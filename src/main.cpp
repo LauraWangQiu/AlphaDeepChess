@@ -1,13 +1,11 @@
-#include <iostream>
-using namespace std;
-#include "board/board.hpp"
+#include <loop.hpp>
 
 int main(int argc, char** argv) {
-    cout << "Hello world!\n";
 
-    Board* board = new Board();
-    board->foo();
-    delete board;
-    
+    std::unique_ptr<Loop> loop = std::make_unique<Loop>();
+    if (loop->init()) loop->run();
+    else
+        return 1;
+
     return 0;
 }
