@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
+#include <cstddef>
 #include <types.hpp>
+#include <ostream>
 
 /**
 * @brief Handles the game board  
