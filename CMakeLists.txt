@@ -8,12 +8,8 @@ include_directories(src)
 include_directories(src/board)
 
 add_executable(AlphaDeepChess 
-src/defs.hpp
 src/main.cpp
-src/loop.hpp
 src/loop.cpp
-src/board/types.hpp
-src/board/board.hpp
 src/board/board.cpp
 )
 

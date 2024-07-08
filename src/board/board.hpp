@@ -14,7 +14,7 @@ private:
     uint64_t whiteBB;   // Bitboard for white pieces
     uint64_t blackBB;   // Bitboard for black pieces
 
-    uint64_t piecesBB[static_cast<int>(Piece::MAX_SIZE) - 2];   // Bitboards for each piece type
+    uint64_t piecesBB[static_cast<int>(Types::Piece::MAX_SIZE) - 2];   // Bitboards for each piece type
 
 public:
     /**
@@ -76,11 +76,11 @@ public:
      * @param piece The piece type
      * @return The bitboard for the piece type
      */
-    inline uint64_t getPieceBB(Piece piece) const { return piecesBB[static_cast<size_t>(piece)]; }
+    inline uint64_t getPieceBB(Types::Piece piece) const { return piecesBB[static_cast<size_t>(piece)]; }
     /**
      * @brief Set the bitboard for a specific piece type
      * @param piece The piece type
      * @param bb The bitboard for the piece type
      */
-    inline void setPieceBB(Piece piece, uint64_t bb) { piecesBB[static_cast<size_t>(piece)] = bb; }
+    inline void setPieceBB(Types::Piece piece, uint64_t bb) { piecesBB[static_cast<size_t>(piece)] = bb; }
 };

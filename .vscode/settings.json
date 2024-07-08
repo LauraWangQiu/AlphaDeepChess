@@ -58,6 +58,15 @@
         "iomanip": "cpp",
         "bitset": "cpp",
         "condition_variable": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "charconv": "cpp",
+        "optional": "cpp",
+        "format": "cpp",
+        "span": "cpp",
+        "variant": "cpp",
+        "xstring": "cpp",
+        "xmemory": "cpp",
+        "xtr1common": "cpp",
+        "xutility": "cpp"
     }
 }

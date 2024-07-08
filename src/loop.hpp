@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <memory>
-#include <defs.hpp>
 #include <board/board.hpp>
 
 /**
@@ -9,7 +8,9 @@
  * @brief User can select options to interact with the program  
  * @brief Options:  
  * @brief q - Quit the program  
- * @brief ...
+ * @brief v - Show version  
+ * @brief p - Print board  
+ * @brief h - Show options
 */
 class Loop {
 private:
@@ -41,22 +42,29 @@ public:
     /**
      * @brief Quit the loop
      */
-    inline void quit() {
-        log("Quitting");
-        exit = true;
-    }
+    inline void quit() { exit = true; }
     /**
      * @brief Set the exit value
      * @param value the value to set
      */
-    inline void setExit(bool value) {
-        log(("Setting exit value to " + std::string(VALUESTR(value))).c_str());
-        exit = value;
-    }
+    inline void setExit(bool value) { exit = value; }
     /**
      * @brief Get the exit value
      * @return true if the loop should exit  
      * @return false if the loop should not exit
      */
     inline bool getExit() const { return exit; }
+
+    /**
+     * @brief Print the version
+     */
+    void printVersion() const;
+    /**
+     * @brief Print the board
+     */
+    void printBoard() const;
+    /**
+     * @brief Print the options
+     */
+    void printOptions() const;
 };
