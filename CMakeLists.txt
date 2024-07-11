@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 include_directories(src)
 include_directories(src/board)
+include_directories(src/moveGenerator)
 
 add_executable(AlphaDeepChess 
 src/main.cpp
