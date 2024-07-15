@@ -2,24 +2,21 @@
 #include <defs.hpp>
 #include <iostream>
 
-Loop::Loop() : exit(false), board(nullptr) { }
-
-Loop::~Loop() { board.reset(); }
+Loop::Loop() : exit(false), board() { }
+Loop::~Loop() { resetConsoleColor(); }
 
 bool Loop::init() {
     // SDL2 initialization?
     // ImGui initialization?
-
-    board = std::make_unique<Board>();
 
     return true;
 }
 
 void Loop::run() {
     debuglog("AlphaDeepChess running...");
+
     while (!exit) {
-        char opt;
-        std::cin >> opt;
+        readOpt(opt);
         switch (opt) {
         case 'q': quit(); break;
         case 'v': printVersion(); break;
@@ -31,11 +28,26 @@ void Loop::run() {
     }
 }
 
-void Loop::printBoard() const { std::cout << *board; }
+void Loop::readOpt(char& opt) const {
+#ifdef COLOR_CONSOLE
+    std::cout << "\e[0;93m";
+#endif
+    std::cin >> opt;
+    resetConsoleColor();
+}
 
-void Loop::printVersion() const { std::cout << "AlphaDeepChess " << ALPHADEEPCHESS_VERSION << std::endl;}
+void Loop::printBoard() const {
+    debuglog("Printing board...");
+    std::cout << board;
+}
+
+void Loop::printVersion() const {
+    debuglog("Printing version...");
+    std::cout << "AlphaDeepChess " << ALPHADEEPCHESS_VERSION << std::endl;
+}
 
 void Loop::printOptions() const {
+    debuglog("Printing options...");
     std::cout << "Options: " << std::endl;
     std::cout << "q - Quit the program" << std::endl;
     std::cout << "v - Show version" << std::endl;

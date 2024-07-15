@@ -14,17 +14,19 @@
 */
 class Loop {
 private:
-    bool exit;                      // Condition to exit the loop
-    std::unique_ptr<Board> board;   // Unique game board
+    bool exit;     // Condition to exit the loop
+    char opt;      // User's current option
+    Board board;   // Unique game board
 
 public:
     /**
-     * @brief Construct a new Loop object
+     * @brief Constructor
      * @brief exit is set to false
      */
     Loop();
     /**
-     * @brief Destroy the Loop object
+     * @brief Destructor
+     * @brief Reset the console color if defined
      */
     ~Loop();
 
@@ -54,6 +56,12 @@ public:
      * @return false if the loop should not exit
      */
     inline bool getExit() const { return exit; }
+
+    /**
+     * @brief Read the user's option
+     * @return option
+     */
+    void readOpt(char& opt) const;
 
     /**
      * @brief Print the version

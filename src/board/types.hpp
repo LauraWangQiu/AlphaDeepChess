@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 namespace Types {
 /**
@@ -18,7 +19,7 @@ enum Column : uint8_t { COL_A = 0, COL_B, COL_C, COL_D, COL_E, COL_F, COL_G, COL
  * @return true if the coordinate is valid
  * @return false if the coordinate is not valid
  */
-constexpr inline bool validCoord(int row, int col) {
+constexpr bool validCoord(int row, int col) {
     return row >= ROW_1 && row <= ROW_8 && col >= COL_A && col <= COL_H;
 }
 
@@ -68,7 +69,7 @@ static constexpr char pieceRepresentation[static_cast<int>(Piece::MAX_SIZE)] = {
  * @brief Returns the character piece representation  
  * @brief {'P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k', ' '}
  */
-constexpr inline char pieceToChar(Piece piece) {
+constexpr char pieceToChar(Piece piece) {
     return pieceRepresentation[static_cast<int>(piece)];
 }
 
@@ -77,7 +78,7 @@ constexpr inline char pieceToChar(Piece piece) {
  * @param pieceChar {'P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k', ' '}
  * @return Piece enum
  */
-constexpr inline Piece charToPiece(char pieceChar) {
+constexpr Piece charToPiece(char pieceChar) {
     switch (pieceChar) {
     case 'P': return Piece::W_PAWN;
     case 'N': return Piece::W_KNIGHT;
@@ -100,7 +101,7 @@ constexpr inline Piece charToPiece(char pieceChar) {
  * @param piece The piece
  * @return Color of the piece
  */
-constexpr inline Color color(Piece piece) {
+constexpr Color color(Piece piece) {
     if (static_cast<int>(piece) <= 5) return Color::WHITE;
     return Color::BLACK;
 }
@@ -128,48 +129,26 @@ enum Square : uint8_t {
 };
 
 /**
- * @brief Returns the row of the Square
- * @param value The square value
- * @return Row of the Square
- */
-constexpr inline int row(Square value) {
-    switch (value) {
-    case SQ_A1: case SQ_B1: case SQ_C1: case SQ_D1: case SQ_E1: case SQ_F1: case SQ_G1: case SQ_H1: return ROW_1;
-    case SQ_A2: case SQ_B2: case SQ_C2: case SQ_D2: case SQ_E2: case SQ_F2: case SQ_G2: case SQ_H2: return ROW_2;
-    case SQ_A3: case SQ_B3: case SQ_C3: case SQ_D3: case SQ_E3: case SQ_F3: case SQ_G3: case SQ_H3: return ROW_3;
-    case SQ_A4: case SQ_B4: case SQ_C4: case SQ_D4: case SQ_E4: case SQ_F4: case SQ_G4: case SQ_H4: return ROW_4;
-    case SQ_A5: case SQ_B5: case SQ_C5: case SQ_D5: case SQ_E5: case SQ_F5: case SQ_G5: case SQ_H5: return ROW_5;
-    case SQ_A6: case SQ_B6: case SQ_C6: case SQ_D6: case SQ_E6: case SQ_F6: case SQ_G6: case SQ_H6: return ROW_6;
-    case SQ_A7: case SQ_B7: case SQ_C7: case SQ_D7: case SQ_E7: case SQ_F7: case SQ_G7: case SQ_H7: return ROW_7;
-    case SQ_A8: case SQ_B8: case SQ_C8: case SQ_D8: case SQ_E8: case SQ_F8: case SQ_G8: case SQ_H8: return ROW_8;
-    default: return -1;
-    }
-}
-
-/**
- * @brief Returns the column of the Square
- * @param value The square value
- * @return Column of the Square
- */
-constexpr inline int col(Square value) {
-    switch (value) {
-    case SQ_A1: case SQ_A2: case SQ_A3: case SQ_A4: case SQ_A5: case SQ_A6: case SQ_A7: case SQ_A8: return COL_A;
-    case SQ_B1: case SQ_B2: case SQ_B3: case SQ_B4: case SQ_B5: case SQ_B6: case SQ_B7: case SQ_B8: return COL_B;
-    case SQ_C1: case SQ_C2: case SQ_C3: case SQ_C4: case SQ_C5: case SQ_C6: case SQ_C7: case SQ_C8: return COL_C;
-    case SQ_D1: case SQ_D2: case SQ_D3: case SQ_D4: case SQ_D5: case SQ_D6: case SQ_D7: case SQ_D8: return COL_D;
-    case SQ_E1: case SQ_E2: case SQ_E3: case SQ_E4: case SQ_E5: case SQ_E6: case SQ_E7: case SQ_E8: return COL_E;
-    case SQ_F1: case SQ_F2: case SQ_F3: case SQ_F4: case SQ_F5: case SQ_F6: case SQ_F7: case SQ_F8: return COL_F;
-    case SQ_G1: case SQ_G2: case SQ_G3: case SQ_G4: case SQ_G5: case SQ_G6: case SQ_G7: case SQ_G8: return COL_G;
-    case SQ_H1: case SQ_H2: case SQ_H3: case SQ_H4: case SQ_H5: case SQ_H6: case SQ_H7: case SQ_H8: return COL_H;
-    default: return -1;
-    }
-}
-
-/**
  * @brief Returns if the value is valid (between 0 and 63)
  * @param value The square value
  * @return true if the value is valid
  * @return false if the value is not valid
  */
-constexpr inline bool validSquare(uint8_t value) { return value > -1 && value < SQ_NONE; }
+constexpr bool validSquare(uint8_t value) { return value > -1 && value < SQ_NONE; }
+
+/**
+ * @brief Returns if the row value is valid (between 0 and 7)
+ * @param row The row value
+ * @return true if the row value is valid
+ * @return false if the row value is not valid
+ */
+constexpr bool validRow(int row) { return row > -1 && row <= ROW_8; }
+
+/**
+ * @brief Returns if the column value is valid (between 0 and 7)
+ * @param col The column value
+ * @return true if the column value is valid
+ * @return false if the column value is not valid
+ */
+constexpr bool validCol(int col) { return col > -1 && col <= COL_H; }
 }

@@ -3,10 +3,10 @@
 
 int main(int argc, char** argv) {
 
-    std::unique_ptr<Loop> loop = std::make_unique<Loop>();
-    if (loop->init()) loop->run();
+    Loop loop;
+    if (loop.init()) loop.run();
     else {
-        debuglog("Failed to initialize loop");
+        debugerror("Failed to initialize loop");
         return 1;
     }
 
