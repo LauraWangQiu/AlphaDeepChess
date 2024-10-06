@@ -1,18 +1,376 @@
-#include <board.hpp>
-#include <defs.hpp>
+/**
+ * @file board.cpp
+ * @brief Board implementations.
+ *
+ */
 
-Board::Board() : allBB(0), whiteBB(0), blackBB(0), piecesBB() { }
+#include "board.hpp"
 
+#include <sstream>
+#include <stdexcept>
+/**
+ * @brief put_piece
+ * 
+ * Add piece to the board
+ * 
+ * @note piece and square must be valid.
+ * 
+ * @param[in] piece
+ * @param[in] square
+ * 
+ */
+void Board::put_piece(Piece piece, Square square)
+{
+    uint64_t mask = square.mask();
+
+    // first remove the previous piece
+    bitboard_piece[static_cast<int>(get_piece(square))] &= ~mask;
+
+    // place the new piece
+    bitboard_piece[static_cast<int>(piece)] |= mask;
+    array_piece[square] = piece;
+
+    if (get_color(piece) == ChessColor::WHITE) {
+        bitboard_white |= mask;
+        bitboard_black &= ~mask;
+    }
+    else {
+        bitboard_black |= mask;
+        bitboard_white &= ~mask;
+    }
+
+    bitboard_all |= mask;
+}
+
+/**
+ * @brief remove_piece
+ * 
+ * Remove piece from the board
+ * 
+ * @note square must be valid.
+ * 
+ * @param[in] square
+ * 
+ */
+void Board::remove_piece(Square square)
+{
+    uint64_t mask = square.mask();
+
+    bitboard_piece[static_cast<int>(get_piece(square))] &= ~mask;
+    array_piece[square] = Piece::EMPTY;
+    bitboard_all &= ~mask;
+    bitboard_white &= ~mask;
+    bitboard_black &= ~mask;
+}
+
+/**
+ * @brief clean
+ * 
+ * Remove all pieces on the board.
+ * 
+ */
+void Board::clean()
+{
+    bitboard_all = 0U;
+    bitboard_black = 0U;
+    bitboard_white = 0U;
+
+    for (int piece = 0; piece < NUM_CHESS_PIECES; piece++) {
+        bitboard_piece[piece] = 0U;
+    }
+
+    for (int square = 0; square < NUM_SQUARES; square++) {
+        array_piece[square] = Piece::EMPTY;
+    }
+}
+
+/**
+ * @brief load_fen
+ * 
+ * Set the position represented as fen on the chess board.
+ * 
+ *  https://www.chess.com/terms/fen-chess
+ *  https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+ * 
+ * @param[in] fen Chess position in fne string format
+ * 
+ */
+void Board::load_fen(const std::string& fen)
+{
+
+    /*
+        Fen notation info :
+
+        https://www.chess.com/terms/fen-chess
+        https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+    */
+
+    Board::clean();
+
+    Row row = ROW_8;
+    Col col = COL_A;
+    char token;
+    Piece piece;
+    std::istringstream ss(fen);
+
+    ss >> std::noskipws;
+
+    // 1. Piece placement
+    while ((ss >> token) && !isspace(token)) {
+        if (isdigit(token)) {
+            col += (token - '0');   // Advance the given number of columns
+        }
+        else if (token == '/') {
+            row -= 1;   // Advance to the next row
+            col = COL_A;
+        }
+        else if ((piece = char_to_piece(token)) != Piece::EMPTY) {
+            put_piece(piece, Square(row, col));
+            col++;
+        }
+    }
+
+    // 2. Active color
+    ss >> token;
+
+    game_state.set_side_to_move(token == 'w' ? ChessColor::WHITE : ChessColor::BLACK);
+
+    ss >> token;
+
+    // 3. Castling availability.
+    while ((ss >> token) && !isspace(token)) {
+        if (token == 'K') {
+            game_state.set_castle_king_white(true);
+        }
+        else if (token == 'Q') {
+            game_state.set_castle_queen_white(true);
+        }
+        else if (token == 'k') {
+            game_state.set_castle_king_black(true);
+        }
+        else if (token == 'q') {
+            game_state.set_castle_queen_black(true);
+        }
+    }
+
+    check_and_modify_castle_rights();
+
+    // 4. En passant square.
+
+    ss >> std::skipws >> token;
+    if (token != '-') {
+        col = static_cast<Col>(token - 'a');
+        ss >> token;
+        row = static_cast<Row>(token - '1');
+
+        game_state.set_en_passsant_square(Square(row, col));
+        check_and_modify_en_passant_rule();
+    }
+
+    // 5-6. Halfmove clock and fullmove number
+    uint32_t moveNumber, halfmove;
+    ss >> std::skipws >> halfmove >> moveNumber;
+    game_state.set_move_number(moveNumber);
+
+    //half move counter could only be (2 * moveCounter) or (2 * moveCounter + 1).
+    // we put half move bit to 1 if halfmove == moveNumber * 2U, else to 0.
+    game_state.set_half_move(halfmove != moveNumber * 2U);
+}
+
+/**
+ * @brief fen
+ * 
+ * Returns fen representation of the position
+ * 
+ *  https://www.chess.com/terms/fen-chess
+ *  https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+ * 
+ * @return std::string fen
+ * 
+ */
+std::string Board::fen() const
+{
+    int emptyCounter;
+    std::ostringstream fen;
+
+    for (Row row = ROW_8; row >= ROW_1; row--) {
+        for (Col col = COL_A; col <= COL_H; col++) {
+            emptyCounter = 0;
+            while (col <= COL_H && is_empty(Square(row, col))) {
+                emptyCounter++;
+                col++;
+            };
+
+            if (emptyCounter) fen << emptyCounter;
+
+            if (col <= 7) fen << (Square(row, col));
+        }
+
+        if (row > 0) fen << '/';
+    }
+
+    fen << (game_state.side_to_move() == ChessColor::WHITE ? " w " : " b ");
+
+    bool any_castle_avaliable = false;
+    if (game_state.castle_king_white()) {
+        fen << 'K';
+        any_castle_avaliable = true;
+    }
+    if (game_state.castle_queen_white()) {
+        fen << 'Q';
+        any_castle_avaliable = true;
+    }
+    if (game_state.castle_king_black()) {
+        fen << 'k';
+        any_castle_avaliable = true;
+    }
+    if (game_state.castle_king_black()) {
+        fen << 'q';
+        any_castle_avaliable = true;
+    }
+
+    if (!any_castle_avaliable) {
+        fen << '-';
+    }
+
+    if (game_state.en_passsant_square().is_valid()) {
+        fen << " " + game_state.en_passsant_square().toString() + " ";
+    }
+    else {
+        fen << " - ";
+    }
+
+    fen << game_state.half_move() << " " << game_state.move_number();
+
+    return fen.str();
+}
+
+/**
+ * @brief Board
+ * 
+ *  Constructor of Board class.
+ */
+Board::Board() : bitboard_all(0), bitboard_white(0), bitboard_black(0), game_state() { clean(); }
+
+/**
+ * @brief ~Board
+ * 
+ *  Destructor of Board class.
+ */
 Board::~Board() { }
 
-std::ostream& operator<<(std::ostream& os, const Board& board) {
+/**
+ * @brief operator<<
+ * 
+ * Overloads the << operator to print the board
+ * 
+ * @param[out] os The output stream
+ * @param[in] board The board to print
+ * 
+ */
+std::ostream& operator<<(std::ostream& os, const Board& board)
+{
 
-    os << "\n+---+---+---+---+---+---+---+---+\n";
+    os << "\n +---+---+---+---+---+---+---+---+\n";
 
-    // ...
+    for (Row row = ROW_8; row >= ROW_1; --row) {
+        for (Col col = COL_A; col <= COL_H; ++col) {
+            os << " | " << piece_to_char(board.get_piece(Square(row, col)));
+        }
+        os << " | " << static_cast<int>(row) + 1 << "\n +---+---+---+---+---+---+---+---+\n";
+    }
+    os << "   a   b   c   d   e   f   g   h\n";
 
-    os << "\n+---+---+---+---+---+---+---+---+\n";
-
-    os << '\n';
+    os << "\n\nFen: " << board.fen();
     return os;
+}
+
+
+/**
+ * @brief check_and_modify_castle_rights
+ * 
+ *  Check if the castle rights are correct and modify them if there are errors.
+ * 
+ */
+void Board::check_and_modify_castle_rights()
+{
+
+    // Check for white king-side castling rights
+    if (game_state.castle_king_white()) {
+
+        if (get_piece({ROW_1, COL_E}) == Piece::W_KING &&
+            get_piece({ROW_1, COL_H}) == Piece::W_ROOK) {
+            game_state.set_castle_king_white(true);
+        }
+    }
+    // Check for white queen-side castling rights
+    if (game_state.castle_queen_white()) {
+
+        if (get_piece({ROW_1, COL_E}) == Piece::W_KING &&
+            get_piece({ROW_1, COL_A}) == Piece::W_ROOK) {
+            game_state.set_castle_queen_white(true);
+        }
+    }
+
+    // Check for black king-side castling rights
+    if (game_state.castle_king_black()) {
+
+        if (get_piece({ROW_8, COL_E}) == Piece::B_KING &&
+            get_piece({ROW_8, COL_H}) == Piece::B_ROOK) {
+            game_state.set_castle_king_black(true);
+        }
+    }
+
+    // Check for black queen-side castling rights
+    if (game_state.castle_queen_black()) {
+
+        if (get_piece({ROW_8, COL_E}) == Piece::B_KING &&
+            get_piece({ROW_8, COL_A}) == Piece::B_ROOK) {
+            game_state.set_castle_queen_black(true);
+        }
+    }
+}
+
+/**
+ * @brief check_and_modify_en_passant_rule
+ * 
+ *  Check if en passant is really possible and modify them if there are errors.
+ * 
+ */
+void Board::check_and_modify_en_passant_rule()
+{
+    // En passant square will be considered only if
+    // a) side to move have a pawn threatening enPassantSquare
+    // b) there is an enemy pawn in front of enPassantSquare
+    // c) there is no piece on enPassantSquare or behind enPassantSquare
+
+    bool valid = false;
+
+    Square enPassantSquare = game_state.en_passsant_square();
+    if (enPassantSquare.is_valid()) {
+
+        Col col = enPassantSquare.col();
+        if (enPassantSquare.row() == ROW_6) {
+
+            if ((get_piece({ROW_5, col - 1}) == Piece::W_PAWN ||
+                 get_piece({ROW_5, col + 1}) == Piece::W_PAWN) &&
+                get_piece({ROW_5, col}) == Piece::B_PAWN && is_empty(enPassantSquare) &&
+                is_empty({ROW_7, col})) {
+                valid = true;
+            }
+        }
+        else if (enPassantSquare.row() == ROW_3) {
+            if ((get_piece({ROW_4, col - 1}) == Piece::B_PAWN ||
+                 get_piece({ROW_4, col + 1}) == Piece::B_PAWN) &&
+                get_piece({ROW_5, col}) == Piece::W_PAWN && is_empty(enPassantSquare) &&
+                is_empty({ROW_2, col})) {
+                valid = true;
+            }
+        }
+
+        if (!valid) {
+            // invalid enPassant row
+            game_state.set_en_passsant_square(Square::SQ_INVALID);
+        }
+    }
 }
