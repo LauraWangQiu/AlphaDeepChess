@@ -292,7 +292,7 @@ public:
      * @return *this
      * 
      */
-    GameState& operator=(const GameState& other)
+    constexpr GameState& operator=(const GameState& other)
     {
         if (this != &other)   // not a self-assignment
         {

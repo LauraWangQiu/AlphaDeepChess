@@ -85,6 +85,79 @@ void Board::clean()
 }
 
 /**
+ * @brief make_move
+ * 
+ * Make the move in the board.
+ * 
+ * @note If the move is not valid in the position the game will be corrupted.
+ * 
+ * @param[in] move chess move.
+ * 
+ */
+void Board::make_move(Move move)
+{
+    /*Square origin_square = move.square_from();
+    Square end_square = move.square_to();
+
+    Piece origin_piece = get_piece(origin_square);
+
+    switch (move.type()) {
+    case MoveType::NORMAL:
+        remove_piece(end_square);
+        put_piece(origin_piece, end_square);
+        remove_piece(origin_square);
+        break;
+    case MoveType::CASTLING:
+
+        // if (end_square.col() == COL_G) then COL_H(7) else COL_A(0)
+        Col rook_origin_col = static_cast<Col>(COL_H * (end_square.col() == COL_G));
+
+        // if (end_square.col() == COL_G) then COL_F(COL_D + 2) else COL_D(3)
+        Col rook_end_col = COL_D + 2 * (end_square.col() == COL_G);
+
+        Square rook_origin_square(origin_square.row(), rook_origin_col);
+        Square rook_end_square(origin_square.row(), rook_end_col);
+
+        put_piece(origin_piece, end_square);
+        put_piece(get_piece(rook_origin_square), rook_end_square);
+        remove_piece(origin_square);
+        remove_piece(rook_origin_square);
+
+        break;
+    case MoveType::EN_PASSANT:
+
+            Square enemy_square(origin_square.row(), end_square.col());
+            remove_piece(enemy_square);
+            put_piece(origin_piece, end_square);
+            remove_piece(origin_square);
+
+        break;
+    case MoveType::PROMOTION:
+        Piece promo_piece = create_piece(move.promotion_piece(), get_color(origin_piece));
+        remove_piece(end_square);
+        put_piece(promo_piece, end_square);
+        remove_piece(origin_square);
+        break;
+    default:
+        //invalid MoveType
+        break;
+    }*/
+}
+
+/**
+ * @brief unmake_move
+ * 
+ * unmake the move in the board, restoring the previous game state.
+ * 
+ * @note If the move was not valid in the position the game will be corrupted.
+ * 
+ * @param[in] move chess move.
+ * @param[in] previous_state previous game state.
+ * 
+ */
+void Board::unmake_move(Move move, GameState previous_state) { }
+
+/**
  * @brief load_fen
  * 
  * Set the position represented as fen on the chess board.
@@ -92,7 +165,7 @@ void Board::clean()
  *  https://www.chess.com/terms/fen-chess
  *  https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
  * 
- * @param[in] fen Chess position in fne string format
+ * @param[in] fen Chess position in fen string format
  * 
  */
 void Board::load_fen(const std::string& fen)
@@ -234,7 +307,7 @@ std::string Board::fen() const
     }
 
     if (game_state.en_passsant_square().is_valid()) {
-        fen << " " + game_state.en_passsant_square().toString() + " ";
+        fen << " " + game_state.en_passsant_square().to_string() + " ";
     }
     else {
         fen << " - ";

@@ -16,6 +16,7 @@
 #include "piece.hpp"
 #include "square.hpp"
 #include "game_state.hpp"
+#include "move.hpp"
 
 /**
  * @brief Board
@@ -138,6 +139,31 @@ public:
     void clean();
 
     /**
+     * @brief make_move
+     * 
+     * Make the move in the board.
+     * 
+     * @note If the move is not valid in the position the game will be corrupted.
+     * 
+     * @param[in] move chess move.
+     * 
+     */
+    void make_move(Move move);
+
+    /**
+     * @brief unmake_move
+     * 
+     * unmake the move in the board, restoring the previous game state.
+     * 
+     * @note If the move was not valid in the position the game will be corrupted.
+     * 
+     * @param[in] move chess move.
+     * @param[in] previous_state previous game state.
+     * 
+     */
+    void unmake_move(Move move, GameState previous_state);
+
+    /**
      * @brief load_fen
      * 
      * Set the position represented as fen on the chess board.
@@ -145,7 +171,7 @@ public:
      *  https://www.chess.com/terms/fen-chess
      *  https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
      * 
-     * @param[in] fen Chess position in fne string format
+     * @param[in] fen Chess position in fen string format
      * 
      */
     void load_fen(const std::string& fen);

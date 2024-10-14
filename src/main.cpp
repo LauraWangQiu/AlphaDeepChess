@@ -1,10 +1,9 @@
 #include "uci.hpp"
 
-int main(int argc, char** argv) {
+int main() {
 
 
     Uci uci;
-
 
     uci.loop();
 

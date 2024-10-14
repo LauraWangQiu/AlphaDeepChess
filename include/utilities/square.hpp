@@ -73,7 +73,17 @@ public:
     constexpr Square() : sq_value(SQ_INVALID) { }
 
     /**
-     * @brief Square
+     * @brief Square(Square& square)
+     * 
+     * copy constructor.
+     * 
+     * @param[in] square 
+     * 
+     */
+    constexpr Square(const Square& square) : sq_value(square.value()) { }
+
+    /**
+     * @brief Square(uint8_t square)
      * 
      * Constructor that initializes with the int square value
      * 
@@ -83,7 +93,7 @@ public:
     constexpr Square(uint8_t square) : sq_value(square) { }
 
     /**
-     * @brief Square
+     * @brief Square(Row row, Col col)
      * 
      * Constructor that initializes with the specified row and col
      * 
@@ -98,7 +108,7 @@ public:
     { }
 
     /**
-     * @brief Square
+     * @brief Square(Square::Name square)
      * 
      * Constructor that initializes with the Name of the square
      * 
@@ -107,6 +117,18 @@ public:
      */
     constexpr Square(Square::Name square) : sq_value(square) { }
 
+    /**
+     * @brief Square(const std::string& square_string)
+     * 
+     * Constructor that initializes the square from a string representation.
+     * E.g "e2" is the square number 12.
+     * 
+     * @note If invalid string representation of square, square is set to SQ_INVALID.
+     * 
+     * @param[in] square_string Square represented in string format (e.g., "e2"). 
+     *                          
+     */
+    constexpr Square(const std::string& square_string);
 
     /**
      * @brief row
@@ -127,13 +149,13 @@ public:
     inline Col col() const { return static_cast<Col>(sq_value & 3U); }
 
     /**
-     * @brief toString
+     * @brief to_string
      * 
      * calculate string representation. E.g : e4, d6, h1, e8.
      * 
      * @return std::string representation of the square.
      */
-    inline std::string toString() const
+    inline std::string to_string() const
     {
         return std::string(1, 'a' + col()) + static_cast<char>('1' + row());
     }
@@ -180,7 +202,7 @@ public:
      * Calculates the bit mask that represents the square.
      * SQ_C1 = 2 has a mask of 0....00000100.
      * 
-     * @return (1U << sq_value)
+     * @return (1UL << sq_value)
      * 
      */
     constexpr uint64_t mask() const { return 1UL << sq_value; }
@@ -242,6 +264,68 @@ public:
         return temp;
     }
 
+    /**
+     * @brief operator==(const Square& sq)
+     * equality operator overload
+     * 
+     * @return
+     *  - TRUE if sq_value == other.sq_value.
+     *  - FALSE sq_value != other.sq_value.
+     */
+    constexpr bool operator==(const Square& other) const { return sq_value == other.sq_value; }
+
+    /**
+     * @brief operator!=(const Square& sq)
+     * inequality operator overload
+     * 
+     * @return
+     *  - TRUE if sq_value != other.sq_value.
+     *  - FALSE sq_value == other.sq_value.
+     */
+    constexpr bool operator!=(const Square& other) const { return sq_value != other.sq_value; }
+
+    /**
+     * @brief operator=
+     * 
+     * Assignment operator overload.
+     * 
+     * @param[in] other square where to copy the value.
+     * 
+     * @return *this
+     * 
+     */
+    constexpr Square& operator=(const Square& other)
+    {
+        if (this != &other)   // not a self-assignment
+        {
+            this->sq_value = other.sq_value;
+        }
+        return *this;
+    }
+
 private:
     uint8_t sq_value;
 };
+
+/**
+ * @brief Square(const std::string& square_string)
+ * 
+ * Constructor that initializes the square from a string representation.
+ * E.g "e2" is the square number 12.
+ * 
+ * @note If invalid string representation of square, square is set to SQ_INVALID.
+ * 
+ * @param[in] square_string Square represented in string format (e.g., "e2"). 
+ *                          
+ */
+constexpr Square::Square(const std::string& square_string) : sq_value(SQ_INVALID)
+{
+    if (square_string.size() == 2) {
+        char col = tolower(square_string[0]);
+        char row = tolower(square_string[1]);
+
+        if (col >= 'a' && col <= 'h' && row >= '1' && row <= '8') {
+            sq_value = (col - 'a') + 8 * (row - '1');
+        }
+    }
+}

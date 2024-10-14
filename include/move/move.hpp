@@ -10,14 +10,6 @@
 #include "square.hpp"
 #include "piece.hpp"
 
-/**
- * @brief MAX_CHESS_MOVES (218)
- *  
- *   max number of moves found in a chess position is 218.
- *   https://www.chessprogramming.org/Encoding_Moves#MoveIndex
- * 
- */
-constexpr const int MAX_CHESS_MOVES = 256;
 
 /**
  * @brief MoveType
@@ -37,165 +29,294 @@ enum class MoveType
     CASTLING = 3
 };
 
+static constexpr uint16_t SHIFT_MOVE_TYPE = 14U;
+static constexpr uint16_t SHIFT_PROMOTION_PIECE = 12U;
+static constexpr uint16_t SHIFT_ORIGIN_SQUARE = 6U;
+static constexpr uint16_t SHIFT_END_SQUARE = 0U;
+
+static constexpr uint16_t MASK_MOVE_TYPE = (0b11U << SHIFT_MOVE_TYPE);
+static constexpr uint16_t MASK_PROMOTION_PIECE = (0b11U << SHIFT_PROMOTION_PIECE);
+static constexpr uint16_t MASK_ORIGIN_SQUARE = (0b111111U << SHIFT_ORIGIN_SQUARE);
+static constexpr uint16_t MASK_END_SQUARE = (0b111111U << SHIFT_END_SQUARE);
+
 
 /**
  * @brief Move
  * 
  * Represents a chess move.
+ * Move::null() = 0.
+ * 
+ * Move is valid if origin_square != destination_square.
  * 
  * @note move is stored as a 16-bit number :
  * 
- * bit  0- 5: destination square (from 0 to 63)
- * bit  6-11: origin square (from 0 to 63)
- * bit 12-13: promotion piece type
- * bit 14-15: special move flag: promotion (1), en passant (2), castling (3)
- * En passant bit is set only when a pawn can be captured
- * while Move::none() and Move::null() have the same origin and destination square.
+ * 14-15: special move flag: NORMAL(0), PROMOTION(1), EN_PASSANT(2), CASTLING(3).
+ * 12-13: promotion piece : KNIGHT(0), BISHOP(1), ROOK(2), QUEEN(3).
+ * 6-11: square from (origin) : (0 to 63).
+ * 0- 5: square to (destination): (0 to 63).
  * 
  */
 class Move
 {
 public:
+    /**
+     * @brief Move
+     * 
+     * Empty Constructor, initializes Move to 0 (null move).
+     * 
+     */
     constexpr Move() : data(0U) { }
 
-    constexpr explicit Move(std::uint16_t data) : data(data) { }
+    /**
+     * @brief Move(const Move& move)
+     * 
+     * copy constructor.
+     * 
+     * @param[in] move 
+     * 
+     */
+    constexpr Move(const Move& move) : data(move.data) { }
 
-    constexpr Move(Square from, Square to, MoveType type = MoveType::NORMAL,
-                   PieceType promotionPiece = PieceType::KNIGHT)
-        : data((from.value() << 6) | to.value() |
-               ((static_cast<uint16_t>(promotionPiece) - 1) << 12) |
-               (static_cast<uint16_t>(type) << 14))
+    /**
+     * @brief Move(std::uint16_t move_data)
+     * 
+     * Constructor with move_data raw value.
+     * 
+     * @param[in] move_data raw data value.
+     * 
+     */
+    constexpr explicit Move(std::uint16_t move_data) : data(move_data) { }
+
+    /**
+     * @brief Move(Square from, Square to, MoveType type, PieceType promotionPiece)
+     * 
+     * Constructor with all information.
+     * 
+     * @param[in] square_from origin square.
+     * @param[in] square_to   end square.
+     * @param[in] move_type move type.
+     * @param[in] promotion_piece promotion piece.
+     * 
+     */
+    constexpr Move(Square square_from, Square square_to, MoveType move_type = MoveType::NORMAL,
+                   PieceType promotion_piece = PieceType::KNIGHT)
+        : data((square_from.value() << SHIFT_ORIGIN_SQUARE) | square_to.value() |
+               ((static_cast<uint16_t>(promotion_piece) - 1) << SHIFT_PROMOTION_PIECE) |
+               (static_cast<uint16_t>(move_type) << SHIFT_MOVE_TYPE))
     {
-    
+
         // we substract -1 because PieceType enum values have an offset of 1.
         // E.g Knight = 0 and PieceType::KNIGHT = 1
-        
     }
 
-    constexpr inline Square squareFrom() const
+    /**
+     * @brief square_from
+     * 
+     * Return the origin square.
+     * 
+     * @return origin square.
+     * 
+     */
+    constexpr inline Square square_from() const
     {
-        // bit  6-11: origin square (from 0 to 63)
-        return Square((data & 0b0000'1111'1100'0000) >> 6);
+        return Square((data & MASK_ORIGIN_SQUARE) >> SHIFT_ORIGIN_SQUARE);
     }
 
-    constexpr inline Square squareTo() const
-    {
-        // bit  0- 5: destination square (from 0 to 63)
-        return Square(data & 0b0000'0000'0011'1111);
-    }
+    /**
+     * @brief square_to
+     * 
+     * Return the destination square.
+     * 
+     * @return destination square.
+     * 
+     */
+    constexpr inline Square square_to() const { return Square(data & MASK_END_SQUARE); }
 
+    /**
+     * @brief type
+     * 
+     * Return move type.
+     * 
+     * @return MoveType
+     *  - NORMAL(00)
+     *  - PROMOTION(01)
+     *  - EN_PASSANT(10)
+     *  - CASTLING(11)
+     * 
+     */
     constexpr inline MoveType type() const
     {
-        /*
-            bit 12-13: promotion piece type :
-                00 = NORMAL
-                01 = PROMOTION
-                10 = EN_PASSANT
-                11 = CASTLING
-        */
-        return static_cast<MoveType>(data >> 14);
+        return static_cast<MoveType>((data & MASK_MOVE_TYPE) >> SHIFT_MOVE_TYPE);
     }
 
-    constexpr inline PieceType promotionPiece() const
+    /**
+     * @brief promotion_piece
+     * 
+     * Return promotion piece.
+     * 
+     * @return PieceType
+     *  - KNIGHT(00)
+     *  - BISHOP(01)
+     *  - ROOK(10)
+     *  - QUEEN(11)
+     * 
+     */
+    constexpr inline PieceType promotion_piece() const
     {
-        /*
-            bit 12-13: promotion piece type :
-                00 = KNIGHT
-                01 = BISHOP
-                10 = ROOK
-                11 = QUEEN
-
-            we add +1 because PieceType enum values have an offset of 1
-            E.g Knight = 0 and PieceType::KNIGHT = 1
-        */
-        return static_cast<PieceType>(((data & 0b0011'0000'0000'0000) >> 12) + 1);
+        // we substract -1 because PieceType enum values have an offset of 1.
+        // E.g Knight = 0 and PieceType::KNIGHT = 1
+        return static_cast<PieceType>(((data & MASK_PROMOTION_PIECE) >> SHIFT_PROMOTION_PIECE) + 1);
     }
 
-    // move is not null and is not none
-    constexpr bool isValid() const { return none().data != data && null().data != data; }
+    /**
+     * @brief is_valid
+     * 
+     * Calculates if move is valid.
+     * Null move is also not valid.
+     * 
+     * @note This just checks if the move if pseudo-valid.
+     * 
+     * @return 
+     *  - TRUE if origin != destination.
+     *  - FALSE if origin == destination.
+     * 
+     */
+    constexpr bool is_valid() const { return square_from() != square_to(); }
 
-    static constexpr Move null()
-    {
-        // Move::null() has the same origin and destination square.
-        return Move(0b0000'0000'0100'0001);
-    }
+    /**
+     * @brief null
+     * 
+     * null move is 0.
+     * 
+     * @return Move(0)
+     * 
+     */
+    static constexpr Move null() { return Move(0U); }
 
-    static constexpr Move none()
-    {
-        // Move::none() is 0 and has the same origin and destination square.
-        return Move(0b0000'0000'0000'0000);
-    }
-
-    static constexpr Move castleWking()
+    /**
+     * @brief castle_white_king
+     * 
+     * white king side castle move.
+     * 
+     * @return Move(Square::SQ_E1, Square::SQ_G1, MoveType::CASTLING).
+     * 
+     */
+    static constexpr Move castle_white_king()
     {
         return Move(Square::SQ_E1, Square::SQ_G1, MoveType::CASTLING);
     }
-    static constexpr Move castleWqueen()
+
+    /**
+     * @brief castle_white_queen
+     * 
+     * white queen side castle move.
+     * 
+     * @return Move(Square::SQ_E1, Square::SQ_C1, MoveType::CASTLING).
+     * 
+     */
+    static constexpr Move castle_white_queen()
     {
         return Move(Square::SQ_E1, Square::SQ_C1, MoveType::CASTLING);
     }
-    static constexpr Move castleBking()
+
+    /**
+     * @brief castle_black_king
+     * 
+     * black king side castle move.
+     * 
+     * @return Move(Square::SQ_E8, Square::SQ_G8, MoveType::CASTLING).
+     * 
+     */
+    static constexpr Move castle_black_king()
     {
         return Move(Square::SQ_E8, Square::SQ_G8, MoveType::CASTLING);
     }
-    static constexpr Move castleBqueen()
+
+    /**
+     * @brief castle_black_queen
+     * 
+     * black queen side castle move.
+     * 
+     * @return Move(Square::SQ_E8, Square::SQ_C8, MoveType::CASTLING).
+     * 
+     */
+    static constexpr Move castle_black_queen()
     {
         return Move(Square::SQ_E8, Square::SQ_C8, MoveType::CASTLING);
     }
 
-    constexpr bool operator==(const Move& m) const { return data == m.data; }
-    constexpr bool operator!=(const Move& m) const { return data != m.data; }
-
-    /*
-     *   Return string representation. E.g : e2e4
+    /**
+     * @brief operator==(const Move& sq)
+     * equality operator overload
+     * 
+     * @return
+     *  - TRUE if data == other.data.
+     *  - FALSE data != other.data.
      */
-    inline std::string toString() const
+    constexpr bool operator==(const Move& other) const { return data == other.data; }
+
+    /**
+     * @brief operator==(const Move& sq)
+     * equality operator overload
+     * 
+     * @return
+     *  - TRUE if data == other.data.
+     *  - FALSE data != other.data.
+     */
+    constexpr bool operator!=(const Move& other) const { return data != other.data; }
+
+    /**
+     * @brief operator=
+     * 
+     * Assignment operator overload.
+     * 
+     * @param[in] other move where to copy the data.
+     * 
+     * @return *this
+     * 
+     */
+    constexpr Move& operator=(const Move& other)
     {
-        if (type() != MoveType::PROMOTION) {
-            return squareFrom().toString() + squareTo().toString();
+        if (this != &other)   // not a self-assignment
+        {
+            this->data = other.data;
         }
-        else {
-            return squareFrom().toString() + squareTo().toString() +
-                pieceType_to_char(promotionPiece());
-        }
+        return *this;
     }
+    /**
+     * @brief to_string
+     * 
+     * calculate string representation. E.g : e2e4.
+     * 
+     * @return 
+     *  - std::string representation if move is valid.
+     *  - "Invalid" if move is invalid
+     */
+    constexpr std::string to_string() const;
 
 private:
     std::uint16_t data;
 };
 
-class MoveList
+/**
+ * @brief to_string
+ * 
+ * calculate string representation. E.g : e2e4.
+ * 
+ * @return 
+ *  - std::string representation if move is valid.
+ *  - "Invalid" if move is invalid
+ */
+constexpr std::string Move::to_string() const
 {
-public:
-    MoveList() : nMoves(0) { }
-
-    // store a move in the list
-    constexpr inline void add(Move move) { moves[nMoves++] = move; }
-
-    // empty the list
-    constexpr inline void clear() { nMoves = 0; }
-
-    // return the number of moves stored
-    constexpr inline int size() const { return nMoves; }
-
-    // return the move in the pos index, index should be valid ( 0 <= index< nMoves)
-    constexpr inline Move get(int index) const { return moves[index]; }
-
-    /*
-     *   Return string representation of all moves in the list E.g :
-     *   e2e4:
-     *   b1b2:
-     */
-    inline std::string toString() const
-    {
-        std::string s = "";
-        for (int i = 0; i < nMoves; i++) {
-            s += moves[i].toString() + ":\n";
-        }
-        return s;
+    if (!is_valid()) {
+        return "Invalid";
     }
-
-private:
-    Move moves[MAX_CHESS_MOVES];
-    int nMoves;
-};
+    else if (type() != MoveType::PROMOTION) {
+        return square_from().to_string() + square_to().to_string();
+    }
+    else {
+        return square_from().to_string() + square_to().to_string() +
+            pieceType_to_char(promotion_piece());
+    }
+}
