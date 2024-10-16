@@ -34,8 +34,10 @@ static constexpr uint32_t MASK_HALF_MOVE = (1U << SHIFT_HALF_MOVE);
  * 
  * Represents the sate of the chess game.
  * 
- * @note game state is stored as a 32-bit number :
- * 
+ * @note game state is stored as a 64-bit number :
+ * 41-42 : triple_repetition_counter : if counter gets to 3 then game is a draw.
+ * 35-40 : fifty_move_rule_counter : if counter gets to 50 then game is a draw.
+ * 32-34 : last_captured_piece : PieceType::Empty if last move was not a capture.
  * 31 : side_to_move : 0 if white, 1 if black.
  * 30 : castle_king_white : 1 if avaliable, 0 if not.
  * 29 : castle_queen_white : 1 if avaliable, 0 if not.
