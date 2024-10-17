@@ -265,26 +265,6 @@ public:
     }
 
     /**
-     * @brief operator==(const Square& sq)
-     * equality operator overload
-     * 
-     * @return
-     *  - TRUE if sq_value == other.sq_value.
-     *  - FALSE sq_value != other.sq_value.
-     */
-    constexpr bool operator==(const Square& other) const { return sq_value == other.sq_value; }
-
-    /**
-     * @brief operator!=(const Square& sq)
-     * inequality operator overload
-     * 
-     * @return
-     *  - TRUE if sq_value != other.sq_value.
-     *  - FALSE sq_value == other.sq_value.
-     */
-    constexpr bool operator!=(const Square& other) const { return sq_value != other.sq_value; }
-
-    /**
      * @brief operator=
      * 
      * Assignment operator overload.

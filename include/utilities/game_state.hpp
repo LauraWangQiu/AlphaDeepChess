@@ -10,23 +10,29 @@
  * 
  */
 
-static constexpr uint32_t SHIFT_SIDE_TO_MOVE = 31U;
-static constexpr uint32_t SHIFT_CASTLE_KING_WHITE = 30U;
-static constexpr uint32_t SHIFT_CASTLE_QUEEN_WHITE = 29U;
-static constexpr uint32_t SHIFT_CASTLE_KING_BLACK = 28U;
-static constexpr uint32_t SHIFT_CASTLE_QUEEN_BLACK = 27U;
-static constexpr uint32_t SHIFT_EN_PASSANT_SQUARE = 20U;
-static constexpr uint32_t SHIFT_MOVE_NUMBER = 1U;
-static constexpr uint32_t SHIFT_HALF_MOVE = 0U;
+static constexpr uint64_t SHIFT_TRIPLE_REPETITION_RULE = 41UL;
+static constexpr uint64_t SHIFT_FIFTY_MOVE_RULE = 35UL;
+static constexpr uint64_t SHIFT_LAST_CAPTURED_PIECE = 32UL;
+static constexpr uint64_t SHIFT_SIDE_TO_MOVE = 31UL;
+static constexpr uint64_t SHIFT_CASTLE_KING_WHITE = 30UL;
+static constexpr uint64_t SHIFT_CASTLE_QUEEN_WHITE = 29UL;
+static constexpr uint64_t SHIFT_CASTLE_KING_BLACK = 28UL;
+static constexpr uint64_t SHIFT_CASTLE_QUEEN_BLACK = 27UL;
+static constexpr uint64_t SHIFT_EN_PASSANT_SQUARE = 20UL;
+static constexpr uint64_t SHIFT_MOVE_NUMBER = 1UL;
+static constexpr uint64_t SHIFT_HALF_MOVE = 0UL;
 
-static constexpr uint32_t MASK_SIDE_TO_MOVE = (1U << SHIFT_SIDE_TO_MOVE);
-static constexpr uint32_t MASK_CASTLE_KING_WHITE = (1U << SHIFT_CASTLE_KING_WHITE);
-static constexpr uint32_t MASK_CASTLE_QUEEN_WHITE = (1U << SHIFT_CASTLE_QUEEN_WHITE);
-static constexpr uint32_t MASK_CASTLE_KING_BLACK = (1U << SHIFT_CASTLE_KING_BLACK);
-static constexpr uint32_t MASK_CASTLE_QUEEN_BLACK = (1U << SHIFT_CASTLE_QUEEN_BLACK);
-static constexpr uint32_t MASK_EN_PASSANT_SQUARE = (0x7fU << SHIFT_EN_PASSANT_SQUARE);
-static constexpr uint32_t MASK_MOVE_NUMBER = (0x7ffffU << SHIFT_MOVE_NUMBER);
-static constexpr uint32_t MASK_HALF_MOVE = (1U << SHIFT_HALF_MOVE);
+static constexpr uint64_t MASK_TRIPLE_REPETITION_RULE = (1UL << SHIFT_TRIPLE_REPETITION_RULE);
+static constexpr uint64_t MASK_FIFTY_MOVE_RULE = (1UL << SHIFT_FIFTY_MOVE_RULE);
+static constexpr uint64_t MASK_LAST_CAPTURED_PIECE = (1UL << SHIFT_LAST_CAPTURED_PIECE);
+static constexpr uint64_t MASK_SIDE_TO_MOVE = (1UL << SHIFT_SIDE_TO_MOVE);
+static constexpr uint64_t MASK_CASTLE_KING_WHITE = (1UL << SHIFT_CASTLE_KING_WHITE);
+static constexpr uint64_t MASK_CASTLE_QUEEN_WHITE = (1UL << SHIFT_CASTLE_QUEEN_WHITE);
+static constexpr uint64_t MASK_CASTLE_KING_BLACK = (1UL << SHIFT_CASTLE_KING_BLACK);
+static constexpr uint64_t MASK_CASTLE_QUEEN_BLACK = (1UL << SHIFT_CASTLE_QUEEN_BLACK);
+static constexpr uint64_t MASK_EN_PASSANT_SQUARE = (0x7fUL << SHIFT_EN_PASSANT_SQUARE);
+static constexpr uint64_t MASK_MOVE_NUMBER = (0x7ffffUL << SHIFT_MOVE_NUMBER);
+static constexpr uint64_t MASK_HALF_MOVE = (1UL << SHIFT_HALF_MOVE);
 
 
 /**
@@ -52,6 +58,43 @@ class GameState
 {
 
 public:
+    /**
+     * @brief triple_repetition_counter
+     * 
+     * Counter of the times the position has been repeated,
+     * if this counter gets to 3 then game is a draw.
+     * 
+     * @note if this counter gets to 3 the game is a draw.
+     * 
+     * @return triple repetition counter.
+     */
+    constexpr inline uint8_t triple_repetition_counter() const;
+
+    /**
+     * @brief fifty_move_rule_counter
+     * 
+     * Counter for the fifty move rule, if 50 moves passed without 
+     * a pawn move or a capture then game is a draw.
+     * 
+     * @note if this counter gets to 50 the game is a draw.
+     * 
+     * @return 50 move rule counter.
+     * 
+     */
+    constexpr inline uint8_t fifty_move_rule_counter() const;
+
+    /**
+     * @brief last_captured_piece
+     * 
+     * get the last captured piece or PieceType::Empty
+     * if last move was not a capture.
+     * 
+     * @return
+     * - PieceType!=Empty if last move was a capture.
+     * - PieceType::Empty if last move was not a capture
+     */
+    constexpr inline PieceType last_captured_piece() const;
+
     /**
      * @brief side_to_move
      * 
@@ -127,7 +170,7 @@ public:
      * @return 0 <= move_number <= 524287.
      * 
      */
-    constexpr inline uint32_t move_number() const;
+    constexpr inline uint64_t move_number() const;
 
     /**
      * @brief half_move
@@ -139,9 +182,42 @@ public:
      * - (move_number * 2 + 1) if half_bit = 1(white was the last to make a move).
      * 
      */
-    constexpr inline uint32_t half_move() const;
+    constexpr inline uint64_t half_move() const;
 
+    /**
+     * @brief set_triple_repetition_counter
+     * 
+     * set number of times the position has been repeated.
+     * 
+     * @note counter must be <=3, otherwise state will be corrupted.
+     * 
+     * @param[in] counter triple repetition counter.
+     * 
+     */
+    constexpr inline void set_triple_repetition_counter(uint8_t counter);
 
+    /**
+     * @brief set_fifty_move_rule_counter
+     * 
+     * set the moves that have passed since the last pawn move or capture.
+     * 
+     * @note counter must be <=50, otherwise state will be corrupted.
+     * 
+     * @param[in] counter fifty rule counter counter.
+     * 
+     */
+    constexpr inline void set_fifty_move_rule_counter(uint8_t counter);
+
+    /**
+     * @brief set_last_captured_piece
+     * 
+     * set the last captured piece or PieceType::Empty
+     * if last move was not a capture.
+     * 
+     * @param[in] piece_type last piece captured.
+     * 
+     */
+    constexpr inline void set_last_captured_piece(PieceType piece_type);
     /**
      * @brief set_side_to_move
      * 
@@ -209,12 +285,13 @@ public:
      * 
      * set the move number.
      * 
-     * @note move number must be between 0-524287.
+     * @note move number must be between 0-524287,
+     *  otherwise state will be corrupted.
      * 
      * @param[in] move_number number of moves in the game
      * 
      */
-    constexpr inline void set_move_number(uint32_t move_number);
+    constexpr inline void set_move_number(uint64_t move_number);
 
     /**
      * @brief set_half_move
@@ -310,8 +387,55 @@ private:
      * Contains all the neccesary information of a chess game state.
      * 
      */
-    uint32_t state_register;
+    uint64_t state_register;
 };
+
+/**
+ * @brief triple_repetition_counter
+ * 
+ * Counter of the times the position has been repeated,
+ * if this counter gets to 3 then game is a draw.
+ * 
+ * @note if this counter gets to 3 the game is a draw.
+ * 
+ * @return triple repetition counter.
+ */
+constexpr inline uint8_t GameState::triple_repetition_counter() const
+{
+    return (state_register & MASK_TRIPLE_REPETITION_RULE) >> SHIFT_TRIPLE_REPETITION_RULE;
+}
+
+/**
+ * @brief fifty_move_rule_counter
+ * 
+ * Counter for the fifty move rule, if 50 moves passed without 
+ * a pawn move or a capture then game is a draw.
+ * 
+ * @note if this counter gets to 50 the game is a draw.
+ * 
+ * @return 50 move rule counter.
+ * 
+ */
+constexpr inline uint8_t GameState::fifty_move_rule_counter() const
+{
+    return (state_register & MASK_FIFTY_MOVE_RULE) >> SHIFT_FIFTY_MOVE_RULE;
+}
+
+/**
+ * @brief last_captured_piece
+ * 
+ * get the last captured piece or PieceType::Empty
+ * if last move was not a capture.
+ * 
+ * @return
+ * - PieceType!=Empty if last move was a capture.
+ * - PieceType::Empty if last move was not a capture
+ */
+constexpr inline PieceType GameState::last_captured_piece() const
+{
+    const uint64_t piece = (state_register & MASK_LAST_CAPTURED_PIECE) >> SHIFT_LAST_CAPTURED_PIECE;
+    return static_cast<PieceType>(piece);
+}
 
 /**
  * @brief side_to_move
@@ -324,7 +448,7 @@ private:
  */
 constexpr inline ChessColor GameState::side_to_move() const
 {
-    const uint32_t side = (state_register & MASK_SIDE_TO_MOVE) >> SHIFT_SIDE_TO_MOVE;
+    const uint64_t side = (state_register & MASK_SIDE_TO_MOVE) >> SHIFT_SIDE_TO_MOVE;
     return static_cast<ChessColor>(side);
 }
 
@@ -406,7 +530,7 @@ constexpr inline Square GameState::en_passsant_square() const
  * @return 0 <= move_number <= 524287.
  * 
  */
-constexpr inline uint32_t GameState::move_number() const
+constexpr inline uint64_t GameState::move_number() const
 {
     return (state_register & MASK_MOVE_NUMBER) >> SHIFT_MOVE_NUMBER;
 }
@@ -421,13 +545,58 @@ constexpr inline uint32_t GameState::move_number() const
  * - (move_number * 2 + 1) if half_bit = 1(white was the last to make a move).
  * 
  */
-constexpr inline uint32_t GameState::half_move() const
+constexpr inline uint64_t GameState::half_move() const
 {
-    const uint32_t move_number = (state_register & MASK_MOVE_NUMBER) >> SHIFT_MOVE_NUMBER;
-    const uint32_t half_move_bit = (state_register & MASK_HALF_MOVE) >> SHIFT_HALF_MOVE;
+    const uint64_t move_number = (state_register & MASK_MOVE_NUMBER) >> SHIFT_MOVE_NUMBER;
+    const uint64_t half_move_bit = (state_register & MASK_HALF_MOVE) >> SHIFT_HALF_MOVE;
     return (move_number << 1U) + half_move_bit;
 }
 
+/**
+ * @brief set_triple_repetition_counterset_triple_repetition_counter
+ * 
+ * set number of times the position has been repeated.
+ * 
+ * @note counter must be <=3, otherwise state will be corrupted.
+ * 
+ * @param[in] counter triple repetition counter.
+ * 
+ */
+constexpr inline void GameState::set_triple_repetition_counter(uint8_t counter)
+{
+    state_register &= ~MASK_TRIPLE_REPETITION_RULE;
+    state_register |= static_cast<uint64_t>(counter) << SHIFT_TRIPLE_REPETITION_RULE;
+}
+/**
+ * @brief set_fifty_move_rule_counter
+ * 
+ * set the moves that have passed since the last pawn move or capture.
+ * 
+ * @note counter must be <=50, otherwise state will be corrupted.
+ * 
+ * @param[in] counter fifty rule counter counter.
+ * 
+ */
+constexpr inline void GameState::set_fifty_move_rule_counter(uint8_t counter)
+{
+    state_register &= ~MASK_FIFTY_MOVE_RULE;
+    state_register |= static_cast<uint64_t>(counter) << SHIFT_FIFTY_MOVE_RULE;
+}
+
+/**
+ * @brief set_last_captured_piece
+ * 
+ * set the last captured piece or PieceType::Empty
+ * if last move was not a capture.
+ * 
+ * @param[in] piece_type last piece captured.
+ * 
+ */
+constexpr inline void GameState::set_last_captured_piece(PieceType piece_type)
+{
+    state_register &= ~MASK_LAST_CAPTURED_PIECE;
+    state_register |= static_cast<uint64_t>(piece_type) << SHIFT_LAST_CAPTURED_PIECE;
+}
 /**
  * @brief set_side_to_move
  * 
@@ -439,7 +608,7 @@ constexpr inline uint32_t GameState::half_move() const
 constexpr inline void GameState::set_side_to_move(ChessColor side)
 {
     state_register &= ~MASK_SIDE_TO_MOVE;
-    state_register |= static_cast<uint32_t>(side) << SHIFT_SIDE_TO_MOVE;
+    state_register |= static_cast<uint64_t>(side) << SHIFT_SIDE_TO_MOVE;
 }
 
 /**
@@ -453,7 +622,7 @@ constexpr inline void GameState::set_side_to_move(ChessColor side)
 constexpr inline void GameState::set_castle_king_white(bool avaliable)
 {
     state_register &= ~MASK_CASTLE_KING_WHITE;
-    state_register |= static_cast<uint32_t>(avaliable) << SHIFT_CASTLE_KING_WHITE;
+    state_register |= static_cast<uint64_t>(avaliable) << SHIFT_CASTLE_KING_WHITE;
 }
 
 /**
@@ -467,7 +636,7 @@ constexpr inline void GameState::set_castle_king_white(bool avaliable)
 constexpr inline void GameState::set_castle_queen_white(bool avaliable)
 {
     state_register &= ~MASK_CASTLE_QUEEN_WHITE;
-    state_register |= static_cast<uint32_t>(avaliable) << SHIFT_CASTLE_QUEEN_WHITE;
+    state_register |= static_cast<uint64_t>(avaliable) << SHIFT_CASTLE_QUEEN_WHITE;
 }
 
 /**
@@ -481,7 +650,7 @@ constexpr inline void GameState::set_castle_queen_white(bool avaliable)
 constexpr inline void GameState::set_castle_king_black(bool avaliable)
 {
     state_register &= ~MASK_CASTLE_KING_BLACK;
-    state_register |= static_cast<uint32_t>(avaliable) << SHIFT_CASTLE_KING_BLACK;
+    state_register |= static_cast<uint64_t>(avaliable) << SHIFT_CASTLE_KING_BLACK;
 }
 
 /**
@@ -495,7 +664,7 @@ constexpr inline void GameState::set_castle_king_black(bool avaliable)
 constexpr inline void GameState::set_castle_queen_black(bool avaliable)
 {
     state_register &= ~MASK_CASTLE_QUEEN_BLACK;
-    state_register |= static_cast<uint32_t>(avaliable) << SHIFT_CASTLE_QUEEN_BLACK;
+    state_register |= static_cast<uint64_t>(avaliable) << SHIFT_CASTLE_QUEEN_BLACK;
 }
 
 
@@ -520,12 +689,13 @@ constexpr inline void GameState::set_en_passsant_square(Square square)
  * 
  * set the move number.
  * 
- * @note move number must be between 0-524287.
+ * @note move number must be between 0-524287,
+ *  otherwise state will be corrupted.
  * 
  * @param[in] move_number number of moves in the game
  * 
  */
-constexpr inline void GameState::set_move_number(uint32_t move_number)
+constexpr inline void GameState::set_move_number(uint64_t move_number)
 {
     state_register &= ~MASK_MOVE_NUMBER;
     state_register |= move_number << SHIFT_MOVE_NUMBER;
@@ -546,5 +716,5 @@ constexpr inline void GameState::set_move_number(uint32_t move_number)
 constexpr inline void GameState::set_half_move(bool half_move_bit)
 {
     state_register &= ~MASK_HALF_MOVE;
-    state_register |= static_cast<uint32_t>(half_move_bit) << SHIFT_HALF_MOVE;
+    state_register |= static_cast<uint64_t>(half_move_bit) << SHIFT_HALF_MOVE;
 }

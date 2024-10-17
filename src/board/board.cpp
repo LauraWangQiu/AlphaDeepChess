@@ -100,7 +100,10 @@ void Board::make_move(Move move)
     const Square end_square = move.square_to();
 
     const Piece origin_piece = get_piece(origin_square);
+    const Piece end_piece = get_piece(end_square);
     const MoveType move_type = move.type();
+
+    /** Update the board pieces */
 
     if (move_type == MoveType::NORMAL) {
         remove_piece(end_square);
@@ -121,18 +124,50 @@ void Board::make_move(Move move)
         put_piece(get_piece(rook_origin_square), rook_end_square);
         remove_piece(origin_square);
         remove_piece(rook_origin_square);
+
+        /**  update the game state regarding to castling */
+        if (end_square == Square::SQ_G1) {
+            game_state.set_castle_king_white(false);
+        }
+        else if (end_square == Square::SQ_G8) {
+            game_state.set_castle_king_black(false);
+        }
+        else if (end_square == Square::SQ_C1) {
+            game_state.set_castle_queen_white(false);
+        }
+        else {
+            game_state.set_castle_queen_black(false);
+        }
     }
     else if (move_type == MoveType::EN_PASSANT) {
+
         Square enemy_square(origin_square.row(), end_square.col());
         remove_piece(enemy_square);
         put_piece(origin_piece, end_square);
         remove_piece(origin_square);
+
     }
     else if (move_type == MoveType::PROMOTION) {
         Piece promo_piece = create_piece(move.promotion_piece(), get_color(origin_piece));
         remove_piece(end_square);
         put_piece(promo_piece, end_square);
         remove_piece(origin_square);
+    }
+
+    /**  update the game state */
+
+    // if move is not a capture last capture piece will be Piece::Empty.
+    game_state.set_last_captured_piece(piece_to_PieceType(end_piece));
+
+    // increment the move counter
+    game_state.set_move_number(game_state.move_number() + 1UL);
+
+    // in black turn (move counter * 2) and in white (move counter * 2 + 1)
+    game_state.set_half_move(!game_state.half_move());
+
+    // increment 50 move rule if the move is not a pawn move or is not a capture move
+    if (!is_empty(end_square) && piece_to_PieceType(origin_piece) != PieceType::PAWN) {
+        game_state.set_fifty_move_rule_counter(game_state.fifty_move_rule_counter() + 1UL);
     }
 }
 
@@ -187,7 +222,7 @@ void Board::unmake_move(Move move, GameState previous_state)
         put_piece(promo_piece, end_square);
         remove_piece(origin_square);
     }
-    
+
     game_state = previous_state;
 }
 

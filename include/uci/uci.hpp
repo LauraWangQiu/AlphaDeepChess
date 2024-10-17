@@ -26,7 +26,7 @@
  * max tokens that user can input in the console.
  * 
  */
-constexpr int TOKEN_ARRAY_SIZE = 500;
+constexpr int TOKEN_ARRAY_SIZE = 1000;
 
 typedef std::array<std::string, TOKEN_ARRAY_SIZE> TokenArray;
 

@@ -14,8 +14,7 @@
 enum class ChessColor
 {
     WHITE = 0,
-    BLACK = 1,
-    INVALID = 2
+    BLACK = 1
 };
 
 /**
@@ -178,6 +177,26 @@ constexpr inline ChessColor get_color(Piece piece)
 {
     // depends on the int value of the Piece enum
     return static_cast<int>(piece) <= 5 ? ChessColor::WHITE : ChessColor::BLACK;
+}
+
+/**
+ * @brief piece_to_PieceType 
+ * 
+ * Convert from Piece to PieceType.
+ * E.g : Piece::W_QUEEN -> PieceType::QUEEN.
+ * 
+ * @param[in] piece piece to convert.
+ * 
+ * @return PieceType
+ * 
+ */
+constexpr inline PieceType piece_to_PieceType(Piece piece)
+{
+    // the white and black pieces have a difference of +6 int value
+    // E.g  WKnight = 1, BKnight = 7
+    // if piece is black then we substract 6 to convert to white.
+    const uint8_t type_int = static_cast<int>(piece);
+    return static_cast<PieceType>(type_int - (6 * (type_int >= 6)));
 }
 
 /**
