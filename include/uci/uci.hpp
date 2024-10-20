@@ -173,7 +173,7 @@ private:
      *      - TRUE if success.
      *      - FALSE if error detected, probably error in user input.
      */
-    bool position_command_action(const TokenArray& tokens, int num_tokens);
+    bool position_command_action(const TokenArray& tokens, uint32_t num_tokens);
 
     /**
      * @brief diagram_command_action
@@ -198,6 +198,16 @@ private:
      * 
      */
     void quit_command_action() const;
+
+    /**
+     * @brief perft_command_action
+     * 
+     * Executes perft test of the actual position.
+     * 
+     * @param[in] depth desired depth of the test.
+     * 
+     */
+    void perft_command_action(uint64_t depth) const;
 
     /**
      * @brief unknown_command_action

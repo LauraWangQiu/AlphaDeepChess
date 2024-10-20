@@ -190,6 +190,16 @@ public:
     std::string fen() const;
 
     /**
+     * @brief state
+     * 
+     * Returns game state of the position
+     * 
+     * @return game_state
+     * 
+     */
+    inline GameState state() const { return game_state; }
+
+    /**
      * @brief operator<<
      * 
      * Overloads the << operator to print the board

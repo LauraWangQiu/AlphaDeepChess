@@ -111,14 +111,12 @@ void Board::make_move(Move move)
         remove_piece(origin_square);
     }
     else if (move_type == MoveType::CASTLING) {
-        // if (end_square.col() == COL_G) then COL_H(7) else COL_A(0)
-        Col rook_origin_col = static_cast<Col>(COL_H * (end_square.col() == COL_G));
 
-        // if (end_square.col() == COL_G) then COL_F(COL_D + 2) else COL_D(3)
-        Col rook_end_col = COL_D + 2 * (end_square.col() == COL_G);
+        const Col rook_origin_col = (end_square.col() == COL_G) ? COL_H : COL_A;
+        const Col rook_end_col = (end_square.col() == COL_G) ? COL_D : COL_F;
 
-        Square rook_origin_square(origin_square.row(), rook_origin_col);
-        Square rook_end_square(origin_square.row(), rook_end_col);
+        const Square rook_origin_square(origin_square.row(), rook_origin_col);
+        const Square rook_end_square(origin_square.row(), rook_end_col);
 
         put_piece(origin_piece, end_square);
         put_piece(get_piece(rook_origin_square), rook_end_square);
@@ -126,13 +124,13 @@ void Board::make_move(Move move)
         remove_piece(rook_origin_square);
 
         /**  update the game state regarding to castling */
-        if (end_square == Square::SQ_G1) {
+        if (move == Move::castle_white_king()) {
             game_state.set_castle_king_white(false);
         }
-        else if (end_square == Square::SQ_G8) {
+        else if (move == Move::castle_black_king()) {
             game_state.set_castle_king_black(false);
         }
-        else if (end_square == Square::SQ_C1) {
+        else if (move == Move::castle_white_queen()) {
             game_state.set_castle_queen_white(false);
         }
         else {
@@ -141,23 +139,27 @@ void Board::make_move(Move move)
     }
     else if (move_type == MoveType::EN_PASSANT) {
 
-        Square enemy_square(origin_square.row(), end_square.col());
+        const Square enemy_square(origin_square.row(), end_square.col());
         remove_piece(enemy_square);
         put_piece(origin_piece, end_square);
         remove_piece(origin_square);
-
     }
     else if (move_type == MoveType::PROMOTION) {
-        Piece promo_piece = create_piece(move.promotion_piece(), get_color(origin_piece));
+        const PieceType promotion_piece = move.promotion_piece();
         remove_piece(end_square);
-        put_piece(promo_piece, end_square);
+        put_piece(create_piece(promotion_piece, get_color(origin_piece)), end_square);
         remove_piece(origin_square);
     }
 
     /**  update the game state */
 
     // if move is not a capture last capture piece will be Piece::Empty.
-    game_state.set_last_captured_piece(piece_to_PieceType(end_piece));
+    if (move_type != MoveType::EN_PASSANT) {
+        game_state.set_last_captured_piece(piece_to_PieceType(end_piece));
+    }
+    else {
+        game_state.set_last_captured_piece(PieceType::PAWN);
+    }
 
     // increment the move counter
     game_state.set_move_number(game_state.move_number() + 1UL);
@@ -167,7 +169,7 @@ void Board::make_move(Move move)
 
     // increment 50 move rule if the move is not a pawn move or is not a capture move
     if (!is_empty(end_square) && piece_to_PieceType(origin_piece) != PieceType::PAWN) {
-        game_state.set_fifty_move_rule_counter(game_state.fifty_move_rule_counter() + 1UL);
+        game_state.set_fifty_move_rule_counter(game_state.fifty_move_rule_counter() + 1U);
     }
 }
 
@@ -187,40 +189,44 @@ void Board::unmake_move(Move move, GameState previous_state)
     const Square origin_square = move.square_from();
     const Square end_square = move.square_to();
 
-    const Piece origin_piece = get_piece(origin_square);
+    const Piece end_piece = get_piece(end_square);
     const MoveType move_type = move.type();
 
     if (move_type == MoveType::NORMAL) {
-        remove_piece(end_square);
-        put_piece(origin_piece, end_square);
-        remove_piece(origin_square);
+
+        put_piece(end_piece, origin_square);
+
+        // if last move was not a capture captured piece will be EMPTY.
+        const PieceType captured_piece = game_state.last_captured_piece();
+        put_piece(create_piece(captured_piece, game_state.side_to_move()), end_square);
     }
     else if (move_type == MoveType::CASTLING) {
-        // if (end_square.col() == COL_G) then COL_H(7) else COL_A(0)
-        Col rook_origin_col = static_cast<Col>(COL_H * (end_square.col() == COL_G));
 
-        // if (end_square.col() == COL_G) then COL_F(COL_D + 2) else COL_D(3)
-        Col rook_end_col = COL_D + 2 * (end_square.col() == COL_G);
+        const Col rook_origin_col = (end_square.col() == COL_G) ? COL_H : COL_A;
+        const Col rook_end_col = (end_square.col() == COL_G) ? COL_D : COL_F;
 
-        Square rook_origin_square(origin_square.row(), rook_origin_col);
-        Square rook_end_square(origin_square.row(), rook_end_col);
+        const Square rook_origin_square(origin_square.row(), rook_origin_col);
+        const Square rook_end_square(origin_square.row(), rook_end_col);
 
-        put_piece(origin_piece, end_square);
-        put_piece(get_piece(rook_origin_square), rook_end_square);
-        remove_piece(origin_square);
-        remove_piece(rook_origin_square);
+        put_piece(end_piece, origin_square);
+        put_piece(get_piece(rook_end_square), rook_origin_square);
+        remove_piece(end_square);
+        remove_piece(rook_end_square);
     }
     else if (move_type == MoveType::EN_PASSANT) {
-        Square enemy_square(origin_square.row(), end_square.col());
-        remove_piece(enemy_square);
-        put_piece(origin_piece, end_square);
-        remove_piece(origin_square);
+        const Square enemy_square(origin_square.row(), end_square.col());
+
+        put_piece(create_piece(PieceType::PAWN, game_state.side_to_move()), enemy_square);
+        put_piece(end_piece, origin_square);
+        remove_piece(end_square);
     }
     else if (move_type == MoveType::PROMOTION) {
-        Piece promo_piece = create_piece(move.promotion_piece(), get_color(origin_piece));
-        remove_piece(end_square);
-        put_piece(promo_piece, end_square);
-        remove_piece(origin_square);
+        const PieceType promotion_piece = move.promotion_piece();
+        put_piece(create_piece(promotion_piece, get_color(end_piece)), origin_square);
+
+        // if last move was not a capture captured piece will be EMPTY.
+        const PieceType captured_piece = game_state.last_captured_piece();
+        put_piece(create_piece(captured_piece, game_state.side_to_move()), end_square);
     }
 
     game_state = previous_state;
@@ -239,14 +245,6 @@ void Board::unmake_move(Move move, GameState previous_state)
  */
 void Board::load_fen(const std::string& fen)
 {
-
-    /*
-        Fen notation info :
-
-        https://www.chess.com/terms/fen-chess
-        https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
-    */
-
     Board::clean();
 
     Row row = ROW_8;

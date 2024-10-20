@@ -1,13 +1,20 @@
-/*
-    Uci protocol specifications
-    https://gist.github.com/DOBRO/2592c6dad754ba67e6dcaec8c90165bf#file-uci-protocol-specification-txt
-*/
+/**
+ * @file uci.cpp
+ * @brief uci services.
+ *
+ * uci implementation. 
+ * 
+ *  Uci protocol specifications
+ *  https://gist.github.com/DOBRO/2592c6dad754ba67e6dcaec8c90165bf#file-uci-protocol-specification-txt
+ * 
+ */
 
 #include "uci.hpp"
 
 #include "evaluation.hpp"
 #include "move_generator.hpp"
 #include "search.hpp"
+#include "perft.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -74,8 +81,18 @@ void Uci::loop()
         else if (command == "e" || command == "eval") {
             eval_command_action();
         }
+        else if (command == "perft") {
+            try {
+                uint64_t depth = stoull(tokens[1]);
+                perft_command_action(depth);
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command : perft depth\n";
+            }
+        }
         else if (command == "p" || command == "position") {
-            bool success = position_command_action(tokens, num_tokens);
+            if (!position_command_action(tokens, num_tokens)) {
+                std::cout << "error in setting the position\n";
+            }
         }
         else if (command == "d" || command == "diagram") {
             diagram_command_action();
@@ -189,34 +206,38 @@ void Uci::eval_command_action() const
  *      - TRUE if success.
  *      - FALSE if error detected, probably error in user input.
  */
-bool Uci::position_command_action(const TokenArray& tokens, int num_tokens)
+bool Uci::position_command_action(const TokenArray& tokens, uint32_t num_tokens)
 {
     if (num_tokens < 2) {
-        return false;   // Not enough tokens
+        return false;
     }
+    uint32_t first_move_pos = 3U;
 
     if (tokens[1] == "startpos") {
-        board.load_fen(StartFEN); 
+        board.load_fen(StartFEN);
+        first_move_pos = 2U;
+    }
+    if (tokens[1] == "actualpos") {
+        first_move_pos = 2U;
     }
     else if (tokens[1] == "fen") {
         if (num_tokens < 3) {
-            return false;   // Not enough tokens for FEN
+            return false;
         }
-        const int fen_string_pos = 2;
 
-        board.load_fen(tokens[fen_string_pos]);
+        board.load_fen(tokens[2]);
     }
     else {
-        return false;   // Invalid format
+        return false;
     }
 
     // Handle any subsequent moves
-    if (num_tokens > 3) {
+    if (num_tokens > first_move_pos) {
         MoveList move_list;
-        for (size_t i = 4; i < num_tokens; ++i) {
+        for (uint32_t i = first_move_pos; i < num_tokens; ++i) {
             Move move = create_move_from_string(tokens[i], board);
             if (!move.is_valid()) {
-                return false;   // Invalid move
+                return false;
             }
             board.make_move(move);
         }
@@ -263,22 +284,25 @@ void Uci::help_command_action() const
            "ucinewgame\n"
            "\tStart of a new game.\n\n"
 
-           "position [fen <fenstring> | startpos ] moves <move1> .... <movei>\n"
+           "position [fen <fenstring> | startpos | actualpos] moves <move1> .... <movei>\n"
            "\tSet up the position on the internal board.\n\n"
-                "\t\tMove format:\n\n"
-                "\t\tThe move format is in long algebraic notation.\n"
-                "\t\tA nullmove from the Engine to the GUI should be sent as 0000.\n"
-                "\t\tExamples:  e2e4, e7e5, e1g1 (white short castling), e7e8q (for promotion)\n\n"
+           "\t\tMove format:\n\n"
+           "\t\tThe move format is in long algebraic notation.\n"
+           "\t\tA nullmove from the Engine to the GUI should be sent as 0000.\n"
+           "\t\tExamples:  e2e4, e7e5, e1g1 (white short castling), e7e8q (for promotion)\n\n"
            "go\n"
            "\tStart calculating.\n"
            "\tOptional parameters: searchmoves, ponder, wtime, btime, winc, binc, movestogo, "
-           "depth, nodes, mate, movetime, infinite.\n\n"
+           "\tdepth, nodes, mate, movetime, infinite.\n\n"
 
            "stop\n"
            "\tStop calculating.\n\n"
 
            "quit\n"
            "\tQuit the program.\n\n"
+
+           "perft depth\n"
+           "\tExecutes perft test to the desired depth.\n\n"
 
            "d\n"
            "\tDisplay the current position on the board.\n\n"
@@ -294,6 +318,22 @@ void Uci::help_command_action() const
  */
 void Uci::quit_command_action() const { std::cout << "goodbye" << std::endl; }
 
+/**
+ * @brief perft_command_action
+ * 
+ * Executes perft test of the actual position.
+ * 
+ * @param[in] depth desired depth of the test.
+ * 
+ */
+void Uci::perft_command_action(uint64_t depth) const
+{
+    int64_t time = 0;
+    uint64_t nodes = 0U;
+
+    perft(board.fen(), depth, time, nodes);
+    std::cout << "Perft " << depth << " : " << nodes << "  execution time: " << time << " ms\n";
+}
 
 /**
  * @brief unknown_command_action
@@ -327,5 +367,53 @@ void Uci::unknown_command_action() const
  */
 Move Uci::create_move_from_string(const std::string& move_string, const Board& board) const
 {
-    return Move::null();
+    uint32_t string_lenght = move_string.length();
+    // move string should have 4 or 5 characters
+    if (string_lenght < 4 || string_lenght > 5) {
+        return Move::null();
+    }
+
+    Square sq_origin(move_string.substr(0, 2));
+    Square sq_end(move_string.substr(2, 2));
+
+    if (sq_origin == Square::SQ_INVALID || sq_end == Square::SQ_INVALID) {
+        return Move::null();
+    }
+
+    // check for castling move
+    if (piece_to_PieceType(board.get_piece(sq_origin)) == PieceType::KING) {
+        if (sq_end == Square::SQ_G1) {
+            return Move::castle_white_king();
+        }
+        else if (sq_end == Square::SQ_G8) {
+            return Move::castle_black_king();
+        }
+        else if (sq_end == Square::SQ_C1) {
+            return Move::castle_white_queen();
+        }
+        else if (sq_end == Square::SQ_C8) {
+            return Move::castle_black_queen();
+        }
+    }
+
+    PieceType promo_piece = PieceType::EMPTY;
+    MoveType move_type = MoveType::NORMAL;
+
+    // check for promotion move
+    if (string_lenght == 5) {
+        promo_piece = char_to_pieceType(move_string[4]);
+        if (promo_piece == PieceType::EMPTY) {
+            return Move::null();
+        }
+        move_type = MoveType::PROMOTION;
+    }
+
+    // check for en Passant
+    if (piece_to_PieceType(board.get_piece(sq_origin)) == PieceType::PAWN &&
+        board.state().en_passsant_square() == sq_end) {
+
+        move_type = MoveType::EN_PASSANT;
+    }
+    // Create and return the Move object
+    return Move(sq_origin, sq_end, move_type, promo_piece);
 }

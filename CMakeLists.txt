@@ -18,6 +18,7 @@ add_executable(AlphaDeepChess
 src/main.cpp
 src/board/board.cpp
 src/uci/uci.cpp
+src/utilities/perft.cpp
 )
 
 # Add basic algorithm source files

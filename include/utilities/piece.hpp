@@ -149,6 +149,38 @@ constexpr inline Piece char_to_piece(char piece_char)
 }
 
 /**
+ * @brief char_to_pieceType
+ * 
+ * Returns the PieceType enum from the character representation
+ * 
+ * @note capital letters will be converted to lowercase.
+ * 
+ * @param piece_char {'p', 'n', 'b', 'r', 'q', 'k', ' '}
+ * 
+ * @return
+ * - PieceType::PAWN if piece_char = 'p'.
+ * - PieceType::KNIGHT if piece_char = 'n'.
+ * - PieceType::BISHOP if piece_char = 'b'.
+ * - PieceType::ROOK if piece_char = 'r'.
+ * - PieceType::QUEEN if piece_char = 'q'.
+ * - PieceType::KING if piece_char = 'k'.
+ * - PieceType::EMPTY if other char.
+ * 
+ */
+constexpr inline PieceType char_to_pieceType(char pieceType_char)
+{
+    switch (tolower(pieceType_char)) {
+    case 'p': return PieceType::PAWN;
+    case 'n': return PieceType::KNIGHT;
+    case 'b': return PieceType::BISHOP;
+    case 'r': return PieceType::ROOK;
+    case 'q': return PieceType::QUEEN;
+    case 'k': return PieceType::KING;
+    default: return PieceType::EMPTY;
+    }
+}
+
+/**
  * @brief pieceType_to_char
  * 
  * Returns the character piece type representation  

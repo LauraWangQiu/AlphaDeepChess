@@ -28,35 +28,111 @@ constexpr const int MAX_CHESS_MOVES = 256;
 class MoveList
 {
 public:
-    MoveList() : nMoves(0) { }
+    /**
+     * @brief MoveList
+     * 
+     * MoveList constructor.
+     * 
+     */
+    MoveList() : num_moves(0) { }
 
-    // store a move in the list
-    constexpr inline void add(Move move) { moves[nMoves++] = move; }
+    /**
+     * @brief add
+     * 
+     * Add a move to the list.
+     * 
+     * @note this dont check if the capacity is exceeded (MAX_CHESS_MOVES)
+     * 
+     * @param[in] move move to store.
+     * 
+     */
+    constexpr inline void add(Move move) { moves[num_moves++] = move; }
 
-    // empty the list
-    constexpr inline void clear() { nMoves = 0; }
+    /**
+     * @brief clear
+     * 
+     * Empty the list.
+     * 
+     */
+    constexpr inline void clear() { num_moves = 0; }
 
-    // return the number of moves stored
-    constexpr inline int size() const { return nMoves; }
+    /**
+     * @brief add
+     * 
+     * return the number of moves stored.
+     * 
+     * @return num_moves.
+     * 
+     */
+    constexpr inline int size() const { return num_moves; }
 
-    // return the move in the pos index, index should be valid ( 0 <= index< nMoves)
+    /**
+     * @brief get
+     * 
+     * return the move in the pos index, 
+     * 
+     * @note index should be valid ( 0 <= index< num_moves)
+     * 
+     * @param[in] index index of the move in the array.
+     * 
+     * @return moves[index]
+     * 
+     */
     constexpr inline Move get(int index) const { return moves[index]; }
 
-    /*
-     *   Return string representation of all moves in the list E.g :
-     *   e2e4:
-     *   b1b2:
+    /**
+     * @brief to_string
+     * 
+     * calculates the string representation of the move list. 
+     * 
+     * @return (i = 0; i < num_moves)"moves[i].to_string():\n"
+     * 
      */
     inline std::string to_string() const
     {
         std::string s = "";
-        for (int i = 0; i < nMoves; i++) {
+        for (int i = 0; i < num_moves; i++) {
             s += moves[i].to_string() + ":\n";
         }
         return s;
     }
 
+    /**
+     * @brief Move& operator[](index)
+     * 
+     * Overload array operator for non-const access.
+     * 
+     * @return moves[index]
+     * 
+     */
+    constexpr inline Move& operator[](int index) { return moves[index]; }
+
+    /**
+     * @brief const Move& operator[](index)
+     * 
+     * Overload array operator for const access.
+     * 
+     * @return moves[index]
+     * 
+     */
+    constexpr inline const Move& operator[](int index) const { return moves[index]; }
+
 private:
+    /**
+     * @brief moves
+     * 
+     * @note max capacity : MAX_CHESS_MOVES
+     * 
+     * move list
+     * 
+     */
     Move moves[MAX_CHESS_MOVES];
-    int nMoves;
+
+    /**
+     * @brief num_moves
+     * 
+     * number of moves stored in the list.
+     * 
+     */
+    int num_moves;
 };

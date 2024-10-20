@@ -325,7 +325,7 @@ public:
      * @param[in] gs gameState where to copy the initial value.
      * 
      */
-    constexpr GameState(GameState& gs) : state_register(gs.state_register) { }
+    constexpr GameState(const GameState& gs) : state_register(gs.state_register) { }
 
     /**
      * @brief operator==
