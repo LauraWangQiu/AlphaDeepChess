@@ -15,6 +15,22 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+
+        {
+            "label": "tests_build",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/test/build",
+                "--config",
+                "Debug"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": false
+            }
         }
     ]
 }
