@@ -88,9 +88,51 @@ enum class PieceType : int
  */
 constexpr const int NUM_CHESS_PIECES = static_cast<int>(Piece::NUM_PIECES);
 
+/**
+ * @brief pieceRepresentation[NUM_CHESS_PIECES]
+ * 
+ * Piece char representation :
+ * 
+ *   W_PAWN(0) = 'P',
+ *   W_KNIGHT(1) = 'N',
+ *   W_BISHOP(2) = 'B',
+ *   W_ROOK(3) = 'R',
+ *   W_QUEEN(4) = 'Q',
+ *   W_KING(5) = 'K',
+ *   B_PAWN(6) = 'p',
+ *   B_KNIGHT(7) = 'n',
+ *   B_BISHOP(8) = 'b',
+ *   B_ROOK(9) = 'r',
+ *   B_QUEEN(10) = 'q',
+ *   B_KING(11) = 'k',
+ *   EMPTY(12) = ' ',
+ * 
+ */
 static constexpr char pieceRepresentation[NUM_CHESS_PIECES] = {'P', 'N', 'B', 'R', 'Q', 'K', 'p',
                                                                'n', 'b', 'r', 'q', 'k', ' '};
 
+/**
+ * @brief pieceRepresentation[NUM_CHESS_PIECES]
+ * 
+ * Piece raw value :
+ * 
+ *   W_PAWN(0) = 100,
+ *   W_KNIGHT(1) = 300,
+ *   W_BISHOP(2) = 310,
+ *   W_ROOK(3) = 500,
+ *   W_QUEEN(4) = 900,
+ *   W_KING(5) = 500,
+ *   B_PAWN(6) = 100,
+ *   B_KNIGHT(7) = 300,
+ *   B_BISHOP(8) = 310,
+ *   B_ROOK(9) = 500,
+ *   B_QUEEN(10) = 900,
+ *   B_KING(11) = 500,
+ *   EMPTY(12) = 0,
+ * 
+ */
+static constexpr uint32_t pieceRawValue[NUM_CHESS_PIECES] = {
+    100U, 300U, 310U, 500U, 900U, 500U, 100U, 300U, 310U, 500U, 900U, 500U, 0U};
 /**
  * @brief pieceToChar
  * 
@@ -248,3 +290,15 @@ constexpr inline Piece create_piece(PieceType type, ChessColor color)
     // E.g  WKnight = 1, BKnight = 7
     return static_cast<Piece>(static_cast<int>(type) + (6 * static_cast<int>(color)));
 }
+
+/**
+ * @brief raw_value 
+ * 
+ * Create piece by piece type and color.
+ * 
+ * @param[in] piece selected piece.
+ * 
+ * @return Piece raw value
+ * 
+ */
+constexpr inline uint32_t raw_value(Piece piece) { return pieceRawValue[static_cast<int>(piece)]; }

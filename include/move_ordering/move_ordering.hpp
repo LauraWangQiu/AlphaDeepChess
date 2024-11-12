@@ -8,6 +8,7 @@
  */
 
 #include "move_list.hpp"
+#include "board.hpp"
 
 /**
  * @brief order_moves
@@ -16,7 +17,8 @@
  * 
  * @note the first move in the list is the move with the best prospects of being the best move.
  * 
+ * @param[in] board chess position.
  * @param[out] moves move list.
  * 
  */
-void order_moves(MoveList& moves);
+void order_moves(MoveList& moves, const Board &board);
