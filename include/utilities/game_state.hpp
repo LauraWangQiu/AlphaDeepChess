@@ -160,7 +160,7 @@ public:
      * - 0<=square<=63 if en passant is avaliable.
      * - SQ_INVALID if en en passant is no avaliable.
      */
-    constexpr inline Square en_passsant_square() const;
+    constexpr inline Square en_passant_square() const;
 
     /**
      * @brief move_number
@@ -269,7 +269,7 @@ public:
     constexpr inline void set_castle_queen_black(bool avaliable);
 
     /**
-     * @brief set_en_passsant_square
+     * @brief set_en_passant_square
      * 
      * set the square where en passant is avaliable.
      * 
@@ -278,7 +278,7 @@ public:
      * @param[in] square nen passant square.
      * 
      */
-    constexpr inline void set_en_passsant_square(Square square);
+    constexpr inline void set_en_passant_square(Square square);
 
     /**
      * @brief set_move_number
@@ -315,7 +315,7 @@ public:
      * @note initializes state_register = 0.
      * 
      */
-    constexpr GameState() : state_register(0U) { }
+    constexpr GameState() : state_register(0U) { set_en_passant_square(Square::SQ_INVALID); }
 
     /**
      * @brief GameState
@@ -517,7 +517,7 @@ constexpr inline bool GameState::castle_queen_black() const
  * - 0<=square<=63 if en passant is avaliable.
  * - SQ_INVALID if en en passant is no avaliable.
  */
-constexpr inline Square GameState::en_passsant_square() const
+constexpr inline Square GameState::en_passant_square() const
 {
     return (state_register & MASK_EN_PASSANT_SQUARE) >> SHIFT_EN_PASSANT_SQUARE;
 }
@@ -669,7 +669,7 @@ constexpr inline void GameState::set_castle_queen_black(bool avaliable)
 
 
 /**
- * @brief set_en_passsant_square
+ * @brief set_en_passant_square
  * 
  * set the square where en passant is avaliable.
  * 
@@ -678,7 +678,7 @@ constexpr inline void GameState::set_castle_queen_black(bool avaliable)
  * @param[in] square nen passant square.
  * 
  */
-constexpr inline void GameState::set_en_passsant_square(Square square)
+constexpr inline void GameState::set_en_passant_square(Square square)
 {
     state_register &= ~MASK_EN_PASSANT_SQUARE;
     state_register |= square << SHIFT_EN_PASSANT_SQUARE;

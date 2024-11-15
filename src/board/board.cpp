@@ -161,6 +161,21 @@ void Board::make_move(Move move)
         game_state.set_last_captured_piece(PieceType::PAWN);
     }
 
+    // if move is double push pawn then update the square where enPassant is avaliable
+
+    const bool is_pawn_move = (piece_to_PieceType(origin_piece) == PieceType::PAWN);
+    const uint32_t row_diff = abs((int32_t)origin_square.row() - (int32_t)end_square.row());
+    const bool is_move_double_push = is_pawn_move && row_diff == 2U;
+
+    if (is_move_double_push) {
+
+        const Row en_passant_row = get_color(origin_piece) == ChessColor::WHITE ? ROW_5 : ROW_4;
+        game_state.set_en_passant_square(Square(en_passant_row, end_square.col()));
+    }
+    else {
+        game_state.set_en_passant_square(Square::SQ_INVALID);
+    }
+
     // increment the move counter
     game_state.set_move_number(game_state.move_number() + 1UL);
 
@@ -303,7 +318,7 @@ void Board::load_fen(const std::string& fen)
         ss >> token;
         row = static_cast<Row>(token - '1');
 
-        game_state.set_en_passsant_square(Square(row, col));
+        game_state.set_en_passant_square(Square(row, col));
         check_and_modify_en_passant_rule();
     }
 
@@ -343,7 +358,7 @@ std::string Board::fen() const
 
             if (emptyCounter) fen << emptyCounter;
 
-            if (col <= 7) fen << (Square(row, col));
+            if (col <= 7) fen << (piece_to_char(get_piece(Square(row, col))));
         }
 
         if (row > 0) fen << '/';
@@ -373,8 +388,8 @@ std::string Board::fen() const
         fen << '-';
     }
 
-    if (game_state.en_passsant_square().is_valid()) {
-        fen << " " + game_state.en_passsant_square().to_string() + " ";
+    if (game_state.en_passant_square().is_valid()) {
+        fen << " " + game_state.en_passant_square().to_string() + " ";
     }
     else {
         fen << " - ";
@@ -486,7 +501,7 @@ void Board::check_and_modify_en_passant_rule()
 
     bool valid = false;
 
-    Square enPassantSquare = game_state.en_passsant_square();
+    Square enPassantSquare = game_state.en_passant_square();
     if (enPassantSquare.is_valid()) {
 
         Col col = enPassantSquare.col();
@@ -510,7 +525,7 @@ void Board::check_and_modify_en_passant_rule()
 
         if (!valid) {
             // invalid enPassant row
-            game_state.set_en_passsant_square(Square::SQ_INVALID);
+            game_state.set_en_passant_square(Square::SQ_INVALID);
         }
     }
 }

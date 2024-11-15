@@ -137,7 +137,7 @@ public:
      * 
      * @return (sq_value / 8)
      */
-    inline Row row() const { return static_cast<Row>(sq_value > 3U); }
+    constexpr inline Row row() const { return static_cast<Row>(sq_value > 3U); }
 
     /**
      * @brief col
@@ -146,7 +146,7 @@ public:
      * 
      * @return (sq_value % 8)
      */
-    inline Col col() const { return static_cast<Col>(sq_value & 3U); }
+    constexpr inline Col col() const { return static_cast<Col>(sq_value & 3U); }
 
     /**
      * @brief to_string
@@ -155,7 +155,7 @@ public:
      * 
      * @return std::string representation of the square.
      */
-    inline std::string to_string() const
+    constexpr inline std::string to_string() const
     {
         return std::string(1, 'a' + col()) + static_cast<char>('1' + row());
     }
@@ -281,6 +281,164 @@ public:
             this->sq_value = other.sq_value;
         }
         return *this;
+    }
+
+    /**
+     * @brief north
+     * 
+     * Calculates the square in the north direction.
+     * White player viewpoint.
+     * 
+     * @note square should be valid
+     * 
+     * @return
+     *  (sq_value + 8) if row() < ROW_8
+     *  (SQ_INVALID) if row() >= ROW_8
+     * 
+     */
+    constexpr Square north() const { return row() < ROW_8 ? sq_value + NORTH : SQ_INVALID; }
+
+    /**
+     * @brief south
+     * 
+     * Calculates the square in the south direction.
+     * White player viewpoint.
+     * 
+     * @note square should be valid
+     * 
+     * @return
+     *  (sq_value - 8) if row() > ROW_1
+     *  (SQ_INVALID) if row() <= ROW_1
+     * 
+     */
+    constexpr Square south() const { return row() > ROW_1 ? sq_value + SOUTH : SQ_INVALID; }
+
+    /**
+     * @brief north
+     * 
+     * Calculates the square in the east direction.
+     * White player viewpoint.
+     * 
+     * @note square should be valid
+     * 
+     * @return
+     *  (sq_value - 1) if col() > COL_A
+     *  (SQ_INVALID) if col() <= COL_A
+     * 
+     */
+    constexpr Square east() const { return col() > COL_A ? sq_value + EAST : SQ_INVALID; }
+
+    /**
+     * @brief west
+     * 
+     * Calculates the square in the west direction.
+     * White player viewpoint.
+     * 
+     * @note square should be valid
+     * 
+     * @return
+     *  (sq_value + 1) if col() < COL_H
+     *  (SQ_INVALID) if col() >= COL_H
+     * 
+     */
+    constexpr Square west() const { return col() < COL_H ? sq_value + WEST : SQ_INVALID; }
+
+    /**
+     * @brief northEast
+     * 
+     * Calculates the square in the northeast direction.
+     * White player viewpoint.
+     * 
+     * @note square should be valid
+     * 
+     * @return
+     *  (sq_value + 7) if row() < ROW_8 && col() > COL_A
+     *  (SQ_INVALID) if row() >= ROW_8 || col() <= COL_A
+     * 
+     */
+    constexpr Square northEast() const
+    {
+        return row() < ROW_8 && col() > COL_A ? sq_value + NORTH_EAST : SQ_INVALID;
+    }
+
+    /**
+     * @brief northWest
+     * 
+     * Calculates the square in the northwest direction.
+     * White player viewpoint.
+     * 
+     * @note square should be valid
+     * 
+     * @return
+     *  (sq_value + 9) if row() < ROW_8 && col() < COL_H
+     *  (SQ_INVALID) if row() >= ROW_8 || col() >= COL_H
+     * 
+     */
+    constexpr Square northWest() const
+    {
+        return row() < ROW_8 && col() < COL_H ? sq_value + NORTH_WEST : SQ_INVALID;
+    }
+
+    /**
+     * @brief southEast
+     * 
+     * Calculates the square in the southeast direction.
+     * White player viewpoint.
+     * 
+     * @note square should be valid
+     * 
+     * @return
+     *  (sq_value - 9) if row() > ROW_1 && col() > COL_A
+     *  (SQ_INVALID) if row() <= ROW_1 || col() <= COL_A
+     * 
+     */
+    constexpr Square southEast() const
+    {
+        return row() > ROW_1 && col() > COL_A ? sq_value + SOUTH_EAST : SQ_INVALID;
+    }
+
+    /**
+     * @brief southWest
+     * 
+     * Calculates the square in the southwest direction.
+     * White player viewpoint.
+     * 
+     * @note square should be valid
+     * 
+     * @return
+     *  (sq_value - 7) if row() > ROW_1 && col() < COL_H
+     *  (SQ_INVALID) if row() <= ROW_1 || col() >= COL_H
+     * 
+     */
+    constexpr Square southWest() const
+    {
+        return row() > ROW_1 && col() < COL_H ? sq_value + SOUTH_WEST : SQ_INVALID;
+    }
+
+    /**
+     * @brief to_direction
+     * 
+     * Move the square in the specified direction.
+     * 
+     * @note square should be valid
+     * 
+     * @param[in] direction
+     * 
+     */
+    constexpr void to_direction(const Direction direction)
+    {
+        switch (direction) {
+        case Direction::NORTH: sq_value = north(); break;
+        case Direction::NORTH_EAST: sq_value = northEast(); break;
+        case Direction::NORTH_WEST: sq_value = northWest(); break;
+        case Direction::EAST: sq_value = east(); break;
+        case Direction::WEST: sq_value = west(); break;
+        case Direction::SOUTH: sq_value = south(); break;
+        case Direction::SOUTH_EAST: sq_value = southEast(); break;
+        case Direction::SOUTH_WEST: sq_value = southWest(); break;
+        default:   // invalid direction
+            break;
+        }
     }
 
 private:

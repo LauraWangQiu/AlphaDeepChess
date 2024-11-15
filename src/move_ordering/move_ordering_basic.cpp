@@ -75,11 +75,13 @@ static uint32_t move_value(const Move& move, const Board& board)
 {
     const Piece origin_piece = board.get_piece(move.square_from());
     const uint32_t origin_piece_value = raw_value(origin_piece);
+    const PieceType promotion_piece = move.promotion_piece();
 
     const uint32_t bonus_capture =
         move.type() == MoveType::EN_PASSANT || !board.is_empty(move.square_to()) ? 10U : 0U;
 
-    const uint32_t bonus_promotion = move.type() == MoveType::PROMOTION ? 10U : 0U;
+    const uint32_t bonus_promotion =
+        move.type() == MoveType::PROMOTION ? raw_value(promotion_piece) : 0U;
 
     return origin_piece_value + bonus_capture + bonus_promotion;
 }

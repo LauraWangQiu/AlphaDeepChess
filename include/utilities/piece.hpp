@@ -294,11 +294,62 @@ constexpr inline Piece create_piece(PieceType type, ChessColor color)
 /**
  * @brief raw_value 
  * 
- * Create piece by piece type and color.
+ * Calculate raw calue of the piece
  * 
  * @param[in] piece selected piece.
  * 
  * @return Piece raw value
+ *   W_PAWN(0) = 100,
+ *   W_KNIGHT(1) = 300,
+ *   W_BISHOP(2) = 310,
+ *   W_ROOK(3) = 500,
+ *   W_QUEEN(4) = 900,
+ *   W_KING(5) = 500,
+ *   B_PAWN(6) = 100,
+ *   B_KNIGHT(7) = 300,
+ *   B_BISHOP(8) = 310,
+ *   B_ROOK(9) = 500,
+ *   B_QUEEN(10) = 900,
+ *   B_KING(11) = 500,
+ *   EMPTY(12) = 0,
  * 
  */
 constexpr inline uint32_t raw_value(Piece piece) { return pieceRawValue[static_cast<int>(piece)]; }
+
+/**
+ * @brief raw_value 
+ * 
+ * Calculate raw calue of the piece type
+ * 
+ * @param[in] piece selected piece type.
+ * 
+ * @return Piece raw value
+ *   PAWN(6) = 100,
+ *   KNIGHT(7) = 300,
+ *   BISHOP(8) = 310,
+ *   ROOK(9) = 500,
+ *   QUEEN(10) = 900,
+ *   KING(11) = 500,
+ *   EMPTY(12) = 0,
+ */
+constexpr inline uint32_t raw_value(PieceType piece)
+{
+    return 6 + pieceRawValue[static_cast<int>(piece)];
+}
+
+/**
+ * @brief is_slider 
+ * 
+ * Check if the piece is an slider (ROOK, QUEEN OR BISHOP)
+ * 
+ * @param[in] piece selected piece.
+ * 
+ * @return
+ *  - TRUE if piece is BISHOP, ROOK or QUEEN..
+ *  - FALSE if piece is not BISHOP, ROOK or QUEEN.
+ * 
+ */
+constexpr inline bool is_slider(PieceType piece)
+{
+    return piece == PieceType::BISHOP || piece == PieceType::QUEEN || piece == PieceType::ROOK;
+}
