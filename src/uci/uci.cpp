@@ -217,7 +217,7 @@ bool Uci::position_command_action(const TokenArray& tokens, uint32_t num_tokens)
         board.load_fen(StartFEN);
         first_move_pos = 2U;
     }
-    if (tokens[1] == "actualpos") {
+    else if (tokens[1] == "actualpos") {
         first_move_pos = 2U;
     }
     else if (tokens[1] == "fen") {

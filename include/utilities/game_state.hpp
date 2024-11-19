@@ -10,29 +10,29 @@
  * 
  */
 
-static constexpr uint64_t SHIFT_TRIPLE_REPETITION_RULE = 41UL;
-static constexpr uint64_t SHIFT_FIFTY_MOVE_RULE = 35UL;
-static constexpr uint64_t SHIFT_LAST_CAPTURED_PIECE = 32UL;
-static constexpr uint64_t SHIFT_SIDE_TO_MOVE = 31UL;
-static constexpr uint64_t SHIFT_CASTLE_KING_WHITE = 30UL;
-static constexpr uint64_t SHIFT_CASTLE_QUEEN_WHITE = 29UL;
-static constexpr uint64_t SHIFT_CASTLE_KING_BLACK = 28UL;
-static constexpr uint64_t SHIFT_CASTLE_QUEEN_BLACK = 27UL;
-static constexpr uint64_t SHIFT_EN_PASSANT_SQUARE = 20UL;
-static constexpr uint64_t SHIFT_MOVE_NUMBER = 1UL;
-static constexpr uint64_t SHIFT_HALF_MOVE = 0UL;
+static constexpr uint64_t SHIFT_TRIPLE_REPETITION_RULE = 41ULL;
+static constexpr uint64_t SHIFT_FIFTY_MOVE_RULE = 35ULL;
+static constexpr uint64_t SHIFT_LAST_CAPTURED_PIECE = 32ULL;
+static constexpr uint64_t SHIFT_SIDE_TO_MOVE = 31ULL;
+static constexpr uint64_t SHIFT_CASTLE_KING_WHITE = 30ULL;
+static constexpr uint64_t SHIFT_CASTLE_QUEEN_WHITE = 29ULL;
+static constexpr uint64_t SHIFT_CASTLE_KING_BLACK = 28ULL;
+static constexpr uint64_t SHIFT_CASTLE_QUEEN_BLACK = 27ULL;
+static constexpr uint64_t SHIFT_EN_PASSANT_SQUARE = 20ULL;
+static constexpr uint64_t SHIFT_MOVE_NUMBER = 1ULL;
+static constexpr uint64_t SHIFT_HALF_MOVE = 0ULL;
 
-static constexpr uint64_t MASK_TRIPLE_REPETITION_RULE = (1UL << SHIFT_TRIPLE_REPETITION_RULE);
-static constexpr uint64_t MASK_FIFTY_MOVE_RULE = (1UL << SHIFT_FIFTY_MOVE_RULE);
-static constexpr uint64_t MASK_LAST_CAPTURED_PIECE = (1UL << SHIFT_LAST_CAPTURED_PIECE);
-static constexpr uint64_t MASK_SIDE_TO_MOVE = (1UL << SHIFT_SIDE_TO_MOVE);
-static constexpr uint64_t MASK_CASTLE_KING_WHITE = (1UL << SHIFT_CASTLE_KING_WHITE);
-static constexpr uint64_t MASK_CASTLE_QUEEN_WHITE = (1UL << SHIFT_CASTLE_QUEEN_WHITE);
-static constexpr uint64_t MASK_CASTLE_KING_BLACK = (1UL << SHIFT_CASTLE_KING_BLACK);
-static constexpr uint64_t MASK_CASTLE_QUEEN_BLACK = (1UL << SHIFT_CASTLE_QUEEN_BLACK);
-static constexpr uint64_t MASK_EN_PASSANT_SQUARE = (0x7fUL << SHIFT_EN_PASSANT_SQUARE);
-static constexpr uint64_t MASK_MOVE_NUMBER = (0x7ffffUL << SHIFT_MOVE_NUMBER);
-static constexpr uint64_t MASK_HALF_MOVE = (1UL << SHIFT_HALF_MOVE);
+static constexpr uint64_t MASK_TRIPLE_REPETITION_RULE = (3ULL << SHIFT_TRIPLE_REPETITION_RULE);
+static constexpr uint64_t MASK_FIFTY_MOVE_RULE = (0x3fULL << SHIFT_FIFTY_MOVE_RULE);
+static constexpr uint64_t MASK_LAST_CAPTURED_PIECE = (7ULL << SHIFT_LAST_CAPTURED_PIECE);
+static constexpr uint64_t MASK_SIDE_TO_MOVE = (1ULL << SHIFT_SIDE_TO_MOVE);
+static constexpr uint64_t MASK_CASTLE_KING_WHITE = (1ULL << SHIFT_CASTLE_KING_WHITE);
+static constexpr uint64_t MASK_CASTLE_QUEEN_WHITE = (1ULL << SHIFT_CASTLE_QUEEN_WHITE);
+static constexpr uint64_t MASK_CASTLE_KING_BLACK = (1ULL << SHIFT_CASTLE_KING_BLACK);
+static constexpr uint64_t MASK_CASTLE_QUEEN_BLACK = (1ULL << SHIFT_CASTLE_QUEEN_BLACK);
+static constexpr uint64_t MASK_EN_PASSANT_SQUARE = (0x7fULL << SHIFT_EN_PASSANT_SQUARE);
+static constexpr uint64_t MASK_MOVE_NUMBER = (0x7ffffULL << SHIFT_MOVE_NUMBER);
+static constexpr uint64_t MASK_HALF_MOVE = (1ULL << SHIFT_HALF_MOVE);
 
 
 /**
@@ -308,6 +308,14 @@ public:
     constexpr inline void set_half_move(bool half_move_bit);
 
     /**
+     * @brief clean
+     * 
+     * Cleans the game state to 0 (initial value)
+     * 
+     */
+    constexpr inline void clean() { state_register = 0ULL; }
+
+    /**
      * @brief GameState
      * 
      * GameState class constructor.
@@ -315,7 +323,7 @@ public:
      * @note initializes state_register = 0.
      * 
      */
-    constexpr GameState() : state_register(0U) { set_en_passant_square(Square::SQ_INVALID); }
+    constexpr GameState() : state_register(0ULL) { set_en_passant_square(Square::SQ_INVALID); }
 
     /**
      * @brief GameState

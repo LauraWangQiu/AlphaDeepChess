@@ -71,6 +71,8 @@ void Board::remove_piece(Square square)
  */
 void Board::clean()
 {
+    game_state.clean();
+
     bitboard_all = 0U;
     bitboard_black = 0U;
     bitboard_white = 0U;
@@ -177,7 +179,11 @@ void Board::make_move(Move move)
     }
 
     // increment the move counter
-    game_state.set_move_number(game_state.move_number() + 1UL);
+    const uint64_t move_number = game_state.side_to_move() == ChessColor::WHITE
+        ? game_state.move_number() + 1ULL
+        : game_state.move_number();
+        
+    game_state.set_move_number(move_number);
 
     // in black turn (move counter * 2) and in white (move counter * 2 + 1)
     game_state.set_half_move(!game_state.half_move());
