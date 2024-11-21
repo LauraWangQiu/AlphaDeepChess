@@ -8,13 +8,34 @@ void move_list_test()
 
     MoveList moves;
 
-    /*if (move.is_valid() != false) {
-        std::cout << "TEST FAILED : move_test : move.is_valid() != false\n";
+    if (moves.size() != 0) {
+        std::cout << "TEST FAILED : move_list_test : size()!=0\n";
+    }
+    moves.add(Move::null());
+    moves.add(Move::null());
+    moves.add(Move::null());
+
+    if (moves.size() != 3) {
+        std::cout << "TEST FAILED : move_list_test : size()!=3\n";
     }
 
-    move = Move(Square::SQ_B2, Square::SQ_B4);
+    moves.clear();
 
-    if (move.square_from() != Square::SQ_B2) {
-        std::cout << "TEST FAILED : move_test : square_from() != Square::SQ_B2\n";
-    }*/
+    if (moves.size() != 0) {
+        std::cout << "TEST FAILED : move_list_test : size()!=0\n";
+    }
+
+    moves.add(Move(Square::SQ_B2, Square::SQ_B4));
+    moves.add(Move(Square::SQ_D2, Square::SQ_D1, MoveType::PROMOTION, PieceType::QUEEN));
+    moves.add(Move::castle_white_queen());
+
+    if (moves.get(0) != Move(Square::SQ_B2, Square::SQ_B4)) {
+        std::cout << "TEST FAILED : move_list_test : get(0) != Move(Square::SQ_B2, Square::SQ_B4\n";
+    }
+    if (moves.get(2) != Move::castle_white_queen()) {
+        std::cout << "TEST FAILED : move_list_test : get(2) != Move::castle_white_queen()\n";
+    }
+    if (moves.to_string() != "b2b4:\nd2d1q:\ne1c1:\n") {
+        std::cout << "TEST FAILED : move_list_test : to_string()!=b2b4:d2d1q:e1c1\n";
+    }
 }
