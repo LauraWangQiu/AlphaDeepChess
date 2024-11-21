@@ -115,7 +115,7 @@ public:
      * @param[in] square 
      * 
      */
-    constexpr Square(Square::Name square) : sq_value(square) { }
+    constexpr Square(Square::Name square) : sq_value(static_cast<uint8_t>(square)) { }
 
     /**
      * @brief Square(const std::string& square_string)
@@ -137,7 +137,7 @@ public:
      * 
      * @return (sq_value / 8)
      */
-    constexpr inline Row row() const { return static_cast<Row>(sq_value > 3U); }
+    constexpr inline Row row() const { return static_cast<Row>(sq_value >> 3U); }
 
     /**
      * @brief col
@@ -146,18 +146,20 @@ public:
      * 
      * @return (sq_value % 8)
      */
-    constexpr inline Col col() const { return static_cast<Col>(sq_value & 3U); }
+    constexpr inline Col col() const { return static_cast<Col>(sq_value & 7U); }
 
     /**
      * @brief to_string
      * 
      * calculate string representation. E.g : e4, d6, h1, e8.
      * 
-     * @return std::string representation of the square.
+     * @return 
+     *  - std::string representation of the square.
+     *  - invalid if square is not valid.
      */
-    constexpr inline std::string to_string() const
+    inline std::string to_string() const
     {
-        return std::string(1, 'a' + col()) + static_cast<char>('1' + row());
+        return is_valid() ? std::string(1, col_to_char(col())) + row_to_char(row()) : "invalid";
     }
 
     /**
@@ -322,11 +324,11 @@ public:
      * @note square should be valid
      * 
      * @return
-     *  (sq_value - 1) if col() > COL_A
-     *  (SQ_INVALID) if col() <= COL_A
+     *  (sq_value - 1) if col() < COL_H
+     *  (SQ_INVALID) if col() >= COL_H
      * 
      */
-    constexpr Square east() const { return col() > COL_A ? sq_value + EAST : SQ_INVALID; }
+    constexpr Square east() const { return col() < COL_H ? sq_value + EAST : SQ_INVALID; }
 
     /**
      * @brief west
@@ -337,11 +339,11 @@ public:
      * @note square should be valid
      * 
      * @return
-     *  (sq_value + 1) if col() < COL_H
-     *  (SQ_INVALID) if col() >= COL_H
+     *  (sq_value + 1) if col() > COL_A
+     *  (SQ_INVALID) if col() <= COL_A
      * 
      */
-    constexpr Square west() const { return col() < COL_H ? sq_value + WEST : SQ_INVALID; }
+    constexpr Square west() const { return col() > COL_A ? sq_value + WEST : SQ_INVALID; }
 
     /**
      * @brief northEast
@@ -352,13 +354,13 @@ public:
      * @note square should be valid
      * 
      * @return
-     *  (sq_value + 7) if row() < ROW_8 && col() > COL_A
-     *  (SQ_INVALID) if row() >= ROW_8 || col() <= COL_A
+     *  (sq_value + 7) if row() < ROW_8 && col() < COL_H
+     *  (SQ_INVALID) if row() >= ROW_8 || col() >= COL_H
      * 
      */
     constexpr Square northEast() const
     {
-        return row() < ROW_8 && col() > COL_A ? sq_value + NORTH_EAST : SQ_INVALID;
+        return row() < ROW_8 && col() < COL_H ? sq_value + NORTH_EAST : SQ_INVALID;
     }
 
     /**
@@ -370,13 +372,13 @@ public:
      * @note square should be valid
      * 
      * @return
-     *  (sq_value + 9) if row() < ROW_8 && col() < COL_H
-     *  (SQ_INVALID) if row() >= ROW_8 || col() >= COL_H
+     *  (sq_value + 9) if row() < ROW_8 && col() > COL_A
+     *  (SQ_INVALID) if row() >= ROW_8 || col() <= COL_A
      * 
      */
     constexpr Square northWest() const
     {
-        return row() < ROW_8 && col() < COL_H ? sq_value + NORTH_WEST : SQ_INVALID;
+        return row() < ROW_8 && col() > COL_A ? sq_value + NORTH_WEST : SQ_INVALID;
     }
 
     /**
@@ -388,13 +390,13 @@ public:
      * @note square should be valid
      * 
      * @return
-     *  (sq_value - 9) if row() > ROW_1 && col() > COL_A
-     *  (SQ_INVALID) if row() <= ROW_1 || col() <= COL_A
+     *  (sq_value - 9) if row() > ROW_1 && col() < COL_H
+     *  (SQ_INVALID) if row() <= ROW_1 || col() >= COL_H
      * 
      */
     constexpr Square southEast() const
     {
-        return row() > ROW_1 && col() > COL_A ? sq_value + SOUTH_EAST : SQ_INVALID;
+        return row() > ROW_1 && col() < COL_H ? sq_value + SOUTH_EAST : SQ_INVALID;
     }
 
     /**
@@ -406,13 +408,13 @@ public:
      * @note square should be valid
      * 
      * @return
-     *  (sq_value - 7) if row() > ROW_1 && col() < COL_H
-     *  (SQ_INVALID) if row() <= ROW_1 || col() >= COL_H
+     *  (sq_value - 7) if row() > ROW_1 && col() > COL_A
+     *  (SQ_INVALID) if row() <= ROW_1 || col() <= COL_A
      * 
      */
     constexpr Square southWest() const
     {
-        return row() > ROW_1 && col() < COL_H ? sq_value + SOUTH_WEST : SQ_INVALID;
+        return row() > ROW_1 && col() > COL_A ? sq_value + SOUTH_WEST : SQ_INVALID;
     }
 
     /**

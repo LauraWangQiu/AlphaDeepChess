@@ -100,7 +100,8 @@ public:
      */
     constexpr Move(Square square_from, Square square_to, MoveType move_type = MoveType::NORMAL,
                    PieceType promotion_piece = PieceType::KNIGHT)
-        : data((square_from.value() << SHIFT_ORIGIN_SQUARE) | square_to.value() |
+        : data((square_from.value() << SHIFT_ORIGIN_SQUARE) |
+               square_to.value() << SHIFT_END_SQUARE |
                ((static_cast<uint16_t>(promotion_piece) - 1) << SHIFT_PROMOTION_PIECE) |
                (static_cast<uint16_t>(move_type) << SHIFT_MOVE_TYPE))
     {
@@ -130,7 +131,10 @@ public:
      * @return destination square.
      * 
      */
-    constexpr inline Square square_to() const { return Square(data & MASK_END_SQUARE); }
+    constexpr inline Square square_to() const
+    {
+        return Square((data & MASK_END_SQUARE) << SHIFT_END_SQUARE);
+    }
 
     /**
      * @brief type
@@ -283,16 +287,17 @@ public:
         }
         return *this;
     }
+
     /**
      * @brief to_string
      * 
-     * calculate string representation. E.g : e2e4.
+     * calculate string representation. E.g : e2e4, e7e8q.
      * 
      * @return 
      *  - std::string representation if move is valid.
-     *  - "Invalid" if move is invalid
+     *  - "invalid" if move is invalid
      */
-    constexpr std::string to_string() const;
+    inline std::string to_string() const;
 
 private:
     std::uint16_t data;
@@ -301,22 +306,22 @@ private:
 /**
  * @brief to_string
  * 
- * calculate string representation. E.g : e2e4.
+ * calculate string representation. E.g : e2e4, e7e8q.
  * 
  * @return 
  *  - std::string representation if move is valid.
- *  - "Invalid" if move is invalid
+ *  - "invalid" if move is invalid
  */
-constexpr std::string Move::to_string() const
+inline std::string Move::to_string() const
 {
     if (!is_valid()) {
-        return "Invalid";
+        return "invalid";
     }
-    else if (type() != MoveType::PROMOTION) {
-        return square_from().to_string() + square_to().to_string();
-    }
-    else {
+    else if (type() == MoveType::PROMOTION) {
         return square_from().to_string() + square_to().to_string() +
             pieceType_to_char(promotion_piece());
+    }
+    else {
+        return square_from().to_string() + square_to().to_string();
     }
 }

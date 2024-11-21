@@ -28,6 +28,22 @@ enum Row : int
 
 
 /**
+ * @brief row_to_char(const Row row)
+ * 
+ * row conversion to char.
+ * 
+ * @note row must be valid
+ * 
+ * @param[in] row The row value
+ * 
+ * @return '1','2','3','4','5','6','7','8'
+ */
+constexpr inline char row_to_char(const Row row)
+{
+    return '1' + static_cast<int>(row);
+}
+
+/**
  * @brief operator+(Row, int)
  * 
  * Addition operator overload

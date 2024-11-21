@@ -25,6 +25,21 @@ enum Col : int
     COL_INVALID
 };
 
+/**
+ * @brief col_to_char(const Col col)
+ * 
+ * column conversion to char.
+ * 
+ * @note col must be valid
+ * 
+ * @param[in] col The col value
+ * 
+ * @return 'a','b','c','d','e','f','g','h'
+ */
+constexpr inline char col_to_char(const Col col)
+{
+    return 'a' + static_cast<int>(col);
+}
 
 /**
  * @brief operator+(Col, int)
