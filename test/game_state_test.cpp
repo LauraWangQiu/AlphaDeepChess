@@ -17,7 +17,6 @@ void game_state_test()
     game_state.set_fifty_move_rule_counter(33ULL);
     game_state.set_last_captured_piece(PieceType::QUEEN);
     game_state.set_move_number(511);
-    game_state.set_half_move(true);
     game_state.set_side_to_move(ChessColor::BLACK);
     game_state.set_triple_repetition_counter(3U);
 
@@ -45,9 +44,6 @@ void game_state_test()
     if (game_state.move_number() != 511) {
         std::cout << "TEST FAILED : game_state_test : move_number() != 511\n";
     }
-    if (game_state.half_move() != 511 * 2 + 1) {
-        std::cout << "TEST FAILED : game_state_test : half_move() != 511 * 2 + 1\n";
-    }
     if (game_state.side_to_move() != ChessColor::BLACK) {
         std::cout << "TEST FAILED : game_state_test : side_to_move() != ChessColor::BLACK\n";
     }
@@ -64,7 +60,6 @@ void game_state_test()
     game_state.set_fifty_move_rule_counter(1ULL);
     game_state.set_last_captured_piece(PieceType::EMPTY);
     game_state.set_move_number(1);
-    game_state.set_half_move(false);
     game_state.set_side_to_move(ChessColor::WHITE);
     game_state.set_triple_repetition_counter(1U);
 
@@ -91,9 +86,6 @@ void game_state_test()
     }
     if (game_state.move_number() != 1) {
         std::cout << "TEST FAILED : game_state_test : move_number() != 1\n";
-    }
-    if (game_state.half_move() != 1 * 2) {
-        std::cout << "TEST FAILED : game_state_test : half_move() != 1 * 2\n";
     }
     if (game_state.side_to_move() != ChessColor::WHITE) {
         std::cout << "TEST FAILED : game_state_test : side_to_move() != ChessColor::WHITE\n";

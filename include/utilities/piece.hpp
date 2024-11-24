@@ -353,3 +353,64 @@ constexpr inline bool is_slider(PieceType piece)
 {
     return piece == PieceType::BISHOP || piece == PieceType::QUEEN || piece == PieceType::ROOK;
 }
+
+
+/**
+ * @brief operator+(Piece, int)
+ * 
+ * Addition operator overload
+ * 
+ * @param[in] piece The piece value
+ * @param[in] value The integer to add
+ * 
+ * @return (Piece)(piece + value)
+ */
+constexpr inline Piece operator+(Piece piece, int value)
+{
+    return static_cast<Piece>(static_cast<int>(piece) + value);
+}
+
+/**
+ * @brief operator-(Piece, int)
+ * 
+ * Subtraction operator overload
+ * 
+ * @param[in] piece The piece value
+ * @param[in] value The integer to subtract
+ * 
+ * @return  (Piece)(piece - value)
+ */
+constexpr inline Piece operator-(Piece piece, int value)
+{
+    return static_cast<Piece>(static_cast<int>(piece) - value);
+}
+
+/**
+ * @brief operator+(PieceType, int)
+ * 
+ * Addition operator overload
+ * 
+ * @param[in] piece_type The piece_type value
+ * @param[in] value The integer to add
+ * 
+ * @return (PieceType)(piece_type + value)
+ */
+constexpr inline PieceType operator+(PieceType piece_type, int value)
+{
+    return static_cast<PieceType>(static_cast<int>(piece_type) + value);
+}
+
+/**
+ * @brief operator-(PieceType, int)
+ * 
+ * Subtraction operator overload
+ * 
+ * @param[in] piece_type The piece_type value
+ * @param[in] value The integer to subtract
+ * 
+ * @return  (PieceType)(piece_type - value)
+ */
+constexpr inline PieceType operator-(PieceType piece_type, int value)
+{
+    return static_cast<PieceType>(static_cast<int>(piece_type) - value);
+}

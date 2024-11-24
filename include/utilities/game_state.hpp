@@ -19,8 +19,7 @@ static constexpr uint64_t SHIFT_CASTLE_QUEEN_WHITE = 29ULL;
 static constexpr uint64_t SHIFT_CASTLE_KING_BLACK = 28ULL;
 static constexpr uint64_t SHIFT_CASTLE_QUEEN_BLACK = 27ULL;
 static constexpr uint64_t SHIFT_EN_PASSANT_SQUARE = 20ULL;
-static constexpr uint64_t SHIFT_MOVE_NUMBER = 1ULL;
-static constexpr uint64_t SHIFT_HALF_MOVE = 0ULL;
+static constexpr uint64_t SHIFT_MOVE_NUMBER = 0ULL;
 
 static constexpr uint64_t MASK_TRIPLE_REPETITION_RULE = (3ULL << SHIFT_TRIPLE_REPETITION_RULE);
 static constexpr uint64_t MASK_FIFTY_MOVE_RULE = (0x3fULL << SHIFT_FIFTY_MOVE_RULE);
@@ -31,8 +30,7 @@ static constexpr uint64_t MASK_CASTLE_QUEEN_WHITE = (1ULL << SHIFT_CASTLE_QUEEN_
 static constexpr uint64_t MASK_CASTLE_KING_BLACK = (1ULL << SHIFT_CASTLE_KING_BLACK);
 static constexpr uint64_t MASK_CASTLE_QUEEN_BLACK = (1ULL << SHIFT_CASTLE_QUEEN_BLACK);
 static constexpr uint64_t MASK_EN_PASSANT_SQUARE = (0x7fULL << SHIFT_EN_PASSANT_SQUARE);
-static constexpr uint64_t MASK_MOVE_NUMBER = (0x7ffffULL << SHIFT_MOVE_NUMBER);
-static constexpr uint64_t MASK_HALF_MOVE = (1ULL << SHIFT_HALF_MOVE);
+static constexpr uint64_t MASK_MOVE_NUMBER = (0xfffffULL << SHIFT_MOVE_NUMBER);
 
 
 /**
@@ -50,8 +48,7 @@ static constexpr uint64_t MASK_HALF_MOVE = (1ULL << SHIFT_HALF_MOVE);
  * 28 : castle_king_black : 1 if avaliable, 0 if not.
  * 27 : castle_queen_black : 1 if avaliable, 0 if not.
  * 26-20 : en_passant_square : 0-63 if avaliable, >=64 if not avaliable
- * 19-1 : move_number : 0-524287 number of moves in the game.
- * 0 : half_move : 0 if half_move = move_number * 2, 1 if half_move = move_number * 2 + 1.
+ * 19-0 : move_number : 0-1048575 number of moves in the game.
  * 
  */
 class GameState
@@ -167,22 +164,10 @@ public:
      * 
      * get the number of moves of the chess game.
      * 
-     * @return 0 <= move_number <= 524287.
+     * @return 0 <= move_number <= 1048575.
      * 
      */
     constexpr inline uint64_t move_number() const;
-
-    /**
-     * @brief half_move
-     * 
-     * get the number of half moves of the chess game.
-     * 
-     * @return
-     * - (move_number * 2) if half_bit = 0(black was the last to make a move).
-     * - (move_number * 2 + 1) if half_bit = 1(white was the last to make a move).
-     * 
-     */
-    constexpr inline uint64_t half_move() const;
 
     /**
      * @brief set_triple_repetition_counter
@@ -285,27 +270,13 @@ public:
      * 
      * set the move number.
      * 
-     * @note move number must be between 0-524287,
+     * @note move number must be between 0-1048575,
      *  otherwise state will be corrupted.
      * 
      * @param[in] move_number number of moves in the game
      * 
      */
     constexpr inline void set_move_number(uint64_t move_number);
-
-    /**
-     * @brief set_half_move
-     * 
-     * set the half move bit.
-     * 
-     * @note Usually when white moves put half_move_bit = 1, when black moves put to 0.
-     * 
-     * @param[in] half_move_bit
-     *  - if 1 then half_move counter = move_number * 2 + 1 
-     *  - if 0 then half_move counter = move_number * 2
-     * 
-     */
-    constexpr inline void set_half_move(bool half_move_bit);
 
     /**
      * @brief clean
@@ -535,29 +506,12 @@ constexpr inline Square GameState::en_passant_square() const
  * 
  * get the number of moves of the chess game.
  * 
- * @return 0 <= move_number <= 524287.
+ * @return 0 <= move_number <= 1048575.
  * 
  */
 constexpr inline uint64_t GameState::move_number() const
 {
     return (state_register & MASK_MOVE_NUMBER) >> SHIFT_MOVE_NUMBER;
-}
-
-/**
- * @brief half_move
- * 
- * get the number of half moves of the chess game.
- * 
- * @return
- * - (move_number * 2) if half_bit = 0(black was the last to make a move).
- * - (move_number * 2 + 1) if half_bit = 1(white was the last to make a move).
- * 
- */
-constexpr inline uint64_t GameState::half_move() const
-{
-    const uint64_t move_number = (state_register & MASK_MOVE_NUMBER) >> SHIFT_MOVE_NUMBER;
-    const uint64_t half_move_bit = (state_register & MASK_HALF_MOVE) >> SHIFT_HALF_MOVE;
-    return (move_number << 1U) + half_move_bit;
 }
 
 /**
@@ -697,7 +651,7 @@ constexpr inline void GameState::set_en_passant_square(Square square)
  * 
  * set the move number.
  * 
- * @note move number must be between 0-524287,
+ * @note move number must be between 0-1048575,
  *  otherwise state will be corrupted.
  * 
  * @param[in] move_number number of moves in the game
@@ -707,22 +661,4 @@ constexpr inline void GameState::set_move_number(uint64_t move_number)
 {
     state_register &= ~MASK_MOVE_NUMBER;
     state_register |= move_number << SHIFT_MOVE_NUMBER;
-}
-
-/**
- * @brief set_half_move
- * 
- * set the half move bit.
- * 
- * @note Usually when white moves put half_move_bit = 1, when black moves put to 0.
- * 
- * @param[in] half_move_bit
- *  - if 1 then half_move counter = move_number * 2 + 1 
- *  - if 0 then half_move counter = move_number * 2
- * 
- */
-constexpr inline void GameState::set_half_move(bool half_move_bit)
-{
-    state_register &= ~MASK_HALF_MOVE;
-    state_register |= static_cast<uint64_t>(half_move_bit) << SHIFT_HALF_MOVE;
 }

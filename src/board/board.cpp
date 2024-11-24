@@ -182,11 +182,8 @@ void Board::make_move(Move move)
     const uint64_t move_number = game_state.side_to_move() == ChessColor::WHITE
         ? game_state.move_number() + 1ULL
         : game_state.move_number();
-        
-    game_state.set_move_number(move_number);
 
-    // in black turn (move counter * 2) and in white (move counter * 2 + 1)
-    game_state.set_half_move(!game_state.half_move());
+    game_state.set_move_number(move_number);
 
     // increment 50 move rule if the move is not a pawn move or is not a capture move
     if (!is_empty(end_square) && piece_to_PieceType(origin_piece) != PieceType::PAWN) {
@@ -328,14 +325,15 @@ void Board::load_fen(const std::string& fen)
         check_and_modify_en_passant_rule();
     }
 
-    // 5-6. Halfmove clock and fullmove number
-    uint32_t moveNumber, halfmove;
-    ss >> std::skipws >> halfmove >> moveNumber;
-    game_state.set_move_number(moveNumber);
+    // 5-6. fifty move rule counter and fullmove number
 
-    //half move counter could only be (2 * moveCounter) or (2 * moveCounter + 1).
-    // we put half move bit to 1 if halfmove == moveNumber * 2U, else to 0.
-    game_state.set_half_move(halfmove != moveNumber * 2U);
+    uint64_t moveNumber = 0ULL;
+    uint8_t fifty_move_rule_counter = 0U;
+
+    ss >> std::skipws >> fifty_move_rule_counter >> moveNumber;
+
+    game_state.set_fifty_move_rule_counter(fifty_move_rule_counter);
+    game_state.set_move_number(moveNumber);
 }
 
 /**
@@ -401,7 +399,7 @@ std::string Board::fen() const
         fen << " - ";
     }
 
-    fen << game_state.half_move() << " " << game_state.move_number();
+    fen << game_state.fifty_move_rule_counter() << " " << game_state.move_number();
 
     return fen.str();
 }
