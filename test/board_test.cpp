@@ -5,6 +5,7 @@
 static void initialization_test();
 static void clean_test();
 static void put_remove_test();
+static void fen_test();
 
 void board_test()
 {
@@ -14,6 +15,7 @@ void board_test()
     initialization_test();
     clean_test();
     put_remove_test();
+    fen_test();
 }
 
 static void initialization_test()
@@ -241,5 +243,51 @@ static void put_remove_test()
     }
     if (board.fen() != "8/8/8/8/8/8/8/8 w - - 0 1") {
         std::cout << "TEST FAILED : board_test : fen() != 8/8/8/8/8/8/8/8 w - - 0 1\n";
+    }
+}
+
+static void fen_test()
+{
+    std::cout << "Fen test :\n\n";
+
+    Board board;
+    const auto StartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    const auto EnPassantFEN = "rnbqkb1r/2pp2pn/1p6/pP1PppPp/8/2N5/P1P1PP1P/R1BQKBNR w KQkq f6 0 8";
+    const auto PromotionFEN = "r3kb1r/pbpqn1P1/1pn4p/5Q2/2P5/2N5/PP1BN1pP/R3KB1R w KQkq - 2 13";
+    const auto KiwipeteFEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
+    const auto NoCastleFEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b - - 0 1";
+    const auto CastleFEN1 = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b Kk - 0 1";
+    const auto CastleFEN2 = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b Qq - 0 1";
+
+    board.load_fen(StartFEN);
+    if (board.fen() != StartFEN) {
+        std::cout << "TEST FAILED : board_test : fen() != StartFEN\n";
+    }
+
+    board.load_fen(EnPassantFEN);
+    if (board.fen() != EnPassantFEN) {
+        std::cout << "TEST FAILED : board_test : fen() != EnPassantFEN\n";
+    }
+
+    board.load_fen(PromotionFEN);
+    if (board.fen() != PromotionFEN) {
+        std::cout << "TEST FAILED : board_test : fen() != PromotionFEN\n";
+    }
+
+    board.load_fen(KiwipeteFEN);
+    if (board.fen() != KiwipeteFEN) {
+        std::cout << "TEST FAILED : board_test : fen() != KiwipeteFEN\n";
+    }
+    board.load_fen(NoCastleFEN);
+    if (board.fen() != NoCastleFEN) {
+        std::cout << "TEST FAILED : board_test : fen() != NoCastleFEN\n";
+    }
+    board.load_fen(CastleFEN1);
+    if (board.fen() != CastleFEN1) {
+        std::cout << "TEST FAILED : board_test : fen() != CastleFEN1\n";
+    }
+    board.load_fen(CastleFEN2);
+    if (board.fen() != CastleFEN2) {
+        std::cout << "TEST FAILED : board_test : fen() != CastleFEN2\n";
     }
 }

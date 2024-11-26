@@ -296,6 +296,11 @@ void Board::load_fen(const std::string& fen)
     ss >> token;
 
     // 3. Castling availability.
+    game_state.set_castle_king_white(false);
+    game_state.set_castle_queen_white(false);
+    game_state.set_castle_king_black(false);
+    game_state.set_castle_queen_black(false);
+
     while ((ss >> token) && !isspace(token)) {
         if (token == 'K') {
             game_state.set_castle_king_white(true);
@@ -328,7 +333,7 @@ void Board::load_fen(const std::string& fen)
     // 5-6. fifty move rule counter and fullmove number
 
     uint64_t moveNumber = 0ULL;
-    uint8_t fifty_move_rule_counter = 0U;
+    uint32_t fifty_move_rule_counter = 0UL;
 
     ss >> std::skipws >> fifty_move_rule_counter >> moveNumber;
 
@@ -383,7 +388,7 @@ std::string Board::fen() const
         fen << 'k';
         any_castle_avaliable = true;
     }
-    if (game_state.castle_king_black()) {
+    if (game_state.castle_queen_black()) {
         fen << 'q';
         any_castle_avaliable = true;
     }
@@ -398,7 +403,7 @@ std::string Board::fen() const
     else {
         fen << " - ";
     }
-    
+
     const uint32_t fifty_move_rule_counter = game_state.fifty_move_rule_counter();
     const uint32_t move_number = game_state.move_number();
 
