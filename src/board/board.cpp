@@ -398,8 +398,11 @@ std::string Board::fen() const
     else {
         fen << " - ";
     }
+    
+    const uint32_t fifty_move_rule_counter = game_state.fifty_move_rule_counter();
+    const uint32_t move_number = game_state.move_number();
 
-    fen << game_state.fifty_move_rule_counter() << " " << game_state.move_number();
+    fen << fifty_move_rule_counter << " " << move_number;
 
     return fen.str();
 }

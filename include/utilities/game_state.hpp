@@ -281,20 +281,36 @@ public:
     /**
      * @brief clean
      * 
-     * Cleans the game state to 0 (initial value)
-     * 
+     *  Cleans the game state to 0 (initial value)
+     *  set_move_number(1ULL);
+        set_side_to_move(ChessColor::WHITE);
+     *  set_en_passant_square(Square::SQ_INVALID);
+     *  set_last_captured_piece(PieceType::EMPTY);
      */
-    constexpr inline void clean() { state_register = 0ULL; }
+    constexpr inline void clean()
+    {
+        state_register = 0ULL;
+        set_move_number(1ULL);
+        set_side_to_move(ChessColor::WHITE);
+        set_en_passant_square(Square::SQ_INVALID);
+        set_last_captured_piece(PieceType::EMPTY);
+    }
 
     /**
      * @brief GameState
      * 
      * GameState class constructor.
      * 
-     * @note initializes state_register = 0.
+     * @note clean state_register.
+     *
+     * set_move_number(1ULL);
+     * set_side_to_move(ChessColor::WHITE);
+     * state_register = 0ULL;
+     * set_en_passant_square(Square::SQ_INVALID);
+     * set_last_captured_piece(PieceType::EMPTY);
      * 
      */
-    constexpr GameState() : state_register(0ULL) { set_en_passant_square(Square::SQ_INVALID); }
+    constexpr GameState() { clean(); }
 
     /**
      * @brief GameState
