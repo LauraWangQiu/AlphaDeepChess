@@ -25,10 +25,11 @@
  */
 Move search_best_move(Board& board, uint32_t max_depth, std::atomic<bool>& stop)
 {
+    Move best_move = Move::null();
     while(!stop)
     {
-
+        
     }
 
-    return Move::null();
+    return best_move;
 }

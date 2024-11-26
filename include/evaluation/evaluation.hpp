@@ -24,4 +24,4 @@
  *  - (+) if position is evaluated as white is better.
  *  - (-) if position is evaluated as black is better.
  */
-uint32_t evaluate_position(const Board& board);
+int evaluate_position(const Board& board);
