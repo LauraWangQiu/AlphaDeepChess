@@ -115,7 +115,7 @@ void Board::make_move(Move move)
     else if (move_type == MoveType::CASTLING) {
 
         const Col rook_origin_col = (end_square.col() == COL_G) ? COL_H : COL_A;
-        const Col rook_end_col = (end_square.col() == COL_G) ? COL_D : COL_F;
+        const Col rook_end_col = (end_square.col() == COL_G) ? COL_F : COL_D;
 
         const Square rook_origin_square(origin_square.row(), rook_origin_col);
         const Square rook_end_square(origin_square.row(), rook_end_col);
@@ -124,20 +124,6 @@ void Board::make_move(Move move)
         put_piece(get_piece(rook_origin_square), rook_end_square);
         remove_piece(origin_square);
         remove_piece(rook_origin_square);
-
-        /**  update the game state regarding to castling */
-        if (move == Move::castle_white_king()) {
-            game_state.set_castle_king_white(false);
-        }
-        else if (move == Move::castle_black_king()) {
-            game_state.set_castle_king_black(false);
-        }
-        else if (move == Move::castle_white_queen()) {
-            game_state.set_castle_queen_white(false);
-        }
-        else {
-            game_state.set_castle_queen_black(false);
-        }
     }
     else if (move_type == MoveType::EN_PASSANT) {
 
@@ -155,6 +141,32 @@ void Board::make_move(Move move)
 
     /**  update the game state */
 
+    // update castling rights
+
+    if (origin_piece == Piece::W_KING) {
+        game_state.set_castle_king_white(false);
+        game_state.set_castle_queen_white(false);
+    }
+    else if (origin_piece == Piece::B_KING) {
+        game_state.set_castle_king_black(false);
+        game_state.set_castle_queen_black(false);
+    }
+    else if (origin_piece == Piece::W_ROOK) {
+        if (origin_square == Square::SQ_A1) {
+            game_state.set_castle_queen_white(false);
+        }
+        else if (origin_square == Square::SQ_H1) {
+            game_state.set_castle_king_white(false);
+        }
+    }
+    else if (origin_piece == Piece::B_ROOK) {
+        if (origin_square == Square::SQ_A8) {
+            game_state.set_castle_queen_black(false);
+        }
+        else if (origin_square == Square::SQ_H8) {
+            game_state.set_castle_king_black(false);
+        }
+    }
     // if move is not a capture last capture piece will be Piece::Empty.
     if (move_type != MoveType::EN_PASSANT) {
         game_state.set_last_captured_piece(piece_to_PieceType(end_piece));
@@ -170,25 +182,49 @@ void Board::make_move(Move move)
     const bool is_move_double_push = is_pawn_move && row_diff == 2U;
 
     if (is_move_double_push) {
+        const Piece left_piece =
+            end_square.west().is_valid() ? get_piece(end_square.west()) : Piece::EMPTY;
+        const Piece right_piece =
+            end_square.east().is_valid() ? get_piece(end_square.east()) : Piece::EMPTY;
+        const Piece enemy_pawn =
+            get_color(origin_piece) == ChessColor::WHITE ? Piece::B_PAWN : Piece::W_PAWN;
 
-        const Row en_passant_row = get_color(origin_piece) == ChessColor::WHITE ? ROW_5 : ROW_4;
-        game_state.set_en_passant_square(Square(en_passant_row, end_square.col()));
+        // check if en passant is really possible in the position
+        if (left_piece == enemy_pawn || right_piece == enemy_pawn) {
+            const Row en_passant_row = get_color(origin_piece) == ChessColor::WHITE ? ROW_5 : ROW_4;
+            game_state.set_en_passant_square(Square(en_passant_row, end_square.col()));
+        }
+        else {
+            game_state.set_en_passant_square(Square::SQ_INVALID);
+        }
     }
     else {
         game_state.set_en_passant_square(Square::SQ_INVALID);
     }
 
     // increment the move counter
-    const uint64_t move_number = game_state.side_to_move() == ChessColor::WHITE
+    const uint64_t next_move_number = game_state.side_to_move() == ChessColor::BLACK
         ? game_state.move_number() + 1ULL
         : game_state.move_number();
 
-    game_state.set_move_number(move_number);
+    game_state.set_move_number(next_move_number);
 
     // increment 50 move rule if the move is not a pawn move or is not a capture move
-    if (!is_empty(end_square) && piece_to_PieceType(origin_piece) != PieceType::PAWN) {
-        game_state.set_fifty_move_rule_counter(game_state.fifty_move_rule_counter() + 1U);
-    }
+
+    const bool is_move_capture = end_piece != Piece::EMPTY || move.type() == MoveType::EN_PASSANT;
+
+    const uint32_t new_50_rule_move_counter =
+        is_move_capture || piece_to_PieceType(origin_piece) == PieceType::PAWN
+        ? 0UL
+        : game_state.fifty_move_rule_counter() + 1UL;
+
+    game_state.set_fifty_move_rule_counter(new_50_rule_move_counter);
+
+    // change side to move
+    const ChessColor next_side_to_move =
+        game_state.side_to_move() == ChessColor::WHITE ? ChessColor::BLACK : ChessColor::WHITE;
+
+    game_state.set_side_to_move(next_side_to_move);
 }
 
 /**
