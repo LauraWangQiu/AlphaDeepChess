@@ -242,6 +242,8 @@ constexpr inline char pieceType_to_char(PieceType piece_type)
  * 
  * Returns the color of the piece
  * 
+ * @note Piece::EMPTY has undefined color
+ * 
  * @param piece selected piece.
  * @return
  *  - Color::WHITE if piece is white
@@ -264,7 +266,7 @@ constexpr inline ChessColor get_color(Piece piece)
  * @return PieceType
  * 
  */
-constexpr inline PieceType piece_to_PieceType(Piece piece)
+constexpr inline PieceType piece_to_pieceType(Piece piece)
 {
     // the white and black pieces have a difference of +6 int value
     // E.g  WKnight = 1, BKnight = 7
@@ -288,7 +290,9 @@ constexpr inline Piece create_piece(PieceType type, ChessColor color)
 {
     // the white and black pieces have a difference of +6 int value
     // E.g  WKnight = 1, BKnight = 7
-    return static_cast<Piece>(static_cast<int>(type) + (6 * static_cast<int>(color)));
+    return type == PieceType::EMPTY
+        ? Piece::EMPTY
+        : static_cast<Piece>(static_cast<int>(type) + (6 * static_cast<int>(color)));
 }
 
 /**
@@ -334,7 +338,7 @@ constexpr inline uint32_t raw_value(Piece piece) { return pieceRawValue[static_c
  */
 constexpr inline uint32_t raw_value(PieceType piece)
 {
-    return 6 + pieceRawValue[static_cast<int>(piece)];
+    return pieceRawValue[6 + static_cast<int>(piece)];
 }
 
 /**
@@ -360,6 +364,8 @@ constexpr inline bool is_slider(PieceType piece)
  * 
  * Addition operator overload
  * 
+ * @note out of bounds will result in Piece::Empty
+ * 
  * @param[in] piece The piece value
  * @param[in] value The integer to add
  * 
@@ -367,13 +373,16 @@ constexpr inline bool is_slider(PieceType piece)
  */
 constexpr inline Piece operator+(Piece piece, int value)
 {
-    return static_cast<Piece>(static_cast<int>(piece) + value);
+    const Piece sum = static_cast<Piece>(static_cast<int>(piece) + value);
+    return sum < Piece::W_PAWN || sum > Piece::EMPTY ? Piece::EMPTY : sum;
 }
 
 /**
  * @brief operator-(Piece, int)
  * 
  * Subtraction operator overload
+ * 
+ * @note out of bounds will result in Piece::Empty
  * 
  * @param[in] piece The piece value
  * @param[in] value The integer to subtract
@@ -382,13 +391,16 @@ constexpr inline Piece operator+(Piece piece, int value)
  */
 constexpr inline Piece operator-(Piece piece, int value)
 {
-    return static_cast<Piece>(static_cast<int>(piece) - value);
+    const Piece sub = static_cast<Piece>(static_cast<int>(piece) - value);
+    return sub < Piece::W_PAWN || sub > Piece::EMPTY ? Piece::EMPTY : sub;
 }
 
 /**
  * @brief operator+(PieceType, int)
  * 
  * Addition operator overload
+ * 
+ * @note out of bounds will result in PieceType::Empty
  * 
  * @param[in] piece_type The piece_type value
  * @param[in] value The integer to add
@@ -397,13 +409,16 @@ constexpr inline Piece operator-(Piece piece, int value)
  */
 constexpr inline PieceType operator+(PieceType piece_type, int value)
 {
-    return static_cast<PieceType>(static_cast<int>(piece_type) + value);
+    const PieceType sum = static_cast<PieceType>(static_cast<int>(piece_type) + value);
+    return sum < PieceType::PAWN || sum > PieceType::EMPTY ? PieceType::EMPTY : sum;
 }
 
 /**
  * @brief operator-(PieceType, int)
  * 
  * Subtraction operator overload
+ * 
+ * @note out of bounds will result in PieceType::Empty
  * 
  * @param[in] piece_type The piece_type value
  * @param[in] value The integer to subtract
@@ -412,5 +427,6 @@ constexpr inline PieceType operator+(PieceType piece_type, int value)
  */
 constexpr inline PieceType operator-(PieceType piece_type, int value)
 {
-    return static_cast<PieceType>(static_cast<int>(piece_type) - value);
+    const PieceType sub = static_cast<PieceType>(static_cast<int>(piece_type) - value);
+    return sub < PieceType::PAWN || sub > PieceType::EMPTY ? PieceType::EMPTY : sub;
 }

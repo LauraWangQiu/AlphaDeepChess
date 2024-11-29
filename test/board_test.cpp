@@ -6,7 +6,7 @@ static void initialization_test();
 static void clean_test();
 static void put_remove_test();
 static void fen_test();
-static void make_move_test();
+static void make_unmake_move_test1();
 
 void board_test()
 {
@@ -17,7 +17,7 @@ void board_test()
     clean_test();
     put_remove_test();
     fen_test();
-    make_move_test();
+    make_unmake_move_test1();
 }
 
 static void initialization_test()
@@ -295,70 +295,75 @@ static void fen_test()
 }
 
 
-static void make_move_test()
+static void make_unmake_move_test1()
 {
-    std::cout << "Make move test :\n\n";
+    std::cout << "Make unmake move test1 :\n\n";
 
     constexpr auto StartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     constexpr auto EndFEN = "rn3r2/pbppq1p1/1p2pN2/8/3P2NP/6P1/PPP1BP1R/2KR2k1 b - - 6 18";
 
+    const uint32_t num_moves = 35U;
+    GameState game_states[num_moves + 1];
+
+    Move moves[num_moves] = {
+        Move(Square::SQ_D2, Square::SQ_D4),   // 1. d4
+        Move(Square::SQ_F7, Square::SQ_F5),   // 1... f5
+        Move(Square::SQ_E2, Square::SQ_E4),   // 2. e4
+        Move(Square::SQ_F5, Square::SQ_E4),   // 2... fxe4
+        Move(Square::SQ_B1, Square::SQ_C3),   // 3. Nc3
+        Move(Square::SQ_G8, Square::SQ_F6),   // 3... Nf6
+        Move(Square::SQ_C1, Square::SQ_G5),   // 4. Bg5
+        Move(Square::SQ_E7, Square::SQ_E6),   // 4... e6
+        Move(Square::SQ_C3, Square::SQ_E4),   // 5. Nxe4
+        Move(Square::SQ_F8, Square::SQ_E7),   // 5... Be7
+        Move(Square::SQ_G5, Square::SQ_F6),   // 6. Bxf6
+        Move(Square::SQ_E7, Square::SQ_F6),   // 6... Bxf6
+        Move(Square::SQ_G1, Square::SQ_F3),   // 7. Nf3
+        Move::castle_black_king(),            // 7... O-O
+        Move(Square::SQ_F1, Square::SQ_D3),   // 8. Bd3
+        Move(Square::SQ_B7, Square::SQ_B6),   // 8... b6
+        Move(Square::SQ_F3, Square::SQ_E5),   // 9. Ne5
+        Move(Square::SQ_C8, Square::SQ_B7),   // 9... Bb7
+        Move(Square::SQ_D1, Square::SQ_H5),   // 10. Qh5
+        Move(Square::SQ_D8, Square::SQ_E7),   // 10... Qe7
+        Move(Square::SQ_H5, Square::SQ_H7),   // 11. Qxh7+
+        Move(Square::SQ_G8, Square::SQ_H7),   // 11... Kxh7
+        Move(Square::SQ_E4, Square::SQ_F6),   // 12. Nxf6+
+        Move(Square::SQ_H7, Square::SQ_H6),   // 12... Kh6
+        Move(Square::SQ_E5, Square::SQ_G4),   // 13. Ng4+
+        Move(Square::SQ_H6, Square::SQ_G5),   // 13... Kg5
+        Move(Square::SQ_H2, Square::SQ_H4),   // 14. h4+
+        Move(Square::SQ_G5, Square::SQ_F4),   // 14... Kf4
+        Move(Square::SQ_G2, Square::SQ_G3),   // 15. g3+
+        Move(Square::SQ_F4, Square::SQ_F3),   // 15... Kf3
+        Move(Square::SQ_D3, Square::SQ_E2),   // 16. Be2+
+        Move(Square::SQ_F3, Square::SQ_G2),   // 16... Kg2
+        Move(Square::SQ_H1, Square::SQ_H2),   // 17. Rh2+
+        Move(Square::SQ_G2, Square::SQ_G1),   // 17... Kg1
+        Move::castle_white_queen()            // 18. O-O-O
+    };
+
     Board board;
+    game_states[0] = board.state();
+
     board.load_fen(StartFEN);
 
-    board.make_move(Move(Square::SQ_D2, Square::SQ_D4));
-    board.make_move(Move(Square::SQ_F7, Square::SQ_F5));
-    //rnbqkbnr/ppppp1pp/8/5p2/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2
-    board.make_move(Move(Square::SQ_E2, Square::SQ_E4));
-    board.make_move(Move(Square::SQ_F5, Square::SQ_E4));
-    //rnbqkbnr/ppppp1pp/8/8/3Pp3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3
-    board.make_move(Move(Square::SQ_B1, Square::SQ_C3));
-    board.make_move(Move(Square::SQ_G8, Square::SQ_F6));
-    //rnbqkb1r/ppppp1pp/5n2/8/3Pp3/2N5/PPP2PPP/R1BQKBNR w KQkq - 2 4
-    board.make_move(Move(Square::SQ_C1, Square::SQ_G5));
-    board.make_move(Move(Square::SQ_E7, Square::SQ_E6));
-    //rnbqkb1r/pppp2pp/4pn2/6B1/3Pp3/2N5/PPP2PPP/R2QKBNR w KQkq - 0 5
-    board.make_move(Move(Square::SQ_C3, Square::SQ_E4));
-    board.make_move(Move(Square::SQ_F8, Square::SQ_E7));
-    //rnbqk2r/ppppb1pp/4pn2/6B1/3PN3/8/PPP2PPP/R2QKBNR w KQkq - 1 6
-    board.make_move(Move(Square::SQ_G5, Square::SQ_F6));
-    board.make_move(Move(Square::SQ_E7, Square::SQ_F6));
-    //rnbqk2r/pppp2pp/4pb2/8/3PN3/8/PPP2PPP/R2QKBNR w KQkq - 0 7
-    board.make_move(Move(Square::SQ_G1, Square::SQ_F3));
-    board.make_move(Move::castle_black_king());
-    //rnbq1rk1/pppp2pp/4pb2/8/3PN3/5N2/PPP2PPP/R2QKB1R w KQ - 2 8
-    board.make_move(Move(Square::SQ_F1, Square::SQ_D3));
-    board.make_move(Move(Square::SQ_B7, Square::SQ_B6));
-    //rnbq1rk1/p1pp2pp/1p2pb2/8/3PN3/3B1N2/PPP2PPP/R2QK2R w KQ - 0 9
-    board.make_move(Move(Square::SQ_F3, Square::SQ_E5));
-    board.make_move(Move(Square::SQ_C8, Square::SQ_B7));
-    //rn1q1rk1/pbpp2pp/1p2pb2/4N3/3PN3/3B4/PPP2PPP/R2QK2R w KQ - 2 10
-    board.make_move(Move(Square::SQ_D1, Square::SQ_H5));
-    board.make_move(Move(Square::SQ_D8, Square::SQ_E7));
-    //rn3rk1/pbppq1pp/1p2pb2/4N2Q/3PN3/3B4/PPP2PPP/R3K2R w KQ - 4 11
-    board.make_move(Move(Square::SQ_H5, Square::SQ_H7));
-    board.make_move(Move(Square::SQ_G8, Square::SQ_H7));
-    //rn3r2/pbppq1pk/1p2pb2/4N3/3PN3/3B4/PPP2PPP/R3K2R w KQ - 0 12
-    board.make_move(Move(Square::SQ_E4, Square::SQ_F6));
-    board.make_move(Move(Square::SQ_H7, Square::SQ_H6));
-    //rn3r2/pbppq1p1/1p2pN1k/4N3/3P4/3B4/PPP2PPP/R3K2R w KQ - 1 13
-    board.make_move(Move(Square::SQ_E5, Square::SQ_G4));
-    board.make_move(Move(Square::SQ_H6, Square::SQ_G5));
-    //rn3r2/pbppq1p1/1p2pN2/6k1/3P2N1/3B4/PPP2PPP/R3K2R w KQ - 3 14
-    board.make_move(Move(Square::SQ_H2, Square::SQ_H4));
-    board.make_move(Move(Square::SQ_G5, Square::SQ_F4));
-    //rn3r2/pbppq1p1/1p2pN2/8/3P1kNP/3B4/PPP2PP1/R3K2R w KQ - 1 15
-    board.make_move(Move(Square::SQ_G2, Square::SQ_G3));
-    board.make_move(Move(Square::SQ_F4, Square::SQ_F3));
-    //rn3r2/pbppq1p1/1p2pN2/8/3P2NP/3B1kP1/PPP2P2/R3K2R w KQ - 1 16
-    board.make_move(Move(Square::SQ_D3, Square::SQ_E2));
-    board.make_move(Move(Square::SQ_F3, Square::SQ_G2));
-    //rn3r2/pbppq1p1/1p2pN2/8/3P2NP/6P1/PPP1BPk1/R3K2R w KQ - 3 17
-    board.make_move(Move(Square::SQ_H1, Square::SQ_H2));
-    board.make_move(Move(Square::SQ_G2, Square::SQ_G1));
-    //rn3r2/pbppq1p1/1p2pN2/8/3P2NP/6P1/PPP1BP1R/R3K1k1 w Q - 5 18
-    board.make_move(Move::castle_white_queen());
+    for (int32_t i = 0; i < num_moves; i++) {
+
+        board.make_move(moves[i]);
+        game_states[i + 1] = board.state();
+    }
 
     if (board.fen() != EndFEN) {
         std::cout << "TEST FAILED : board_test : fen() != EndFEN\n";
+    }
+
+    for (int32_t i = num_moves - 1; i >= 0; i--) {
+
+        board.unmake_move(moves[i],game_states[i]);
+    }
+
+    if (board.fen() != StartFEN) {
+        std::cout << "TEST FAILED : board_test : fen() != StartFEN\n";
     }
 }

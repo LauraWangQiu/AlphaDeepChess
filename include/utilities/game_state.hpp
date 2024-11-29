@@ -310,7 +310,7 @@ public:
      * set_last_captured_piece(PieceType::EMPTY);
      * 
      */
-    constexpr GameState() { clean(); }
+    constexpr GameState() : state_register(0ULL) { clean(); }
 
     /**
      * @brief GameState

@@ -4,9 +4,11 @@
 #include "square_test.cpp"
 #include "move_test.cpp"
 #include "move_list_test.cpp"
+#include "piece_test.cpp"
 
 int main()
 {
+    piece_test();
     game_state_test();
     square_test();
     move_test();

@@ -381,7 +381,7 @@ Move Uci::create_move_from_string(const std::string& move_string, const Board& b
     }
 
     // check for castling move
-    if (piece_to_PieceType(board.get_piece(sq_origin)) == PieceType::KING) {
+    if (piece_to_pieceType(board.get_piece(sq_origin)) == PieceType::KING) {
         if (sq_end == Square::SQ_G1) {
             return Move::castle_white_king();
         }
@@ -409,7 +409,7 @@ Move Uci::create_move_from_string(const std::string& move_string, const Board& b
     }
 
     // check for en Passant
-    if (piece_to_PieceType(board.get_piece(sq_origin)) == PieceType::PAWN &&
+    if (piece_to_pieceType(board.get_piece(sq_origin)) == PieceType::PAWN &&
         board.state().en_passant_square() == sq_end) {
 
         move_type = MoveType::EN_PASSANT;

@@ -169,7 +169,7 @@ void Board::make_move(Move move)
     }
     // if move is not a capture last capture piece will be Piece::Empty.
     if (move_type != MoveType::EN_PASSANT) {
-        game_state.set_last_captured_piece(piece_to_PieceType(end_piece));
+        game_state.set_last_captured_piece(piece_to_pieceType(end_piece));
     }
     else {
         game_state.set_last_captured_piece(PieceType::PAWN);
@@ -177,7 +177,7 @@ void Board::make_move(Move move)
 
     // if move is double push pawn then update the square where enPassant is avaliable
 
-    const bool is_pawn_move = (piece_to_PieceType(origin_piece) == PieceType::PAWN);
+    const bool is_pawn_move = (piece_to_pieceType(origin_piece) == PieceType::PAWN);
     const uint32_t row_diff = abs((int32_t)origin_square.row() - (int32_t)end_square.row());
     const bool is_move_double_push = is_pawn_move && row_diff == 2U;
 
@@ -214,7 +214,7 @@ void Board::make_move(Move move)
     const bool is_move_capture = end_piece != Piece::EMPTY || move.type() == MoveType::EN_PASSANT;
 
     const uint32_t new_50_rule_move_counter =
-        is_move_capture || piece_to_PieceType(origin_piece) == PieceType::PAWN
+        is_move_capture || piece_to_pieceType(origin_piece) == PieceType::PAWN
         ? 0UL
         : game_state.fifty_move_rule_counter() + 1UL;
 
@@ -257,7 +257,7 @@ void Board::unmake_move(Move move, GameState previous_state)
     else if (move_type == MoveType::CASTLING) {
 
         const Col rook_origin_col = (end_square.col() == COL_G) ? COL_H : COL_A;
-        const Col rook_end_col = (end_square.col() == COL_G) ? COL_D : COL_F;
+        const Col rook_end_col = (end_square.col() == COL_G) ? COL_F : COL_D;
 
         const Square rook_origin_square(origin_square.row(), rook_origin_col);
         const Square rook_end_square(origin_square.row(), rook_end_col);

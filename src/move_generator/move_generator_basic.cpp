@@ -166,7 +166,7 @@ void generate_legal_moves(MoveList& moves, const Board& board)
 
         if (board.is_empty(square) || color == side_to_move) continue;
 
-        switch (piece_to_PieceType(piece)) {
+        switch (piece_to_pieceType(piece)) {
         case PieceType::PAWN: calculate_pawn_moves(board, square, moveGenInfo, moves); break;
         case PieceType::KNIGHT: calculate_knight_moves(board, square, moveGenInfo, moves); break;
         case PieceType::KING: calculate_king_moves(board, square, moveGenInfo, moves); break;
@@ -194,7 +194,7 @@ static void calculate_dangers(const Board& board, MoveGenInfo& moveGenInfo)
 
         if (board.is_empty(square) || color == board.state().side_to_move()) continue;
 
-        switch (piece_to_PieceType(piece)) {
+        switch (piece_to_pieceType(piece)) {
         case PieceType::PAWN: calculate_pawn_dangers(board, square, moveGenInfo); break;
         case PieceType::KNIGHT: calculate_knight_dangers(board, square, moveGenInfo); break;
         case PieceType::KING: calculate_king_dangers(board, square, moveGenInfo); break;
@@ -279,7 +279,7 @@ static void calculate_bishop_dangers(const Board& board, Square sq, MoveGenInfo&
 static inline bool is_enemy_king(const Board& board, Square king_square, ChessColor friend_color)
 {
     const Piece piece = board.get_piece(king_square);
-    return piece_to_PieceType(piece) == PieceType::KING && get_color(piece) != friend_color;
+    return piece_to_pieceType(piece) == PieceType::KING && get_color(piece) != friend_color;
 }
 
 static inline bool is_enemy_piece(const Board& board, Square piece_square, ChessColor friend_color)
@@ -658,7 +658,7 @@ static bool is_valid_move_en_passant(const Board& board, Square piece_sq, Square
         while (aux_square.is_valid()) {
             if (aux_square.col() != end_sq.col() && aux_square.col() != piece_sq.col()) {
                 if (!board.is_empty(aux_square)) {
-                    const PieceType enemy = piece_to_PieceType(board.get_piece(aux_square));
+                    const PieceType enemy = piece_to_pieceType(board.get_piece(aux_square));
                     is_legal = !(is_enemy_piece(board, aux_square, color) &&
                                  (enemy == PieceType::QUEEN || enemy == PieceType::ROOK));
 
@@ -687,7 +687,7 @@ static void calculate_checkers(const Board& board, MoveGenInfo& moveGenInfo)
     moveGenInfo.set_capture_square(checker_sq, true);
 
     // insert in between squares in push mask, when in check it is legal to block check with a piece.
-    if (is_slider(piece_to_PieceType(board.get_piece(checker_sq)))) {
+    if (is_slider(piece_to_pieceType(board.get_piece(checker_sq)))) {
 
         const Direction direction =
             get_direction(king_sq.row(), king_sq.col(), checker_sq.row(), checker_sq.col());
