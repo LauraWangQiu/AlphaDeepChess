@@ -44,7 +44,7 @@ static void initialization_test()
         std::cout << "TEST FAILED : board_test : get_bitboard_white() != 0ULL\n";
     }
 
-    for (Piece p = Piece::W_PAWN; p <= Piece::EMPTY; p = p + 1) {
+    for (Piece p = Piece::W_PAWN; p < Piece::EMPTY; p = p + 1) {
         if (board.get_bitboard_piece(p) != 0ULL) {
             std::cout << "TEST FAILED : board_test : get_bitboard_piece(p) != 0ULL\n";
         }
@@ -110,7 +110,7 @@ static void clean_test()
         std::cout << "TEST FAILED : board_test : get_bitboard_white() != 0ULL\n";
     }
 
-    for (Piece p = Piece::W_PAWN; p <= Piece::EMPTY; p = p + 1) {
+    for (Piece p = Piece::W_PAWN; p < Piece::EMPTY; p = p + 1) {
         if (board.get_bitboard_piece(p) != 0ULL) {
             std::cout << "TEST FAILED : board_test : get_bitboard_piece(p) != 0ULL\n";
         }
@@ -238,7 +238,7 @@ static void put_remove_test()
         std::cout << "TEST FAILED : board_test : get_bitboard_white() != 0ULL\n";
     }
 
-    for (Piece p = Piece::W_PAWN; p <= Piece::EMPTY; p = p + 1) {
+    for (Piece p = Piece::W_PAWN; p < Piece::EMPTY; p = p + 1) {
         if (board.get_bitboard_piece(p) != 0ULL) {
             std::cout << "TEST FAILED : board_test : get_bitboard_piece(p) != 0ULL\n";
         }

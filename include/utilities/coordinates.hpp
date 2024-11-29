@@ -69,6 +69,14 @@ constexpr inline bool is_valid_coord(Row row, Col col)
  * @param[in] end_col The end column coordinate
  * 
  * @return
+ * - Direction::EAST,
+ * - Direction::SOUTH_EAST,
+ * - Direction::SOUTH,
+ * - Direction::SOUTH_WEST,
+ * - Direction::WEST,
+ * - Direction::NORTH_WEST,
+ * - Direction::NORTH,
+ * - Direction::NORTH_EAST
  * 
  */
 constexpr Direction get_direction(Row origin_row, Col origin_col, Row end_row, Col end_col)
