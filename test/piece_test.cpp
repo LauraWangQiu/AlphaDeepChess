@@ -444,7 +444,6 @@ static void piece_sum_test()
 {
     std::cout << "piece_sum test :\n\n";
 
-    Piece p = (Piece)(Piece::W_PAWN + 6);
     if ((Piece)(Piece::W_PAWN + 6)!= Piece::B_PAWN) {
         std::cout << "TEST FAILED : Piece::W_PAWN + 6 != Piece::B_PAWN\n";
     }

@@ -6,10 +6,14 @@
 #include "move_list_test.cpp"
 #include "piece_test.cpp"
 #include "coordinates_test.cpp"
+#include "row_test.cpp"
+#include "col_test.cpp"
 
 int main()
 {
     piece_test();
+    row_test();
+    col_test();
     coordinates_test();
     game_state_test();
     square_test();

@@ -393,7 +393,7 @@ std::string Board::fen() const
     int emptyCounter;
     std::ostringstream fen;
 
-    for (Row row = ROW_8; row >= ROW_1; row--) {
+    for (Row row = ROW_8; is_valid_row(row); row--) {
         for (Col col = COL_A; col <= COL_H; col++) {
             emptyCounter = 0;
             while (col <= COL_H && is_empty(Square(row, col))) {

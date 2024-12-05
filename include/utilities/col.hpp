@@ -36,15 +36,28 @@ enum Col : int
  * 
  * @return 'a','b','c','d','e','f','g','h'
  */
-constexpr inline char col_to_char(const Col col)
-{
-    return 'a' + static_cast<int>(col);
-}
+constexpr inline char col_to_char(const Col col) { return 'a' + static_cast<int>(col); }
+
+/**
+ * @brief is_valid_col 
+ * 
+ * Returns if col is valid.
+ * 
+ * @param[in] col The column coordinate
+ * 
+ * @return
+ * - TRUE if col >= COL_A && col <= COL_H.
+ * - FALSE if col is invalid.
+ * 
+ */
+constexpr inline bool is_valid_col(Col col) { return col >= COL_A && col <= COL_H; }
 
 /**
  * @brief operator+(Col, int)
  * 
  * Addition operator overload
+ * 
+ * @note out of bounds will result in COL_INVALID
  * 
  * @param[in] col The col value
  * @param[in] value The integer to add
@@ -53,13 +66,16 @@ constexpr inline char col_to_char(const Col col)
  */
 constexpr inline Col operator+(Col col, int value)
 {
-    return static_cast<Col>(static_cast<int>(col) + value);
+    const Col sum = static_cast<Col>(static_cast<int>(col) + value);
+    return is_valid_col(sum) ? sum : COL_INVALID;
 }
 
 /**
  * @brief operator-(Col, int)
  * 
  * Subtraction operator overload
+ * 
+ * @note out of bounds will result in COL_INVALID
  * 
  * @param[in] col The col value
  * @param[in] value The integer to subtract
@@ -68,7 +84,8 @@ constexpr inline Col operator+(Col col, int value)
  */
 constexpr inline Col operator-(Col col, int value)
 {
-    return static_cast<Col>(static_cast<int>(col) - value);
+    const Col sub = static_cast<Col>(static_cast<int>(col) - value);
+    return is_valid_col(sub) ? sub : COL_INVALID;
 }
 
 
@@ -76,20 +93,24 @@ constexpr inline Col operator-(Col col, int value)
  * @brief operator++(Col&)
  * Pre-increment operator overload for Col
  * 
+ * @note out of bounds will result in COL_INVALID
+ * 
  * @param[in,out] col
  * 
  * @return col + 1
  */
 constexpr inline Col& operator++(Col& col)
 {
-    col = static_cast<Col>(static_cast<int>(col) + 1);
-
+    const Col sum = static_cast<Col>(static_cast<int>(col) + 1);
+    col = is_valid_col(sum) ? sum : COL_INVALID;
     return col;
 }
 
 /**
  * @brief operator++(Col&,int)
  * Post-increment operator overload for Col
+ * 
+ * @note out of bounds will result in COL_INVALID
  * 
  * @param[in,out] col
  * 
@@ -98,7 +119,8 @@ constexpr inline Col& operator++(Col& col)
 constexpr inline Col operator++(Col& col, int)
 {
     Col old = col;
-    ++col;
+    const Col sum = static_cast<Col>(static_cast<int>(col) + 1);
+    col = is_valid_col(sum) ? sum : COL_INVALID;
     return old;
 }
 
@@ -106,20 +128,24 @@ constexpr inline Col operator++(Col& col, int)
  * @brief operator--(Col&)
  * Pre-decrement operator overload for Col
  * 
+ * @note out of bounds will result in COL_INVALID
+ * 
  * @param[in,out] col
  * 
  * @return col - 1
  */
 constexpr inline Col& operator--(Col& col)
 {
-
-    col = static_cast<Col>(static_cast<int>(col) - 1);
+    const Col sub = static_cast<Col>(static_cast<int>(col) - 1);
+    col = is_valid_col(sub) ? sub : COL_INVALID;
     return col;
 }
 
 /**
  * @brief operator--(Col&,int)
  * Post-decrement operator overload for Col
+ * 
+ * @note out of bounds will result in COL_INVALID
  * 
  * @param[in,out] col
  * 
@@ -128,7 +154,8 @@ constexpr inline Col& operator--(Col& col)
 constexpr inline Col operator--(Col& col, int)
 {
     Col old = col;
-    --col;
+    const Col sub = static_cast<Col>(static_cast<int>(col) - 1);
+    col = is_valid_col(sub) ? sub : COL_INVALID;
     return old;
 }
 
@@ -137,6 +164,8 @@ constexpr inline Col operator--(Col& col, int)
  * 
  * Addition and assignment operator overload
  * 
+ * @note out of bounds will result in COL_INVALID
+ * 
  * @param[in,out] col The col value
  * @param[in] value The integer to add
  * 
@@ -144,7 +173,8 @@ constexpr inline Col operator--(Col& col, int)
  */
 constexpr inline Col& operator+=(Col& col, int value)
 {
-    col = static_cast<Col>(static_cast<int>(col) + value);
+    const Col sum = static_cast<Col>(static_cast<int>(col) + value);
+    col = is_valid_col(sum) ? sum : COL_INVALID;
     return col;
 }
 
@@ -153,6 +183,8 @@ constexpr inline Col& operator+=(Col& col, int value)
  * 
  * Subtraction and assignment operator overload
  * 
+ * @note out of bounds will result in COL_INVALID
+ * 
  * @param[in,out] col The col value
  * @param[in] value The integer to subtract
  * 
@@ -160,6 +192,7 @@ constexpr inline Col& operator+=(Col& col, int value)
  */
 constexpr inline Col& operator-=(Col& col, int value)
 {
-    col = static_cast<Col>(static_cast<int>(col) - value);
+    const Col sub = static_cast<Col>(static_cast<int>(col) - value);
+    col = is_valid_col(sub) ? sub : COL_INVALID;
     return col;
 }

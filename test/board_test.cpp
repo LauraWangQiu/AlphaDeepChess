@@ -348,7 +348,7 @@ static void make_unmake_move_test1()
 
     board.load_fen(StartFEN);
 
-    for (int32_t i = 0; i < num_moves; i++) {
+    for (int32_t i = 0; i < (int32_t)num_moves; i++) {
 
         board.make_move(moves[i]);
         game_states[i + 1] = board.state();

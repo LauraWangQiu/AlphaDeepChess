@@ -38,15 +38,28 @@ enum Row : int
  * 
  * @return '1','2','3','4','5','6','7','8'
  */
-constexpr inline char row_to_char(const Row row)
-{
-    return '1' + static_cast<int>(row);
-}
+constexpr inline char row_to_char(const Row row) { return '1' + static_cast<int>(row); }
+
+/**
+ * @brief is_valid_row
+ * 
+ * Returns if the coordinaterow is valid
+ * 
+ * @param[in] row The row
+ * 
+ * @return
+ * - TRUE if row >= ROW_1 && row <= ROW_8
+ * - FALSE if row is invalid.
+ * 
+ */
+constexpr inline bool is_valid_row(Row row) { return row >= ROW_1 && row <= ROW_8; }
 
 /**
  * @brief operator+(Row, int)
  * 
  * Addition operator overload
+ * 
+ * @note out of bounds will result in ROW_INVALID
  * 
  * @param[in] row The row value
  * @param[in] value The integer to add
@@ -55,13 +68,16 @@ constexpr inline char row_to_char(const Row row)
  */
 constexpr inline Row operator+(Row row, int value)
 {
-    return static_cast<Row>(static_cast<int>(row) + value);
+    const Row sum = static_cast<Row>(static_cast<int>(row) + value);
+    return is_valid_row(sum) ? sum : ROW_INVALID;
 }
 
 /**
  * @brief operator-(Row, int)
  * 
  * Subtraction operator overload
+ * 
+ * @note out of bounds will result in ROW_INVALID
  * 
  * @param[in] row The row value
  * @param[in] value The integer to subtract
@@ -70,7 +86,8 @@ constexpr inline Row operator+(Row row, int value)
  */
 constexpr inline Row operator-(Row row, int value)
 {
-    return static_cast<Row>(static_cast<int>(row) - value);
+    const Row sub = static_cast<Row>(static_cast<int>(row) - value);
+    return is_valid_row(sub) ? sub : ROW_INVALID;
 }
 
 /**
@@ -78,14 +95,16 @@ constexpr inline Row operator-(Row row, int value)
  * 
  * Pre-increment operator overload for Row
  * 
+ * @note out of bounds will result in ROW_INVALID
+ * 
  * @param[in,out] row
  * 
  * @return row + 1
  */
 constexpr inline Row& operator++(Row& row)
 {
-    row = static_cast<Row>(static_cast<int>(row) + 1);
-
+    const Row sum = static_cast<Row>(static_cast<int>(row) + 1);
+    row = is_valid_row(sum) ? sum : ROW_INVALID;
     return row;
 }
 
@@ -93,14 +112,18 @@ constexpr inline Row& operator++(Row& row)
  * @brief operator++(Row&,int)
  * Post-increment operator overload for Row
  * 
+ * @note out of bounds will result in ROW_INVALID
+ * 
  * @param[in,out] row
  * 
  * @return row(old value)
  */
 constexpr inline Row operator++(Row& row, int)
 {
+
     Row old = row;
-    ++row;
+    const Row sum = static_cast<Row>(static_cast<int>(row) + 1);
+    row = is_valid_row(sum) ? sum : ROW_INVALID;
     return old;
 }
 
@@ -108,21 +131,24 @@ constexpr inline Row operator++(Row& row, int)
  * @brief operator--(Row&)
  * Pre-decrement operator overload for Row
  * 
+ * @note out of bounds will result in ROW_INVALID
+ * 
  * @param[in,out] row
  * 
  * @return row - 1
  */
 constexpr inline Row& operator--(Row& row)
 {
-
-    row = static_cast<Row>(static_cast<int>(row) - 1);
-
+    const Row sub = static_cast<Row>(static_cast<int>(row) - 1);
+    row = is_valid_row(sub) ? sub : ROW_INVALID;
     return row;
 }
 
 /**
  * @brief operator--(Row&,int)
  * Post-decrement operator overload for Row
+ * 
+ * @note out of bounds will result in ROW_INVALID
  * 
  * @param[in,out] row
  * 
@@ -131,7 +157,8 @@ constexpr inline Row& operator--(Row& row)
 constexpr inline Row operator--(Row& row, int)
 {
     Row old = row;
-    --row;
+    const Row sub = static_cast<Row>(static_cast<int>(row) - 1);
+    row = is_valid_row(sub) ? sub : ROW_INVALID;
     return old;
 }
 
@@ -140,6 +167,8 @@ constexpr inline Row operator--(Row& row, int)
  * 
  * Addition and assignment operator overload
  * 
+ * @note out of bounds will result in ROW_INVALID
+ * 
  * @param[in,out] row The row value
  * @param[in] value The integer to add
  * 
@@ -147,7 +176,8 @@ constexpr inline Row operator--(Row& row, int)
  */
 constexpr inline Row& operator+=(Row& row, int value)
 {
-    row = static_cast<Row>(static_cast<int>(row) + value);
+    const Row sum = static_cast<Row>(static_cast<int>(row) + value);
+    row = is_valid_row(sum) ? sum : ROW_INVALID;
     return row;
 }
 
@@ -156,6 +186,8 @@ constexpr inline Row& operator+=(Row& row, int value)
  * 
  * Subtraction and assignment operator overload
  * 
+ * @note out of bounds will result in ROW_INVALID
+ * 
  * @param[in,out] row The row value
  * @param[in] value The integer to subtract
  * 
@@ -163,6 +195,7 @@ constexpr inline Row& operator+=(Row& row, int value)
  */
 constexpr inline Row& operator-=(Row& row, int value)
 {
-    row = static_cast<Row>(static_cast<int>(row) - value);
+    const Row sub = static_cast<Row>(static_cast<int>(row) - value);
+    row = is_valid_row(sub) ? sub : ROW_INVALID;
     return row;
 }
