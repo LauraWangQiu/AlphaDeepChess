@@ -156,9 +156,6 @@ void generate_legal_moves(MoveList& moves, const Board& board)
         return;   // when double check only king moves allowed
     }
 
-
-    ChessColor color;
-
     for (Square square = Square::SQ_A1; square <= Square::SQ_H8; square++) {
 
         const Piece piece = board.get_piece(square);
@@ -624,7 +621,8 @@ static bool is_valid_move_pinned(const Board& board, Square piece_sq, Square end
     {
 
         // Calculate the slope of the line
-        int numerator = (king_sq.col() - piece_sq.col()) * (end_sq.row() - piece_sq.row());
+        int numerator = (int)(king_sq.col() - piece_sq.col());
+        numerator *= (int)(end_sq.row() - piece_sq.row());
         int denominator = (king_sq.row() - piece_sq.row());
 
         // Check if the y-coordinate of the destPos on the line matches the y-coordinate of the destPos

@@ -87,10 +87,13 @@ public:
      * 
      * Constructor that initializes with the int square value
      * 
-     * @param[in] square 
+     * @param[in] square square uint8_t value
      * 
      */
-    constexpr Square(uint8_t square) : sq_value(square) { }
+    constexpr Square(uint8_t square) : sq_value(square)
+    {
+        sq_value = is_valid() ? sq_value : (uint8_t)SQ_INVALID;
+    }
 
     /**
      * @brief Square(Row row, Col col)
@@ -137,7 +140,10 @@ public:
      * 
      * @return (sq_value / 8)
      */
-    constexpr inline Row row() const { return static_cast<Row>(sq_value >> 3U); }
+    constexpr inline Row row() const
+    {
+        return is_valid() ? static_cast<Row>(sq_value >> 3U) : ROW_INVALID;
+    }
 
     /**
      * @brief col
@@ -146,7 +152,10 @@ public:
      * 
      * @return (sq_value % 8)
      */
-    constexpr inline Col col() const { return static_cast<Col>(sq_value & 7U); }
+    constexpr inline Col col() const
+    {
+        return is_valid() ? static_cast<Col>(sq_value & 7U) : COL_INVALID;
+    }
 
     /**
      * @brief to_string
@@ -221,11 +230,14 @@ public:
      * @brief operator++
      * Pre-increment operator overload
      * 
+     * @note out of bounds will result in SQ_INVALID
+     * 
      * @return *this
      */
     constexpr Square& operator++()
     {
         ++sq_value;
+        sq_value = is_valid() ? sq_value : (uint8_t)SQ_INVALID;
         return *this;
     }
 
@@ -233,12 +245,15 @@ public:
      * @brief operator++(int)
      * Post-increment operator overload
      * 
+     * @note out of bounds will result in SQ_INVALID
+     * 
      * @return *this
      */
     constexpr Square operator++(int)
     {
         Square temp = *this;
-        ++(*this);
+        ++sq_value;
+        sq_value = is_valid() ? sq_value : (uint8_t)SQ_INVALID;
         return temp;
     }
 
@@ -246,23 +261,29 @@ public:
      * @brief operator--
      * Pre-decrement operator overload
      * 
+     * @note out of bounds will result in SQ_INVALID
+     * 
      * @return *this
      */
     constexpr Square& operator--()
     {
         --sq_value;
+        sq_value = is_valid() ? sq_value : (uint8_t)SQ_INVALID;
         return *this;
     }
     /**
      * @brief operator--(int)
      * Post-decrement operator overload
      * 
+     * @note out of bounds will result in SQ_INVALID
+     * 
      * @return *this
      */
     constexpr Square operator--(int)
     {
         Square temp = *this;
-        --(*this);
+        --sq_value;
+        sq_value = is_valid() ? sq_value : (uint8_t)SQ_INVALID;
         return temp;
     }
 
