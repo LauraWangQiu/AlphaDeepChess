@@ -2,7 +2,7 @@
 #include "col.hpp"
 
 static void col_to_char_test();
-static void is_valid_col_test();
+static void col_is_valid_col_test();
 static void col_plus_test();
 static void col_minus_test();
 static void col_pre_increment_test();
@@ -17,7 +17,7 @@ void col_test()
     std::cout << "---------col test---------\n\n";
 
     col_to_char_test();
-    is_valid_col_test();
+    col_is_valid_col_test();
     col_plus_test();
     col_minus_test();
     col_pre_increment_test();
@@ -39,9 +39,9 @@ static void col_to_char_test()
     }
 }
 
-static void is_valid_col_test()
+static void col_is_valid_col_test()
 {
-    std::cout << "is_valid_col test :\n\n";
+    std::cout << "col_is_valid_col_test test :\n\n";
 
     for (Col i = COL_A; i <= COL_H; ++i) {
         if (!is_valid_col(i)) {

@@ -1,24 +1,291 @@
 #include <iostream>
 
 #include "board.hpp"
+#include "test_utils.hpp"
 
-static void initialization_test();
-static void clean_test();
-static void put_remove_test();
-static void fen_test();
-static void make_unmake_move_test1();
+constexpr auto StartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+static void board_get_piece_test();
+static void board_is_empty_test();
+static void board_get_bitboard_all_test();
+static void board_get_bitboard_white_test();
+static void board_get_bitboard_black_test();
+static void board_get_bitboard_piece_test();
+static void board_put_piece_test();
+static void board_remove_piece_test();
+static void board_clean_test();
+static void board_make_move_test();
+static void board_unmake_move_test();
+static void board_load_fen_test();
+static void board_fen_test();
+static void board_state_test();
+static void board_initialization_test();
+static void board_destructor_test();
+
 
 void board_test()
 {
 
     std::cout << "---------board test---------\n\n";
 
-    initialization_test();
-    clean_test();
-    put_remove_test();
-    fen_test();
-    make_unmake_move_test1();
+    board_get_piece_test();
+    board_is_empty_test();
+    board_get_bitboard_all_test();
+    board_get_bitboard_white_test();
+    board_get_bitboard_black_test();
+    board_get_bitboard_piece_test();
+    board_put_piece_test();
+    board_remove_piece_test();
+    board_clean_test();
+    board_make_move_test();
+    board_unmake_move_test();
+    board_load_fen_test();
+    board_fen_test();
+    board_state_test();
+    board_initialization_test();
+    board_destructor_test();
 }
+
+static void board_get_piece_test()
+{
+    const std::string test_name = "board_get_piece_test";
+
+    Board board;
+    board.load_fen(StartFEN);
+
+    if (board.get_piece(Square::SQ_A1) != Piece::W_ROOK) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A1)!=Piece::W_ROOK");
+    }
+    if (board.get_piece(Square::SQ_A2) != Piece::W_PAWN) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A2)!=Piece::W_PAWN");
+    }
+    if (board.get_piece(Square::SQ_A3) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A3)!=Piece::EMPTY");
+    }
+    if (board.get_piece(Square::SQ_A4) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A4)!=Piece::EMPTY");
+    }
+    if (board.get_piece(Square::SQ_A5) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A5)!=Piece::EMPTY");
+    }
+    if (board.get_piece(Square::SQ_A6) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A6)!=Piece::EMPTY");
+    }
+    if (board.get_piece(Square::SQ_A7) != Piece::B_PAWN) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A7)!=Piece::B_PAWN");
+    }
+    if (board.get_piece(Square::SQ_A8) != Piece::B_ROOK) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A8)!=Piece::B_ROOK");
+    }
+}
+
+static void board_is_empty_test()
+{
+    const std::string test_name = "board_is_empty_test";
+
+    Board board;
+    board.load_fen(StartFEN);
+
+    if (board.is_empty(Square::SQ_A1) != false) {
+        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A1)!=false");
+    }
+    if (board.is_empty(Square::SQ_A2) != false) {
+        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A2)!=false");
+    }
+    if (board.is_empty(Square::SQ_A3) != true) {
+        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A3)!=true");
+    }
+    if (board.is_empty(Square::SQ_A4) != true) {
+        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A4)!=true");
+    }
+    if (board.is_empty(Square::SQ_A5) != true) {
+        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A5)!=true");
+    }
+    if (board.is_empty(Square::SQ_A6) != true) {
+        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A6)!=true");
+    }
+    if (board.is_empty(Square::SQ_A7) != false) {
+        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A7)!=false");
+    }
+    if (board.is_empty(Square::SQ_A8) != false) {
+        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A8)!=false");
+    }
+}
+
+static void board_get_bitboard_all_test()
+{
+    const std::string test_name = "board_get_bitboard_all_test";
+
+    Board board;
+
+    if (board.get_bitboard_all() != 0ULL) {
+        PRINT_TEST_FAILED(test_name, "get_bitboard_all()!=0ULL");
+    }
+
+    board.load_fen(StartFEN);
+
+    if (board.get_bitboard_all() != 0xffff00000000ffff) {
+        PRINT_TEST_FAILED(test_name, "get_bitboard_all()!=0xffff00000000ffff");
+    }
+}
+
+static void board_get_bitboard_white_test()
+{
+    const std::string test_name = "board_get_bitboard_white_test";
+
+    Board board;
+
+    if (board.get_bitboard_white() != 0ULL) {
+        PRINT_TEST_FAILED(test_name, "get_bitboard_white()!=0ULL");
+    }
+
+    board.load_fen(StartFEN);
+
+    if (board.get_bitboard_white() != 0xffff000000000000) {
+        PRINT_TEST_FAILED(test_name, "get_bitboard_white()!=0xffff000000000000");
+    }
+}
+
+static void board_get_bitboard_black_test()
+{
+    const std::string test_name = "board_get_bitboard_black_test";
+
+    Board board;
+
+    if (board.get_bitboard_black() != 0ULL) {
+        PRINT_TEST_FAILED(test_name, "get_bitboard_black()!=0ULL");
+    }
+
+    board.load_fen(StartFEN);
+
+    if (board.get_bitboard_black() != 0xffff000000000000) {
+        PRINT_TEST_FAILED(test_name, "get_bitboard_black()!=0x000000000000ffff");
+    }
+}
+
+static void board_get_bitboard_piece_test()
+{
+
+    const std::string test_name = "board_get_bitboard_piece_test";
+
+    Board board;
+
+    for (Piece p = Piece::W_PAWN; p < Piece::EMPTY; p = p + 1) {
+        if (board.get_bitboard_piece(p) != 0) {
+            const std::string s = "" + piece_to_char(p);
+            PRINT_TEST_FAILED(test_name, "get_bitboard_piece(" + s + ")!=0ULL");
+        }
+    }
+
+    board.load_fen(StartFEN);
+
+    constexpr static uint64_t start_pos_bitboard[NUM_CHESS_PIECES] = {
+        0x000000000000ff00,   // W_PAWN
+        0x0000000000000042,   // W_KNIGHT
+        0x0000000000000024,   // W_BISHOP
+        0x0000000000000081,   // W_ROOK
+        0x0000000000000008,   // W_QUEEN
+        0x0000000000000010,   // W_KING
+        0x00ff000000000000,   // B_PAWN
+        0x4200000000000000,   // B_KNIGHT
+        0x2400000000000000,   // B_BISHOP
+        0x8100000000000000,   // B_ROOK
+        0x0800000000000000,   // B_QUEEN
+        0x1000000000000000,   // B_KING
+        0x0000ffffffff0000    // EMPTY
+    };
+
+    for (Piece p = Piece::W_PAWN; p < Piece::EMPTY; p = p + 1) {
+        if (board.get_bitboard_piece(p) != start_pos_bitboard[(int)p]) {
+            const std::string s = "" + piece_to_char(p);
+            PRINT_TEST_FAILED(test_name, "get_bitboard_piece(" + s + ")!=start_pos_bitboard[p]");
+        }
+    }
+}
+
+static void board_put_piece_test()
+{
+    const std::string test_name = "board_put_piece_test";
+
+    Board board;
+
+    board.put_piece(Piece::W_QUEEN, Square::SQ_A1);
+    board.put_piece(Piece::B_QUEEN, Square::SQ_H8);
+    board.put_piece(Piece::W_KNIGHT, Square::SQ_A8);
+    board.put_piece(Piece::B_PAWN, Square::SQ_H1);
+    board.put_piece(Piece::B_ROOK, Square::SQ_D4);
+
+    if (board.get_piece(Square::SQ_A1) != Piece::W_QUEEN) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A1)!=Piece::W_QUEEN");
+    }
+    if (board.get_piece(Square::SQ_H8) != Piece::B_QUEEN) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_H8)!=Piece::B_QUEEN");
+    }
+    if (board.get_piece(Square::SQ_A8) != Piece::W_KNIGHT) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A8)!=Piece::W_KNIGHT");
+    }
+    if (board.get_piece(Square::SQ_H1) != Piece::B_PAWN) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_H1)!=Piece::B_PAWN");
+    }
+    if (board.get_piece(Square::SQ_D4) != Piece::B_ROOK) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_D4)!=Piece::B_ROOK");
+    }
+
+    board.put_piece(Piece::EMPTY, Square::SQ_A1);
+
+    if (board.get_piece(Square::SQ_A1) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A1)!=Piece::EMPTY");
+    }
+}
+
+static void board_remove_piece_test()
+{
+    const std::string test_name = "board_put_piece_test";
+
+    Board board;
+
+    board.put_piece(Piece::W_QUEEN, Square::SQ_A1);
+    board.put_piece(Piece::B_QUEEN, Square::SQ_H8);
+    board.put_piece(Piece::W_KNIGHT, Square::SQ_A8);
+    board.put_piece(Piece::B_PAWN, Square::SQ_H1);
+    board.put_piece(Piece::B_ROOK, Square::SQ_D4);
+
+    board.remove_piece(Square::SQ_A1);
+    board.remove_piece(Square::SQ_H8);
+    board.remove_piece(Square::SQ_A8);
+    board.remove_piece(Square::SQ_H1);
+    board.remove_piece(Square::SQ_D4);
+
+    if (board.get_piece(Square::SQ_A1) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A1)!=Piece::EMPTY");
+    }
+    if (board.get_piece(Square::SQ_H8) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_H8)!=Piece::EMPTY");
+    }
+    if (board.get_piece(Square::SQ_A8) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A8)!=Piece::EMPTY");
+    }
+    if (board.get_piece(Square::SQ_H1) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_H1)!=Piece::EMPTY");
+    }
+    if (board.get_piece(Square::SQ_D4) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(SQ_D4)!=Piece::EMPTY");
+    }
+}
+
+static void board_clean_test() { }
+
+static void board_make_move_test() { }
+
+static void board_unmake_move_test();
+static void board_load_fen_test();
+static void board_fen_test();
+static void board_state_test();
+static void board_initialization_test();
+static void board_destructor_test();
+
+
+/*
 
 static void initialization_test()
 {
@@ -367,3 +634,4 @@ static void make_unmake_move_test1()
         std::cout << "TEST FAILED : board_test : fen() != StartFEN\n";
     }
 }
+*/
