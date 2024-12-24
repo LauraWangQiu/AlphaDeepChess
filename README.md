@@ -1,7 +1,84 @@
 # AlphaDeepChess
 AlphaDeepChess, desarrollo de un motor de ajedrez basado en podas alfa-beta
 
+## Getting Started
 
+These instructions will help you set up and build the project on your local machine.
+
+### Linux
+
+1. **Install git and clone the repository**:
+
+    ```bash
+    sudo apt-get install git
+    git clone https://github.com/LauraWangQiu/AlphaDeepChess.git
+    ```
+
+2. **Install g++ and cmake**:
+
+    ```bash
+    sudo apt-get install g++
+    sudo apt-get install cmake
+    ```
+
+3. **move to the project folder and run the setup script for cmake**:
+
+    ```bash
+    cd ./AlphaDeepChess
+    chmod +x setup_linux.sh
+    ./setupLinux.sh
+    ```
+
+### Windows
+
+1. **Install git and clone the repository**:
+
+    ```bash
+    install git
+    git clone https://github.com/LauraWangQiu/AlphaDeepChess.git
+    ```
+
+2. ** OPTION 1 : use Visual Studio (EASY)**:
+
+    ```bash
+    you can directly run the project from Visual Studio IDE
+    ```
+
+3. ** OPTION 2 : download g++(mingw) and cmake (HARD)**:
+
+    ```bash
+    [CMake](https://cmake.org/download/)
+    [Mingw](https://www.mingw-w64.org/downloads/)
+
+    configure the PATH enviroment variable
+    configure cmake build folder
+    ```
+
+### MacOS
+
+1. **Install homebrew, git and clone the repository**:
+
+    ```bash
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    brew install git
+    git clone https://github.com/LauraWangQiu/AlphaDeepChess.git
+    ```
+
+2. **Install g++ and cmake**:
+
+    ```bash
+    brew install gcc
+    brew install cmake
+    ```
+
+3. **move to the project folder and run the setup script for cmake**:
+
+    ```bash
+    cd ./AlphaDeepChess
+    chmod +x setup_linux.sh
+    ./setupLinux.sh
+    ```
 
 # Doxygen Commenting Guidelines
 
