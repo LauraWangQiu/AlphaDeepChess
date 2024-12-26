@@ -25,7 +25,7 @@ These instructions will help you set up and build the project on your local mach
 
     ```bash
     cd ./AlphaDeepChess
-    chmod +x setup_linux.sh
+    sudo chmod +x setup_linux.sh
     ./setupLinux.sh
     ```
 

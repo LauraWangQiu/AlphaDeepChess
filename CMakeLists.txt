@@ -61,9 +61,14 @@ endif()
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     target_compile_definitions(AlphaDeepChess PRIVATE _RELEASE)
     target_compile_options(AlphaDeepChess PRIVATE 
-        -Ofast                          # Maximum and aggressive optimization
-        -DNDEBUG                        # Disable debugging checks
-        -march=native                   # Enables the use of machine architecture-specific instructions
-        -mtune=native                   # Optimize for current CPU
+        -g                               # Generate debugging information
+        -O0                              # No optimization
+        -Wall                            # Enable basic warnings
+        -Wextra                          # Enable additional warnings
+        -Wpedantic                       # Enable strict standard warnings
+        #-Ofast                          # Maximum and aggressive optimization
+        #-DNDEBUG                        # Disable debugging checks
+        #-march=native                   # Enables the use of machine architecture-specific instructions
+        #-mtune=native                   # Optimize for current CPU
     )
 endif()

@@ -476,8 +476,8 @@ std::ostream& operator<<(std::ostream& os, const Board& board)
 
     os << "\n +---+---+---+---+---+---+---+---+\n";
 
-    for (Row row = ROW_8; row >= ROW_1; --row) {
-        for (Col col = COL_A; col <= COL_H; ++col) {
+    for (Row row = ROW_8; is_valid_row(row); row--) {
+        for (Col col = COL_A; col<=COL_H; col++) {
             os << " | " << piece_to_char(board.get_piece(Square(row, col)));
         }
         os << " | " << static_cast<int>(row) + 1 << "\n +---+---+---+---+---+---+---+---+\n";
