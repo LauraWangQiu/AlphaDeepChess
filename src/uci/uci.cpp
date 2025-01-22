@@ -149,11 +149,14 @@ void Uci::new_game_command_action() { board.load_fen(StartFEN); }
  */
 void Uci::go_command_action()
 {
-    stopSearch.store(false);
+    /*stopSearch.store(false);
 
     // Launch a new thread to search for the best move
     searchThread = std::thread(
-        [this]() { bestMove = search_best_move(board, INFINITE_SEARCH_DEPTH_VALUE, stopSearch); });
+        [this]() { bestMove = search_best_move(board, 1, stopSearch); });*/
+    
+    bestMove = search_best_move(board, 1, stopSearch);
+    std::cout << "Best move found : " << bestMove.to_string() << std::endl;
 }
 
 /**

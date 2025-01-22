@@ -18,6 +18,7 @@ public:
     inline bool is_square_in_capture(Square square) { return push_mask & square.mask(); }
     inline Square get_checker_square() { return checker_square; }
     inline uint8_t get_checkers_number() { return checkers_number; }
+
     inline Square get_king_square(ChessColor color)
     {
         return color == ChessColor::WHITE ? king_white_square : king_black_square;

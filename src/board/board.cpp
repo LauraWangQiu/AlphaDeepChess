@@ -73,12 +73,12 @@ void Board::clean()
 {
     game_state.clean();
 
-    bitboard_all = 0U;
-    bitboard_black = 0U;
-    bitboard_white = 0U;
+    bitboard_all = 0ULL;
+    bitboard_black = 0ULL;
+    bitboard_white = 0ULL;
 
     for (int piece = 0; piece < NUM_CHESS_PIECES; piece++) {
-        bitboard_piece[piece] = 0U;
+        bitboard_piece[piece] = 0ULL;
     }
 
     for (int square = 0; square < NUM_SQUARES; square++) {
@@ -453,7 +453,7 @@ std::string Board::fen() const
  * 
  *  Constructor of Board class.
  */
-Board::Board() : bitboard_all(0), bitboard_white(0), bitboard_black(0), game_state() { clean(); }
+Board::Board() : bitboard_all(0ULL), bitboard_white(0ULL), bitboard_black(0ULL), game_state() { clean(); }
 
 /**
  * @brief ~Board
