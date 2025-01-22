@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "board.hpp"
 #include "test_utils.hpp"
 

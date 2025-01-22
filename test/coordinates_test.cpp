@@ -1,5 +1,4 @@
-#include <iostream>
-
+#include "test_utils.hpp"
 #include "coordinates.hpp"
 
 static void is_valid_coord_test();
@@ -15,63 +14,61 @@ void coordinates_test()
 
 static void is_valid_coord_test()
 {
-    std::cout << "is_valid_coord test :\n\n";
-
+    const std::string test_name = "is_valid_coord_test";
 
     if (is_valid_coord(ROW_1, COL_A) != true) {
-        std::cout << "TEST FAILED : coordinates_test : is_valid_coord(ROW_1, COL_A) != true\n";
+        PRINT_TEST_FAILED(test_name, "is_valid_coord(ROW_1, COL_A) != true");
     }
     if (is_valid_coord(ROW_8, COL_H) != true) {
-        std::cout << "TEST FAILED : coordinates_test : is_valid_coord(ROW_8, COL_H) != true\n";
+        PRINT_TEST_FAILED(test_name, "is_valid_coord(ROW_8, COL_H) != true");
     }
     if (is_valid_coord((Row)(-1), COL_A) != false) {
-        std::cout << "TEST FAILED : coordinates_test : is_valid_coord((Row)(-1), COL_A) != false\n";
+        PRINT_TEST_FAILED(test_name, "is_valid_coord((Row)(-1), COL_A) != false");
     }
     if (is_valid_coord((Row)(8), COL_H) != false) {
-        std::cout << "TEST FAILED : coordinates_test : is_valid_coord((Row)(8), COL_H) != false\n";
+        PRINT_TEST_FAILED(test_name, "is_valid_coord((Row)(8), COL_H) != false");
     }
     if (is_valid_coord(ROW_1, (Col)(-1)) != false) {
-        std::cout << "TEST FAILED : coordinates_test : is_valid_coord(ROW_1, (Col)(-1)) != false\n";
+        PRINT_TEST_FAILED(test_name, "is_valid_coord(ROW_1, (Col)(-1)) != false");
     }
     if (is_valid_coord(ROW_8, (Col)(8)) != false) {
-        std::cout << "TEST FAILED : coordinates_test : is_valid_coord(ROW_8, (Col)(8)) != false\n";
+        PRINT_TEST_FAILED(test_name, "is_valid_coord(ROW_8, (Col)(8)) != false");
     }
 }
 
 static void get_direction_test()
 {
-
-    std::cout << "get_direction test :\n\n";
+    const std::string test_name = "get_direction_test_test";
 
     if (get_direction(ROW_4, COL_D, ROW_4, COL_H) != Direction::EAST) {
-        std::cout << "TEST FAILED : get_direction_test : EAST\n";
+        PRINT_TEST_FAILED(test_name, "get_direction_test != EAST");
     }
 
     if (get_direction(ROW_4, COL_D, ROW_1, COL_G) != Direction::SOUTH_EAST) {
-        std::cout << "TEST FAILED : get_direction_test : SOUTH_EAST\n";
+        PRINT_TEST_FAILED(test_name, "get_direction_test != SOUTH_EAST");
     }
 
     if (get_direction(ROW_4, COL_D, ROW_1, COL_D) != Direction::SOUTH) {
-        std::cout << "TEST FAILED : get_direction_test : SOUTH\n";
+        PRINT_TEST_FAILED(test_name, "get_direction_test != SOUTH");
     }
 
     if (get_direction(ROW_4, COL_D, ROW_1, COL_A) != Direction::SOUTH_WEST) {
-        std::cout << "TEST FAILED : get_direction_test : SOUTH_WEST\n";
+        PRINT_TEST_FAILED(test_name, "get_direction_test != SOUTH_WEST");
     }
 
     if (get_direction(ROW_4, COL_D, ROW_4, COL_A) != Direction::WEST) {
-        std::cout << "TEST FAILED : get_direction_test : WEST\n";
+        PRINT_TEST_FAILED(test_name, "get_direction_test != WEST");
     }
 
     if (get_direction(ROW_4, COL_D, ROW_7, COL_A) != Direction::NORTH_WEST) {
-        std::cout << "TEST FAILED : get_direction_test : NORTH_WEST\n";
+        PRINT_TEST_FAILED(test_name, "get_direction_test != NORTH_WEST");
     }
 
     if (get_direction(ROW_4, COL_D, ROW_7, COL_D) != Direction::NORTH) {
-        std::cout << "TEST FAILED : get_direction_test : NORTH\n";
+        PRINT_TEST_FAILED(test_name, "get_direction_test != NORTH");
     }
 
     if (get_direction(ROW_4, COL_D, ROW_7, COL_G) != Direction::NORTH_EAST) {
-        std::cout << "TEST FAILED : get_direction_test : NORTH_EAST\n";
+        PRINT_TEST_FAILED(test_name, "get_direction_test != NORTH_EAST");
     }
 }
