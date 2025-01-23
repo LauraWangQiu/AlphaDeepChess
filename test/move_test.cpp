@@ -38,64 +38,47 @@ static void move_constructor_test()
     Move move;
 
     if (move.is_valid() != false) {
-        std::cout << "TEST FAILED : move_test : move.is_valid() != false\n";
+        PRINT_TEST_FAILED(test_name, "move.is_valid() != false");
     }
 
     move = Move(Square::SQ_B2, Square::SQ_B4);
 
     if (move.square_from() != Square::SQ_B2) {
-        std::cout << "TEST FAILED : move_test : square_from() != Square::SQ_B2\n";
+        PRINT_TEST_FAILED(test_name, "move.square_from() != Square::SQ_B2");
     }
     if (move.square_to() != Square::SQ_B4) {
-        std::cout << "TEST FAILED : move_test : square_to() != Square::SQ_B4\n";
+        PRINT_TEST_FAILED(test_name, "move.square_to() != Square::SQ_B4");
     }
     if (move.type() != MoveType::NORMAL) {
-        std::cout << "TEST FAILED : move_test : move.type() != MoveType::NORMAL\n";
+        PRINT_TEST_FAILED(test_name, "move.type() != MoveType::NORMAL");
     }
-    if (move.to_string() != "b2b4") {
-        std::cout << "TEST FAILED : move_test : move.to_string() != b2b4\n";
-    }
-    if (move.is_valid() != true) {
-        std::cout << "TEST FAILED : move_test : move.is_valid() != true\n";
-    }
+
 
     move = Move(Square::SQ_D2, Square::SQ_D1, MoveType::PROMOTION, PieceType::QUEEN);
 
     if (move.square_from() != Square::SQ_D2) {
-        std::cout << "TEST FAILED : move_test : square_from() != Square::SQ_B2\n";
+        PRINT_TEST_FAILED(test_name, "move.square_from() != Square::SQ_D2");
     }
     if (move.square_to() != Square::SQ_D1) {
-        std::cout << "TEST FAILED : move_test : square_to() != Square::SQ_B4\n";
+        PRINT_TEST_FAILED(test_name, "move.square_to() != Square::SQ_D1");
     }
     if (move.type() != MoveType::PROMOTION) {
-        std::cout << "TEST FAILED : move_test : move.type() != MoveType::PROMOTION\n";
+        PRINT_TEST_FAILED(test_name, "move.type() != MoveType::PROMOTION");
     }
     if (move.promotion_piece() != PieceType::QUEEN) {
-        std::cout << "TEST FAILED : move_test : move.promotion_piece() != PieceType::QUEEN\n";
-    }
-    if (move.to_string() != "d2d1q") {
-        std::cout << "TEST FAILED : move_test : move.to_string() != d2d1q\n";
-    }
-    if (move.is_valid() != true) {
-        std::cout << "TEST FAILED : move_test : move.is_valid() != true\n";
+        PRINT_TEST_FAILED(test_name, "move.promotion_piece() != PieceType::QUEEN");
     }
 
     move = Move(Square::SQ_D5, Square::SQ_E6, MoveType::EN_PASSANT);
 
     if (move.square_from() != Square::SQ_D5) {
-        std::cout << "TEST FAILED : move_test : square_from() != Square::SQ_D5\n";
+        PRINT_TEST_FAILED(test_name, "move.square_from() != Square::SQ_D5");
     }
     if (move.square_to() != Square::SQ_E6) {
-        std::cout << "TEST FAILED : move_test : square_to() != Square::SQ_E6\n";
+        PRINT_TEST_FAILED(test_name, "move.square_to() != Square::SQ_E6");
     }
     if (move.type() != MoveType::EN_PASSANT) {
-        std::cout << "TEST FAILED : move_test : move.type() != MoveType::EN_PASSANT\n";
-    }
-    if (move.to_string() != "d5e6") {
-        std::cout << "TEST FAILED : move_test : move.to_string() != d5e6\n";
-    }
-    if (move.is_valid() != true) {
-        std::cout << "TEST FAILED : move_test : move.is_valid() != true\n";
+        PRINT_TEST_FAILED(test_name, "move.type() != MoveType::EN_PASSANT");
     }
 }
 

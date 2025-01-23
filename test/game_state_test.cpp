@@ -1,10 +1,11 @@
-#include <iostream>
-
+#include "test_utils.hpp"
 #include "game_state.hpp"
 
 void game_state_test()
 {
     std::cout << "---------game state test---------\n\n";
+
+    const std::string test_name = "game_state_test";
 
     GameState game_state;
 
@@ -21,34 +22,44 @@ void game_state_test()
     game_state.set_triple_repetition_counter(3U);
 
     if (game_state.en_passant_square() != Square::SQ_B7) {
-        std::cout << "TEST FAILED : game_state_test : en_passant_square() != Square::SQ_B7\n";
+        PRINT_TEST_FAILED(test_name, "game_state.en_passant_square() != Square::SQ_B7");
+
     }
     if (game_state.castle_king_black() != true) {
-        std::cout << "TEST FAILED : game_state_test : castle_king_black() != true\n";
+        PRINT_TEST_FAILED(test_name, "game_state.castle_king_black() != true");
+
     }
     if (game_state.castle_queen_black() != true) {
-        std::cout << "TEST FAILED : game_state_test : castle_queen_black() != true\n";
+        PRINT_TEST_FAILED(test_name, "game_state.castle_queen_black() != true");
+
     }
     if (game_state.castle_king_white() != true) {
-        std::cout << "TEST FAILED : game_state_test : ecastle_king_white() != true\n";
+        PRINT_TEST_FAILED(test_name, "game_state.castle_king_white() != true");
+
     }
     if (game_state.castle_queen_white() != true) {
-        std::cout << "TEST FAILED : game_state_test : castle_queen_white() != true\n";
+        PRINT_TEST_FAILED(test_name, "game_state.castle_queen_white() != true");
+
     }
     if (game_state.fifty_move_rule_counter() != 33ULL) {
-        std::cout << "TEST FAILED : game_state_test : fifty_move_rule_counter() != 33ULL\n";
+        PRINT_TEST_FAILED(test_name, "game_state.fifty_move_rule_counter() != 33ULL");
+
     }
     if (game_state.last_captured_piece() != PieceType::QUEEN) {
-        std::cout << "TEST FAILED : game_state_test : last_captured_piece() != PieceType::QUEEN\n";
+        PRINT_TEST_FAILED(test_name, "game_state.last_captured_piece() != PieceType::QUEEN");
+
     }
     if (game_state.move_number() != 511) {
-        std::cout << "TEST FAILED : game_state_test : move_number() != 511\n";
+        PRINT_TEST_FAILED(test_name, "game_state.move_number() != 511");
+
     }
     if (game_state.side_to_move() != ChessColor::BLACK) {
-        std::cout << "TEST FAILED : game_state_test : side_to_move() != ChessColor::BLACK\n";
+        PRINT_TEST_FAILED(test_name, "game_state.side_to_move() != ChessColor::BLACK");
+
     }
     if (game_state.triple_repetition_counter() != 3) {
-        std::cout << "TEST FAILED : game_state_test : triple_repetition_counter() != 3\n";
+        PRINT_TEST_FAILED(test_name, "game_state.triple_repetition_counter() != 3");
+
     }
 
 
@@ -64,33 +75,43 @@ void game_state_test()
     game_state.set_triple_repetition_counter(1U);
 
     if (game_state.en_passant_square() != Square::SQ_INVALID) {
-        std::cout << "TEST FAILED : game_state_test : en_passant_square() != Square::SQ_INVALID\n";
+        PRINT_TEST_FAILED(test_name, "game_state.en_passant_square() != Square::SQ_INVALID");
+
     }
     if (game_state.castle_king_black() != false) {
-        std::cout << "TEST FAILED : game_state_test : castle_king_black() != false\n";
+        PRINT_TEST_FAILED(test_name, "game_state.castle_king_black() != false");
+
     }
     if (game_state.castle_queen_black() != false) {
-        std::cout << "TEST FAILED : game_state_test : castle_queen_black() != false\n";
+        PRINT_TEST_FAILED(test_name, "game_state.castle_queen_black() != false");
+
     }
     if (game_state.castle_king_white() != false) {
-        std::cout << "TEST FAILED : game_state_test : ecastle_king_white() != false\n";
+        PRINT_TEST_FAILED(test_name, "game_state.castle_king_white() != false");
+
     }
     if (game_state.castle_queen_white() != false) {
-        std::cout << "TEST FAILED : game_state_test : castle_queen_white() != false\n";
+        PRINT_TEST_FAILED(test_name, "game_state.castle_queen_white() != false");
+
     }
     if (game_state.fifty_move_rule_counter() != 1ULL) {
-        std::cout << "TEST FAILED : game_state_test : fifty_move_rule_counter() != 1ULL\n";
+        PRINT_TEST_FAILED(test_name, "game_state.fifty_move_rule_counter() != 1ULL");
+
     }
     if (game_state.last_captured_piece() != PieceType::EMPTY) {
-        std::cout << "TEST FAILED : game_state_test : last_captured_piece() != PieceType::EMPTY\n";
+        PRINT_TEST_FAILED(test_name, "game_state.last_captured_piece() != PieceType::EMPTY");
+
     }
     if (game_state.move_number() != 1) {
-        std::cout << "TEST FAILED : game_state_test : move_number() != 1\n";
+        PRINT_TEST_FAILED(test_name, "game_state.move_number() != 1");
+
     }
     if (game_state.side_to_move() != ChessColor::WHITE) {
-        std::cout << "TEST FAILED : game_state_test : side_to_move() != ChessColor::WHITE\n";
+        PRINT_TEST_FAILED(test_name, "game_state.side_to_move() != ChessColor::WHITE");
+
     }
     if (game_state.triple_repetition_counter() != 1) {
-        std::cout << "TEST FAILED : game_state_test : triple_repetition_counter() != 1\n";
+        PRINT_TEST_FAILED(test_name, "game_state.triple_repetition_counter() != 1");
+
     }
 }
