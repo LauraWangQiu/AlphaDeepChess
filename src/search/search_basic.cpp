@@ -46,9 +46,9 @@ Move search_best_move(Board& board, uint32_t max_depth, std::atomic<bool>& stop)
     const GameState game_state = board.state();
 
     for (int i = 0; i < moves.size(); i++) {
-            board.make_move(moves[i]);
+        board.make_move(moves[i]);
         int moveValue = minimax(board, max_depth - 1, false);
-            board.unmake_move(moves[i], game_state);
+        board.unmake_move(moves[i], game_state);
 
         if (moveValue > bestValue) {
             bestValue = moveValue;
@@ -70,7 +70,7 @@ int minimax(Board& board, uint32_t depth, bool isMaximizingPlayer)
     generate_legal_moves(moves, board);
     const GameState game_state = board.state();
 
-   /*if (moves.size() == 0) {
+    /*if (moves.size() == 0) {
         return evaluate_position(board);
     }*/
 
@@ -78,7 +78,6 @@ int minimax(Board& board, uint32_t depth, bool isMaximizingPlayer)
         int maxEval = -INF;
 
         for (int i = 0; i < moves.size(); i++) {
-
             board.make_move(moves[i]);
             int eval = minimax(board, depth - 1, false);
             board.unmake_move(moves[i], game_state);

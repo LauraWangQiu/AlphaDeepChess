@@ -1,4 +1,5 @@
 # AlphaDeepChess
+
 AlphaDeepChess, desarrollo de un motor de ajedrez basado en podas alfa-beta
 
 ## Getting Started
@@ -38,13 +39,13 @@ These instructions will help you set up and build the project on your local mach
     git clone https://github.com/LauraWangQiu/AlphaDeepChess.git
     ```
 
-2. ** OPTION 1 : use Visual Studio (EASY)**:
+2. **OPTION 1 : use Visual Studio (EASY)**:
 
     ```bash
     you can directly run the project from Visual Studio IDE
     ```
 
-3. ** OPTION 2 : download g++(mingw) and cmake (HARD)**:
+3. **OPTION 2 : download g++(mingw) and cmake (HARD)**:
 
     ```bash
     [CMake](https://cmake.org/download/)
@@ -80,12 +81,11 @@ These instructions will help you set up and build the project on your local mach
     ./setupLinux.sh
     ```
 
-# Doxygen Commenting Guidelines
+## Doxygen Commenting Guidelines
 
 Standard Doxygen commenting format to be followed for documenting functions, structs, classes, and enums in the project.
 
-## Header (.hpp) File Comment Template
-
+### Header (.hpp) File Comment Template
 
 ```cpp
 #pragma once
@@ -97,8 +97,8 @@ Standard Doxygen commenting format to be followed for documenting functions, str
  * Detailed description of the file.
  */
 ```
-## Source (.cpp) File Comment Template
 
+### Source (.cpp) File Comment Template
 
 ```cpp
 /**
@@ -109,7 +109,7 @@ Standard Doxygen commenting format to be followed for documenting functions, str
  */
 ```
 
-## Function Comment Template
+### Function Comment Template
 
 ```cpp
 /**
@@ -129,7 +129,7 @@ Standard Doxygen commenting format to be followed for documenting functions, str
 int function_template(int inputParam, int& outputParam);
 ```
 
-## Class Comment Template
+### Class Comment Template
 
 ```cpp
 /**
@@ -160,7 +160,7 @@ private:
 };
 ```
 
-## Struct Comment Template
+### Struct Comment Template
 
 ```cpp
 /**
@@ -175,7 +175,7 @@ struct StructName {
 };
 ```
 
-## Enum Comment Template
+### Enum Comment Template
 
 ```cpp
 /**
@@ -189,3 +189,7 @@ enum class EnumName {
     VALUE3  /**< Description of Value3 */
 };
 ```
+
+### Using Python's pygame library to visualize the board from the engine
+
+Execute [main.py](main.py) to send commands as with the UCI and visualize the chessboard.
