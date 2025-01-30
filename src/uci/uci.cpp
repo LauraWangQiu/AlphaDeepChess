@@ -73,7 +73,7 @@ void Uci::loop()
             new_game_command_action();
         }
         else if (command == "g" || command == "go") {
-            go_command_action();
+            go_command_action(tokens);
         }
         else if (command == "s" || command == "stop") {
             stop_command_action();
@@ -147,15 +147,123 @@ void Uci::new_game_command_action() { board.load_fen(StartFEN); }
  * Starts the search in the searchThread.
  * 
  */
-void Uci::go_command_action()
+void Uci::go_command_action(const TokenArray& tokens)
 {
-    /*stopSearch.store(false);
+    uint32_t wtime = 0U;        // Time left for white player
+    uint32_t btime = 0U;        // Time left for black player
+    uint32_t winc = 0U;         // Time increment for white player
+    uint32_t binc = 0U;         // Time increment for black player
+    uint32_t movetime = 0U;     // Time to spend on a move
+    uint32_t movestogo = 0U;    // Number of moves to the next time control
+    uint32_t depth = 5U;        // Depth to search (default value)
+    uint32_t nodes = 0U;        // Number of nodes to search
+    uint32_t mate = 0U;         // Search for a mate in x moves
+
+    // Parse the command line arguments
+    for (uint32_t i = 1; i < tokens.size(); ++i) {
+        if (tokens[i].empty()) {
+            continue;
+        }
+
+        if (tokens[i] == "searchmoves") {
+            // TODO: Manage all the moves to search before another argument
+        }
+        else if (tokens[i] == "ponder") {
+            // TODO
+        }
+        else if (tokens[i] == "wtime" && i + 1 < tokens.size()) {
+            try {
+                wtime = std::stoul(tokens[i + 1]);
+                ++i; // Skip the number value of the wtime
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command: go wtime\n";
+            }
+        }
+        else if (tokens[i] == "btime" && i + 1 < tokens.size()) {
+            try {
+                btime = std::stoul(tokens[i + 1]);
+                ++i; // Skip the number value of the btime
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command: go btime\n";
+            }
+        }
+        else if (tokens[i] == "winc" && i + 1 < tokens.size()) {
+            try {
+                winc = std::stoul(tokens[i + 1]);
+                ++i; // Skip the number value of the winc
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command: go winc\n";
+            }
+        }
+        else if (tokens[i] == "binc" && i + 1 < tokens.size()) {
+            try {
+                binc = std::stoul(tokens[i + 1]);
+                ++i; // Skip the number value of the binc
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command: go binc\n";
+            }
+        }
+        else if (tokens[i] == "movestogo" && i + 1 < tokens.size()) {
+            try {
+                movestogo = std::stoul(tokens[i + 1]);
+                ++i; // Skip the number value of the movestogo
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command: go movestogo\n";
+            }
+        }
+        else if (tokens[i] == "depth" && i + 1 < tokens.size()) {
+            try {
+                depth = std::stoul(tokens[i + 1]);
+                ++i; // Skip the number value of the depth
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command : go depth\n";
+            }
+        } else if (tokens[i] == "nodes" && i + 1 < tokens.size()) {
+            try {
+                nodes = std::stoul(tokens[i + 1]);
+                ++i; // Skip the number value of the nodes
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command : go nodes\n";
+            }
+        } else if (tokens[i] == "mate" && i + 1 < tokens.size()) {
+            try {
+                mate = std::stoul(tokens[i + 1]);
+                ++i; // Skip the number value of searching mate
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command : go mate\n";
+            }
+        } else if (tokens[i] == "movetime" && i + 1 < tokens.size()) {
+            try {
+                movetime = std::stoul(tokens[i + 1]);
+                ++i; // Skip the number value of the movetime
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command: go movetime\n";
+            }
+        } else if (tokens[i] == "infinite") {
+            depth = INFINITE_SEARCH_DEPTH_VALUE;
+        } else {
+            std::cout << "Invalid argument for command : go\n";
+        }
+    }
+
+    /*
+    stopSearch.store(false);
 
     // Launch a new thread to search for the best move
     searchThread = std::thread(
-        [this]() { bestMove = search_best_move(board, 1, stopSearch); });*/
-    
-    bestMove = search_best_move(board, 1, stopSearch);
+        [this, depth]() {
+            try {
+                bestMove = search_best_move(board, depth, stopSearch);
+                std::cout << "Best move found : " << bestMove.to_string() << std::endl;
+            } catch (const std::exception& e) {
+                std::cerr << "Exception in search thread: " << e.what() << std::endl;
+            } catch (...) {
+                std::cerr << "Unknown exception in search thread" << std::endl;
+            }
+        });
+    */
+
+    bestMove = search_best_move(board, depth, stopSearch);
     std::cout << "Best move found : " << bestMove.to_string() << std::endl;
 }
 

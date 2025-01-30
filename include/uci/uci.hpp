@@ -135,7 +135,7 @@ private:
      * Starts the search in the searchThread.
      * 
      */
-    void go_command_action();
+    void go_command_action(const TokenArray& tokens);
 
     /**
      * @brief stop_command_action
