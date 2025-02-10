@@ -1,5 +1,6 @@
 #include "board.hpp"
 #include "test_utils.hpp"
+#include <stack>
 
 static void board_get_piece_test();
 static void board_is_empty_test();
@@ -345,7 +346,7 @@ static void board_make_unmake_move_test()
     constexpr auto EndFEN = "rn3r2/pbppq1p1/1p2pN2/8/3P2NP/6P1/PPP1BP1R/2KR2k1 b - - 6 18";
 
     const uint32_t num_moves = 35U;
-    GameState game_states[num_moves + 1];
+    std::stack<GameState> game_states;
 
     Move moves[num_moves] = {
         Move(Square::SQ_D2, Square::SQ_D4),   // 1. d4
@@ -386,23 +387,26 @@ static void board_make_unmake_move_test()
     };
 
     Board board;
-    game_states[0] = board.state();
-
     board.load_fen(StartFEN);
+    game_states.push(board.state());
 
-    for (int32_t i = 0; i < (int32_t)num_moves; i++) {
+    for (uint32_t i = 0; i < num_moves; i++) {
 
         board.make_move(moves[i]);
-        game_states[i + 1] = board.state();
+        if(i < num_moves - 1)
+        {
+            game_states.push(board.state());
+        }
     }
 
     if (board.fen() != EndFEN) {
         PRINT_TEST_FAILED(test_name, "fen() != EndFEN");
     }
 
-    for (int32_t i = num_moves - 1; i >= 0; i--) {
+    for (int32_t i = num_moves - 1; !game_states.empty(); i--) {
 
-        board.unmake_move(moves[i], game_states[i]);
+        board.unmake_move(moves[i], game_states.top());
+        game_states.pop();
     }
 
     if (board.fen() != StartFEN) {

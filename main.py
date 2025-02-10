@@ -6,8 +6,11 @@ import time
 import pygame
 import chess
 
+# List of required modules
+REQUIRED_MODULES = ['pygame', 'chess']
+
 # Path to the engine and pieces images
-PATH_TO_EXE = "./build/AlphaDeepChess.exe"
+PATH_TO_EXE = "./build/AlphaDeepChess"
 PATH_TO_PIECES_IMAGES = "./assets/"
 
 # Pieces images filenames
