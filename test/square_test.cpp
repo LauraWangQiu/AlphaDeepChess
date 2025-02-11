@@ -24,6 +24,8 @@ static void square_northWest_test();
 static void square_southEast_test();
 static void square_southWest_test();
 static void square_toDirection_test();
+static void square_diagonal_test();
+static void square_antidiagonal_test();
 
 void square_test()
 {
@@ -51,6 +53,8 @@ void square_test()
     square_southEast_test();
     square_southWest_test();
     square_toDirection_test();
+    square_diagonal_test();
+    square_antidiagonal_test();
 }
 
 
@@ -640,5 +644,63 @@ static void square_toDirection_test()
 
     if (square != Square::SQ_D4) {
         PRINT_TEST_FAILED(test_name, "square != Square::SQ_D4");
+    }
+}
+
+static void square_diagonal_test()
+{
+    const std::string test_name = "square_diagonal_test";
+
+    static Diagonal SQUARE_TO_DIAGONAL[64] = {
+        DIAGONAL_7_A1_H8,  DIAGONAL_6_B1_H7,  DIAGONAL_5_C1_H6,  DIAGONAL_4_D1_H5,
+        DIAGONAL_3_E1_H4,  DIAGONAL_2_F1_H3,  DIAGONAL_1_G1_H2,  DIAGONAL_0_H1_H1,
+        DIAGONAL_8_A2_G8,  DIAGONAL_7_A1_H8,  DIAGONAL_6_B1_H7,  DIAGONAL_5_C1_H6,
+        DIAGONAL_4_D1_H5,  DIAGONAL_3_E1_H4,  DIAGONAL_2_F1_H3,  DIAGONAL_1_G1_H2,
+        DIAGONAL_9_A3_F8,  DIAGONAL_8_A2_G8,  DIAGONAL_7_A1_H8,  DIAGONAL_6_B1_H7,
+        DIAGONAL_5_C1_H6,  DIAGONAL_4_D1_H5,  DIAGONAL_3_E1_H4,  DIAGONAL_2_F1_H3,
+        DIAGONAL_10_A4_E8, DIAGONAL_9_A3_F8,  DIAGONAL_8_A2_G8,  DIAGONAL_7_A1_H8,
+        DIAGONAL_6_B1_H7,  DIAGONAL_5_C1_H6,  DIAGONAL_4_D1_H5,  DIAGONAL_3_E1_H4,
+        DIAGONAL_11_A5_D8, DIAGONAL_10_A4_E8, DIAGONAL_9_A3_F8,  DIAGONAL_8_A2_G8,
+        DIAGONAL_7_A1_H8,  DIAGONAL_6_B1_H7,  DIAGONAL_5_C1_H6,  DIAGONAL_4_D1_H5,
+        DIAGONAL_12_A6_C8, DIAGONAL_11_A5_D8, DIAGONAL_10_A4_E8, DIAGONAL_9_A3_F8,
+        DIAGONAL_8_A2_G8,  DIAGONAL_7_A1_H8,  DIAGONAL_6_B1_H7,  DIAGONAL_5_C1_H6,
+        DIAGONAL_13_A7_B8, DIAGONAL_12_A6_C8, DIAGONAL_11_A5_D8, DIAGONAL_10_A4_E8,
+        DIAGONAL_9_A3_F8,  DIAGONAL_8_A2_G8,  DIAGONAL_7_A1_H8,  DIAGONAL_6_B1_H7,
+        DIAGONAL_14_A8_A8, DIAGONAL_13_A7_B8, DIAGONAL_12_A6_C8, DIAGONAL_11_A5_D8,
+        DIAGONAL_10_A4_E8, DIAGONAL_9_A3_F8,  DIAGONAL_8_A2_G8,  DIAGONAL_7_A1_H8};
+
+    for (Square sq = Square::SQ_A1; sq.is_valid(); sq++) {
+        if (sq.diagonal() != SQUARE_TO_DIAGONAL[sq]) {
+            PRINT_TEST_FAILED(test_name, "sq.diagonal() != SQUARE_TO_DIAGONAL[sq]");
+        }
+    }
+}
+
+static void square_antidiagonal_test()
+{
+    const std::string test_name = "square_antidiagonal_test";
+
+    static AntiDiagonal SQUARE_TO_ANTIDIAGONAL[64] = {
+        ANTIDIAGONAL_0_A1_A1,  ANTIDIAGONAL_1_B1_A2,  ANTIDIAGONAL_2_C1_A3,  ANTIDIAGONAL_3_D1_A4,
+        ANTIDIAGONAL_4_E1_A5,  ANTIDIAGONAL_5_F1_A6,  ANTIDIAGONAL_6_G1_A7,  ANTIDIAGONAL_7_H1_A8,
+        ANTIDIAGONAL_1_B1_A2,  ANTIDIAGONAL_2_C1_A3,  ANTIDIAGONAL_3_D1_A4,  ANTIDIAGONAL_4_E1_A5,
+        ANTIDIAGONAL_5_F1_A6,  ANTIDIAGONAL_6_G1_A7,  ANTIDIAGONAL_7_H1_A8,  ANTIDIAGONAL_8_H2_B8,
+        ANTIDIAGONAL_2_C1_A3,  ANTIDIAGONAL_3_D1_A4,  ANTIDIAGONAL_4_E1_A5,  ANTIDIAGONAL_5_F1_A6,
+        ANTIDIAGONAL_6_G1_A7,  ANTIDIAGONAL_7_H1_A8,  ANTIDIAGONAL_8_H2_B8,  ANTIDIAGONAL_9_H3_C8,
+        ANTIDIAGONAL_3_D1_A4,  ANTIDIAGONAL_4_E1_A5,  ANTIDIAGONAL_5_F1_A6,  ANTIDIAGONAL_6_G1_A7,
+        ANTIDIAGONAL_7_H1_A8,  ANTIDIAGONAL_8_H2_B8,  ANTIDIAGONAL_9_H3_C8,  ANTIDIAGONAL_10_H4_D8,
+        ANTIDIAGONAL_4_E1_A5,  ANTIDIAGONAL_5_F1_A6,  ANTIDIAGONAL_6_G1_A7,  ANTIDIAGONAL_7_H1_A8,
+        ANTIDIAGONAL_8_H2_B8,  ANTIDIAGONAL_9_H3_C8,  ANTIDIAGONAL_10_H4_D8, ANTIDIAGONAL_11_H5_E8,
+        ANTIDIAGONAL_5_F1_A6,  ANTIDIAGONAL_6_G1_A7,  ANTIDIAGONAL_7_H1_A8,  ANTIDIAGONAL_8_H2_B8,
+        ANTIDIAGONAL_9_H3_C8,  ANTIDIAGONAL_10_H4_D8, ANTIDIAGONAL_11_H5_E8, ANTIDIAGONAL_12_H6_F8,
+        ANTIDIAGONAL_6_G1_A7,  ANTIDIAGONAL_7_H1_A8,  ANTIDIAGONAL_8_H2_B8,  ANTIDIAGONAL_9_H3_C8,
+        ANTIDIAGONAL_10_H4_D8, ANTIDIAGONAL_11_H5_E8, ANTIDIAGONAL_12_H6_F8, ANTIDIAGONAL_13_H7_G8,
+        ANTIDIAGONAL_7_H1_A8,  ANTIDIAGONAL_8_H2_B8,  ANTIDIAGONAL_9_H3_C8,  ANTIDIAGONAL_10_H4_D8,
+        ANTIDIAGONAL_11_H5_E8, ANTIDIAGONAL_12_H6_F8, ANTIDIAGONAL_13_H7_G8, ANTIDIAGONAL_14_H8_H8};
+
+    for (Square sq = Square::SQ_A1; sq.is_valid(); sq++) {
+        if (sq.antidiagonal() != SQUARE_TO_ANTIDIAGONAL[sq]) {
+            PRINT_TEST_FAILED(test_name, "sq.antidiagonal() != SQUARE_TO_ANTIDIAGONAL[sq]");
+        }
     }
 }

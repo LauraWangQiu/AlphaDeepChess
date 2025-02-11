@@ -11,7 +11,7 @@
 #include <ostream>
 
 #include "coordinates.hpp"
-
+#include "diagonal.hpp"
 
 /**
  * @brief NUM_SQUARES
@@ -157,6 +157,33 @@ public:
         return is_valid() ? static_cast<Col>(sq_value & 7U) : COL_INVALID;
     }
 
+    /**
+     * @brief diagonal
+     * 
+     * calculates the diagonal of the square
+     * 
+     * @return (row - col + 7)
+     */
+    constexpr inline Diagonal diagonal() const
+    {
+        return is_valid()
+            ? static_cast<Diagonal>(static_cast<int>(row()) - static_cast<int>(col()) + 7)
+            : DIAGONAL_INVALID;
+    }
+
+    /**
+     * @brief antidiagonal
+     * 
+     * calculates the antidiagonal of the square
+     * 
+     * @return (row + col)
+     */
+    constexpr inline AntiDiagonal antidiagonal() const
+    {
+        return is_valid()
+            ? static_cast<AntiDiagonal>(static_cast<int>(row()) + static_cast<int>(col()))
+            : ANTIDIAGONAL_INVALID;
+    }
     /**
      * @brief to_string
      * 

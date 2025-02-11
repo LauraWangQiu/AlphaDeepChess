@@ -6,6 +6,8 @@
  *
  */
 
+#include <cstdint>
+
 /**
  * @brief Col
  * 
@@ -24,6 +26,18 @@ enum Col : int
     COL_H,
     COL_INVALID
 };
+
+constexpr uint64_t COL_A_MASK = 0x0101010101010101ULL;
+constexpr uint64_t COL_B_MASK = COL_A_MASK << 1;
+constexpr uint64_t COL_C_MASK = COL_A_MASK << 2;
+constexpr uint64_t COL_D_MASK = COL_A_MASK << 3;
+constexpr uint64_t COL_E_MASK = COL_A_MASK << 4;
+constexpr uint64_t COL_F_MASK = COL_A_MASK << 5;
+constexpr uint64_t COL_G_MASK = COL_A_MASK << 6;
+constexpr uint64_t COL_H_MASK = COL_A_MASK << 7;
+
+static constexpr uint64_t COL_MASKS[8] = {COL_A_MASK, COL_B_MASK, COL_C_MASK, COL_D_MASK,
+                                          COL_E_MASK, COL_F_MASK, COL_G_MASK, COL_H_MASK};
 
 /**
  * @brief col_to_char(const Col col)
@@ -195,4 +209,21 @@ constexpr inline Col& operator-=(Col& col, int value)
     const Col sub = static_cast<Col>(static_cast<int>(col) - value);
     col = is_valid_col(sub) ? sub : COL_INVALID;
     return col;
+}
+
+
+/**
+ * @brief get_col_mask
+ * 
+ * calculates the mask with all 1 in the selected col
+ * 
+ * @note out of bounds will result in mask 0
+ * 
+ * @param[in] col The selected col
+ * 
+ * @return COL_MASKS[col]
+ */
+constexpr inline uint64_t get_col_mask(Col col)
+{
+    return is_valid_col(col) ? COL_MASKS[col] : 0ULL;
 }

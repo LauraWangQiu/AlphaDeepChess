@@ -59,16 +59,11 @@ endif()
 
 # Compilation settings for Release mode
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    target_compile_definitions(AlphaDeepChess PRIVATE _RELEASE)
+    target_compile_definitions(AlphaDeepChess PRIVATE _RELEASE NDEBUG)
     target_compile_options(AlphaDeepChess PRIVATE 
-        -g                               # Generate debugging information
-        -O0                              # No optimization
-        -Wall                            # Enable basic warnings
-        -Wextra                          # Enable additional warnings
-        -Wpedantic                       # Enable strict standard warnings
+        -O3                              # No optimization
         #-Ofast                          # Maximum and aggressive optimization
-        #-DNDEBUG                        # Disable debugging checks
-        #-march=native                   # Enables the use of machine architecture-specific instructions
-        #-mtune=native                   # Optimize for current CPU
+        -march=native                   # Enables the use of machine architecture-specific instructions
+        -mtune=native                   # Optimize for current CPU
     )
 endif()

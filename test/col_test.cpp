@@ -11,6 +11,7 @@ static void col_pre_decrement_test();
 static void col_post_decrement_test();
 static void col_plus_equals_test();
 static void col_minus_equals_test();
+static void get_col_mask_test();
 
 void col_test()
 {
@@ -26,6 +27,7 @@ void col_test()
     col_post_decrement_test();
     col_plus_equals_test();
     col_minus_equals_test();
+    get_col_mask_test();
 }
 
 static void col_to_char_test()
@@ -170,5 +172,29 @@ static void col_minus_equals_test()
     col -= 1;
     if (col != COL_INVALID) {
         PRINT_TEST_FAILED(test_name, "col != COL_INVALID");
+    }
+}
+
+static void get_col_mask_test()
+{
+    const std::string test_name = "get_col_mask_test";
+
+    constexpr uint64_t COL_A_MASK = 0x0101010101010101ULL;
+    constexpr uint64_t COL_B_MASK = 0x0202020202020202ULL;
+    constexpr uint64_t COL_C_MASK = 0x0404040404040404ULL;
+    constexpr uint64_t COL_D_MASK = 0x0808080808080808ULL;
+    constexpr uint64_t COL_E_MASK = 0x1010101010101010ULL;
+    constexpr uint64_t COL_F_MASK = 0x2020202020202020ULL;
+    constexpr uint64_t COL_G_MASK = 0x4040404040404040ULL;
+    constexpr uint64_t COL_H_MASK = 0x8080808080808080ULL;
+
+    static constexpr uint64_t COL_MASKS[8] = {COL_A_MASK, COL_B_MASK, COL_C_MASK, COL_D_MASK,
+        COL_E_MASK, COL_F_MASK, COL_G_MASK, COL_H_MASK};
+
+    for (Col col = COL_A; is_valid_col(col); col++) 
+    {
+        if (get_col_mask(col) != COL_MASKS[col]) {
+            PRINT_TEST_FAILED(test_name, "get_col_mask(col) != COL_MASKS[col]");
+        }
     }
 }

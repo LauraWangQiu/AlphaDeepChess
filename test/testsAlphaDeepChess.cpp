@@ -8,6 +8,7 @@
 #include "coordinates_test.cpp"
 #include "row_test.cpp"
 #include "col_test.cpp"
+#include "diagonal_test.cpp"
 
 int main()
 {
@@ -21,5 +22,7 @@ int main()
     move_list_test();
     board_test();
     move_generator_test();
+    diagonal_test();
+    
     return 0;
 }

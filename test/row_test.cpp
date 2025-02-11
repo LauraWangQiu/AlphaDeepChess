@@ -11,6 +11,7 @@ static void row_pre_decrement_test();
 static void row_post_decrement_test();
 static void row_plus_equals_test();
 static void row_minus_equals_test();
+static void get_row_mask_test();
 
 void row_test()
 {
@@ -26,6 +27,7 @@ void row_test()
     row_post_decrement_test();
     row_plus_equals_test();
     row_minus_equals_test();
+    get_row_mask_test();
 }
 
 static void row_to_char_test()
@@ -169,5 +171,29 @@ static void row_minus_equals_test()
     row -= 1;
     if (row != ROW_INVALID) {
         PRINT_TEST_FAILED(test_name, "ROW_1 -= 1 != ROW_INVALID");
+    }
+}
+
+static void get_row_mask_test()
+{
+    const std::string test_name = "get_row_mask_test";
+
+    constexpr uint64_t ROW_1_MASK = 0x00000000000000FFULL;
+    constexpr uint64_t ROW_2_MASK = 0x000000000000FF00ULL;
+    constexpr uint64_t ROW_3_MASK = 0x0000000000FF0000ULL;
+    constexpr uint64_t ROW_4_MASK = 0x00000000FF000000ULL;
+    constexpr uint64_t ROW_5_MASK = 0x000000FF00000000ULL;
+    constexpr uint64_t ROW_6_MASK = 0x0000FF0000000000ULL;
+    constexpr uint64_t ROW_7_MASK = 0x00FF000000000000ULL;
+    constexpr uint64_t ROW_8_MASK = 0xFF00000000000000ULL;
+
+    static constexpr uint64_t ROW_MASKS[8] = {ROW_1_MASK, ROW_2_MASK, ROW_3_MASK, ROW_4_MASK,
+                                              ROW_5_MASK, ROW_6_MASK, ROW_7_MASK, ROW_8_MASK};
+
+
+    for (Row row = ROW_1; is_valid_row(row); row++) {
+        if (get_row_mask(row) != ROW_MASKS[row]) {
+            PRINT_TEST_FAILED(test_name, "get_row_mask(row) != ROW_MASKS[row]");
+        }
     }
 }

@@ -6,6 +6,7 @@
  *
  */
 
+#include <cstdint>
 
 /**
  * @brief Row
@@ -26,6 +27,17 @@ enum Row : int
     ROW_INVALID
 };
 
+constexpr uint64_t ROW_1_MASK = 0x00000000000000FFULL;
+constexpr uint64_t ROW_2_MASK = 0x000000000000FF00ULL;
+constexpr uint64_t ROW_3_MASK = 0x0000000000FF0000ULL;
+constexpr uint64_t ROW_4_MASK = 0x00000000FF000000ULL;
+constexpr uint64_t ROW_5_MASK = 0x000000FF00000000ULL;
+constexpr uint64_t ROW_6_MASK = 0x0000FF0000000000ULL;
+constexpr uint64_t ROW_7_MASK = 0x00FF000000000000ULL;
+constexpr uint64_t ROW_8_MASK = 0xFF00000000000000ULL;
+
+static constexpr uint64_t ROW_MASKS[8] = {ROW_1_MASK, ROW_2_MASK, ROW_3_MASK, ROW_4_MASK,
+                                          ROW_5_MASK, ROW_6_MASK, ROW_7_MASK, ROW_8_MASK};
 
 /**
  * @brief row_to_char(const Row row)
@@ -198,4 +210,20 @@ constexpr inline Row& operator-=(Row& row, int value)
     const Row sub = static_cast<Row>(static_cast<int>(row) - value);
     row = is_valid_row(sub) ? sub : ROW_INVALID;
     return row;
+}
+
+/**
+ * @brief get_row_mask
+ * 
+ * calculates the mask with all 1 in the selected row
+ * 
+ * @note out of bounds will result in mask 0
+ * 
+ * @param[in] row The selected row
+ * 
+ * @return ROW_MASKS[row]
+ */
+constexpr inline uint64_t get_row_mask(Row row)
+{
+    return is_valid_row(row) ? ROW_MASKS[row] : 0ULL;
 }

@@ -4,88 +4,40 @@
  *
  * chess move generator basic implementation. 
  * 
+ * https://peterellisjones.com/posts/generating-legal-chess-moves-efficiently/
+ * 
  */
 
 #include "move_generator.hpp"
+#include "precomputed_move_data.hpp"
 
 struct MoveGenInfo
 {
 public:
-    inline bool is_square_attacked(Square square) { return attack_mask & square.mask(); }
-    inline bool is_square_pinned(Square square) { return pin_mask & square.mask(); }
-    inline bool is_square_in_king_danger(Square square) { return kingDanger_mask & square.mask(); }
-    inline bool is_square_in_push(Square square) { return push_mask & square.mask(); }
-    inline bool is_square_in_capture(Square square) { return push_mask & square.mask(); }
-    inline Square get_checker_square() { return checker_square; }
-    inline uint8_t get_checkers_number() { return checkers_number; }
+    uint64_t attacked_squares_mask;      // squares that enemy pieces directly attack
+    uint64_t pinned_squares_mask;        // squares where pinned pieces could move
+    uint64_t king_danger_squares_mask;   // squares that enemy pieces attack if the king is removed
+    uint64_t push_squares_mask;          // squares where pieces could move to block a check
+    uint64_t capture_squares_mask;       // squares of pieces that could be capture to block a check
+    Square checker_square;               // square of the piece giving check
+    Square king_white_square;            // square of the white king
+    Square king_black_square;            // square of the black king
+    uint8_t checkers_number;             // number of pieces giving check
+    ChessColor side_to_move;             // color of the side to move in the game
 
-    inline Square get_king_square(ChessColor color)
+    // put all fields to default value (push and capture mask = 0xffffffff, others to 0)
+    inline void init()
     {
-        return color == ChessColor::WHITE ? king_white_square : king_black_square;
-    }
-
-    inline void set_attack_square(Square square, bool value)
-    {
-        attack_mask &= ~square.mask();
-        attack_mask |= static_cast<uint64_t>(value) << square;
-    }
-
-    inline void set_pinned_square(Square square, bool value)
-    {
-        pin_mask &= ~square.mask();
-        pin_mask |= static_cast<uint64_t>(value) << square;
-    }
-
-    inline void set_kingDanger_square(Square square, bool value)
-    {
-        kingDanger_mask &= ~square.mask();
-        kingDanger_mask |= static_cast<uint64_t>(value) << square;
-    }
-
-    inline void set_push_square(Square square, bool value)
-    {
-        push_mask &= ~square.mask();
-        push_mask |= static_cast<uint64_t>(value) << square;
-    }
-
-    inline void set_capture_square(Square square, bool value)
-    {
-        capture_mask &= ~square.mask();
-        capture_mask |= static_cast<uint64_t>(value) << square;
-    }
-
-    inline void add_checker(Square square)
-    {
-        checker_square = square;
-        checkers_number++;
-    }
-
-    inline void set_king_square(Square square, ChessColor color)
-    {
-        color == ChessColor::WHITE ? king_white_square = square : king_black_square = square;
-    }
-
-    inline void clear()
-    {
-        attack_mask = 0U;
-        pin_mask = 0U;
-        kingDanger_mask = 0U;
+        attacked_squares_mask = 0U;
+        pinned_squares_mask = 0U;
+        king_danger_squares_mask = 0U;
+        push_squares_mask = 0xffffffffU;
+        capture_squares_mask = 0xffffffffU;
         checker_square = Square::SQ_INVALID;
         checkers_number = 0U;
         king_white_square = Square::SQ_INVALID;
         king_black_square = Square::SQ_INVALID;
     }
-
-private:
-    uint64_t attack_mask;
-    uint64_t pin_mask;
-    uint64_t kingDanger_mask;
-    uint64_t push_mask;
-    uint64_t capture_mask;
-    Square checker_square;
-    Square king_white_square;
-    Square king_black_square;
-    uint8_t checkers_number;
 };
 
 static void calculate_dangers(const Board& board, MoveGenInfo& moveGenInfo);
@@ -143,7 +95,7 @@ static void calculate_checkers(const Board& board, MoveGenInfo& moveGenInfo);
 void generate_legal_moves(MoveList& moves, const Board& board)
 {
 
-    MoveGenInfo moveGenInfo;
+    /*MoveGenInfo moveGenInfo;
     moves.clear();
 
     const ChessColor side_to_move = board.state().side_to_move();
@@ -174,16 +126,19 @@ void generate_legal_moves(MoveList& moves, const Board& board)
         default: break;
         }
     }
-
+*/
 
     //numMoves = numLegalMoves;
     //stateInfo.check = checkersNum > 0;
 }
+/*
+static void update_move_generator_info(const Board& board, MoveGenInfo& moveGenInfo)
+{
+    moveGenInfo.init();
+}
 
 static void calculate_dangers(const Board& board, MoveGenInfo& moveGenInfo)
 {
-
-    moveGenInfo.clear();
 
     for (Square square = Square::SQ_A1; square <= Square::SQ_H8; square++) {
 
@@ -700,3 +655,11 @@ static void calculate_checkers(const Board& board, MoveGenInfo& moveGenInfo)
         }
     }
 }
+
+// return the mask of the squares that the knight could move
+static uint64_t get_knight_moves_mask(Square knight_square)
+{
+
+    
+} 
+*/
