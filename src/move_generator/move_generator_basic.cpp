@@ -1,5 +1,5 @@
 /**
- * @file move_generator_basic.hpp
+ * @file move_generator_basic.cpp
  * @brief move generator services.
  *
  * chess move generator basic implementation. 
@@ -11,7 +11,7 @@
 #include "move_generator.hpp"
 #include "precomputed_move_data.hpp"
 #include "move_generator_info.hpp"
-#include <cassert>
+#include "bit_utilities.hpp"
 
 
 static void calculate_dangers(const Board& board, MoveGeneratorInfo& MoveGeneratorInfo);
@@ -65,10 +65,21 @@ static bool is_valid_move_en_passant(const Board& board, Square piece_sq, Square
                                      MoveGeneratorInfo& MoveGeneratorInfo);
 
 
-void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo);
-void update_king_danger(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
-void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo);
-void update_knight_danger(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo);
+static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo);
+
+static void update_king_danger(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
+static void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo);
+static void update_knight_danger(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo);
+static void update_rook_danger(Square rook_sq, MoveGeneratorInfo& moveGeneratorInfo);
+static void update_bishop_danger(Square bishop_sq, MoveGeneratorInfo& moveGeneratorInfo);
+static void update_queen_danger(Square queen_sq, MoveGeneratorInfo& moveGeneratorInfo);
+
+static void calculate_king_moves(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
+static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo);
+static void calculate_knight_moves(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo);
+static void calculate_rook_moves(Square rook_sq, MoveGeneratorInfo& moveGeneratorInfo);
+static void calculate_bishop_moves(Square bishop_sq, MoveGeneratorInfo& moveGeneratorInfo);
+static void calculate_queen_moves(Square queen_sq, MoveGeneratorInfo& moveGeneratorInfo);
 
 /**
  * @brief generate_legal_moves
@@ -81,49 +92,41 @@ void update_knight_danger(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo
  */
 void generate_legal_moves(MoveList& moves, const Board& board)
 {
-    moves.clear();
-    MoveGeneratorInfo moveGeneratorInfo(board);
+    MoveGeneratorInfo moveGeneratorInfo(board, moves);
 
     update_move_generator_info(moveGeneratorInfo);
 
-    /*
-    const ChessColor side_to_move = board.state().side_to_move();
-    calculate_dangers(board, MoveGeneratorInfo);
 
-    calculate_checkers(board, MoveGeneratorInfo);
+    const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
 
-    if (MoveGeneratorInfo.get_checkers_number() >= 2) {
-
-        calculate_king_moves(board, MoveGeneratorInfo.get_king_square(side_to_move), MoveGeneratorInfo, moves);
-        return;   // when double check only king moves allowed
+    if (moveGeneratorInfo.number_of_checkers >= 2) {
+        // when double check only king moves allowed
+        calculate_king_moves(moveGeneratorInfo.side_to_move_king_square, moveGeneratorInfo);
+        return;
     }
 
     for (Square square = Square::SQ_A1; square <= Square::SQ_H8; square++) {
 
         const Piece piece = board.get_piece(square);
-        const ChessColor color = get_color(piece);
+        const ChessColor piece_color = get_color(piece);
 
-        if (board.is_empty(square) || color == side_to_move) continue;
+        if (board.is_empty(square) || piece_color != side_to_move) continue;
 
         switch (piece_to_pieceType(piece)) {
-        case PieceType::PAWN: calculate_pawn_moves(board, square, MoveGeneratorInfo, moves); break;
-        case PieceType::KNIGHT: calculate_knight_moves(board, square, MoveGeneratorInfo, moves); break;
-        case PieceType::KING: calculate_king_moves(board, square, MoveGeneratorInfo, moves); break;
-        case PieceType::QUEEN: calculate_queen_moves(board, square, MoveGeneratorInfo, moves); break;
-        case PieceType::ROOK: calculate_rook_moves(board, square, MoveGeneratorInfo, moves); break;
-        case PieceType::BISHOP: calculate_bishop_moves(board, square, MoveGeneratorInfo, moves); break;
+        case PieceType::PAWN: calculate_pawn_moves(square, moveGeneratorInfo); break;
+        case PieceType::KNIGHT: calculate_knight_moves(square, moveGeneratorInfo); break;
+        case PieceType::KING: calculate_king_moves(square, moveGeneratorInfo); break;
+        case PieceType::QUEEN: calculate_queen_moves(square, moveGeneratorInfo); break;
+        case PieceType::ROOK: calculate_rook_moves(square, moveGeneratorInfo); break;
+        case PieceType::BISHOP: calculate_bishop_moves(square, moveGeneratorInfo); break;
         default: break;
         }
     }
-*/
-
-    //numMoves = numLegalMoves;
-    //stateInfo.check = checkersNum > 0;
 }
 
 void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
 {
-    const Board board = moveGeneratorInfo.board;
+    const Board& board = moveGeneratorInfo.board;
     const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
 
     for (Square square = Square::SQ_A1; square <= Square::SQ_H8; square++) {
@@ -134,12 +137,12 @@ void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
         if (board.is_empty(square) || piece_color == side_to_move) continue;
 
         switch (piece_to_pieceType(piece)) {
-        case PieceType::PAWN: calculate_pawn_dangers(board, square, MoveGeneratorInfo); break;
-        case PieceType::KNIGHT: calculate_knight_dangers(board, square, MoveGeneratorInfo); break;
+        case PieceType::PAWN: update_pawn_danger(square, moveGeneratorInfo); break;
+        case PieceType::KNIGHT: update_knight_danger(square, moveGeneratorInfo); break;
         case PieceType::KING: update_king_danger(square, moveGeneratorInfo); break;
-        case PieceType::QUEEN: calculate_queen_dangers(board, square, MoveGeneratorInfo); break;
-        case PieceType::ROOK: calculate_rook_dangers(board, square, MoveGeneratorInfo); break;
-        case PieceType::BISHOP: calculate_bishop_dangers(board, square, MoveGeneratorInfo); break;
+        case PieceType::QUEEN: update_queen_danger(square, moveGeneratorInfo); break;
+        case PieceType::ROOK: update_rook_danger(square, moveGeneratorInfo); break;
+        case PieceType::BISHOP: update_bishop_danger(square, moveGeneratorInfo); break;
         default: break;
         }
     }
@@ -149,16 +152,25 @@ void update_king_danger(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(king_sq.is_valid());
 
+    const Board& board = moveGeneratorInfo.board;
+    const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
+
     const uint64_t king_attacks_mask = PrecomputedMoveData::kingAttacks(king_sq);
 
     moveGeneratorInfo.king_danger_squares_mask |= king_attacks_mask;
+
+    // the real attacks are the squares where piece attacks minus the blockers friendly pieces
+    const uint64_t blockers_mask = moveGeneratorInfo.side_to_move_pieces_mask;
+    const uint64_t king_real_attacks = king_attacks_mask & ~(blockers_mask);
+
+    moveGeneratorInfo.attacked_squares_mask |= king_real_attacks;
 }
 
 void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(pawn_sq.is_valid());
 
-    const Board board = moveGeneratorInfo.board;
+    const Board& board = moveGeneratorInfo.board;
     const ChessColor side_waiting = moveGeneratorInfo.side_waiting;
 
     const uint64_t pawn_attacks_mask = side_waiting == ChessColor::WHITE
@@ -166,6 +178,12 @@ void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo)
         : PrecomputedMoveData::blackPawnAttacks(pawn_sq);
 
     moveGeneratorInfo.king_danger_squares_mask |= pawn_attacks_mask;
+
+    // the real attacks are the squares where piece attacks minus the blockers friendly pieces
+    const uint64_t blockers_mask = moveGeneratorInfo.side_to_move_pieces_mask;
+    const uint64_t pawn_real_attacks = pawn_attacks_mask & ~(blockers_mask);
+
+    moveGeneratorInfo.attacked_squares_mask |= pawn_real_attacks;
 
     // there is a check if the enemy king mask is inside the pawn attack mask
     const Square friendly_king_square = moveGeneratorInfo.side_to_move_king_square;
@@ -183,6 +201,12 @@ void update_knight_danger(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo
 
     moveGeneratorInfo.king_danger_squares_mask |= knight_attacks_mask;
 
+    // the real attacks are the squares where piece attacks minus the blockers friendly pieces
+    const uint64_t blockers_mask = moveGeneratorInfo.side_to_move_pieces_mask;
+    const uint64_t knight_real_attacks = knight_attacks_mask & ~(blockers_mask);
+
+    moveGeneratorInfo.attacked_squares_mask |= knight_real_attacks;
+
     // there is a check if the enemy king mask is inside the knight attack mask
     const Square friendly_king_square = moveGeneratorInfo.side_to_move_king_square;
 
@@ -191,12 +215,144 @@ void update_knight_danger(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo
     }
 }
 
-/*
-static void update_move_generator_info(const Board& board, MoveGeneratorInfo& MoveGeneratorInfo)
+void update_rook_danger(Square rook_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
-    MoveGeneratorInfo.init();
+    assert(rook_sq.is_valid());
 }
 
+void update_bishop_danger(Square bishop_sq, MoveGeneratorInfo& moveGeneratorInfo)
+{
+    assert(bishop_sq.is_valid());
+}
+
+void update_queen_danger(Square queen_sq, MoveGeneratorInfo& moveGeneratorInfo)
+{
+    assert(queen_sq.is_valid());
+
+    update_rook_danger(queen_sq, moveGeneratorInfo);
+    update_bishop_danger(queen_sq, moveGeneratorInfo);
+}
+
+static void calculate_king_moves(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo)
+{
+    assert(king_sq.is_valid());
+
+    MoveList& moves = moveGeneratorInfo.moves;
+
+    const uint64_t king_attacks = PrecomputedMoveData::kingAttacks(king_sq);
+    const uint64_t attack_mask = moveGeneratorInfo.attacked_squares_mask;
+    const uint64_t king_danger_mask = moveGeneratorInfo.king_danger_squares_mask;
+    const uint64_t blockers_mask = moveGeneratorInfo.side_to_move_pieces_mask;
+    const uint64_t capture_mask = moveGeneratorInfo.capture_squares_mask;
+
+    uint64_t king_moves_mask = king_attacks & ~king_danger_mask & ~blockers_mask & capture_mask;
+
+    while (king_moves_mask) {
+        // pop least significant bit of king_moves_bitboard until is zero
+        Square available_square = static_cast<Square>(pop_lsb(king_moves_mask));
+
+        // each lsb is an square where the piece could move
+        moves.add(Move(king_sq, available_square));
+    }
+}
+
+static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo)
+{
+    assert(pawn_sq.is_valid());
+
+    const Board& board = moveGeneratorInfo.board;
+    MoveList& moves = moveGeneratorInfo.moves;
+
+    const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
+
+    const uint64_t pawn_attacks = side_to_move == ChessColor::WHITE
+        ? PrecomputedMoveData::whitePawnAttacks(pawn_sq)
+        : PrecomputedMoveData::blackPawnAttacks(pawn_sq);
+
+    const uint64_t enemy_mask = moveGeneratorInfo.side_waiting_pieces_mask;
+    const uint64_t capture_mask = moveGeneratorInfo.capture_squares_mask;
+    const uint64_t push_mask = moveGeneratorInfo.push_squares_mask;
+
+    // pawn captures
+    uint64_t pawn_captures_mask = pawn_attacks & enemy_mask & capture_mask & push_mask;
+
+    while (pawn_captures_mask) {
+        Square available_square = static_cast<Square>(pop_lsb(pawn_captures_mask));
+        moves.add(Move(pawn_sq, available_square));
+    }
+
+
+    // pawn push
+    const Square pawn_push_sq =
+        side_to_move == ChessColor::WHITE ? pawn_sq.north() : pawn_sq.south();
+
+    const Row pawn_row = pawn_sq.row();
+
+    if (pawn_row == moveGeneratorInfo.row_where_double_push_is_avaliable) {
+
+        const Square pawn_double_push_sq =
+            side_to_move == ChessColor::WHITE ? pawn_push_sq.north() : pawn_push_sq.south();
+
+        if (board.is_empty(pawn_push_sq)) {
+            moves.add(Move(pawn_sq, pawn_push_sq));
+
+            if (board.is_empty(pawn_double_push_sq)) {
+                moves.add(Move(pawn_sq, pawn_double_push_sq));
+            }
+        }
+    }
+    else if (pawn_row == moveGeneratorInfo.row_where_promotion_is_available) {
+        if (board.is_empty(pawn_push_sq)) {
+            moves.add(Move(pawn_sq, pawn_push_sq, MoveType::PROMOTION, PieceType::KNIGHT));
+            moves.add(Move(pawn_sq, pawn_push_sq, MoveType::PROMOTION, PieceType::BISHOP));
+            moves.add(Move(pawn_sq, pawn_push_sq, MoveType::PROMOTION, PieceType::ROOK));
+            moves.add(Move(pawn_sq, pawn_push_sq, MoveType::PROMOTION, PieceType::QUEEN));
+        }
+    }
+    else {
+        if (board.is_empty(pawn_push_sq)) {
+            moves.add(Move(pawn_sq, pawn_push_sq));
+        }
+    }
+}
+
+static void calculate_knight_moves(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo)
+{
+    assert(knight_sq.is_valid());
+
+    MoveList& moves = moveGeneratorInfo.moves;
+
+    const uint64_t knight_attacks = PrecomputedMoveData::knightAttacks(knight_sq);
+    const uint64_t blockers_mask = moveGeneratorInfo.side_to_move_pieces_mask;
+    const uint64_t capture_mask = moveGeneratorInfo.capture_squares_mask;
+    const uint64_t push_mask = moveGeneratorInfo.push_squares_mask;
+
+    uint64_t knight_moves_mask = knight_attacks & ~blockers_mask & capture_mask & push_mask;
+
+    while (knight_moves_mask) {
+        Square available_square = static_cast<Square>(pop_lsb(knight_moves_mask));
+        moves.add(Move(knight_sq, available_square));
+    }
+}
+
+static void calculate_rook_moves(Square rook_sq, MoveGeneratorInfo& moveGeneratorInfo)
+{
+    assert(rook_sq.is_valid());
+}
+
+static void calculate_bishop_moves(Square bishop_sq, MoveGeneratorInfo& moveGeneratorInfo)
+{
+    assert(bishop_sq.is_valid());
+}
+
+static void calculate_queen_moves(Square queen_sq, MoveGeneratorInfo& moveGeneratorInfo)
+{
+    assert(queen_sq.is_valid());
+    calculate_rook_moves(queen_sq, moveGeneratorInfo);
+    calculate_bishop_moves(queen_sq, moveGeneratorInfo);
+}
+
+/*
 static void calculate_dangers(const Board& board, MoveGeneratorInfo& MoveGeneratorInfo)
 {
 

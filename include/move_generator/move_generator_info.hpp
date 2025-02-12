@@ -34,7 +34,13 @@ public:
     uint8_t number_of_checkers;          // number of pieces giving check
     ChessColor side_to_move;             // color of the side to move in the game
     ChessColor side_waiting;             // color of the side waiting
-    const Board& board;
+    const Board& board;                  // chess position
+    MoveList& moves;                     // move list
+    uint64_t side_to_move_pieces_mask;   // bitboard of the pieces of the side to move
+    uint64_t side_waiting_pieces_mask;   // bitboard of the pieces of the side waiting
+    Row row_where_promotion_is_available;
+    Row row_where_en_passant_is_available;
+    Row row_where_double_push_is_avaliable;
 
     /**
      * @brief MoveGeneratorInfo
@@ -44,10 +50,12 @@ public:
      *  @note put all fields to default value (push and capture mask = 0xffffffff, others to 0)
      * 
      *  @param[in] board actual position
+     *  @param[in] moves array of moves to fill
      * 
      */
-    MoveGeneratorInfo(const Board& board) : board(board)
+    MoveGeneratorInfo(const Board& board, MoveList& moves) : board(board), moves(moves)
     {
+        moves.clear();
         side_to_move = board.state().side_to_move();
         side_waiting = side_to_move == ChessColor::WHITE ? ChessColor::BLACK : ChessColor::WHITE;
         attacked_squares_mask = 0U;
@@ -59,10 +67,22 @@ public:
         number_of_checkers = 0U;
         king_white_square = board.get_bitboard_piece(Piece::W_KING);
         king_black_square = board.get_bitboard_piece(Piece::B_KING);
+
         side_to_move_king_square =
             side_to_move == ChessColor::WHITE ? king_white_square : king_black_square;
+
         side_waiting_king_square =
             side_to_move == ChessColor::WHITE ? king_black_square : king_white_square;
+
+        side_to_move_pieces_mask = side_to_move == ChessColor::WHITE ? board.get_bitboard_white()
+                                                                     : board.get_bitboard_black();
+        side_waiting_pieces_mask = side_to_move == ChessColor::WHITE ? board.get_bitboard_black()
+                                                                     : board.get_bitboard_white();
+
+        row_where_promotion_is_available = side_to_move == ChessColor::WHITE ? ROW_7 : ROW_2;
+        row_where_en_passant_is_available = side_to_move == ChessColor::WHITE ? ROW_5 : ROW_4;
+        row_where_double_push_is_avaliable = side_to_move == ChessColor::WHITE ? ROW_2 : ROW_7;
+
     }
     ~MoveGeneratorInfo() { }
 
