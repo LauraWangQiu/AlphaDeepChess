@@ -165,10 +165,10 @@ private:
 std::array<uint64_t, 64> PrecomputedMoveData::WHITE_PAWN_ATTACKS = initializeWhitePawnAttacks();
 std::array<uint64_t, 64> PrecomputedMoveData::BLACK_PAWN_ATTACKS = initializeBlackPawnAttacks();
 std::array<uint64_t, 64> PrecomputedMoveData::KING_ATTACKS = initializeKingAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::KNIGHT_ATTACKS = initializeKingAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::BISHOP_ATTACKS = initializeKingAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::ROOK_ATTACKS = initializeKingAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::QUEEN_ATTACKS = initializeKingAttacks();
+std::array<uint64_t, 64> PrecomputedMoveData::KNIGHT_ATTACKS = initializeKnightAttacks();
+std::array<uint64_t, 64> PrecomputedMoveData::BISHOP_ATTACKS = initializeBishopAttacks();
+std::array<uint64_t, 64> PrecomputedMoveData::ROOK_ATTACKS = initializeRookAttacks();
+std::array<uint64_t, 64> PrecomputedMoveData::QUEEN_ATTACKS = initializeQueenAttacks();
 
 constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeKingAttacks()
 {
@@ -182,7 +182,7 @@ constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeKingAttacks()
             for (auto& dir : dirs) {
 
                 const Square king_square = Square(row, col);
-                const Square attack_square = Square(row + dir[0], col + dir[1]);
+                const Square attack_square = Square(row + (Row)dir[0], col + (Col)dir[1]);
 
                 if (attack_square.is_valid()) {
                     KING_ATTACKS[king_square] |= attack_square.mask();
