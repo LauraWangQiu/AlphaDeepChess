@@ -10,79 +10,66 @@
 
 #include "move_generator.hpp"
 #include "precomputed_move_data.hpp"
+#include "move_generator_info.hpp"
+#include <cassert>
 
-struct MoveGenInfo
-{
-public:
-    uint64_t attacked_squares_mask;      // squares that enemy pieces directly attack
-    uint64_t pinned_squares_mask;        // squares where pinned pieces could move
-    uint64_t king_danger_squares_mask;   // squares that enemy pieces attack if the king is removed
-    uint64_t push_squares_mask;          // squares where pieces could move to block a check
-    uint64_t capture_squares_mask;       // squares of pieces that could be capture to block a check
-    Square checker_square;               // square of the piece giving check
-    Square king_white_square;            // square of the white king
-    Square king_black_square;            // square of the black king
-    uint8_t checkers_number;             // number of pieces giving check
-    ChessColor side_to_move;             // color of the side to move in the game
 
-    // put all fields to default value (push and capture mask = 0xffffffff, others to 0)
-    inline void init()
-    {
-        attacked_squares_mask = 0U;
-        pinned_squares_mask = 0U;
-        king_danger_squares_mask = 0U;
-        push_squares_mask = 0xffffffffU;
-        capture_squares_mask = 0xffffffffU;
-        checker_square = Square::SQ_INVALID;
-        checkers_number = 0U;
-        king_white_square = Square::SQ_INVALID;
-        king_black_square = Square::SQ_INVALID;
-    }
-};
-
-static void calculate_dangers(const Board& board, MoveGenInfo& moveGenInfo);
-static void calculate_pawn_dangers(const Board& board, Square sq, MoveGenInfo& moveGenInfo);
-static void calculate_knight_dangers(const Board& board, Square sq, MoveGenInfo& moveGenInfo);
-static void calculate_king_dangers(const Board& board, Square sq, MoveGenInfo& moveGenInfo);
-static void calculate_queen_dangers(const Board& board, Square sq, MoveGenInfo& moveGenInfo);
-static void calculate_rook_dangers(const Board& board, Square sq, MoveGenInfo& moveGenInfo);
-static void calculate_bishop_dangers(const Board& board, Square sq, MoveGenInfo& moveGenInfo);
+static void calculate_dangers(const Board& board, MoveGeneratorInfo& MoveGeneratorInfo);
+static void calculate_pawn_dangers(const Board& board, Square sq,
+                                   MoveGeneratorInfo& MoveGeneratorInfo);
+static void calculate_knight_dangers(const Board& board, Square sq,
+                                     MoveGeneratorInfo& MoveGeneratorInfo);
+static void calculate_king_dangers(const Board& board, Square sq,
+                                   MoveGeneratorInfo& MoveGeneratorInfo);
+static void calculate_queen_dangers(const Board& board, Square sq,
+                                    MoveGeneratorInfo& MoveGeneratorInfo);
+static void calculate_rook_dangers(const Board& board, Square sq,
+                                   MoveGeneratorInfo& MoveGeneratorInfo);
+static void calculate_bishop_dangers(const Board& board, Square sq,
+                                     MoveGeneratorInfo& MoveGeneratorInfo);
 
 static inline bool is_enemy_king(const Board& board, Square king_square, ChessColor friend_color);
 static inline bool is_enemy_piece(const Board& board, Square piece_square, ChessColor friend_color);
 
 static void calculate_danger_to_square(const Board& board, Square attacker_sq, Square defender_sq,
-                                       ChessColor friend_color, MoveGenInfo& moveGenInfo);
+                                       ChessColor friend_color,
+                                       MoveGeneratorInfo& MoveGeneratorInfo);
 
 static void calculate_danger_to_direction(const Board& board, Direction dir, Square attacker_sq,
-                                          ChessColor friend_color, MoveGenInfo& moveGenInfo);
+                                          ChessColor friend_color,
+                                          MoveGeneratorInfo& MoveGeneratorInfo);
 
-static void calculate_pawn_moves(const Board& board, Square sq, MoveGenInfo& moveGenInfo,
-                                 MoveList& moves);
-static void calculate_knight_moves(const Board& board, Square sq, MoveGenInfo& moveGenInfo,
-                                   MoveList& moves);
-static void calculate_king_moves(const Board& board, Square sq, MoveGenInfo& moveGenInfo,
-                                 MoveList& moves);
-static void calculate_queen_moves(const Board& board, Square sq, MoveGenInfo& moveGenInfo,
-                                  MoveList& moves);
-static void calculate_rook_moves(const Board& board, Square sq, MoveGenInfo& moveGenInfo,
-                                 MoveList& moves);
-static void calculate_bishop_moves(const Board& board, Square sq, MoveGenInfo& moveGenInfo,
-                                   MoveList& moves);
+static void calculate_pawn_moves(const Board& board, Square sq,
+                                 MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
+static void calculate_knight_moves(const Board& board, Square sq,
+                                   MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
+static void calculate_king_moves(const Board& board, Square sq,
+                                 MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
+static void calculate_queen_moves(const Board& board, Square sq,
+                                  MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
+static void calculate_rook_moves(const Board& board, Square sq,
+                                 MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
+static void calculate_bishop_moves(const Board& board, Square sq,
+                                   MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
 static void calculate_castle_moves(const Board& board, Square king_sq, ChessColor friendly_color,
-                                   MoveGenInfo& moveGenInfo, MoveList& moves);
+                                   MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
 
 static void calculate_moves_to_direction(const Board& board, Direction dir, Square attacker_sq,
-                                         ChessColor friend_color, MoveGenInfo& moveGenInfo,
-                                         MoveList& moves);
+                                         ChessColor friend_color,
+                                         MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
 
 static bool is_valid_move_pinned(const Board& board, Square piece_sq, Square end_sq,
-                                 MoveGenInfo& moveGenInfo);
+                                 MoveGeneratorInfo& MoveGeneratorInfo);
 
 static bool is_valid_move_en_passant(const Board& board, Square piece_sq, Square end_sq,
-                                     MoveGenInfo& moveGenInfo);
+                                     MoveGeneratorInfo& MoveGeneratorInfo);
 
-static void calculate_checkers(const Board& board, MoveGenInfo& moveGenInfo);
+
+void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo);
+void update_king_danger(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
+void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo);
+void update_knight_danger(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo);
+
 /**
  * @brief generate_legal_moves
  * 
@@ -94,18 +81,20 @@ static void calculate_checkers(const Board& board, MoveGenInfo& moveGenInfo);
  */
 void generate_legal_moves(MoveList& moves, const Board& board)
 {
-
-    /*MoveGenInfo moveGenInfo;
     moves.clear();
+    MoveGeneratorInfo moveGeneratorInfo(board);
 
+    update_move_generator_info(moveGeneratorInfo);
+
+    /*
     const ChessColor side_to_move = board.state().side_to_move();
-    calculate_dangers(board, moveGenInfo);
+    calculate_dangers(board, MoveGeneratorInfo);
 
-    calculate_checkers(board, moveGenInfo);
+    calculate_checkers(board, MoveGeneratorInfo);
 
-    if (moveGenInfo.get_checkers_number() >= 2) {
+    if (MoveGeneratorInfo.get_checkers_number() >= 2) {
 
-        calculate_king_moves(board, moveGenInfo.get_king_square(side_to_move), moveGenInfo, moves);
+        calculate_king_moves(board, MoveGeneratorInfo.get_king_square(side_to_move), MoveGeneratorInfo, moves);
         return;   // when double check only king moves allowed
     }
 
@@ -117,12 +106,12 @@ void generate_legal_moves(MoveList& moves, const Board& board)
         if (board.is_empty(square) || color == side_to_move) continue;
 
         switch (piece_to_pieceType(piece)) {
-        case PieceType::PAWN: calculate_pawn_moves(board, square, moveGenInfo, moves); break;
-        case PieceType::KNIGHT: calculate_knight_moves(board, square, moveGenInfo, moves); break;
-        case PieceType::KING: calculate_king_moves(board, square, moveGenInfo, moves); break;
-        case PieceType::QUEEN: calculate_queen_moves(board, square, moveGenInfo, moves); break;
-        case PieceType::ROOK: calculate_rook_moves(board, square, moveGenInfo, moves); break;
-        case PieceType::BISHOP: calculate_bishop_moves(board, square, moveGenInfo, moves); break;
+        case PieceType::PAWN: calculate_pawn_moves(board, square, MoveGeneratorInfo, moves); break;
+        case PieceType::KNIGHT: calculate_knight_moves(board, square, MoveGeneratorInfo, moves); break;
+        case PieceType::KING: calculate_king_moves(board, square, MoveGeneratorInfo, moves); break;
+        case PieceType::QUEEN: calculate_queen_moves(board, square, MoveGeneratorInfo, moves); break;
+        case PieceType::ROOK: calculate_rook_moves(board, square, MoveGeneratorInfo, moves); break;
+        case PieceType::BISHOP: calculate_bishop_moves(board, square, MoveGeneratorInfo, moves); break;
         default: break;
         }
     }
@@ -131,13 +120,84 @@ void generate_legal_moves(MoveList& moves, const Board& board)
     //numMoves = numLegalMoves;
     //stateInfo.check = checkersNum > 0;
 }
-/*
-static void update_move_generator_info(const Board& board, MoveGenInfo& moveGenInfo)
+
+void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
 {
-    moveGenInfo.init();
+    const Board board = moveGeneratorInfo.board;
+    const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
+
+    for (Square square = Square::SQ_A1; square <= Square::SQ_H8; square++) {
+
+        const Piece piece = board.get_piece(square);
+        const ChessColor piece_color = get_color(piece);
+
+        if (board.is_empty(square) || piece_color == side_to_move) continue;
+
+        switch (piece_to_pieceType(piece)) {
+        case PieceType::PAWN: calculate_pawn_dangers(board, square, MoveGeneratorInfo); break;
+        case PieceType::KNIGHT: calculate_knight_dangers(board, square, MoveGeneratorInfo); break;
+        case PieceType::KING: update_king_danger(square, moveGeneratorInfo); break;
+        case PieceType::QUEEN: calculate_queen_dangers(board, square, MoveGeneratorInfo); break;
+        case PieceType::ROOK: calculate_rook_dangers(board, square, MoveGeneratorInfo); break;
+        case PieceType::BISHOP: calculate_bishop_dangers(board, square, MoveGeneratorInfo); break;
+        default: break;
+        }
+    }
 }
 
-static void calculate_dangers(const Board& board, MoveGenInfo& moveGenInfo)
+void update_king_danger(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo)
+{
+    assert(king_sq.is_valid());
+
+    const uint64_t king_attacks_mask = PrecomputedMoveData::kingAttacks(king_sq);
+
+    moveGeneratorInfo.king_danger_squares_mask |= king_attacks_mask;
+}
+
+void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo)
+{
+    assert(pawn_sq.is_valid());
+
+    const Board board = moveGeneratorInfo.board;
+    const ChessColor side_waiting = moveGeneratorInfo.side_waiting;
+
+    const uint64_t pawn_attacks_mask = side_waiting == ChessColor::WHITE
+        ? PrecomputedMoveData::whitePawnAttacks(pawn_sq)
+        : PrecomputedMoveData::blackPawnAttacks(pawn_sq);
+
+    moveGeneratorInfo.king_danger_squares_mask |= pawn_attacks_mask;
+
+    // there is a check if the enemy king mask is inside the pawn attack mask
+    const Square friendly_king_square = moveGeneratorInfo.side_to_move_king_square;
+
+    if (pawn_attacks_mask & friendly_king_square.mask()) {
+        moveGeneratorInfo.new_checker_found(pawn_sq);
+    }
+}
+
+void update_knight_danger(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo)
+{
+    assert(knight_sq.is_valid());
+
+    const uint64_t knight_attacks_mask = PrecomputedMoveData::knightAttacks(knight_sq);
+
+    moveGeneratorInfo.king_danger_squares_mask |= knight_attacks_mask;
+
+    // there is a check if the enemy king mask is inside the knight attack mask
+    const Square friendly_king_square = moveGeneratorInfo.side_to_move_king_square;
+
+    if (knight_attacks_mask & friendly_king_square.mask()) {
+        moveGeneratorInfo.new_checker_found(knight_sq);
+    }
+}
+
+/*
+static void update_move_generator_info(const Board& board, MoveGeneratorInfo& MoveGeneratorInfo)
+{
+    MoveGeneratorInfo.init();
+}
+
+static void calculate_dangers(const Board& board, MoveGeneratorInfo& MoveGeneratorInfo)
 {
 
     for (Square square = Square::SQ_A1; square <= Square::SQ_H8; square++) {
@@ -148,18 +208,18 @@ static void calculate_dangers(const Board& board, MoveGenInfo& moveGenInfo)
         if (board.is_empty(square) || color == board.state().side_to_move()) continue;
 
         switch (piece_to_pieceType(piece)) {
-        case PieceType::PAWN: calculate_pawn_dangers(board, square, moveGenInfo); break;
-        case PieceType::KNIGHT: calculate_knight_dangers(board, square, moveGenInfo); break;
-        case PieceType::KING: calculate_king_dangers(board, square, moveGenInfo); break;
-        case PieceType::QUEEN: calculate_queen_dangers(board, square, moveGenInfo); break;
-        case PieceType::ROOK: calculate_rook_dangers(board, square, moveGenInfo); break;
-        case PieceType::BISHOP: calculate_bishop_dangers(board, square, moveGenInfo); break;
+        case PieceType::PAWN: calculate_pawn_dangers(board, square, MoveGeneratorInfo); break;
+        case PieceType::KNIGHT: calculate_knight_dangers(board, square, MoveGeneratorInfo); break;
+        case PieceType::KING: calculate_king_dangers(board, square, MoveGeneratorInfo); break;
+        case PieceType::QUEEN: calculate_queen_dangers(board, square, MoveGeneratorInfo); break;
+        case PieceType::ROOK: calculate_rook_dangers(board, square, MoveGeneratorInfo); break;
+        case PieceType::BISHOP: calculate_bishop_dangers(board, square, MoveGeneratorInfo); break;
         default: break;
         }
     }
 };
 
-static void calculate_pawn_dangers(const Board& board, Square square, MoveGenInfo& moveGenInfo)
+static void calculate_pawn_dangers(const Board& board, Square square, MoveGeneratorInfo& MoveGeneratorInfo)
 {
     const ChessColor side_to_move = board.state().side_to_move();
 
@@ -169,64 +229,64 @@ static void calculate_pawn_dangers(const Board& board, Square square, MoveGenInf
     const Square defender_square_right =
         side_to_move == ChessColor::WHITE ? square.northWest() : square.southWest();
 
-    calculate_danger_to_square(board, square, defender_square_left, side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, square, defender_square_right, side_to_move, moveGenInfo);
+    calculate_danger_to_square(board, square, defender_square_left, side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, square, defender_square_right, side_to_move, MoveGeneratorInfo);
 }
 
-static void calculate_knight_dangers(const Board& board, Square sq, MoveGenInfo& moveGenInfo)
+static void calculate_knight_dangers(const Board& board, Square sq, MoveGeneratorInfo& MoveGeneratorInfo)
 {
     const ChessColor side_to_move = board.state().side_to_move();
 
-    calculate_danger_to_square(board, sq, sq.north().northWest(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.north().northEast(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.east().northEast(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.east().southEast(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.south().southEast(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.south().southWest(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.west().northWest(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.west().southWest(), side_to_move, moveGenInfo);
+    calculate_danger_to_square(board, sq, sq.north().northWest(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.north().northEast(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.east().northEast(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.east().southEast(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.south().southEast(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.south().southWest(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.west().northWest(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.west().southWest(), side_to_move, MoveGeneratorInfo);
 }
 
-static void calculate_king_dangers(const Board& board, Square sq, MoveGenInfo& moveGenInfo)
+static void calculate_king_dangers(const Board& board, Square sq, MoveGeneratorInfo& MoveGeneratorInfo)
 {
     const ChessColor side_to_move = board.state().side_to_move();
 
-    moveGenInfo.set_king_square(sq, side_to_move);
+    MoveGeneratorInfo.set_king_square(sq, side_to_move);
 
-    calculate_danger_to_square(board, sq, sq.north(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.northEast(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.east(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.southEast(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.south(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.southWest(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.west(), side_to_move, moveGenInfo);
-    calculate_danger_to_square(board, sq, sq.northWest(), side_to_move, moveGenInfo);
+    calculate_danger_to_square(board, sq, sq.north(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.northEast(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.east(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.southEast(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.south(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.southWest(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.west(), side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_square(board, sq, sq.northWest(), side_to_move, MoveGeneratorInfo);
 }
 
-static void calculate_queen_dangers(const Board& board, Square sq, MoveGenInfo& moveGenInfo)
+static void calculate_queen_dangers(const Board& board, Square sq, MoveGeneratorInfo& MoveGeneratorInfo)
 {
-    calculate_rook_dangers(board, sq, moveGenInfo);
-    calculate_bishop_dangers(board, sq, moveGenInfo);
+    calculate_rook_dangers(board, sq, MoveGeneratorInfo);
+    calculate_bishop_dangers(board, sq, MoveGeneratorInfo);
 }
 
-static void calculate_rook_dangers(const Board& board, Square sq, MoveGenInfo& moveGenInfo)
-{
-    const ChessColor side_to_move = board.state().side_to_move();
-
-    calculate_danger_to_direction(board, Direction::NORTH, sq, side_to_move, moveGenInfo);
-    calculate_danger_to_direction(board, Direction::SOUTH, sq, side_to_move, moveGenInfo);
-    calculate_danger_to_direction(board, Direction::EAST, sq, side_to_move, moveGenInfo);
-    calculate_danger_to_direction(board, Direction::WEST, sq, side_to_move, moveGenInfo);
-}
-
-static void calculate_bishop_dangers(const Board& board, Square sq, MoveGenInfo& moveGenInfo)
+static void calculate_rook_dangers(const Board& board, Square sq, MoveGeneratorInfo& MoveGeneratorInfo)
 {
     const ChessColor side_to_move = board.state().side_to_move();
 
-    calculate_danger_to_direction(board, Direction::NORTH_EAST, sq, side_to_move, moveGenInfo);
-    calculate_danger_to_direction(board, Direction::NORTH_WEST, sq, side_to_move, moveGenInfo);
-    calculate_danger_to_direction(board, Direction::SOUTH_EAST, sq, side_to_move, moveGenInfo);
-    calculate_danger_to_direction(board, Direction::SOUTH_WEST, sq, side_to_move, moveGenInfo);
+    calculate_danger_to_direction(board, Direction::NORTH, sq, side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_direction(board, Direction::SOUTH, sq, side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_direction(board, Direction::EAST, sq, side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_direction(board, Direction::WEST, sq, side_to_move, MoveGeneratorInfo);
+}
+
+static void calculate_bishop_dangers(const Board& board, Square sq, MoveGeneratorInfo& MoveGeneratorInfo)
+{
+    const ChessColor side_to_move = board.state().side_to_move();
+
+    calculate_danger_to_direction(board, Direction::NORTH_EAST, sq, side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_direction(board, Direction::NORTH_WEST, sq, side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_direction(board, Direction::SOUTH_EAST, sq, side_to_move, MoveGeneratorInfo);
+    calculate_danger_to_direction(board, Direction::SOUTH_WEST, sq, side_to_move, MoveGeneratorInfo);
 }
 
 static inline bool is_enemy_king(const Board& board, Square king_square, ChessColor friend_color)
@@ -242,20 +302,20 @@ static inline bool is_enemy_piece(const Board& board, Square piece_square, Chess
 }
 
 static void calculate_danger_to_square(const Board& board, Square attacker_sq, Square defender_sq,
-                                       ChessColor friend_color, MoveGenInfo& moveGenInfo)
+                                       ChessColor friend_color, MoveGeneratorInfo& MoveGeneratorInfo)
 {
     if (defender_sq.is_valid()) {
-        moveGenInfo.set_attack_square(defender_sq, true);
-        moveGenInfo.set_kingDanger_square(defender_sq, true);
+        MoveGeneratorInfo.set_attack_square(defender_sq, true);
+        MoveGeneratorInfo.set_kingDanger_square(defender_sq, true);
 
         if (is_enemy_king(board, defender_sq, friend_color)) {
-            moveGenInfo.add_checker(attacker_sq);
+            MoveGeneratorInfo.add_checker(attacker_sq);
         }
     }
 }
 
 static void calculate_danger_to_direction(const Board& board, Direction dir, Square attacker_sq,
-                                          ChessColor friend_color, MoveGenInfo& moveGenInfo)
+                                          ChessColor friend_color, MoveGeneratorInfo& MoveGeneratorInfo)
 {
     bool attack = true;
     bool danger = true;
@@ -268,14 +328,14 @@ static void calculate_danger_to_direction(const Board& board, Direction dir, Squ
 
     for (defender_sq = ini_sq; defender_sq.is_valid(); defender_sq.to_direction(dir)) {
 
-        if (attack) moveGenInfo.set_attack_square(defender_sq, true);
+        if (attack) MoveGeneratorInfo.set_attack_square(defender_sq, true);
 
-        if (danger) moveGenInfo.set_kingDanger_square(defender_sq, true);
+        if (danger) MoveGeneratorInfo.set_kingDanger_square(defender_sq, true);
 
         if (!board.is_empty(defender_sq)) {
             if (is_enemy_king(board, defender_sq, friend_color)) {
                 if (attack) {
-                    moveGenInfo.add_checker(attacker_sq);
+                    MoveGeneratorInfo.add_checker(attacker_sq);
                 }
             }
             else {
@@ -284,7 +344,7 @@ static void calculate_danger_to_direction(const Board& board, Direction dir, Squ
 
             if (pin && is_enemy_king(board, defender_sq, friend_color)) {
                 pin = false;
-                moveGenInfo.set_pinned_square(pinned_piece_square, true);
+                MoveGeneratorInfo.set_pinned_square(pinned_piece_square, true);
             }
             else if (pin && !board.is_empty(defender_sq)) {
                 pin = false;
@@ -302,7 +362,7 @@ static void calculate_danger_to_direction(const Board& board, Direction dir, Squ
     }
 }
 
-static void calculate_pawn_moves(const Board& board, Square sq, MoveGenInfo& moveGenInfo,
+static void calculate_pawn_moves(const Board& board, Square sq, MoveGeneratorInfo& MoveGeneratorInfo,
                                  MoveList& moves)
 {
     const ChessColor friend_color = board.state().side_to_move();
@@ -317,8 +377,8 @@ static void calculate_pawn_moves(const Board& board, Square sq, MoveGenInfo& mov
 
     // pawn push
     if (push_sq.is_valid() && board.is_empty(push_sq) && push_sq.row() != pre_promotion_row) {
-        if (moveGenInfo.is_square_in_push(push_sq) &&
-            is_valid_move_pinned(board, sq, push_sq, moveGenInfo)) {
+        if (MoveGeneratorInfo.is_square_in_push(push_sq) &&
+            is_valid_move_pinned(board, sq, push_sq, MoveGeneratorInfo)) {
 
             if (sq.row() == pre_promotion_row) {
                 moves.add(Move(sq, push_sq, MoveType::PROMOTION, PieceType::KNIGHT));
@@ -336,8 +396,8 @@ static void calculate_pawn_moves(const Board& board, Square sq, MoveGenInfo& mov
     const Square capture_sq1 = push_sq.east();
     if (capture_sq1.is_valid() && is_enemy_piece(board, capture_sq1, friend_color) &&
         capture_sq1.row() != pre_promotion_row) {
-        if (moveGenInfo.is_square_in_capture(capture_sq1) &&
-            is_valid_move_pinned(board, sq, capture_sq1, moveGenInfo)) {
+        if (MoveGeneratorInfo.is_square_in_capture(capture_sq1) &&
+            is_valid_move_pinned(board, sq, capture_sq1, MoveGeneratorInfo)) {
 
             if (sq.row() == pre_promotion_row) {
                 moves.add(Move(sq, capture_sq1, MoveType::PROMOTION, PieceType::KNIGHT));
@@ -354,8 +414,8 @@ static void calculate_pawn_moves(const Board& board, Square sq, MoveGenInfo& mov
     const Square capture_sq2 = push_sq.west();
     if (capture_sq2.is_valid() && is_enemy_piece(board, capture_sq2, friend_color) &&
         capture_sq2.row() != pre_promotion_row) {
-        if (moveGenInfo.is_square_in_capture(capture_sq2) &&
-            is_valid_move_pinned(board, sq, capture_sq2, moveGenInfo))
+        if (MoveGeneratorInfo.is_square_in_capture(capture_sq2) &&
+            is_valid_move_pinned(board, sq, capture_sq2, MoveGeneratorInfo))
             moves.add(Move(sq, capture_sq2));
     }
 
@@ -367,37 +427,37 @@ static void calculate_pawn_moves(const Board& board, Square sq, MoveGenInfo& mov
         double_push_sq.to_direction(dir);
 
         if (board.is_empty(push_sq) && board.is_empty(double_push_sq)) {
-            if (moveGenInfo.is_square_in_push(double_push_sq) &&
-                is_valid_move_pinned(board, sq, double_push_sq, moveGenInfo))
+            if (MoveGeneratorInfo.is_square_in_push(double_push_sq) &&
+                is_valid_move_pinned(board, sq, double_push_sq, MoveGeneratorInfo))
                 moves.add(Move(sq, double_push_sq));
         }
     }
 
     if (sq.row() == en_passant_row) {
         if (board.state().en_passant_square() == capture_sq1) {
-            if (moveGenInfo.is_square_in_capture(capture_sq1) &&
-                is_valid_move_en_passant(board, sq, capture_sq1, moveGenInfo))
+            if (MoveGeneratorInfo.is_square_in_capture(capture_sq1) &&
+                is_valid_move_en_passant(board, sq, capture_sq1, MoveGeneratorInfo))
                 moves.add(Move(sq, capture_sq1, MoveType::EN_PASSANT));
         }
 
         if (board.state().en_passant_square() == capture_sq2) {
-            if (moveGenInfo.is_square_in_capture(capture_sq2) &&
-                is_valid_move_en_passant(board, sq, capture_sq2, moveGenInfo))
+            if (MoveGeneratorInfo.is_square_in_capture(capture_sq2) &&
+                is_valid_move_en_passant(board, sq, capture_sq2, MoveGeneratorInfo))
                 moves.add(Move(sq, capture_sq2, MoveType::EN_PASSANT));
         }
     }
 }
 
-static void calculate_knight_moves(const Board& board, Square sq, MoveGenInfo& moveGenInfo,
+static void calculate_knight_moves(const Board& board, Square sq, MoveGeneratorInfo& MoveGeneratorInfo,
                                    MoveList& moves)
 {
     auto calculate_knight_move_to_square = [&](Square end_sq, ChessColor friend_color) {
-        if (end_sq.is_valid() && is_valid_move_pinned(board, sq, end_sq, moveGenInfo)) {
-            if (board.is_empty(end_sq) && moveGenInfo.is_square_in_push(end_sq)) {
+        if (end_sq.is_valid() && is_valid_move_pinned(board, sq, end_sq, MoveGeneratorInfo)) {
+            if (board.is_empty(end_sq) && MoveGeneratorInfo.is_square_in_push(end_sq)) {
                 moves.add(Move(sq, end_sq));
             }
             else if (is_enemy_piece(board, end_sq, friend_color) &&
-                     moveGenInfo.is_square_in_capture(end_sq)) {
+                     MoveGeneratorInfo.is_square_in_capture(end_sq)) {
                 moves.add(Move(sq, end_sq));
             }
         }
@@ -414,11 +474,11 @@ static void calculate_knight_moves(const Board& board, Square sq, MoveGenInfo& m
     calculate_knight_move_to_square(sq.west(), friend_color);
     calculate_knight_move_to_square(sq.northWest(), friend_color);
 }
-static void calculate_king_moves(const Board& board, Square sq, MoveGenInfo& moveGenInfo,
+static void calculate_king_moves(const Board& board, Square sq, MoveGeneratorInfo& MoveGeneratorInfo,
                                  MoveList& moves)
 {
     auto calculate_king_move_to_square = [&](Square end_sq, ChessColor friend_color) {
-        if (end_sq.is_valid() && !moveGenInfo.is_square_in_king_danger(end_sq)) {
+        if (end_sq.is_valid() && !MoveGeneratorInfo.is_square_in_king_danger(end_sq)) {
             moves.add(Move(sq, end_sq));
         }
         else if (is_enemy_piece(board, end_sq, friend_color)) {
@@ -437,44 +497,44 @@ static void calculate_king_moves(const Board& board, Square sq, MoveGenInfo& mov
     calculate_king_move_to_square(sq.west(), friend_color);
     calculate_king_move_to_square(sq.northWest(), friend_color);
 
-    calculate_castle_moves(board, sq, friend_color, moveGenInfo, moves);
+    calculate_castle_moves(board, sq, friend_color, MoveGeneratorInfo, moves);
 }
-static void calculate_queen_moves(const Board& board, Square sq, MoveGenInfo& moveGenInfo,
+static void calculate_queen_moves(const Board& board, Square sq, MoveGeneratorInfo& MoveGeneratorInfo,
                                   MoveList& moves)
 {
-    calculate_rook_moves(board, sq, moveGenInfo, moves);
-    calculate_bishop_moves(board, sq, moveGenInfo, moves);
+    calculate_rook_moves(board, sq, MoveGeneratorInfo, moves);
+    calculate_bishop_moves(board, sq, MoveGeneratorInfo, moves);
 }
-static void calculate_rook_moves(const Board& board, Square sq, MoveGenInfo& moveGenInfo,
+static void calculate_rook_moves(const Board& board, Square sq, MoveGeneratorInfo& MoveGeneratorInfo,
                                  MoveList& moves)
 {
     const ChessColor side_to_move = board.state().side_to_move();
 
-    calculate_moves_to_direction(board, Direction::NORTH, sq, side_to_move, moveGenInfo, moves);
-    calculate_moves_to_direction(board, Direction::SOUTH, sq, side_to_move, moveGenInfo, moves);
-    calculate_moves_to_direction(board, Direction::EAST, sq, side_to_move, moveGenInfo, moves);
-    calculate_moves_to_direction(board, Direction::WEST, sq, side_to_move, moveGenInfo, moves);
+    calculate_moves_to_direction(board, Direction::NORTH, sq, side_to_move, MoveGeneratorInfo, moves);
+    calculate_moves_to_direction(board, Direction::SOUTH, sq, side_to_move, MoveGeneratorInfo, moves);
+    calculate_moves_to_direction(board, Direction::EAST, sq, side_to_move, MoveGeneratorInfo, moves);
+    calculate_moves_to_direction(board, Direction::WEST, sq, side_to_move, MoveGeneratorInfo, moves);
 }
-static void calculate_bishop_moves(const Board& board, Square sq, MoveGenInfo& moveGenInfo,
+static void calculate_bishop_moves(const Board& board, Square sq, MoveGeneratorInfo& MoveGeneratorInfo,
                                    MoveList& moves)
 {
     const ChessColor side_to_move = board.state().side_to_move();
 
 
-    calculate_moves_to_direction(board, Direction::NORTH_EAST, sq, side_to_move, moveGenInfo,
+    calculate_moves_to_direction(board, Direction::NORTH_EAST, sq, side_to_move, MoveGeneratorInfo,
                                  moves);
-    calculate_moves_to_direction(board, Direction::NORTH_WEST, sq, side_to_move, moveGenInfo,
+    calculate_moves_to_direction(board, Direction::NORTH_WEST, sq, side_to_move, MoveGeneratorInfo,
                                  moves);
-    calculate_moves_to_direction(board, Direction::SOUTH_EAST, sq, side_to_move, moveGenInfo,
+    calculate_moves_to_direction(board, Direction::SOUTH_EAST, sq, side_to_move, MoveGeneratorInfo,
                                  moves);
-    calculate_moves_to_direction(board, Direction::SOUTH_WEST, sq, side_to_move, moveGenInfo,
+    calculate_moves_to_direction(board, Direction::SOUTH_WEST, sq, side_to_move, MoveGeneratorInfo,
                                  moves);
 }
 
 static void calculate_castle_moves(const Board& board, Square king_sq, ChessColor friendly_color,
-                                   MoveGenInfo& moveGenInfo, MoveList& moves)
+                                   MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves)
 {
-    if (moveGenInfo.get_checkers_number() > 0) {
+    if (MoveGeneratorInfo.get_checkers_number() > 0) {
         // when king is in check castle is not avaliable
         return;
     }
@@ -494,8 +554,8 @@ static void calculate_castle_moves(const Board& board, Square king_sq, ChessColo
         const Square between_sq1 = king_sq.east();
         const Square between_sq2 = between_sq1.east();
 
-        if (board.is_empty(between_sq1) && !moveGenInfo.is_square_in_king_danger(between_sq1) &&
-            board.is_empty(between_sq2) && !moveGenInfo.is_square_in_king_danger(between_sq2)) {
+        if (board.is_empty(between_sq1) && !MoveGeneratorInfo.is_square_in_king_danger(between_sq1) &&
+            board.is_empty(between_sq2) && !MoveGeneratorInfo.is_square_in_king_danger(between_sq2)) {
 
             moves.add(friendly_color == ChessColor::WHITE ? Move::castle_white_king()
                                                           : Move::castle_black_king());
@@ -513,8 +573,8 @@ static void calculate_castle_moves(const Board& board, Square king_sq, ChessColo
         const Square between_sq3 = between_sq2.west();
 
         // between_sq3 (COL_B) can be attacked, because king dont need to travel through that square
-        if (board.is_empty(between_sq1) && !moveGenInfo.is_square_in_king_danger(between_sq1) &&
-            board.is_empty(between_sq2) && !moveGenInfo.is_square_in_king_danger(between_sq2) &&
+        if (board.is_empty(between_sq1) && !MoveGeneratorInfo.is_square_in_king_danger(between_sq1) &&
+            board.is_empty(between_sq2) && !MoveGeneratorInfo.is_square_in_king_danger(between_sq2) &&
             board.is_empty(between_sq3)) {
 
             moves.add(friendly_color == ChessColor::WHITE ? Move::castle_white_queen()
@@ -524,7 +584,7 @@ static void calculate_castle_moves(const Board& board, Square king_sq, ChessColo
 }
 
 static void calculate_moves_to_direction(const Board& board, Direction dir, Square attacker_sq,
-                                         ChessColor friend_color, MoveGenInfo& moveGenInfo,
+                                         ChessColor friend_color, MoveGeneratorInfo& MoveGeneratorInfo,
                                          MoveList& moves)
 {
 
@@ -535,18 +595,18 @@ static void calculate_moves_to_direction(const Board& board, Direction dir, Squa
     for (defender_sq = ini_sq; defender_sq.is_valid(); defender_sq.to_direction(dir)) {
 
         if (!defender_sq.is_valid() ||
-            !is_valid_move_pinned(board, attacker_sq, defender_sq, moveGenInfo)) {
+            !is_valid_move_pinned(board, attacker_sq, defender_sq, MoveGeneratorInfo)) {
             break;
         }
 
         if (board.is_empty(defender_sq)) {
-            if (moveGenInfo.is_square_in_push(defender_sq)) {
+            if (MoveGeneratorInfo.is_square_in_push(defender_sq)) {
                 moves.add(Move(attacker_sq, defender_sq));
             }
         }
         else {
             if (is_enemy_piece(board, defender_sq, friend_color) &&
-                moveGenInfo.is_square_in_capture(defender_sq)) {
+                MoveGeneratorInfo.is_square_in_capture(defender_sq)) {
                 moves.add(Move(attacker_sq, defender_sq));
             }
             break;
@@ -555,15 +615,15 @@ static void calculate_moves_to_direction(const Board& board, Direction dir, Squa
 }
 
 static bool is_valid_move_pinned(const Board& board, Square piece_sq, Square end_sq,
-                                 MoveGenInfo& moveGenInfo)
+                                 MoveGeneratorInfo& MoveGeneratorInfo)
 {
 
-    if (!moveGenInfo.is_square_pinned(piece_sq)) return true;   // piece is not pinned
+    if (!MoveGeneratorInfo.is_square_pinned(piece_sq)) return true;   // piece is not pinned
 
     bool is_legal = false;
 
     const ChessColor color = board.state().side_to_move();
-    Square king_sq = moveGenInfo.get_king_square(color);
+    Square king_sq = MoveGeneratorInfo.get_king_square(color);
 
     if (piece_sq.row() == king_sq.row())   // horizontal pin
     {
@@ -590,16 +650,16 @@ static bool is_valid_move_pinned(const Board& board, Square piece_sq, Square end
 }
 
 static bool is_valid_move_en_passant(const Board& board, Square piece_sq, Square end_sq,
-                                     MoveGenInfo& moveGenInfo)
+                                     MoveGeneratorInfo& MoveGeneratorInfo)
 {
-    if (!is_valid_move_pinned(board, piece_sq, end_sq, moveGenInfo)) {
+    if (!is_valid_move_pinned(board, piece_sq, end_sq, MoveGeneratorInfo)) {
         return false;
     }
 
     bool is_legal = true;
 
     const ChessColor color = board.state().side_to_move();
-    Square king_sq = moveGenInfo.get_king_square(color);
+    Square king_sq = MoveGeneratorInfo.get_king_square(color);
 
     Square en_passant_sq = board.state().en_passant_square();
 
@@ -626,19 +686,19 @@ static bool is_valid_move_en_passant(const Board& board, Square piece_sq, Square
     return is_legal;
 }
 
-static void calculate_checkers(const Board& board, MoveGenInfo& moveGenInfo)
+static void calculate_checkers(const Board& board, MoveGeneratorInfo& MoveGeneratorInfo)
 {
-    if (moveGenInfo.get_checkers_number() != 1) {
+    if (MoveGeneratorInfo.get_checkers_number() != 1) {
         // if there is no check or there is double check there is nothing to calculate
         return;
     }
     const ChessColor friend_color = board.state().side_to_move();
 
-    const Square king_sq = moveGenInfo.get_king_square(friend_color);
-    const Square checker_sq = moveGenInfo.get_checker_square();
+    const Square king_sq = MoveGeneratorInfo.get_king_square(friend_color);
+    const Square checker_sq = MoveGeneratorInfo.get_checker_square();
 
     // insert checker in capture mask, when in check it is legal to capture the checker.
-    moveGenInfo.set_capture_square(checker_sq, true);
+    MoveGeneratorInfo.set_capture_square(checker_sq, true);
 
     // insert in between squares in push mask, when in check it is legal to block check with a piece.
     if (is_slider(piece_to_pieceType(board.get_piece(checker_sq)))) {
@@ -650,7 +710,7 @@ static void calculate_checkers(const Board& board, MoveGenInfo& moveGenInfo)
         aux_sq.to_direction(direction);
 
         while (aux_sq != checker_sq) {
-            moveGenInfo.set_push_square(aux_sq, true);
+            MoveGeneratorInfo.set_push_square(aux_sq, true);
             aux_sq.to_direction(direction);
         }
     }
