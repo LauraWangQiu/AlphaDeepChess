@@ -43,11 +43,11 @@ static constexpr uint64_t MASK_MOVE_NUMBER = (0xfffffULL << SHIFT_MOVE_NUMBER);
  * 35-40 : fifty_move_rule_counter : if counter gets to 50 then game is a draw.
  * 32-34 : last_captured_piece : PieceType::Empty if last move was not a capture.
  * 31 : side_to_move : 0 if white, 1 if black.
- * 30 : castle_king_white : 1 if avaliable, 0 if not.
- * 29 : castle_queen_white : 1 if avaliable, 0 if not.
- * 28 : castle_king_black : 1 if avaliable, 0 if not.
- * 27 : castle_queen_black : 1 if avaliable, 0 if not.
- * 26-20 : en_passant_square : 0-63 if avaliable, >=64 if not avaliable
+ * 30 : castle_king_white : 1 if available, 0 if not.
+ * 29 : castle_queen_white : 1 if available, 0 if not.
+ * 28 : castle_king_black : 1 if available, 0 if not.
+ * 27 : castle_queen_black : 1 if available, 0 if not.
+ * 26-20 : en_passant_square : 0-63 if available, >=64 if not available
  * 19-0 : move_number : 0-1048575 number of moves in the game.
  * 
  */
@@ -109,8 +109,8 @@ public:
      * get the avaliability of castle king side for white.
      * 
      * @return
-     * - TRUE if castle is avaliable.
-     * - FALSE if castle is not avaliable.
+     * - TRUE if castle is available.
+     * - FALSE if castle is not available.
      */
     constexpr inline bool castle_king_white() const;
 
@@ -120,8 +120,8 @@ public:
      * get the avaliability of castle queen side for white.
      * 
      * @return
-     * - TRUE if castle is avaliable.
-     * - FALSE if castle is not avaliable.
+     * - TRUE if castle is available.
+     * - FALSE if castle is not available.
      */
     constexpr inline bool castle_queen_white() const;
 
@@ -131,8 +131,8 @@ public:
      * get the avaliability of castle king side for black.
      * 
      * @return
-     * - TRUE if castle is avaliable.
-     * - FALSE if castle is not avaliable.
+     * - TRUE if castle is available.
+     * - FALSE if castle is not available.
      */
     constexpr inline bool castle_king_black() const;
 
@@ -142,8 +142,8 @@ public:
      * get the avaliability of castle queen side for black.
      * 
      * @return
-     * - TRUE if castle is avaliable.
-     * - FALSE if castle is not avaliable.
+     * - TRUE if castle is available.
+     * - FALSE if castle is not available.
      */
     constexpr inline bool castle_queen_black() const;
 
@@ -151,11 +151,11 @@ public:
     /**
      * @brief en_passsant_square
      * 
-     * get square where en passant is avaliable.
+     * get square where en passant is available.
      * 
      * @return
-     * - 0<=square<=63 if en passant is avaliable.
-     * - SQ_INVALID if en en passant is no avaliable.
+     * - 0<=square<=63 if en passant is available.
+     * - SQ_INVALID if en en passant is no available.
      */
     constexpr inline Square en_passant_square() const;
 
@@ -218,47 +218,47 @@ public:
      * 
      * set avaliability of castle king side for white.
      * 
-     * @param[in] avaliable avaliability of castle.
+     * @param[in] available avaliability of castle.
      * 
      */
-    constexpr inline void set_castle_king_white(bool avaliable);
+    constexpr inline void set_castle_king_white(bool available);
 
     /**
      * @brief set_castle_queen_white
      * 
      * set avaliability of castle queen side for white.
      * 
-     * @param[in] avaliable avaliability of castle.
+     * @param[in] available avaliability of castle.
      * 
      */
-    constexpr inline void set_castle_queen_white(bool avaliable);
+    constexpr inline void set_castle_queen_white(bool available);
 
     /**
      * @brief set_castle_king_black
      * 
      * set avaliability of castle king side for black.
      * 
-     * @param[in] avaliable avaliability of castle.
+     * @param[in] available avaliability of castle.
      * 
      */
-    constexpr inline void set_castle_king_black(bool avaliable);
+    constexpr inline void set_castle_king_black(bool available);
 
     /**
      * @brief set_castle_queen_black
      * 
      * set avaliability of castle queen side for black.
      * 
-     * @param[in] avaliable avaliability of castle.
+     * @param[in] available avaliability of castle.
      * 
      */
-    constexpr inline void set_castle_queen_black(bool avaliable);
+    constexpr inline void set_castle_queen_black(bool available);
 
     /**
      * @brief set_en_passant_square
      * 
-     * set the square where en passant is avaliable.
+     * set the square where en passant is available.
      * 
-     * @note SQ_INVALID means that en passant is not avaliable.
+     * @note SQ_INVALID means that en passant is not available.
      * 
      * @param[in] square nen passant square.
      * 
@@ -453,8 +453,8 @@ constexpr inline ChessColor GameState::side_to_move() const
  * get the avaliability of castle king side for white.
  * 
  * @return
- * - TRUE if castle is avaliable.
- * - FALSE if castle is not avaliable.
+ * - TRUE if castle is available.
+ * - FALSE if castle is not available.
  */
 constexpr inline bool GameState::castle_king_white() const
 {
@@ -467,8 +467,8 @@ constexpr inline bool GameState::castle_king_white() const
  * get the avaliability of castle queen side for white.
  * 
  * @return
- * - TRUE if castle is avaliable.
- * - FALSE if castle is not avaliable.
+ * - TRUE if castle is available.
+ * - FALSE if castle is not available.
  */
 constexpr inline bool GameState::castle_queen_white() const
 {
@@ -481,8 +481,8 @@ constexpr inline bool GameState::castle_queen_white() const
  * get the avaliability of castle king side for black.
  * 
  * @return
- * - TRUE if castle is avaliable.
- * - FALSE if castle is not avaliable.
+ * - TRUE if castle is available.
+ * - FALSE if castle is not available.
  */
 constexpr inline bool GameState::castle_king_black() const
 {
@@ -495,8 +495,8 @@ constexpr inline bool GameState::castle_king_black() const
  * get the avaliability of castle queen side for black.
  * 
  * @return
- * - TRUE if castle is avaliable.
- * - FALSE if castle is not avaliable.
+ * - TRUE if castle is available.
+ * - FALSE if castle is not available.
  */
 constexpr inline bool GameState::castle_queen_black() const
 {
@@ -506,11 +506,11 @@ constexpr inline bool GameState::castle_queen_black() const
 /**
  * @brief en_passsant_square
  * 
- * get square where en passant is avaliable.
+ * get square where en passant is available.
  * 
  * @return
- * - 0<=square<=63 if en passant is avaliable.
- * - SQ_INVALID if en en passant is no avaliable.
+ * - 0<=square<=63 if en passant is available.
+ * - SQ_INVALID if en en passant is no available.
  */
 constexpr inline Square GameState::en_passant_square() const
 {
@@ -594,13 +594,13 @@ constexpr inline void GameState::set_side_to_move(ChessColor side)
  * 
  * set avaliability of castle king side for white.
  * 
- * @param[in] avaliable avaliability of castle.
+ * @param[in] available avaliability of castle.
  * 
  */
-constexpr inline void GameState::set_castle_king_white(bool avaliable)
+constexpr inline void GameState::set_castle_king_white(bool available)
 {
     state_register &= ~MASK_CASTLE_KING_WHITE;
-    state_register |= static_cast<uint64_t>(avaliable) << SHIFT_CASTLE_KING_WHITE;
+    state_register |= static_cast<uint64_t>(available) << SHIFT_CASTLE_KING_WHITE;
 }
 
 /**
@@ -608,13 +608,13 @@ constexpr inline void GameState::set_castle_king_white(bool avaliable)
  * 
  * set avaliability of castle queen side for white.
  * 
- * @param[in] avaliable avaliability of castle.
+ * @param[in] available avaliability of castle.
  * 
  */
-constexpr inline void GameState::set_castle_queen_white(bool avaliable)
+constexpr inline void GameState::set_castle_queen_white(bool available)
 {
     state_register &= ~MASK_CASTLE_QUEEN_WHITE;
-    state_register |= static_cast<uint64_t>(avaliable) << SHIFT_CASTLE_QUEEN_WHITE;
+    state_register |= static_cast<uint64_t>(available) << SHIFT_CASTLE_QUEEN_WHITE;
 }
 
 /**
@@ -622,13 +622,13 @@ constexpr inline void GameState::set_castle_queen_white(bool avaliable)
  * 
  * set avaliability of castle king side for black.
  * 
- * @param[in] avaliable avaliability of castle.
+ * @param[in] available avaliability of castle.
  * 
  */
-constexpr inline void GameState::set_castle_king_black(bool avaliable)
+constexpr inline void GameState::set_castle_king_black(bool available)
 {
     state_register &= ~MASK_CASTLE_KING_BLACK;
-    state_register |= static_cast<uint64_t>(avaliable) << SHIFT_CASTLE_KING_BLACK;
+    state_register |= static_cast<uint64_t>(available) << SHIFT_CASTLE_KING_BLACK;
 }
 
 /**
@@ -636,22 +636,22 @@ constexpr inline void GameState::set_castle_king_black(bool avaliable)
  * 
  * set avaliability of castle queen side for black.
  * 
- * @param[in] avaliable avaliability of castle.
+ * @param[in] available avaliability of castle.
  * 
  */
-constexpr inline void GameState::set_castle_queen_black(bool avaliable)
+constexpr inline void GameState::set_castle_queen_black(bool available)
 {
     state_register &= ~MASK_CASTLE_QUEEN_BLACK;
-    state_register |= static_cast<uint64_t>(avaliable) << SHIFT_CASTLE_QUEEN_BLACK;
+    state_register |= static_cast<uint64_t>(available) << SHIFT_CASTLE_QUEEN_BLACK;
 }
 
 
 /**
  * @brief set_en_passant_square
  * 
- * set the square where en passant is avaliable.
+ * set the square where en passant is available.
  * 
- * @note SQ_INVALID means that en passant is not avaliable.
+ * @note SQ_INVALID means that en passant is not available.
  * 
  * @param[in] square nen passant square.
  * 

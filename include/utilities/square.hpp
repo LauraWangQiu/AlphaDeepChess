@@ -10,7 +10,9 @@
 #include <cstdint>
 #include <ostream>
 
-#include "coordinates.hpp"
+#include "col.hpp"
+#include "row.hpp"
+#include "direction.hpp"
 #include "diagonal.hpp"
 
 /**
@@ -107,7 +109,7 @@ public:
      * 
      */
     constexpr Square(Row row, Col col)
-        : sq_value(is_valid_coord(row, col) ? (row << 3U) + col : SQ_INVALID)
+        : sq_value(is_valid_row(row) && is_valid_col(col) ? (row << 3U) + col : SQ_INVALID)
     { }
 
     /**
@@ -240,10 +242,10 @@ public:
      * Calculates the bit mask that represents the square.
      * SQ_C1 = 2 has a mask of 0....00000100.
      * 
-     * @return (1UL << sq_value)
+     * @return (1UL << sq_value) if square is valid, Else 0
      * 
      */
-    constexpr uint64_t mask() const { return 1UL << sq_value; }
+    constexpr uint64_t mask() const { return is_valid() ? 1UL << sq_value : 0ULL; }
 
     /**
      * @brief uint8_t

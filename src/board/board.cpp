@@ -175,7 +175,7 @@ void Board::make_move(Move move)
         game_state.set_last_captured_piece(PieceType::PAWN);
     }
 
-    // if move is double push pawn then update the square where enPassant is avaliable
+    // if move is double push pawn then update the square where enPassant is available
 
     const bool is_pawn_move = (piece_to_pieceType(origin_piece) == PieceType::PAWN);
     const uint32_t row_diff = abs((int32_t)origin_square.row() - (int32_t)end_square.row());
@@ -411,25 +411,25 @@ std::string Board::fen() const
 
     fen << (game_state.side_to_move() == ChessColor::WHITE ? " w " : " b ");
 
-    bool any_castle_avaliable = false;
+    bool any_castle_available = false;
     if (game_state.castle_king_white()) {
         fen << 'K';
-        any_castle_avaliable = true;
+        any_castle_available = true;
     }
     if (game_state.castle_queen_white()) {
         fen << 'Q';
-        any_castle_avaliable = true;
+        any_castle_available = true;
     }
     if (game_state.castle_king_black()) {
         fen << 'k';
-        any_castle_avaliable = true;
+        any_castle_available = true;
     }
     if (game_state.castle_queen_black()) {
         fen << 'q';
-        any_castle_avaliable = true;
+        any_castle_available = true;
     }
 
-    if (!any_castle_avaliable) {
+    if (!any_castle_available) {
         fen << '-';
     }
 

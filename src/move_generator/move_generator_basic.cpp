@@ -12,7 +12,7 @@
 #include "precomputed_move_data.hpp"
 #include "move_generator_info.hpp"
 #include "bit_utilities.hpp"
-
+#include "coordinates.hpp"
 
 static void calculate_dangers(const Board& board, MoveGeneratorInfo& MoveGeneratorInfo);
 static void calculate_pawn_dangers(const Board& board, Square sq,
@@ -265,6 +265,8 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
 
     const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
 
+    const Square en_passant_square = board.state().en_passant_square();
+
     const uint64_t pawn_attacks = side_to_move == ChessColor::WHITE
         ? PrecomputedMoveData::whitePawnAttacks(pawn_sq)
         : PrecomputedMoveData::blackPawnAttacks(pawn_sq);
@@ -274,44 +276,60 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
     const uint64_t push_mask = moveGeneratorInfo.push_squares_mask;
 
     // pawn captures
-    uint64_t pawn_captures_mask = pawn_attacks & enemy_mask & capture_mask & push_mask;
+    uint64_t pawn_moves_mask = pawn_attacks & enemy_mask & capture_mask & push_mask;
 
-    while (pawn_captures_mask) {
-        Square available_square = static_cast<Square>(pop_lsb(pawn_captures_mask));
-        moves.add(Move(pawn_sq, available_square));
-    }
-
+    // en passant capture, en passant mask is 0 if not available
+    pawn_moves_mask |= pawn_attacks & en_passant_square.mask();
 
     // pawn push
     const Square pawn_push_sq =
         side_to_move == ChessColor::WHITE ? pawn_sq.north() : pawn_sq.south();
 
-    const Row pawn_row = pawn_sq.row();
+    const Square pawn_double_push_sq =
+        side_to_move == ChessColor::WHITE ? pawn_push_sq.north() : pawn_push_sq.south();
 
-    if (pawn_row == moveGeneratorInfo.row_where_double_push_is_avaliable) {
+    const bool double_push_available =
+        pawn_sq.row() == moveGeneratorInfo.row_where_double_push_is_available;
 
-        const Square pawn_double_push_sq =
-            side_to_move == ChessColor::WHITE ? pawn_push_sq.north() : pawn_push_sq.south();
+    if (board.is_empty(pawn_push_sq)) {
+        pawn_moves_mask |= pawn_push_sq.mask();
 
-        if (board.is_empty(pawn_push_sq)) {
-            moves.add(Move(pawn_sq, pawn_push_sq));
-
-            if (board.is_empty(pawn_double_push_sq)) {
-                moves.add(Move(pawn_sq, pawn_double_push_sq));
-            }
+        if (double_push_available && board.is_empty(pawn_double_push_sq)) {
+            pawn_moves_mask |= pawn_double_push_sq.mask();
         }
     }
-    else if (pawn_row == moveGeneratorInfo.row_where_promotion_is_available) {
-        if (board.is_empty(pawn_push_sq)) {
-            moves.add(Move(pawn_sq, pawn_push_sq, MoveType::PROMOTION, PieceType::KNIGHT));
-            moves.add(Move(pawn_sq, pawn_push_sq, MoveType::PROMOTION, PieceType::BISHOP));
-            moves.add(Move(pawn_sq, pawn_push_sq, MoveType::PROMOTION, PieceType::ROOK));
-            moves.add(Move(pawn_sq, pawn_push_sq, MoveType::PROMOTION, PieceType::QUEEN));
+
+
+    // if pawn is pinned pawn can only moved in the direction of the pin
+    if (moveGeneratorInfo.pinned_squares_mask & pawn_sq.mask()) {
+        const Square side_to_move_king_square = moveGeneratorInfo.side_to_move_king_square;
+        const uint64_t pin_direction_mask = get_direction_mask(pawn_sq, side_to_move_king_square);
+
+        pawn_moves_mask &= pin_direction_mask;
+    }
+
+    // check for enPassant
+    if (pawn_sq.row() == moveGeneratorInfo.row_where_en_passant_is_available) {
+        // en passant mask will be 0 if en passant not valid
+        if (pawn_moves_mask & en_passant_square.mask()) {
+            moves.add(Move(pawn_sq, en_passant_square, MoveType::EN_PASSANT));
+            // delete the en passant move from pawn_moves_mask
+            pawn_moves_mask &= ~en_passant_square.mask();
         }
     }
-    else {
-        if (board.is_empty(pawn_push_sq)) {
-            moves.add(Move(pawn_sq, pawn_push_sq));
+
+    while (pawn_moves_mask) {
+        Square available_square = static_cast<Square>(pop_lsb(pawn_moves_mask));
+        if (pawn_sq.row() == moveGeneratorInfo.row_where_promotion_is_available) {
+
+            moves.add(Move(pawn_sq, available_square, MoveType::PROMOTION, PieceType::KNIGHT));
+            moves.add(Move(pawn_sq, available_square, MoveType::PROMOTION, PieceType::BISHOP));
+            moves.add(Move(pawn_sq, available_square, MoveType::PROMOTION, PieceType::ROOK));
+            moves.add(Move(pawn_sq, available_square, MoveType::PROMOTION, PieceType::QUEEN));
+        }
+        else {
+
+            moves.add(Move(pawn_sq, available_square));
         }
     }
 }
@@ -319,6 +337,11 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
 static void calculate_knight_moves(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(knight_sq.is_valid());
+
+    // knight cant move if it is pinned
+    if (moveGeneratorInfo.pinned_squares_mask & knight_sq.mask()) {
+        return;
+    }
 
     MoveList& moves = moveGeneratorInfo.moves;
 
@@ -691,21 +714,21 @@ static void calculate_castle_moves(const Board& board, Square king_sq, ChessColo
                                    MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves)
 {
     if (MoveGeneratorInfo.get_checkers_number() > 0) {
-        // when king is in check castle is not avaliable
+        // when king is in check castle is not available
         return;
     }
 
-    const bool castle_king_avaliable = friendly_color == ChessColor::WHITE
+    const bool castle_king_available = friendly_color == ChessColor::WHITE
         ? board.state().castle_king_white()
         : board.state().castle_king_black();
 
-    const bool castle_queen_avaliable = friendly_color == ChessColor::WHITE
+    const bool castle_queen_available = friendly_color == ChessColor::WHITE
         ? board.state().castle_queen_white()
         : board.state().castle_queen_black();
 
-    if (castle_king_avaliable) {
+    if (castle_king_available) {
 
-        // king side castle avaliable if there is no pieces between the king and the rook
+        // king side castle available if there is no pieces between the king and the rook
         // also the king and the in between squares cant be attacked by enemy pieces
         const Square between_sq1 = king_sq.east();
         const Square between_sq2 = between_sq1.east();
@@ -718,9 +741,9 @@ static void calculate_castle_moves(const Board& board, Square king_sq, ChessColo
         }
     }
 
-    if (castle_queen_avaliable) {
+    if (castle_queen_available) {
 
-        // queen side castle avaliable if there is no pieces between the king and the rook
+        // queen side castle available if there is no pieces between the king and the rook
         // also the king and the in between squares that the king has to travel
         // cant be attacked by enemy pieces
 

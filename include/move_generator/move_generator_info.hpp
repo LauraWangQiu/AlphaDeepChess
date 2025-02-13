@@ -40,7 +40,7 @@ public:
     uint64_t side_waiting_pieces_mask;   // bitboard of the pieces of the side waiting
     Row row_where_promotion_is_available;
     Row row_where_en_passant_is_available;
-    Row row_where_double_push_is_avaliable;
+    Row row_where_double_push_is_available;
 
     /**
      * @brief MoveGeneratorInfo
@@ -81,7 +81,7 @@ public:
 
         row_where_promotion_is_available = side_to_move == ChessColor::WHITE ? ROW_7 : ROW_2;
         row_where_en_passant_is_available = side_to_move == ChessColor::WHITE ? ROW_5 : ROW_4;
-        row_where_double_push_is_avaliable = side_to_move == ChessColor::WHITE ? ROW_2 : ROW_7;
+        row_where_double_push_is_available = side_to_move == ChessColor::WHITE ? ROW_2 : ROW_7;
 
     }
     ~MoveGeneratorInfo() { }

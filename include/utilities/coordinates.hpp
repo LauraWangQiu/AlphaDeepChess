@@ -6,36 +6,9 @@
  *
  */
 
-#include "row.hpp"
-#include "col.hpp"
+#include "square.hpp"
+#include <cassert>
 
-/**
- * @brief Direction
- * 
- * Represents all the possible directions to move in the board
- * 
- *   INVALID_DIR = 0,
- *   NORTH = 8,
- *   EAST  = 1,
- *   SOUTH = -8,
- *   WEST  = -1,
- *   NORTH_EAST = 9,
- *   SOUTH_EAST = -7,
- *   SOUTH_WEST = -9,
- *   NORTH_WEST = 7.
- */
-enum Direction : int
-{
-    INVALID_DIR = 0,
-    NORTH = 8,
-    EAST = 1,
-    SOUTH = -8,
-    WEST = -1,
-    NORTH_EAST = NORTH + EAST,
-    SOUTH_EAST = SOUTH + EAST,
-    SOUTH_WEST = SOUTH + WEST,
-    NORTH_WEST = NORTH + WEST
-};
 
 /**
  * @brief is_valid_coord 
@@ -81,6 +54,9 @@ constexpr inline bool is_valid_coord(Row row, Col col)
  */
 constexpr Direction get_direction(Row origin_row, Col origin_col, Row end_row, Col end_col)
 {
+    assert(is_valid_row(origin_row) && is_valid_col(origin_col));
+    assert(is_valid_row(end_row) && is_valid_col(end_col));
+
     // Calculate row and column differences
     const int row_diff = static_cast<int>(end_row) - static_cast<int>(origin_row);
     const int col_diff = static_cast<int>(end_col) - static_cast<int>(origin_col);
@@ -91,4 +67,80 @@ constexpr Direction get_direction(Row origin_row, Col origin_col, Row end_row, C
 
     // Compute the direction based taking advantage of the int value of each direction
     return static_cast<Direction>(8 * normalized_row + normalized_col);
+}
+
+
+/**
+ * @brief squares_in_same_diagonal 
+ * 
+ * Returns if the squares are inside the same diagonal
+ * 
+ * @param[in] sq1 first square
+ * @param[in] sq2 second square
+ * 
+ * @return
+ * - TRUE if sq1.diagonal() == sq2.diagonal().
+ * - FALSE sq1.diagonal() != sq2.diagonal().
+ * 
+ */
+constexpr inline bool squares_in_same_diagonal(Square sq1, Square sq2)
+{
+    assert(sq1.is_valid() && sq2.is_valid());
+    return sq1.diagonal() == sq2.diagonal();
+}
+
+/**
+ * @brief squares_in_same_antidiagonal 
+ * 
+ * Returns if the squares are inside the same antidiagonal
+ * 
+ * @param[in] sq1 first square
+ * @param[in] sq2 second square
+ * 
+ * @return
+ * - TRUE if sq1.antidiagonal() == sq2.antidiagonal().
+ * - FALSE sq1.antidiagonal() != sq2.antidiagonal().
+ * 
+ */
+constexpr inline bool squares_in_same_antidiagonal(Square sq1, Square sq2)
+{
+    assert(sq1.is_valid() && sq2.is_valid());
+    return sq1.antidiagonal() == sq2.antidiagonal();
+}
+
+/**
+ * @brief get_direction_mask 
+ * 
+ * Returns the mask of the common direction of two squares
+ * 
+ * @param[in] sq1 first square
+ * @param[in] sq2 second square
+ * 
+ * @return
+ * -
+ * - row mask of sq1,sq2 if sq1.row() == sq2.row()
+ * - col mask of sq1,sq2 if sq1.col() == sq2.col()
+ * - diagonal_mask of sq1,sq2 if squares_in_same_diagonal(sq1, sq2).
+ * - antidiagonal_mask of sq1,sq2 if squares_in_same_antidiagonal(sq1, sq2).
+ * - 0ULL in other case
+ */
+constexpr inline uint64_t get_direction_mask(Square sq1, Square sq2)
+{
+    assert(sq1.is_valid() && sq2.is_valid());
+
+    if (sq1.row() == sq2.row()) {
+        return get_row_mask(sq1.row());
+    }
+    else if (sq1.col() == sq2.col()) {
+        return get_col_mask(sq1.col());
+    }
+    else if (squares_in_same_diagonal(sq1, sq2)) {
+        return get_diagonal_mask(sq1.diagonal());
+    }
+    else if (squares_in_same_antidiagonal(sq1, sq2)) {
+        return get_antidiagonal_mask(sq1.antidiagonal());
+    }
+    else {
+        return 0ULL;
+    }
 }
