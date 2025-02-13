@@ -158,6 +158,7 @@ void Uci::go_command_action(const TokenArray& tokens)
     uint32_t depth = 5U;        // Depth to search (default value)
     uint32_t nodes = 0U;        // Number of nodes to search
     uint32_t mate = 0U;         // Search for a mate in x moves
+    MoveList search_moves;      // List of moves to search before another argument
 
     // Parse the command line arguments
     for (uint32_t i = 1; i < tokens.size(); ++i) {
@@ -166,7 +167,17 @@ void Uci::go_command_action(const TokenArray& tokens)
         }
 
         if (tokens[i] == "searchmoves") {
-            // TODO: Manage all the moves to search before another argument
+            search_moves.clear();
+            while (++i < tokens.size()) {
+                Move move = create_move_from_string(tokens[i], board);
+                if (move.is_valid()) {
+                    search_moves.add(move);
+                } else {
+                    break;
+                }
+            }
+            --i;
+            
         }
         else if (tokens[i] == "ponder") {
             // TODO
@@ -242,7 +253,7 @@ void Uci::go_command_action(const TokenArray& tokens)
         } else if (tokens[i] == "infinite") {
             depth = INFINITE_SEARCH_DEPTH_VALUE;
         } else {
-            std::cout << "Invalid argument for command : go\n";
+            std::cout << "Invalid argument for command : go ( "<< tokens[i] << " )\n";
         }
     }
 
@@ -263,7 +274,7 @@ void Uci::go_command_action(const TokenArray& tokens)
         });
     */
 
-    bestMove = search_best_move(board, depth, stopSearch);
+    bestMove = search_best_move(board, depth, search_moves, stopSearch);
     std::cout << "Best move found : " << bestMove.to_string() << std::endl;
 }
 

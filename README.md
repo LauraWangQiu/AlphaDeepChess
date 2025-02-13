@@ -8,18 +8,19 @@ These instructions will help you set up and build the project on your local mach
 
 ### Linux
 
-1. **Install git and clone the repository**:
+1. **Download and install git and clone the repository**:
 
     ```bash
     sudo apt-get install git
     git clone https://github.com/LauraWangQiu/AlphaDeepChess.git
     ```
 
-2. **Install g++ and cmake**:
+2. **Install g++, cmake and OpenCL**:
 
     ```bash
     sudo apt-get install g++
     sudo apt-get install cmake
+    sudo apt install ocl-icd-opencl-dev
     ```
 
 3. **move to the project folder and run the setup script for cmake**:
@@ -32,28 +33,29 @@ These instructions will help you set up and build the project on your local mach
 
 ### Windows
 
-1. **Install git and clone the repository**:
+1. **Download and install git and clone the repository**:
+
+    Download and install [Git](https://git-scm.com/downloads/win)
 
     ```bash
-    install git
     git clone https://github.com/LauraWangQiu/AlphaDeepChess.git
     ```
 
 2. **OPTION 1 : use Visual Studio (EASY)**:
 
-    ```bash
-    you can directly run the project from Visual Studio IDE
-    ```
+    You can directly run the project from Visual Studio IDE
 
-3. **OPTION 2 : download g++(mingw) and cmake (HARD)**:
+3. **OPTION 2 : download g++(mingw), cmake and OpenCL (HARD)**:
 
-    ```bash
-    [CMake](https://cmake.org/download/)
-    [Mingw](https://www.mingw-w64.org/downloads/)
+    [Mingw](https://www.mingw-w64.org/downloads/)  
+    [CMake](https://cmake.org/download/)  
+    OpenCL:
+    - [NVIDIA](https://developer.nvidia.com/cuda-downloads)
+    - [AMD](https://www.amd.com/en/developer.html)
+    - [Intel](https://www.intel.com/content/www/us/en/developer/articles/tool/tools-for-opencl-applications.html)
 
-    configure the PATH enviroment variable
+    configure the PATH enviroment variable  
     configure cmake build folder
-    ```
 
 ### MacOS
 
@@ -66,12 +68,14 @@ These instructions will help you set up and build the project on your local mach
     git clone https://github.com/LauraWangQiu/AlphaDeepChess.git
     ```
 
-2. **Install g++ and cmake**:
+2. **Install g++, cmake and OpenCL**:
 
     ```bash
     brew install gcc
     brew install cmake
     ```
+
+    OpenCL is pre-installed on MacOS.
 
 3. **move to the project folder and run the setup script for cmake**:
 

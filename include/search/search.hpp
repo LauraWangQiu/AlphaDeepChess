@@ -10,6 +10,7 @@
 
 #include "board.hpp"
 #include "move.hpp"
+#include "move_list.hpp"
 
 #include <atomic>
 
@@ -37,4 +38,4 @@ constexpr const uint32_t INFINITE_SEARCH_DEPTH_VALUE = 999999999U;
  *  - move, best move found in the position.
  *  - move.none() if no move was found.
  */
-Move search_best_move(Board& board, uint32_t max_depth, std::atomic<bool>& stop);
+Move search_best_move(Board& board, uint32_t max_depth, MoveList search_moves, std::atomic<bool>& stop);

@@ -14,12 +14,20 @@ include_directories(include/uci)
 include_directories(include/move_ordering)
 include_directories(include/move_generator)
 
+find_package(OpenCL REQUIRED)
+
+message(STATUS "OpenCL include directory: ${OpenCL_INCLUDE_DIR}")
+message(STATUS "OpenCL library path: ${OpenCL_LIBRARY}")
+
 add_executable(AlphaDeepChess 
 src/main.cpp
 src/board/board.cpp
 src/uci/uci.cpp
 src/utilities/perft.cpp
 )
+
+target_include_directories(AlphaDeepChess PRIVATE ${OpenCL_INCLUDE_DIR})
+target_link_libraries(AlphaDeepChess PRIVATE ${OpenCL_LIBRARY})
 
 # Add basic algorithm source files
 set(BASIC_SOURCES
