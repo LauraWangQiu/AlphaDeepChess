@@ -7,6 +7,7 @@
  */
 
 #include "move_ordering.hpp"
+#include <cassert>
 
 /**
  * @brief move_value
@@ -73,6 +74,8 @@ void order_moves(MoveList& moves, const Board& board)
  */
 static uint32_t move_value(const Move& move, const Board& board)
 {
+    assert(move.is_valid());
+
     const Piece origin_piece = board.get_piece(move.square_from());
     const uint32_t origin_piece_value = raw_value(origin_piece);
     const PieceType promotion_piece = move.promotion_piece();

@@ -179,12 +179,18 @@ constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeKingAttacks()
 
     for (Row row = ROW_1; is_valid_row(row); row++) {
         for (Col col = COL_A; is_valid_col(col); col++) {
+
+            const Square king_square = Square(row, col);
+
             for (auto& dir : dirs) {
 
-                const Square king_square = Square(row, col);
-                const Square attack_square = Square(row + (Row)dir[0], col + (Col)dir[1]);
+                const Row attack_row = row + static_cast<Row>(dir[0]);
+                const Col attack_col = col + static_cast<Col>(dir[1]);
+
+                const Square attack_square = Square(attack_row, attack_col);
 
                 if (attack_square.is_valid()) {
+
                     KING_ATTACKS[king_square] |= attack_square.mask();
                 }
             }
@@ -202,10 +208,15 @@ constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeKnightAttacks(
 
     for (Row row = ROW_1; is_valid_row(row); row++) {
         for (Col col = COL_A; is_valid_col(col); col++) {
+
+            const Square knight_square = Square(row, col);
+
             for (auto& dir : dirs) {
 
-                const Square knight_square = Square(row, col);
-                const Square attack_square = Square(row + dir[0], col + dir[1]);
+                const Row attack_row = row + static_cast<Row>(dir[0]);
+                const Col attack_col = col + static_cast<Col>(dir[1]);
+
+                const Square attack_square = Square(attack_row, attack_col);
 
                 if (attack_square.is_valid()) {
                     KNIGHT_ATTACKS[knight_square] |= attack_square.mask();
@@ -224,13 +235,19 @@ constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeWhitePawnAttac
 
     for (Row row = ROW_1; is_valid_row(row); row++) {
         for (Col col = COL_A; is_valid_col(col); col++) {
+
+            const Square pawn_square = Square(row, col);
+
             for (auto& dir : dirs) {
 
-                const Square pawn_square = Square(row, col);
-                const Square attack_square_white_pawn = Square(row + dir[0], col + dir[1]);
+                const Row attack_row = row + static_cast<Row>(dir[0]);
+                const Col attack_col = col + static_cast<Col>(dir[1]);
 
-                if (attack_square_white_pawn.is_valid()) {
-                    WHITE_PAWN_ATTACKS[pawn_square] |= attack_square_white_pawn.mask();
+                const Square attack_square = Square(attack_row, attack_col);
+
+                if (attack_square.is_valid()) {
+
+                    WHITE_PAWN_ATTACKS[pawn_square] |= attack_square.mask();
                 }
             }
         }
@@ -246,13 +263,19 @@ constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeBlackPawnAttac
 
     for (Row row = ROW_1; is_valid_row(row); row++) {
         for (Col col = COL_A; is_valid_col(col); col++) {
+
+            const Square pawn_square = Square(row, col);
+
             for (auto& dir : dirs) {
 
-                const Square pawn_square = Square(row, col);
-                const Square attack_square_black_pawn = Square(row + dir[0], col + dir[1]);
+                const Row attack_row = row + static_cast<Row>(dir[0]);
+                const Col attack_col = col + static_cast<Col>(dir[1]);
 
-                if (attack_square_black_pawn.is_valid()) {
-                    BLACK_PAWN_ATTACKS[pawn_square] |= attack_square_black_pawn.mask();
+                const Square attack_square = Square(attack_row, attack_col);
+
+                if (attack_square.is_valid()) {
+
+                    BLACK_PAWN_ATTACKS[pawn_square] |= attack_square.mask();
                 }
             }
         }

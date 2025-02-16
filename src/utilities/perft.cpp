@@ -42,24 +42,42 @@ static uint64_t perft_recursive(Board& board, uint32_t depth);
  * 
  * @param[in] FEN position to study.
  * @param[in] depth depth to reach.
+ * @param[out] moveNodeList legal moves and their number of nodes
  * @param[out] time ms passed to complete the perft test.
- * @param[out] nodes counted nodes.
  */
-void perft(const std::string &FEN, uint64_t depth, int64_t& time, uint64_t& nodes)
+void perft(const std::string& FEN, uint64_t depth, MoveNodesList& moveNodeList, int64_t& time)
 {
     Board board;
     board.load_fen(FEN);
+    
+    MoveList moves;
+    moveNodeList.reserve(moves.size());
+
+
+    generate_legal_moves(moves,board);
+
+    for (int i = 0; i < moves.size(); i++)
+    {
+        moveNodeList.emplace_back(moves[i],0ULL);
+    }
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    uint64_t n_moves = perft_recursive(board, depth);
+
+    const GameState game_state = board.state();
+
+    for (int i = 0; i < moves.size(); i++)
+    {
+        board.make_move(moves[i]);
+        moveNodeList[i].second = perft_recursive(board, depth - 1);
+        board.unmake_move(moves[i], game_state);
+    }
 
     auto end = std::chrono::high_resolution_clock::now();
 
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
     time = duration.count();
-    nodes = n_moves;
 }
 
 /**

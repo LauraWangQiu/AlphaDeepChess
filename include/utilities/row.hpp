@@ -7,6 +7,7 @@
  */
 
 #include <cstdint>
+#include <cassert>
 
 /**
  * @brief Row
@@ -40,19 +41,6 @@ static constexpr uint64_t ROW_MASKS[8] = {ROW_1_MASK, ROW_2_MASK, ROW_3_MASK, RO
                                           ROW_5_MASK, ROW_6_MASK, ROW_7_MASK, ROW_8_MASK};
 
 /**
- * @brief row_to_char(const Row row)
- * 
- * row conversion to char.
- * 
- * @note row must be valid
- * 
- * @param[in] row The row value
- * 
- * @return '1','2','3','4','5','6','7','8'
- */
-constexpr inline char row_to_char(const Row row) { return '1' + static_cast<int>(row); }
-
-/**
  * @brief is_valid_row
  * 
  * Returns if the coordinaterow is valid
@@ -65,6 +53,23 @@ constexpr inline char row_to_char(const Row row) { return '1' + static_cast<int>
  * 
  */
 constexpr inline bool is_valid_row(Row row) { return row >= ROW_1 && row <= ROW_8; }
+
+/**
+ * @brief row_to_char(const Row row)
+ * 
+ * row conversion to char.
+ * 
+ * @note row must be valid
+ * 
+ * @param[in] row The row value
+ * 
+ * @return '1','2','3','4','5','6','7','8'
+ */
+constexpr inline char row_to_char(const Row row)
+{
+    assert(is_valid_row(row));
+    return '1' + static_cast<int>(row);
+}
 
 /**
  * @brief operator+(Row, int)
@@ -80,6 +85,8 @@ constexpr inline bool is_valid_row(Row row) { return row >= ROW_1 && row <= ROW_
  */
 constexpr inline Row operator+(Row row, int value)
 {
+    assert(is_valid_row(row));
+
     const Row sum = static_cast<Row>(static_cast<int>(row) + value);
     return is_valid_row(sum) ? sum : ROW_INVALID;
 }
@@ -98,6 +105,8 @@ constexpr inline Row operator+(Row row, int value)
  */
 constexpr inline Row operator-(Row row, int value)
 {
+    assert(is_valid_row(row));
+
     const Row sub = static_cast<Row>(static_cast<int>(row) - value);
     return is_valid_row(sub) ? sub : ROW_INVALID;
 }
@@ -115,6 +124,8 @@ constexpr inline Row operator-(Row row, int value)
  */
 constexpr inline Row& operator++(Row& row)
 {
+    assert(is_valid_row(row));
+
     const Row sum = static_cast<Row>(static_cast<int>(row) + 1);
     row = is_valid_row(sum) ? sum : ROW_INVALID;
     return row;
@@ -132,6 +143,7 @@ constexpr inline Row& operator++(Row& row)
  */
 constexpr inline Row operator++(Row& row, int)
 {
+    assert(is_valid_row(row));
 
     Row old = row;
     const Row sum = static_cast<Row>(static_cast<int>(row) + 1);
@@ -151,6 +163,8 @@ constexpr inline Row operator++(Row& row, int)
  */
 constexpr inline Row& operator--(Row& row)
 {
+    assert(is_valid_row(row));
+
     const Row sub = static_cast<Row>(static_cast<int>(row) - 1);
     row = is_valid_row(sub) ? sub : ROW_INVALID;
     return row;
@@ -168,6 +182,8 @@ constexpr inline Row& operator--(Row& row)
  */
 constexpr inline Row operator--(Row& row, int)
 {
+    assert(is_valid_row(row));
+
     Row old = row;
     const Row sub = static_cast<Row>(static_cast<int>(row) - 1);
     row = is_valid_row(sub) ? sub : ROW_INVALID;
@@ -188,6 +204,8 @@ constexpr inline Row operator--(Row& row, int)
  */
 constexpr inline Row& operator+=(Row& row, int value)
 {
+    assert(is_valid_row(row));
+
     const Row sum = static_cast<Row>(static_cast<int>(row) + value);
     row = is_valid_row(sum) ? sum : ROW_INVALID;
     return row;
@@ -207,6 +225,8 @@ constexpr inline Row& operator+=(Row& row, int value)
  */
 constexpr inline Row& operator-=(Row& row, int value)
 {
+    assert(is_valid_row(row));
+    
     const Row sub = static_cast<Row>(static_cast<int>(row) - value);
     row = is_valid_row(sub) ? sub : ROW_INVALID;
     return row;
@@ -225,5 +245,7 @@ constexpr inline Row& operator-=(Row& row, int value)
  */
 constexpr inline uint64_t get_row_mask(Row row)
 {
+    assert(is_valid_row(row));
+
     return is_valid_row(row) ? ROW_MASKS[row] : 0ULL;
 }

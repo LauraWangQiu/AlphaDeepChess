@@ -9,7 +9,7 @@
 
 #include "square.hpp"
 #include "piece.hpp"
-
+#include <cassert>
 
 /**
  * @brief MoveType
@@ -105,6 +105,11 @@ public:
                ((static_cast<uint16_t>(promotion_piece) - 1) << SHIFT_PROMOTION_PIECE) |
                (static_cast<uint16_t>(move_type) << SHIFT_MOVE_TYPE))
     {
+        assert(square_from.is_valid());
+        assert(square_to.is_valid());
+        assert(move_type >= MoveType::NORMAL && move_type <= MoveType::CASTLING);
+        assert(promotion_piece == PieceType::KNIGHT || promotion_piece == PieceType::BISHOP ||
+               promotion_piece == PieceType::ROOK || promotion_piece == PieceType::QUEEN);
 
         // we substract -1 because PieceType enum values have an offset of 1.
         // E.g Knight = 0 and PieceType::KNIGHT = 1

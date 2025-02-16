@@ -34,7 +34,7 @@ static void col_to_char_test()
 {
     const std::string test_name = "col_to_char_test";
 
-    for (Col i = COL_A; i <= COL_H; ++i) {
+    for (Col i = COL_A; is_valid_col(i); ++i) {
         if (col_to_char(i) != 'a' + i) {
             PRINT_TEST_FAILED(test_name, "col_to_char(i) != 'a' + i");
         }
@@ -45,7 +45,7 @@ static void col_is_valid_col_test()
 {
     const std::string test_name = "col_is_valid_col_test";
 
-    for (Col i = COL_A; i <= COL_H; ++i) {
+    for (Col i = COL_A; is_valid_col(i); ++i) {
 
         if (!is_valid_col(i)) {
             PRINT_TEST_FAILED(test_name, "!is_valid_col(i)");

@@ -12,6 +12,10 @@
 
 #include <string>
 #include <cstdint>
+#include <vector>
+#include "move.hpp"
+
+typedef std::vector<std::pair<Move, uint64_t>> MoveNodesList;
 
 /**
  * @brief perft
@@ -28,7 +32,7 @@
  * 
  * @param[in] FEN position to study.
  * @param[in] depth depth to reach.
+ * @param[out] moveNodeList legal moves and their number of nodes
  * @param[out] time ms passed to complete the perft test.
- * @param[out] nodes counted nodes.
  */
-void perft(const std::string &FEN, uint64_t depth, int64_t& time, uint64_t& nodes);
+void perft(const std::string& FEN, uint64_t depth, MoveNodesList& moveNodeList, int64_t& time);

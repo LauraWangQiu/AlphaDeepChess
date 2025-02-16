@@ -8,6 +8,7 @@
 
 #include <sstream>
 #include <stdexcept>
+
 /**
  * @brief put_piece
  * 
@@ -21,6 +22,9 @@
  */
 void Board::put_piece(Piece piece, Square square)
 {
+    assert(is_valid_piece(piece));
+    assert(square.is_valid());
+
     uint64_t mask = square.mask();
 
     // first remove the previous piece
@@ -54,6 +58,8 @@ void Board::put_piece(Piece piece, Square square)
  */
 void Board::remove_piece(Square square)
 {
+    assert(square.is_valid());
+
     uint64_t mask = square.mask();
 
     bitboard_piece[static_cast<int>(get_piece(square))] &= ~mask;
@@ -98,6 +104,8 @@ void Board::clean()
  */
 void Board::make_move(Move move)
 {
+    assert(move.is_valid());
+
     const Square origin_square = move.square_from();
     const Square end_square = move.square_to();
 
@@ -177,30 +185,19 @@ void Board::make_move(Move move)
 
     // if move is double push pawn then update the square where enPassant is available
 
+    game_state.set_en_passant_square(Square::SQ_INVALID);
+
     const bool is_pawn_move = (piece_to_pieceType(origin_piece) == PieceType::PAWN);
-    const uint32_t row_diff = abs((int32_t)origin_square.row() - (int32_t)end_square.row());
-    const bool is_move_double_push = is_pawn_move && row_diff == 2U;
+    const bool is_move_double_push = is_pawn_move &&
+        (origin_square.row() == ROW_7 && end_square.row() == ROW_5 ||
+         origin_square.row() == ROW_2 && end_square.row() == ROW_4);
 
     if (is_move_double_push) {
-        const Piece left_piece =
-            end_square.west().is_valid() ? get_piece(end_square.west()) : Piece::EMPTY;
-        const Piece right_piece =
-            end_square.east().is_valid() ? get_piece(end_square.east()) : Piece::EMPTY;
-        const Piece enemy_pawn =
-            get_color(origin_piece) == ChessColor::WHITE ? Piece::B_PAWN : Piece::W_PAWN;
+        const Square eps(origin_square.row() == ROW_2 ? ROW_3 : ROW_6, end_square.col());
+        game_state.set_en_passant_square(eps);
+        check_and_modify_en_passant_rule();
+    }
 
-        // check if en passant is really possible in the position
-        if (left_piece == enemy_pawn || right_piece == enemy_pawn) {
-            const Row en_passant_row = get_color(origin_piece) == ChessColor::WHITE ? ROW_5 : ROW_4;
-            game_state.set_en_passant_square(Square(en_passant_row, end_square.col()));
-        }
-        else {
-            game_state.set_en_passant_square(Square::SQ_INVALID);
-        }
-    }
-    else {
-        game_state.set_en_passant_square(Square::SQ_INVALID);
-    }
 
     // increment the move counter
     const uint64_t next_move_number = game_state.side_to_move() == ChessColor::BLACK
@@ -240,6 +237,8 @@ void Board::make_move(Move move)
  */
 void Board::unmake_move(Move move, GameState previous_state)
 {
+    assert(move.is_valid());
+
     const Square origin_square = move.square_from();
     const Square end_square = move.square_to();
 
@@ -394,16 +393,20 @@ std::string Board::fen() const
     std::ostringstream fen;
 
     for (Row row = ROW_8; is_valid_row(row); row--) {
-        for (Col col = COL_A; col <= COL_H; col++) {
+        Col col = COL_A;
+        while (is_valid_col(col)) {
             emptyCounter = 0;
-            while (col <= COL_H && is_empty(Square(row, col))) {
+            while (is_valid_col(col) && is_empty(Square(row, col))) {
                 emptyCounter++;
                 col++;
             };
 
             if (emptyCounter) fen << emptyCounter;
 
-            if (col <= 7) fen << (piece_to_char(get_piece(Square(row, col))));
+            if (is_valid_col(col)) {
+                fen << piece_to_char(get_piece(Square(row, col)));
+                col++;
+            }
         }
 
         if (row > 0) fen << '/';
@@ -453,7 +456,10 @@ std::string Board::fen() const
  * 
  *  Constructor of Board class.
  */
-Board::Board() : bitboard_all(0ULL), bitboard_white(0ULL), bitboard_black(0ULL), game_state() { clean(); }
+Board::Board() : bitboard_all(0ULL), bitboard_white(0ULL), bitboard_black(0ULL), game_state()
+{
+    clean();
+}
 
 /**
  * @brief ~Board
@@ -542,38 +548,45 @@ void Board::check_and_modify_castle_rights()
  */
 void Board::check_and_modify_en_passant_rule()
 {
-    // En passant square will be considered only if
-    // a) side to move have a pawn threatening enPassantSquare
-    // b) there is an enemy pawn in front of enPassantSquare
-    // c) there is no piece on enPassantSquare or behind enPassantSquare
+    // En passant square will be considered only if:
+    // a) Side to move has a pawn threatening enPassantSquare
+    // b) There is an enemy pawn in front of enPassantSquare
+    // c) There is no piece on enPassantSquare or behind it
 
-    bool valid = false;
-
-    Square enPassantSquare = game_state.en_passant_square();
-    if (enPassantSquare.is_valid()) {
-
-        Col col = enPassantSquare.col();
-        if (enPassantSquare.row() == ROW_6) {
-
-            if ((get_piece({ROW_5, col - 1}) == Piece::W_PAWN ||
-                 get_piece({ROW_5, col + 1}) == Piece::W_PAWN) &&
-                get_piece({ROW_5, col}) == Piece::B_PAWN && is_empty(enPassantSquare) &&
-                is_empty({ROW_7, col})) {
-                valid = true;
-            }
-        }
-        else if (enPassantSquare.row() == ROW_3) {
-            if ((get_piece({ROW_4, col - 1}) == Piece::B_PAWN ||
-                 get_piece({ROW_4, col + 1}) == Piece::B_PAWN) &&
-                get_piece({ROW_5, col}) == Piece::W_PAWN && is_empty(enPassantSquare) &&
-                is_empty({ROW_2, col})) {
-                valid = true;
-            }
-        }
-
-        if (!valid) {
-            // invalid enPassant row
-            game_state.set_en_passant_square(Square::SQ_INVALID);
-        }
+    // Get the en passant square (EPS) set by the previous move.
+    const Square eps = game_state.en_passant_square();
+    if (!eps.is_valid()) {
+        return;
     }
+
+    const Square pawn_pushed_sq(eps.row() == ROW_6 ? ROW_5 : ROW_4, eps.col());
+    const Square pawn_pushed_origin_sq(eps.row() == ROW_6 ? ROW_7 : ROW_2, eps.col());
+    const Square pawn_attacker1_sq = pawn_pushed_sq.east();
+    const Square pawn_attacker2_sq = pawn_pushed_sq.west();
+
+    // c) There is no piece on enPassantSquare or behind it
+    if (!is_empty(eps) || !is_empty(pawn_pushed_origin_sq)) {
+        game_state.set_en_passant_square(Square::SQ_INVALID);
+        return;
+    }
+
+    const Piece capturable_pawn = eps.row() == ROW_6 ? Piece::B_PAWN : Piece::W_PAWN;
+    const Piece attacker_pawn = eps.row() == ROW_6 ? Piece::W_PAWN : Piece::B_PAWN;
+
+    // b) There is an enemy pawn in front of enPassantSquare
+    if (get_piece(pawn_pushed_sq) != capturable_pawn) {
+        game_state.set_en_passant_square(Square::SQ_INVALID);
+        return;
+    }
+
+    // a) Side to move has a pawn threatening enPassantSquar
+    bool has_pawn_attacker = false;
+    if (pawn_attacker1_sq.is_valid() && get_piece(pawn_attacker1_sq) == attacker_pawn) {
+        has_pawn_attacker = true;
+    }
+    if (pawn_attacker2_sq.is_valid() && get_piece(pawn_attacker2_sq) == attacker_pawn) {
+        has_pawn_attacker = true;
+    }
+
+    game_state.set_en_passant_square(has_pawn_attacker ? eps : Square::SQ_INVALID);
 }

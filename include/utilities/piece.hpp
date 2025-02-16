@@ -7,6 +7,8 @@
  * 
  */
 
+#include <cassert>
+
 /**
  * @brief WHITE = 0  
  * @brief BLACK = 1
@@ -133,6 +135,59 @@ static constexpr char pieceRepresentation[NUM_CHESS_PIECES] = {'P', 'N', 'B', 'R
  */
 static constexpr uint32_t pieceRawValue[NUM_CHESS_PIECES] = {
     100U, 300U, 310U, 500U, 900U, 500U, 100U, 300U, 310U, 500U, 900U, 500U, 0U};
+
+
+/**
+ * @brief is_valid_piece 
+ * 
+ * Returns if piece is valid.
+ * 
+ * @param[in] piece The piece
+ * 
+ * @return
+ * - TRUE if piece >= W_PAWN && piece < NUM_PIECES
+ * - FALSE if piece is invalid.
+ * 
+ */
+constexpr inline bool is_valid_piece(Piece piece)
+{
+    return piece >= Piece::W_PAWN && piece < Piece::NUM_PIECES;
+}
+
+/**
+ * @brief is_valid_pieceType 
+ * 
+ * Returns if pieceType is valid.
+ * 
+ * @param[in] piece_type The piece type
+ * 
+ * @return
+ * - TRUE if piece_type >= PAWN && piece_type < EMPTY
+ * - FALSE if piece_type is invalid.
+ * 
+ */
+constexpr inline bool is_valid_pieceType(PieceType piece_type)
+{
+    return piece_type >= PieceType::PAWN && piece_type <= PieceType::EMPTY;
+}
+
+/**
+ * @brief is_valid_color 
+ * 
+ * Returns if color is valid.
+ * 
+ * @param[in] color The color
+ * 
+ * @return
+ * - TRUE if color == WHITE || color == BLACK
+ * - FALSE if color is invalid.
+ * 
+ */
+constexpr inline bool is_valid_color(ChessColor color)
+{
+    return color == ChessColor::WHITE || color == ChessColor::BLACK;
+}
+
 /**
  * @brief pieceToChar
  * 
@@ -145,6 +200,7 @@ static constexpr uint32_t pieceRawValue[NUM_CHESS_PIECES] = {
  */
 constexpr inline char piece_to_char(Piece piece)
 {
+    assert(is_valid_piece(piece));
     return pieceRepresentation[static_cast<int>(piece)];
 }
 
@@ -234,6 +290,8 @@ constexpr inline PieceType char_to_pieceType(char pieceType_char)
  */
 constexpr inline char pieceType_to_char(PieceType piece_type)
 {
+    assert(is_valid_pieceType(piece_type));
+
     return pieceRepresentation[static_cast<int>(piece_type) + 6];
 }
 
@@ -251,6 +309,8 @@ constexpr inline char pieceType_to_char(PieceType piece_type)
  */
 constexpr inline ChessColor get_color(Piece piece)
 {
+    assert(is_valid_piece(piece));
+
     // depends on the int value of the Piece enum
     return static_cast<int>(piece) <= 5 ? ChessColor::WHITE : ChessColor::BLACK;
 }
@@ -268,6 +328,8 @@ constexpr inline ChessColor get_color(Piece piece)
  */
 constexpr inline PieceType piece_to_pieceType(Piece piece)
 {
+    assert(is_valid_piece(piece));
+
     // the white and black pieces have a difference of +6 int value
     // E.g  WKnight = 1, BKnight = 7
     // if piece is black then we substract 6 to convert to white.
@@ -288,6 +350,9 @@ constexpr inline PieceType piece_to_pieceType(Piece piece)
  */
 constexpr inline Piece create_piece(PieceType type, ChessColor color)
 {
+    assert(is_valid_pieceType(type));
+    assert(is_valid_color(color));
+
     // the white and black pieces have a difference of +6 int value
     // E.g  WKnight = 1, BKnight = 7
     return type == PieceType::EMPTY
@@ -318,7 +383,11 @@ constexpr inline Piece create_piece(PieceType type, ChessColor color)
  *   EMPTY(12) = 0,
  * 
  */
-constexpr inline uint32_t raw_value(Piece piece) { return pieceRawValue[static_cast<int>(piece)]; }
+constexpr inline uint32_t raw_value(Piece piece)
+{
+    assert(is_valid_piece(piece));
+    return pieceRawValue[static_cast<int>(piece)];
+}
 
 /**
  * @brief raw_value 
@@ -338,6 +407,8 @@ constexpr inline uint32_t raw_value(Piece piece) { return pieceRawValue[static_c
  */
 constexpr inline uint32_t raw_value(PieceType piece)
 {
+    assert(is_valid_pieceType(piece));
+
     return pieceRawValue[6 + static_cast<int>(piece)];
 }
 
@@ -355,6 +426,8 @@ constexpr inline uint32_t raw_value(PieceType piece)
  */
 constexpr inline bool is_slider(PieceType piece)
 {
+    assert(is_valid_pieceType(piece));
+
     return piece == PieceType::BISHOP || piece == PieceType::QUEEN || piece == PieceType::ROOK;
 }
 
@@ -373,6 +446,8 @@ constexpr inline bool is_slider(PieceType piece)
  */
 constexpr inline Piece operator+(Piece piece, int value)
 {
+    assert(is_valid_piece(piece));
+
     const Piece sum = static_cast<Piece>(static_cast<int>(piece) + value);
     return sum < Piece::W_PAWN || sum > Piece::EMPTY ? Piece::EMPTY : sum;
 }
@@ -391,6 +466,8 @@ constexpr inline Piece operator+(Piece piece, int value)
  */
 constexpr inline Piece operator-(Piece piece, int value)
 {
+    assert(is_valid_piece(piece));
+
     const Piece sub = static_cast<Piece>(static_cast<int>(piece) - value);
     return sub < Piece::W_PAWN || sub > Piece::EMPTY ? Piece::EMPTY : sub;
 }
@@ -409,6 +486,8 @@ constexpr inline Piece operator-(Piece piece, int value)
  */
 constexpr inline PieceType operator+(PieceType piece_type, int value)
 {
+    assert(is_valid_pieceType(piece_type));
+
     const PieceType sum = static_cast<PieceType>(static_cast<int>(piece_type) + value);
     return sum < PieceType::PAWN || sum > PieceType::EMPTY ? PieceType::EMPTY : sum;
 }
@@ -427,6 +506,8 @@ constexpr inline PieceType operator+(PieceType piece_type, int value)
  */
 constexpr inline PieceType operator-(PieceType piece_type, int value)
 {
+    assert(is_valid_pieceType(piece_type));
+
     const PieceType sub = static_cast<PieceType>(static_cast<int>(piece_type) - value);
     return sub < PieceType::PAWN || sub > PieceType::EMPTY ? PieceType::EMPTY : sub;
 }

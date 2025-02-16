@@ -139,7 +139,7 @@ static void get_direction_mask_test()
         PRINT_TEST_FAILED(
             test_name, "get_direction_mask(Square::SQ_D4, Square::SQ_G1) != ANTIDIAGONAL_6_MASK");
     }
-    if (get_direction_mask(Square::SQ_A8, Square::SQ_G8) != 0ULL) {
+    if (get_direction_mask(Square::SQ_A8, Square::SQ_G6) != 0ULL) {
         PRINT_TEST_FAILED(test_name, "get_direction_mask(Square::SQ_A8, Square::SQ_G8) != 0ULL");
     }
 }

@@ -41,6 +41,15 @@
                 }
             ],
             "preLaunchTask": "tests_build"
+        },
+
+        {
+            "name": "BoardViewer",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/boardViewer.py",
+            "console": "integratedTerminal"
         }
-    ]
+    ],
+
 }

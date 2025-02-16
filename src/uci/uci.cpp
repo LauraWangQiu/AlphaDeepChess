@@ -149,16 +149,16 @@ void Uci::new_game_command_action() { board.load_fen(StartFEN); }
  */
 void Uci::go_command_action(const TokenArray& tokens)
 {
-    uint32_t wtime = 0U;        // Time left for white player
-    uint32_t btime = 0U;        // Time left for black player
-    uint32_t winc = 0U;         // Time increment for white player
-    uint32_t binc = 0U;         // Time increment for black player
-    uint32_t movetime = 0U;     // Time to spend on a move
-    uint32_t movestogo = 0U;    // Number of moves to the next time control
-    uint32_t depth = 5U;        // Depth to search (default value)
-    uint32_t nodes = 0U;        // Number of nodes to search
-    uint32_t mate = 0U;         // Search for a mate in x moves
-    MoveList search_moves;      // List of moves to search before another argument
+    uint32_t wtime = 0U;       // Time left for white player
+    uint32_t btime = 0U;       // Time left for black player
+    uint32_t winc = 0U;        // Time increment for white player
+    uint32_t binc = 0U;        // Time increment for black player
+    uint32_t movetime = 0U;    // Time to spend on a move
+    uint32_t movestogo = 0U;   // Number of moves to the next time control
+    uint32_t depth = 5U;       // Depth to search (default value)
+    uint32_t nodes = 0U;       // Number of nodes to search
+    uint32_t mate = 0U;        // Search for a mate in x moves
+    MoveList search_moves;     // List of moves to search before another argument
 
     // Parse the command line arguments
     for (uint32_t i = 1; i < tokens.size(); ++i) {
@@ -172,12 +172,12 @@ void Uci::go_command_action(const TokenArray& tokens)
                 Move move = create_move_from_string(tokens[i], board);
                 if (move.is_valid()) {
                     search_moves.add(move);
-                } else {
+                }
+                else {
                     break;
                 }
             }
             --i;
-            
         }
         else if (tokens[i] == "ponder") {
             // TODO
@@ -185,7 +185,7 @@ void Uci::go_command_action(const TokenArray& tokens)
         else if (tokens[i] == "wtime" && i + 1 < tokens.size()) {
             try {
                 wtime = std::stoul(tokens[i + 1]);
-                ++i; // Skip the number value of the wtime
+                ++i;   // Skip the number value of the wtime
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command: go wtime\n";
             }
@@ -193,7 +193,7 @@ void Uci::go_command_action(const TokenArray& tokens)
         else if (tokens[i] == "btime" && i + 1 < tokens.size()) {
             try {
                 btime = std::stoul(tokens[i + 1]);
-                ++i; // Skip the number value of the btime
+                ++i;   // Skip the number value of the btime
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command: go btime\n";
             }
@@ -201,7 +201,7 @@ void Uci::go_command_action(const TokenArray& tokens)
         else if (tokens[i] == "winc" && i + 1 < tokens.size()) {
             try {
                 winc = std::stoul(tokens[i + 1]);
-                ++i; // Skip the number value of the winc
+                ++i;   // Skip the number value of the winc
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command: go winc\n";
             }
@@ -209,7 +209,7 @@ void Uci::go_command_action(const TokenArray& tokens)
         else if (tokens[i] == "binc" && i + 1 < tokens.size()) {
             try {
                 binc = std::stoul(tokens[i + 1]);
-                ++i; // Skip the number value of the binc
+                ++i;   // Skip the number value of the binc
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command: go binc\n";
             }
@@ -217,7 +217,7 @@ void Uci::go_command_action(const TokenArray& tokens)
         else if (tokens[i] == "movestogo" && i + 1 < tokens.size()) {
             try {
                 movestogo = std::stoul(tokens[i + 1]);
-                ++i; // Skip the number value of the movestogo
+                ++i;   // Skip the number value of the movestogo
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command: go movestogo\n";
             }
@@ -225,35 +225,40 @@ void Uci::go_command_action(const TokenArray& tokens)
         else if (tokens[i] == "depth" && i + 1 < tokens.size()) {
             try {
                 depth = std::stoul(tokens[i + 1]);
-                ++i; // Skip the number value of the depth
+                ++i;   // Skip the number value of the depth
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command : go depth\n";
             }
-        } else if (tokens[i] == "nodes" && i + 1 < tokens.size()) {
+        }
+        else if (tokens[i] == "nodes" && i + 1 < tokens.size()) {
             try {
                 nodes = std::stoul(tokens[i + 1]);
-                ++i; // Skip the number value of the nodes
+                ++i;   // Skip the number value of the nodes
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command : go nodes\n";
             }
-        } else if (tokens[i] == "mate" && i + 1 < tokens.size()) {
+        }
+        else if (tokens[i] == "mate" && i + 1 < tokens.size()) {
             try {
                 mate = std::stoul(tokens[i + 1]);
-                ++i; // Skip the number value of searching mate
+                ++i;   // Skip the number value of searching mate
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command : go mate\n";
             }
-        } else if (tokens[i] == "movetime" && i + 1 < tokens.size()) {
+        }
+        else if (tokens[i] == "movetime" && i + 1 < tokens.size()) {
             try {
                 movetime = std::stoul(tokens[i + 1]);
-                ++i; // Skip the number value of the movetime
+                ++i;   // Skip the number value of the movetime
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command: go movetime\n";
             }
-        } else if (tokens[i] == "infinite") {
+        }
+        else if (tokens[i] == "infinite") {
             depth = INFINITE_SEARCH_DEPTH_VALUE;
-        } else {
-            std::cout << "Invalid argument for command : go ( "<< tokens[i] << " )\n";
+        }
+        else {
+            std::cout << "Invalid argument for command : go ( " << tokens[i] << " )\n";
         }
     }
 
@@ -333,37 +338,53 @@ bool Uci::position_command_action(const TokenArray& tokens, uint32_t num_tokens)
     if (num_tokens < 2) {
         return false;
     }
-    uint32_t first_move_pos = 3U;
+    uint32_t token_i = 1;
 
-    if (tokens[1] == "startpos") {
+    if (tokens[token_i] == "startpos") {
         board.load_fen(StartFEN);
-        first_move_pos = 2U;
+        token_i++;
     }
-    else if (tokens[1] == "actualpos") {
-        first_move_pos = 2U;
+    else if (tokens[token_i] == "actualpos") {
+        token_i++;
     }
-    else if (tokens[1] == "fen") {
+    else if (tokens[token_i] == "fen") {
+        token_i++;
         if (num_tokens < 3) {
             return false;
         }
+        // parse the fen
+        std::string fen = "";
 
-        board.load_fen(tokens[2]);
+        while (token_i < num_tokens && tokens[token_i] != "moves") {
+            fen += tokens[token_i++] + " ";
+
+        }
+        if(fen.empty())
+        {
+            return false;
+        }
+
+        fen.pop_back(); // remove last " "
+
+        board.load_fen(fen);
     }
     else {
         return false;
     }
 
-    // Handle any subsequent moves
-    if (num_tokens > first_move_pos) {
+    // parse moves
+    if (token_i < num_tokens && tokens[token_i++] == "moves") {
+
         MoveList move_list;
-        for (uint32_t i = first_move_pos; i < num_tokens; ++i) {
-            Move move = create_move_from_string(tokens[i], board);
+        while (token_i < num_tokens) {
+            Move move = create_move_from_string(tokens[token_i++], board);
             if (!move.is_valid()) {
                 return false;
             }
             board.make_move(move);
         }
     }
+
 
     return true;
 }
@@ -377,12 +398,6 @@ bool Uci::position_command_action(const TokenArray& tokens, uint32_t num_tokens)
 void Uci::diagram_command_action() const
 {
     std::cout << board << std::endl;
-
-    MoveList moves;
-
-    generate_legal_moves(moves, board);
-
-    std::cout << "Legal moves : " << moves.size() << std::endl << moves.to_string() << std::endl;
 }
 
 /**
@@ -452,9 +467,17 @@ void Uci::perft_command_action(uint64_t depth) const
 {
     int64_t time = 0;
     uint64_t nodes = 0U;
+    MoveNodesList moveNodesList;
 
-    perft(board.fen(), depth, time, nodes);
-    std::cout << "Perft " << depth << " : " << nodes << "  execution time: " << time << " ms\n";
+    perft(board.fen(), depth, moveNodesList, time);
+
+    std::cout << '\n';
+
+    for (const auto& moveNode : moveNodesList) {
+        std::cout << moveNode.first.to_string() << ": " << moveNode.second << '\n';
+        nodes += moveNode.second;
+    }
+    std::cout << "\nNodes searched: " << nodes << "\nExecution time: " << time << " ms\n";
 }
 
 /**
@@ -518,7 +541,7 @@ Move Uci::create_move_from_string(const std::string& move_string, const Board& b
         }
     }
 
-    PieceType promo_piece = PieceType::EMPTY;
+    PieceType promo_piece = PieceType::KNIGHT;
     MoveType move_type = MoveType::NORMAL;
 
     // check for promotion move

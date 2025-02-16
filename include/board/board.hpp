@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <ostream>
 #include <string>
+#include <cassert>
 
 #include "piece.hpp"
 #include "square.hpp"
@@ -40,7 +41,11 @@ public:
      * @return array_piece[square].
      * 
      */
-    inline Piece get_piece(Square square) const { return array_piece[square]; }
+    inline Piece get_piece(Square square) const
+    {
+        assert(square.is_valid());
+        return array_piece[square];
+    }
 
     /**
      * @brief is_empty 
@@ -54,7 +59,11 @@ public:
      * - FALSE if there is a piece in the square.
      * 
      */
-    inline bool is_empty(Square square) const { return array_piece[square] == Piece::EMPTY; }
+    inline bool is_empty(Square square) const
+    {
+        assert(square.is_valid());
+        return array_piece[square] == Piece::EMPTY;
+    }
 
     /**
      * @brief bitboard_all_pieces 
@@ -102,6 +111,7 @@ public:
      */
     inline uint64_t get_bitboard_piece(Piece piece) const
     {
+        assert(is_valid_piece(piece));
         return bitboard_piece[static_cast<int>(piece)];
     }
 

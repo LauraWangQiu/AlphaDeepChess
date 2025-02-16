@@ -7,6 +7,7 @@
  */
 
 #include <cstdint>
+#include <cassert>
 
 /**
  * @brief Col
@@ -40,19 +41,6 @@ static constexpr uint64_t COL_MASKS[8] = {COL_A_MASK, COL_B_MASK, COL_C_MASK, CO
                                           COL_E_MASK, COL_F_MASK, COL_G_MASK, COL_H_MASK};
 
 /**
- * @brief col_to_char(const Col col)
- * 
- * column conversion to char.
- * 
- * @note col must be valid
- * 
- * @param[in] col The col value
- * 
- * @return 'a','b','c','d','e','f','g','h'
- */
-constexpr inline char col_to_char(const Col col) { return 'a' + static_cast<int>(col); }
-
-/**
  * @brief is_valid_col 
  * 
  * Returns if col is valid.
@@ -65,6 +53,23 @@ constexpr inline char col_to_char(const Col col) { return 'a' + static_cast<int>
  * 
  */
 constexpr inline bool is_valid_col(Col col) { return col >= COL_A && col <= COL_H; }
+
+/**
+ * @brief col_to_char(const Col col)
+ * 
+ * column conversion to char.
+ * 
+ * @note col must be valid
+ * 
+ * @param[in] col The col value
+ * 
+ * @return 'a','b','c','d','e','f','g','h'
+ */
+constexpr inline char col_to_char(const Col col)
+{
+    assert(is_valid_col(col));
+    return 'a' + static_cast<int>(col);
+}
 
 /**
  * @brief operator+(Col, int)
@@ -80,6 +85,8 @@ constexpr inline bool is_valid_col(Col col) { return col >= COL_A && col <= COL_
  */
 constexpr inline Col operator+(Col col, int value)
 {
+    assert(is_valid_col(col));
+
     const Col sum = static_cast<Col>(static_cast<int>(col) + value);
     return is_valid_col(sum) ? sum : COL_INVALID;
 }
@@ -98,6 +105,8 @@ constexpr inline Col operator+(Col col, int value)
  */
 constexpr inline Col operator-(Col col, int value)
 {
+    assert(is_valid_col(col));
+
     const Col sub = static_cast<Col>(static_cast<int>(col) - value);
     return is_valid_col(sub) ? sub : COL_INVALID;
 }
@@ -115,6 +124,8 @@ constexpr inline Col operator-(Col col, int value)
  */
 constexpr inline Col& operator++(Col& col)
 {
+    assert(is_valid_col(col));
+
     const Col sum = static_cast<Col>(static_cast<int>(col) + 1);
     col = is_valid_col(sum) ? sum : COL_INVALID;
     return col;
@@ -132,6 +143,8 @@ constexpr inline Col& operator++(Col& col)
  */
 constexpr inline Col operator++(Col& col, int)
 {
+    assert(is_valid_col(col));
+
     Col old = col;
     const Col sum = static_cast<Col>(static_cast<int>(col) + 1);
     col = is_valid_col(sum) ? sum : COL_INVALID;
@@ -150,6 +163,8 @@ constexpr inline Col operator++(Col& col, int)
  */
 constexpr inline Col& operator--(Col& col)
 {
+    assert(is_valid_col(col));
+
     const Col sub = static_cast<Col>(static_cast<int>(col) - 1);
     col = is_valid_col(sub) ? sub : COL_INVALID;
     return col;
@@ -167,6 +182,8 @@ constexpr inline Col& operator--(Col& col)
  */
 constexpr inline Col operator--(Col& col, int)
 {
+    assert(is_valid_col(col));
+
     Col old = col;
     const Col sub = static_cast<Col>(static_cast<int>(col) - 1);
     col = is_valid_col(sub) ? sub : COL_INVALID;
@@ -187,6 +204,8 @@ constexpr inline Col operator--(Col& col, int)
  */
 constexpr inline Col& operator+=(Col& col, int value)
 {
+    assert(is_valid_col(col));
+
     const Col sum = static_cast<Col>(static_cast<int>(col) + value);
     col = is_valid_col(sum) ? sum : COL_INVALID;
     return col;
@@ -206,6 +225,8 @@ constexpr inline Col& operator+=(Col& col, int value)
  */
 constexpr inline Col& operator-=(Col& col, int value)
 {
+    assert(is_valid_col(col));
+
     const Col sub = static_cast<Col>(static_cast<int>(col) - value);
     col = is_valid_col(sub) ? sub : COL_INVALID;
     return col;
@@ -225,5 +246,6 @@ constexpr inline Col& operator-=(Col& col, int value)
  */
 constexpr inline uint64_t get_col_mask(Col col)
 {
+    assert(is_valid_col(col));
     return is_valid_col(col) ? COL_MASKS[col] : 0ULL;
 }

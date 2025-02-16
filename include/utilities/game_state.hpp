@@ -2,6 +2,7 @@
 
 #include "piece.hpp"
 #include "square.hpp"
+#include <cassert>
 
 /**
  * @file game_state.hpp
@@ -542,6 +543,7 @@ constexpr inline uint64_t GameState::move_number() const
  */
 constexpr inline void GameState::set_triple_repetition_counter(uint8_t counter)
 {
+    assert(counter <= 3);
     state_register &= ~MASK_TRIPLE_REPETITION_RULE;
     state_register |= static_cast<uint64_t>(counter) << SHIFT_TRIPLE_REPETITION_RULE;
 }
@@ -557,6 +559,7 @@ constexpr inline void GameState::set_triple_repetition_counter(uint8_t counter)
  */
 constexpr inline void GameState::set_fifty_move_rule_counter(uint8_t counter)
 {
+    assert(counter <= 50);
     state_register &= ~MASK_FIFTY_MOVE_RULE;
     state_register |= static_cast<uint64_t>(counter) << SHIFT_FIFTY_MOVE_RULE;
 }
@@ -572,6 +575,8 @@ constexpr inline void GameState::set_fifty_move_rule_counter(uint8_t counter)
  */
 constexpr inline void GameState::set_last_captured_piece(PieceType piece_type)
 {
+    assert(is_valid_pieceType(piece_type));
+
     state_register &= ~MASK_LAST_CAPTURED_PIECE;
     state_register |= static_cast<uint64_t>(piece_type) << SHIFT_LAST_CAPTURED_PIECE;
 }
@@ -585,6 +590,8 @@ constexpr inline void GameState::set_last_captured_piece(PieceType piece_type)
  */
 constexpr inline void GameState::set_side_to_move(ChessColor side)
 {
+    assert(is_valid_color(side));
+
     state_register &= ~MASK_SIDE_TO_MOVE;
     state_register |= static_cast<uint64_t>(side) << SHIFT_SIDE_TO_MOVE;
 }
@@ -675,6 +682,8 @@ constexpr inline void GameState::set_en_passant_square(Square square)
  */
 constexpr inline void GameState::set_move_number(uint64_t move_number)
 {
+    assert(move_number < 1048575);
+
     state_register &= ~MASK_MOVE_NUMBER;
     state_register |= move_number << SHIFT_MOVE_NUMBER;
 }

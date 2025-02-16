@@ -61,8 +61,8 @@ public:
         attacked_squares_mask = 0U;
         pinned_squares_mask = 0U;
         king_danger_squares_mask = 0U;
-        push_squares_mask = 0xffffffffU;
-        capture_squares_mask = 0xffffffffU;
+        push_squares_mask = 0xffffffffffffffffU;
+        capture_squares_mask = 0xffffffffffffffffU;
         checker_square = Square::SQ_INVALID;
         number_of_checkers = 0U;
         king_white_square = board.get_bitboard_piece(Piece::W_KING);

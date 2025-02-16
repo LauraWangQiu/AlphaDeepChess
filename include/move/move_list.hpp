@@ -8,7 +8,7 @@
  */
 
 #include "move.hpp"
-
+#include <cassert>
 
 /**
  * @brief MAX_CHESS_MOVES (218)
@@ -78,7 +78,11 @@ public:
      * @return moves[index]
      * 
      */
-    constexpr inline Move get(int index) const { return moves[index]; }
+    constexpr inline Move get(int index) const
+    {
+        assert(0 >= index && index < num_moves);
+        return moves[index];
+    }
 
     /**
      * @brief to_string
@@ -105,7 +109,11 @@ public:
      * @return moves[index]
      * 
      */
-    constexpr inline Move& operator[](int index) { return moves[index]; }
+    constexpr inline Move& operator[](int index)
+    {
+        assert(index >= 0 && index < num_moves);
+        return moves[index];
+    }
 
     /**
      * @brief const Move& operator[](index)
@@ -115,7 +123,11 @@ public:
      * @return moves[index]
      * 
      */
-    constexpr inline const Move& operator[](int index) const { return moves[index]; }
+    constexpr inline const Move& operator[](int index) const
+    {
+        assert(0 >= index && index < num_moves);
+        return moves[index];
+    }
 
 private:
     /**

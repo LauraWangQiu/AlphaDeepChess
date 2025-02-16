@@ -9,6 +9,7 @@
 #include <string>
 #include <cstdint>
 #include <ostream>
+#include <cassert>
 
 #include "col.hpp"
 #include "row.hpp"
@@ -110,7 +111,9 @@ public:
      */
     constexpr Square(Row row, Col col)
         : sq_value(is_valid_row(row) && is_valid_col(col) ? (row << 3U) + col : SQ_INVALID)
-    { }
+    {
+
+    }
 
     /**
      * @brief Square(Square::Name square)
@@ -210,6 +213,8 @@ public:
      */
     friend std::ostream& operator<<(std::ostream& os, const Square& square)
     {
+        assert(square.is_valid());
+
         os << (char)('a' + square.col()) << (char)('1' + square.row());
         return os;
     }
@@ -265,6 +270,8 @@ public:
      */
     constexpr Square& operator++()
     {
+        assert(this->is_valid());
+
         ++sq_value;
         sq_value = is_valid() ? sq_value : (uint8_t)SQ_INVALID;
         return *this;
@@ -280,6 +287,8 @@ public:
      */
     constexpr Square operator++(int)
     {
+        assert(this->is_valid());
+
         Square temp = *this;
         ++sq_value;
         sq_value = is_valid() ? sq_value : (uint8_t)SQ_INVALID;
@@ -296,6 +305,8 @@ public:
      */
     constexpr Square& operator--()
     {
+        assert(this->is_valid());
+
         --sq_value;
         sq_value = is_valid() ? sq_value : (uint8_t)SQ_INVALID;
         return *this;
@@ -310,6 +321,8 @@ public:
      */
     constexpr Square operator--(int)
     {
+        assert(this->is_valid());
+
         Square temp = *this;
         --sq_value;
         sq_value = is_valid() ? sq_value : (uint8_t)SQ_INVALID;

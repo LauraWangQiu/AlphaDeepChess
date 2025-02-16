@@ -222,12 +222,6 @@ static void square_PreIncrement_test()
     if (++square != Square::SQ_C5) {
         PRINT_TEST_FAILED(test_name, "++square != Square::SQ_C5");
     }
-
-    square = Square(Square::SQ_INVALID);
-
-    if (++square != Square::SQ_INVALID) {
-        PRINT_TEST_FAILED(test_name, "++square != Square::SQ_INVALID");
-    }
 }
 
 static void square_PostIncrement_test()
@@ -245,9 +239,6 @@ static void square_PostIncrement_test()
 
     square = Square(Square::SQ_INVALID);
 
-    if (square++ != Square::SQ_INVALID) {
-        PRINT_TEST_FAILED(test_name, "square++ != Square::SQ_INVALID");
-    }
     if (square != Square::SQ_INVALID) {
         PRINT_TEST_FAILED(test_name, "square != Square::SQ_INVALID");
     }

@@ -15,6 +15,9 @@ static void piece_sum_test();
 static void piece_sub_test();
 static void pieceType_sum_test();
 static void pieceType_sub_test();
+static void is_valid_piece_test();
+static void is_valid_pieceType_test();
+static void is_valid_color_test();
 
 void piece_test()
 {
@@ -34,6 +37,9 @@ void piece_test()
     piece_sub_test();
     pieceType_sum_test();
     pieceType_sub_test();
+    is_valid_piece_test();
+    is_valid_pieceType_test();
+    is_valid_color_test();
 }
 
 static void piece_to_char_test()
@@ -485,5 +491,60 @@ static void pieceType_sub_test()
     if (PieceType::PAWN - 1 != PieceType::EMPTY) {
 
         PRINT_TEST_FAILED(test_name, "PieceType::PAWN - 1 != PieceType::EMPTY");
+    }
+}
+
+static void is_valid_piece_test()
+{
+    const std::string test_name = "is_valid_piece_test";
+
+    if (is_valid_piece(Piece::NUM_PIECES)) {
+        PRINT_TEST_FAILED(test_name, "is_valid_piece(Piece::NUM_PIECES)");
+    }
+    if (is_valid_piece(Piece(-1))) {
+        PRINT_TEST_FAILED(test_name, "is_valid_piece(Piece(-1))");
+    }
+    if (!is_valid_piece(Piece::W_PAWN)) {
+        PRINT_TEST_FAILED(test_name, "!is_valid_piece(Piece::W_PAWN)");
+    }
+    if (!is_valid_piece(Piece::EMPTY)) {
+        PRINT_TEST_FAILED(test_name, "!is_valid_piece(Piece::EMPTY)");
+    }
+}
+
+static void is_valid_pieceType_test()
+{
+    const std::string test_name = "is_valid_pieceType_test";
+
+
+    if (is_valid_pieceType(PieceType(7))) {
+        PRINT_TEST_FAILED(test_name, "is_valid_pieceType(PieceType(7))");
+    }
+    if (is_valid_pieceType(PieceType(-1))) {
+        PRINT_TEST_FAILED(test_name, "is_valid_pieceType(PieceType(-1))");
+    }
+    if (!is_valid_pieceType(PieceType::PAWN)) {
+        PRINT_TEST_FAILED(test_name, "!is_valid_pieceType(PieceType::PAWN)");
+    }
+    if (!is_valid_pieceType(PieceType::EMPTY)) {
+        PRINT_TEST_FAILED(test_name, "!is_valid_pieceType(PieceType::EMPTY)");
+    }
+}
+
+static void is_valid_color_test()
+{
+    const std::string test_name = "is_valid_color_test";
+
+    if (is_valid_color(ChessColor(-1))) {
+        PRINT_TEST_FAILED(test_name, "is_valid_color(ChessColor(-1))");
+    }
+    if (is_valid_color(ChessColor(2))) {
+        PRINT_TEST_FAILED(test_name, "is_valid_color(ChessColor(2))");
+    }
+    if (!is_valid_color(ChessColor::WHITE)) {
+        PRINT_TEST_FAILED(test_name, "!is_valid_color(ChessColor::WHITE)");
+    }
+    if (!is_valid_color(ChessColor::BLACK)) {
+        PRINT_TEST_FAILED(test_name, "!is_valid_color(ChessColor::BLACK)");
     }
 }
