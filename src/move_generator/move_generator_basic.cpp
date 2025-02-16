@@ -11,59 +11,7 @@
 #include "move_generator.hpp"
 #include "precomputed_move_data.hpp"
 #include "move_generator_info.hpp"
-#include "bit_utilities.hpp"
 #include "coordinates.hpp"
-
-static void calculate_dangers(const Board& board, MoveGeneratorInfo& MoveGeneratorInfo);
-static void calculate_pawn_dangers(const Board& board, Square sq,
-                                   MoveGeneratorInfo& MoveGeneratorInfo);
-static void calculate_knight_dangers(const Board& board, Square sq,
-                                     MoveGeneratorInfo& MoveGeneratorInfo);
-static void calculate_king_dangers(const Board& board, Square sq,
-                                   MoveGeneratorInfo& MoveGeneratorInfo);
-static void calculate_queen_dangers(const Board& board, Square sq,
-                                    MoveGeneratorInfo& MoveGeneratorInfo);
-static void calculate_rook_dangers(const Board& board, Square sq,
-                                   MoveGeneratorInfo& MoveGeneratorInfo);
-static void calculate_bishop_dangers(const Board& board, Square sq,
-                                     MoveGeneratorInfo& MoveGeneratorInfo);
-
-static inline bool is_enemy_king(const Board& board, Square king_square, ChessColor friend_color);
-static inline bool is_enemy_piece(const Board& board, Square piece_square, ChessColor friend_color);
-
-static void calculate_danger_to_square(const Board& board, Square attacker_sq, Square defender_sq,
-                                       ChessColor friend_color,
-                                       MoveGeneratorInfo& MoveGeneratorInfo);
-
-static void calculate_danger_to_direction(const Board& board, Direction dir, Square attacker_sq,
-                                          ChessColor friend_color,
-                                          MoveGeneratorInfo& MoveGeneratorInfo);
-
-static void calculate_pawn_moves(const Board& board, Square sq,
-                                 MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
-static void calculate_knight_moves(const Board& board, Square sq,
-                                   MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
-static void calculate_king_moves(const Board& board, Square sq,
-                                 MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
-static void calculate_queen_moves(const Board& board, Square sq,
-                                  MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
-static void calculate_rook_moves(const Board& board, Square sq,
-                                 MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
-static void calculate_bishop_moves(const Board& board, Square sq,
-                                   MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
-static void calculate_castle_moves(const Board& board, Square king_sq, ChessColor friendly_color,
-                                   MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
-
-static void calculate_moves_to_direction(const Board& board, Direction dir, Square attacker_sq,
-                                         ChessColor friend_color,
-                                         MoveGeneratorInfo& MoveGeneratorInfo, MoveList& moves);
-
-static bool is_valid_move_pinned(const Board& board, Square piece_sq, Square end_sq,
-                                 MoveGeneratorInfo& MoveGeneratorInfo);
-
-static bool is_valid_move_en_passant(const Board& board, Square piece_sq, Square end_sq,
-                                     MoveGeneratorInfo& MoveGeneratorInfo);
-
 
 static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo);
 
@@ -152,9 +100,6 @@ void update_king_danger(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(king_sq.is_valid());
 
-    const Board& board = moveGeneratorInfo.board;
-    const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
-
     const uint64_t king_attacks_mask = PrecomputedMoveData::kingAttacks(king_sq);
 
     moveGeneratorInfo.king_danger_squares_mask |= king_attacks_mask;
@@ -186,9 +131,9 @@ void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo)
     moveGeneratorInfo.attacked_squares_mask |= pawn_real_attacks;
 
     // there is a check if the enemy king mask is inside the pawn attack mask
-    const Square friendly_king_square = moveGeneratorInfo.side_to_move_king_square;
+    const Square side_to_move_king_square = moveGeneratorInfo.side_to_move_king_square;
 
-    if (pawn_attacks_mask & friendly_king_square.mask()) {
+    if (pawn_attacks_mask & side_to_move_king_square.mask()) {
         moveGeneratorInfo.new_checker_found(pawn_sq);
     }
 }
@@ -245,7 +190,7 @@ static void calculate_king_moves(Square king_sq, MoveGeneratorInfo& moveGenerato
     const uint64_t blockers_mask = moveGeneratorInfo.side_to_move_pieces_mask;
     const uint64_t capture_mask = moveGeneratorInfo.capture_squares_mask;
 
-    uint64_t king_moves_mask = king_attacks & ~king_danger_mask & ~blockers_mask & capture_mask;
+    uint64_t king_moves_mask = king_attacks & ~king_danger_mask & ~blockers_mask;
 
     while (king_moves_mask) {
         // pop least significant bit of king_moves_bitboard until is zero
@@ -276,7 +221,7 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
     const uint64_t push_mask = moveGeneratorInfo.push_squares_mask;
 
     // pawn captures
-    uint64_t pawn_moves_mask = pawn_attacks & enemy_mask & capture_mask & push_mask;
+    uint64_t pawn_moves_mask = pawn_attacks & enemy_mask;
 
     // en passant capture, en passant mask is 0 if not available
     pawn_moves_mask |= pawn_attacks & en_passant_square.mask();
@@ -299,6 +244,8 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
         }
     }
 
+    // restrict moves if king is in check to capture and push mask
+    pawn_moves_mask &= capture_mask & push_mask;
 
     // if pawn is pinned pawn can only moved in the direction of the pin
     if (moveGeneratorInfo.pinned_squares_mask & pawn_sq.mask()) {

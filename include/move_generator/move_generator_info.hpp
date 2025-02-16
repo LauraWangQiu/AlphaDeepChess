@@ -9,7 +9,7 @@
  */
 
 #include "board.hpp"
-
+#include "bit_utilities.hpp"
 #include <cassert>
 
 /**
@@ -65,8 +65,8 @@ public:
         capture_squares_mask = 0xffffffffffffffffU;
         checker_square = Square::SQ_INVALID;
         number_of_checkers = 0U;
-        king_white_square = board.get_bitboard_piece(Piece::W_KING);
-        king_black_square = board.get_bitboard_piece(Piece::B_KING);
+        king_white_square = lsb(board.get_bitboard_piece(Piece::W_KING));
+        king_black_square = lsb(board.get_bitboard_piece(Piece::B_KING));
 
         side_to_move_king_square =
             side_to_move == ChessColor::WHITE ? king_white_square : king_black_square;

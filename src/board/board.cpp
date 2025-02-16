@@ -189,8 +189,8 @@ void Board::make_move(Move move)
 
     const bool is_pawn_move = (piece_to_pieceType(origin_piece) == PieceType::PAWN);
     const bool is_move_double_push = is_pawn_move &&
-        (origin_square.row() == ROW_7 && end_square.row() == ROW_5 ||
-         origin_square.row() == ROW_2 && end_square.row() == ROW_4);
+        ((origin_square.row() == ROW_7 && end_square.row() == ROW_5) ||
+         (origin_square.row() == ROW_2 && end_square.row() == ROW_4));
 
     if (is_move_double_push) {
         const Square eps(origin_square.row() == ROW_2 ? ROW_3 : ROW_6, end_square.col());
