@@ -21,7 +21,7 @@
 class MoveGeneratorInfo
 {
 public:
-    uint64_t attacked_squares_mask;      // squares that enemy pieces directly attack
+    //uint64_t attacked_squares_mask;      // squares that enemy pieces directly attack
     uint64_t pinned_squares_mask;        // squares where pinned pieces could move
     uint64_t king_danger_squares_mask;   // squares that enemy pieces attack if the king is removed
     uint64_t push_squares_mask;          // squares where pieces could move to block a check
@@ -41,7 +41,7 @@ public:
     Row row_where_promotion_is_available;
     Row row_where_en_passant_is_available;
     Row row_where_double_push_is_available;
-
+    
     /**
      * @brief MoveGeneratorInfo
      * 
@@ -58,7 +58,7 @@ public:
         moves.clear();
         side_to_move = board.state().side_to_move();
         side_waiting = side_to_move == ChessColor::WHITE ? ChessColor::BLACK : ChessColor::WHITE;
-        attacked_squares_mask = 0U;
+        //attacked_squares_mask = 0U;
         pinned_squares_mask = 0U;
         king_danger_squares_mask = 0U;
         push_squares_mask = 0xffffffffffffffffU;
