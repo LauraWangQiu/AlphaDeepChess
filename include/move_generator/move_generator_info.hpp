@@ -26,7 +26,6 @@ public:
     uint64_t king_danger_squares_mask;   // squares that enemy pieces attack if the king is removed
     uint64_t push_squares_mask;          // squares where pieces could move to block a check
     uint64_t capture_squares_mask;       // squares of pieces that could be capture to block a check
-    Square checker_square;               // square of the piece giving check
     Square king_white_square;            // square of the white king
     Square king_black_square;            // square of the black king
     Square side_to_move_king_square;     // king square of the side to move
@@ -63,7 +62,6 @@ public:
         king_danger_squares_mask = 0U;
         push_squares_mask = 0xffffffffffffffffU;
         capture_squares_mask = 0xffffffffffffffffU;
-        checker_square = Square::SQ_INVALID;
         number_of_checkers = 0U;
         king_white_square = lsb(board.get_bitboard_piece(Piece::W_KING));
         king_black_square = lsb(board.get_bitboard_piece(Piece::B_KING));
@@ -92,21 +90,16 @@ public:
      *  increment the number_of_checkers by 1, update checker_square and update the capture_mask
      *      
      *  @param[in] checker_sq square of the checker piece
+     *  @param[in] new_push_mask squares where the check could be block, pass zero if cheker is not a slider
      * 
      */
-    void new_checker_found(Square checker_sq)
+    void new_checker_found(Square checker_sq, uint64_t new_push_mask)
     {
         assert(checker_sq.is_valid());
 
-        if (number_of_checkers == 0) {
-            // if this is the first checker the only capture is the checker piece
-            capture_squares_mask = checker_sq.mask();
-        }
-        else {
-            capture_squares_mask |= checker_sq.mask();
-        }
+        capture_squares_mask = checker_sq.mask();
+        push_squares_mask = new_push_mask;
 
         number_of_checkers++;
-        checker_square = checker_sq;
     }
 };
