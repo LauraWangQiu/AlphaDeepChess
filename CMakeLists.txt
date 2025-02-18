@@ -14,7 +14,7 @@ include_directories(include/uci)
 include_directories(include/move_ordering)
 include_directories(include/move_generator)
 
-find_package(OpenCL REQUIRED)
+#find_package(OpenCL REQUIRED)
 
 message(STATUS "OpenCL include directory: ${OpenCL_INCLUDE_DIR}")
 message(STATUS "OpenCL library path: ${OpenCL_LIBRARY}")

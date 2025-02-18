@@ -250,7 +250,7 @@ public:
      * @return (1UL << sq_value) if square is valid, Else 0
      * 
      */
-    constexpr uint64_t mask() const { return is_valid() ? 1UL << sq_value : 0ULL; }
+    constexpr uint64_t mask() const { return is_valid() ? 1ULL << sq_value : 0ULL; }
 
     /**
      * @brief uint8_t
