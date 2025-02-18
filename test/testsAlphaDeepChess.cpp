@@ -21,8 +21,8 @@ int main()
     move_test();
     move_list_test();
     board_test();
-    move_generator_test();
     diagonal_test();
-    
+    move_generator_test();
+
     return 0;
 }

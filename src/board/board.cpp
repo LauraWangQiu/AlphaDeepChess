@@ -507,35 +507,35 @@ void Board::check_and_modify_castle_rights()
     // Check for white king-side castling rights
     if (game_state.castle_king_white()) {
 
-        if (get_piece({ROW_1, COL_E}) == Piece::W_KING &&
-            get_piece({ROW_1, COL_H}) == Piece::W_ROOK) {
-            game_state.set_castle_king_white(true);
+        if (get_piece({ROW_1, COL_E}) != Piece::W_KING ||
+            get_piece({ROW_1, COL_H}) != Piece::W_ROOK) {
+            game_state.set_castle_king_white(false);
         }
     }
     // Check for white queen-side castling rights
     if (game_state.castle_queen_white()) {
 
-        if (get_piece({ROW_1, COL_E}) == Piece::W_KING &&
-            get_piece({ROW_1, COL_A}) == Piece::W_ROOK) {
-            game_state.set_castle_queen_white(true);
+        if (get_piece({ROW_1, COL_E}) != Piece::W_KING ||
+            get_piece({ROW_1, COL_A}) != Piece::W_ROOK) {
+            game_state.set_castle_queen_white(false);
         }
     }
 
     // Check for black king-side castling rights
     if (game_state.castle_king_black()) {
 
-        if (get_piece({ROW_8, COL_E}) == Piece::B_KING &&
-            get_piece({ROW_8, COL_H}) == Piece::B_ROOK) {
-            game_state.set_castle_king_black(true);
+        if (get_piece({ROW_8, COL_E}) != Piece::B_KING ||
+            get_piece({ROW_8, COL_H}) != Piece::B_ROOK) {
+            game_state.set_castle_king_black(false);
         }
     }
 
     // Check for black queen-side castling rights
     if (game_state.castle_queen_black()) {
 
-        if (get_piece({ROW_8, COL_E}) == Piece::B_KING &&
-            get_piece({ROW_8, COL_A}) == Piece::B_ROOK) {
-            game_state.set_castle_queen_black(true);
+        if (get_piece({ROW_8, COL_E}) != Piece::B_KING ||
+            get_piece({ROW_8, COL_A}) != Piece::B_ROOK) {
+            game_state.set_castle_queen_black(false);
         }
     }
 }
@@ -589,4 +589,74 @@ void Board::check_and_modify_en_passant_rule()
     }
 
     game_state.set_en_passant_square(has_pawn_attacker ? eps : Square::SQ_INVALID);
+}
+
+static void make_castling_move(Board& board, Move castling_move)
+{
+    assert(castling_move.is_valid());
+    assert(castling_move.type() == MoveType::CASTLING);
+
+    if (castling_move == Move::castle_white_king() && board.state().castle_king_white()) {
+        board.put_piece(Piece::W_KING, Square::SQ_G1);
+        board.put_piece(Piece::W_ROOK, Square::SQ_F1);
+        board.remove_piece(Square::SQ_E1);
+        board.remove_piece(Square::SQ_H1);
+
+        board.state().set_castle_king_white(false);
+    }
+    else if (castling_move == Move::castle_black_king() && board.state().castle_king_black()) {
+        board.put_piece(Piece::B_KING, Square::SQ_G8);
+        board.put_piece(Piece::B_ROOK, Square::SQ_F8);
+        board.remove_piece(Square::SQ_E8);
+        board.remove_piece(Square::SQ_H8);
+
+        board.state().set_castle_king_black(false);
+    }
+    else if (castling_move == Move::castle_white_queen() && board.state().castle_queen_white()) {
+        board.put_piece(Piece::W_KING, Square::SQ_C1);
+        board.put_piece(Piece::W_ROOK, Square::SQ_D1);
+        board.remove_piece(Square::SQ_E1);
+        board.remove_piece(Square::SQ_A1);
+
+        board.state().set_castle_queen_white(false);
+    }
+    else if (castling_move == Move::castle_black_queen() && board.state().castle_queen_black()) {
+        board.put_piece(Piece::B_KING, Square::SQ_C8);
+        board.put_piece(Piece::B_ROOK, Square::SQ_D8);
+        board.remove_piece(Square::SQ_E8);
+        board.remove_piece(Square::SQ_A8);
+
+        board.state().set_castle_queen_black(false);
+    }
+}
+
+static void unmake_castling_move(Board& board, Move castling_move)
+{
+    assert(castling_move.is_valid());
+    assert(castling_move.type() == MoveType::CASTLING);
+
+    if (castling_move == Move::castle_white_king()) {
+        board.put_piece(Piece::W_KING, Square::SQ_E1);
+        board.put_piece(Piece::W_ROOK, Square::SQ_H1);
+        board.remove_piece(Square::SQ_G1);
+        board.remove_piece(Square::SQ_F1);
+    }
+    else if (castling_move == Move::castle_black_king()) {
+        board.put_piece(Piece::B_KING, Square::SQ_E8);
+        board.put_piece(Piece::B_ROOK, Square::SQ_H8);
+        board.remove_piece(Square::SQ_G8);
+        board.remove_piece(Square::SQ_F8);
+    }
+    else if (castling_move == Move::castle_white_queen()) {
+        board.put_piece(Piece::W_KING, Square::SQ_E1);
+        board.put_piece(Piece::W_ROOK, Square::SQ_A1);
+        board.remove_piece(Square::SQ_C1);
+        board.remove_piece(Square::SQ_D1);
+    }
+    else if (castling_move == Move::castle_black_queen()) {
+        board.put_piece(Piece::B_KING, Square::SQ_E8);
+        board.put_piece(Piece::B_ROOK, Square::SQ_A8);
+        board.remove_piece(Square::SQ_C8);
+        board.remove_piece(Square::SQ_D8);
+    }
 }
