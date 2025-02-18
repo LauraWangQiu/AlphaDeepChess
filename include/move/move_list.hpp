@@ -71,7 +71,7 @@ public:
      * 
      * return the move in the pos index, 
      * 
-     * @note index should be valid ( 0 <= index< num_moves)
+     * @note index should be valid (0 <= index < num_moves)
      * 
      * @param[in] index index of the move in the array.
      * 
@@ -80,7 +80,7 @@ public:
      */
     constexpr inline Move get(int index) const
     {
-        assert(0 >= index && index < num_moves);
+        assert(0 <= index && index < num_moves);
         return moves[index];
     }
 
@@ -111,7 +111,7 @@ public:
      */
     constexpr inline Move& operator[](int index)
     {
-        assert(index >= 0 && index < num_moves);
+        assert(0 <= index && index < num_moves);
         return moves[index];
     }
 
@@ -125,7 +125,7 @@ public:
      */
     constexpr inline const Move& operator[](int index) const
     {
-        assert(0 >= index && index < num_moves);
+        assert(0 <= index && index < num_moves);
         return moves[index];
     }
 
