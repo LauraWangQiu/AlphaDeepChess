@@ -141,6 +141,22 @@ public:
     void remove_piece(Square square);
 
     /**
+     * @brief set_side_to_move
+     * 
+     * set the side to move in the chess position
+     * 
+     * @note color must be valid.
+     * 
+     * @param[in] color side to move color
+     * 
+     */
+    inline void set_side_to_move(ChessColor color)
+    {
+        assert(is_valid_color(color));
+        game_state.set_side_to_move(color);
+    }
+
+    /**
      * @brief clean
      * 
      * Remove all pieces on the board.
@@ -207,7 +223,7 @@ public:
      * @return game_state
      * 
      */
-    inline GameState state() const { return game_state; }
+    inline const GameState state() const { return game_state; }
 
     /**
      * @brief operator<<
@@ -292,6 +308,15 @@ private:
      */
     GameState game_state;
 
+
+    void make_normal_move(Move normal_move);
+    void unmake_normal_move(Move normal_move);
+    void make_promotion_move(Move promotion_move);
+    void unmake_promotion_move(Move promotion_move);
+    void make_castling_move(Move castling_move);
+    void unmake_castling_move(Move castling_move);
+    void make_enPassant_move(Move enPassant_move);
+    void unmake_enPassant_move(Move enPassant_move);
 
     /**
      * @brief check_and_modify_castle_rights

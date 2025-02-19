@@ -202,7 +202,7 @@ int evaluate_position(const Board& board)
 
     Board board_copy = board;
     side_to_move = -side_to_move;
-    board_copy.state().set_side_to_move((side_to_move == 1) ? ChessColor::WHITE : ChessColor::BLACK);
+    board_copy.set_side_to_move((side_to_move == 1) ? ChessColor::WHITE : ChessColor::BLACK);
     generate_legal_moves(legal_moves, board_copy);
     evaluation += evaluate_legal_moves(legal_moves, side_to_move);
 

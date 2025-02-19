@@ -10,7 +10,11 @@ static void board_get_bitboard_black_test();
 static void board_get_bitboard_piece_test();
 static void board_put_piece_test();
 static void board_remove_piece_test();
+static void board_set_side_to_move_test();
 static void board_clean_test();
+static void board_make_unmake_castling_move_test();
+static void board_make_unmake_enPassant_move_test();
+static void board_make_unmake_normal_move_test();
 static void board_make_unmake_move_test();
 static void board_fen_test();
 static void board_initialization_test();
@@ -27,8 +31,13 @@ void board_test()
     board_get_bitboard_black_test();
     board_get_bitboard_piece_test();
     board_put_piece_test();
+    board_set_side_to_move_test();
     board_remove_piece_test();
     board_clean_test();
+    board_make_unmake_castling_move_test();
+    board_make_unmake_enPassant_move_test();
+    board_make_unmake_normal_move_test();
+
     board_make_unmake_move_test();
     board_fen_test();
     board_initialization_test();
@@ -273,6 +282,27 @@ static void board_remove_piece_test()
     }
 }
 
+static void board_set_side_to_move_test()
+{
+    const std::string test_name = "board_set_side_to_move_test";
+    constexpr auto StartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+    Board board;
+    board.load_fen(StartFEN);
+
+    board.set_side_to_move(ChessColor::BLACK);
+
+    if (board.state().side_to_move() != ChessColor::BLACK) {
+        PRINT_TEST_FAILED(test_name, "board.state().side_to_move() != ChessColor::BLACK");
+    }
+
+    board.set_side_to_move(ChessColor::WHITE);
+    
+    if (board.state().side_to_move() != ChessColor::WHITE) {
+        PRINT_TEST_FAILED(test_name, "board.state().side_to_move() != ChessColor::WHITE");
+    }
+}
+
 static void board_clean_test()
 {
     const std::string test_name = "board_clean_test";
@@ -393,8 +423,7 @@ static void board_make_unmake_move_test()
     for (uint32_t i = 0; i < num_moves; i++) {
 
         board.make_move(moves[i]);
-        if(i < num_moves - 1)
-        {
+        if (i < num_moves - 1) {
             game_states.push(board.state());
         }
     }
@@ -517,4 +546,126 @@ static void board_initialization_test()
     if (board.state().castle_queen_white() != false) {
         PRINT_TEST_FAILED(test_name, "state().castle_queen_white() != false");
     }
+}
+
+static void board_make_unmake_castling_move_test()
+{
+    const std::string test_name = "board_make_unmake_castling_move_test";
+
+    Board board;
+    const auto start_castling_white_fen = "r3k2r/8/8/3Pp3/8/8/8/R3K2R w KQkq e6 0 2";
+    const auto end_fen_king_castle_white = "r3k2r/8/8/3Pp3/8/8/8/R4RK1 b kq - 1 2";
+    const auto end_fen_queen_castle_white = "r3k2r/8/8/3Pp3/8/8/8/2KR3R b kq - 1 2";
+
+    board.load_fen(start_castling_white_fen);
+    const GameState start_castling_white_fen_state = board.state();
+
+    // castle white king
+    board.make_move(Move::castle_white_king());
+    if (board.fen() != end_fen_king_castle_white) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_fen_king_castle_white");
+    }
+    board.unmake_move(Move::castle_white_king(), start_castling_white_fen_state);
+    if (board.fen() != start_castling_white_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_castling_white_fen");
+    }
+
+    // castle white queen
+    board.make_move(Move::castle_white_queen());
+    if (board.fen() != end_fen_queen_castle_white) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_fen_queen_castle_white");
+    }
+    board.unmake_move(Move::castle_white_queen(), start_castling_white_fen_state);
+    if (board.fen() != start_castling_white_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_castling_white_fen");
+    }
+
+    const auto start_castling_black_fen = "r3k2r/8/8/8/3Pp3/8/8/R3K2R b KQkq d3 0 1";
+    const auto end_fen_king_castle_black = "r4rk1/8/8/8/3Pp3/8/8/R3K2R w KQ - 1 2";
+    const auto end_fen_queen_castle_black = "2kr3r/8/8/8/3Pp3/8/8/R3K2R w KQ - 1 2";
+
+    board.load_fen(start_castling_black_fen);
+    const GameState start_castling_black_fen_state = board.state();
+
+    // castle black king
+    board.make_move(Move::castle_black_king());
+    if (board.fen() != end_fen_king_castle_black) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_fen_king_castle_black");
+    }
+    board.unmake_move(Move::castle_black_king(), start_castling_black_fen_state);
+    if (board.fen() != start_castling_black_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_castling_black_fen");
+    }
+
+    // castle black queen
+    board.make_move(Move::castle_black_queen());
+    if (board.fen() != end_fen_queen_castle_black) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_fen_queen_castle_black");
+    }
+    board.unmake_move(Move::castle_black_queen(), start_castling_black_fen_state);
+    if (board.fen() != start_castling_black_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_castling_black_fen");
+    }
+}
+
+static void board_make_unmake_enPassant_move_test()
+{
+    const std::string test_name = "board_make_unmake_enPassant_move_test";
+
+    Board board;
+
+    const auto start_enPassant_white_fen = "r3k2r/8/8/3Pp3/8/8/8/R3K2R w KQkq e6 0 3";
+    const auto end_fen_enPassant_white = "r3k2r/8/4P3/8/8/8/8/R3K2R b KQkq - 0 3";
+
+    board.load_fen(start_enPassant_white_fen);
+    const GameState start_enPassant_white_fen_state = board.state();
+    const Move enPassant_white_move(Square::SQ_D5, Square::SQ_E6, MoveType::EN_PASSANT);
+
+    // enPassant white
+    board.make_move(enPassant_white_move);
+
+    if (board.fen() != end_fen_enPassant_white) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_fen_enPassant_white");
+    }
+    board.unmake_move(enPassant_white_move, start_enPassant_white_fen_state);
+    if (board.fen() != start_enPassant_white_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_enPassant_white_fen");
+    }
+
+    // enPassant black
+
+    const auto start_enPassant_black_fen = "r3k2r/8/8/8/3Pp3/8/8/R3K2R b KQkq d3 0 2";
+    const auto end_fen_enPassant_black = "r3k2r/8/8/8/8/3p4/8/R3K2R w KQkq - 0 3";
+
+    board.load_fen(start_enPassant_black_fen);
+
+    const GameState start_enPassant_black_fen_state = board.state();
+    const Move enPassant_black_move(Square::SQ_E4, Square::SQ_D3, MoveType::EN_PASSANT);
+
+    board.make_move(enPassant_black_move);
+
+    if (board.fen() != end_fen_enPassant_black) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_fen_enPassant_black");
+    }
+    board.unmake_move(enPassant_black_move, start_enPassant_black_fen_state);
+    if (board.fen() != start_enPassant_black_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_enPassant_black_fen");
+    }
+}
+
+static void board_make_unmake_normal_move_test()
+{
+    const std::string test_name = "board_make_unmake_normal_move_test";
+
+    //super normal move white
+
+    //super normal move black
+
+    //move with capture white
+
+    //move with capture black
+
+    //double pawn push white
+
+    //double pawn push black
 }

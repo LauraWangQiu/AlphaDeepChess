@@ -1,5 +1,5 @@
 /**
- * @file board.cpp
+ * @file cpp
  * @brief Board implementations.
  *
  */
@@ -8,16 +8,6 @@
 
 #include <sstream>
 #include <stdexcept>
-
-static inline void make_normal_move(Board& board, Move normal_move);
-static inline void unmake_normal_move(Board& board, Move normal_move);
-static inline void make_promotion_move(Board& board, Move promotion_move);
-static inline void unmake_promotion_move(Board& board, Move promotion_move);
-static inline void make_castling_move(Board& board, Move castling_move);
-static inline void unmake_castling_move(Board& board, Move castling_move);
-static inline void make_enPassant_move(Board& board, Move enPassant_move);
-static inline void unmake_enPassant_move(Board& board, Move enPassant_move);
-
 
 /**
  * @brief put_piece
@@ -82,7 +72,7 @@ void Board::remove_piece(Square square)
 /**
  * @brief clean
  * 
- * Remove all pieces on the board.
+ * Remove all pieces on the 
  * 
  */
 void Board::clean()
@@ -105,7 +95,7 @@ void Board::clean()
 /**
  * @brief make_move
  * 
- * Make the move in the board.
+ * Make the move in the 
  * 
  * @note If the move is not valid in the position the game will be corrupted.
  * 
@@ -118,56 +108,15 @@ void Board::make_move(Move move)
 
     const Square origin_square = move.square_from();
     const Square end_square = move.square_to();
-
     const Piece origin_piece = get_piece(origin_square);
     const Piece end_piece = get_piece(end_square);
-    const MoveType move_type = move.type();
 
-    /** Update the board pieces */
-
-    if (move_type == MoveType::NORMAL) {
-        remove_piece(end_square);
-        put_piece(origin_piece, end_square);
-        remove_piece(origin_square);
-    }
-    else if (move_type == MoveType::CASTLING) {
-
-        make_castling_move(*this, move);
-    }
-    else if (move_type == MoveType::EN_PASSANT) {
-
-        make_enPassant_move(*this, move);
-    }
-    else if (move_type == MoveType::PROMOTION) {
-        const PieceType promotion_piece = move.promotion_piece();
-        remove_piece(end_square);
-        put_piece(create_piece(promotion_piece, get_color(origin_piece)), end_square);
-        remove_piece(origin_square);
-    }
-
-    /**  update the game state */
-
-    // if move is not a capture last capture piece will be Piece::Empty.
-    if (move_type != MoveType::EN_PASSANT) {
-        game_state.set_last_captured_piece(piece_to_pieceType(end_piece));
-    }
-    else {
-        game_state.set_last_captured_piece(PieceType::PAWN);
-    }
-
-    // if move is double push pawn then update the square where enPassant is available
-
-    game_state.set_en_passant_square(Square::SQ_INVALID);
-
-    const bool is_pawn_move = (piece_to_pieceType(origin_piece) == PieceType::PAWN);
-    const bool is_move_double_push = is_pawn_move &&
-        ((origin_square.row() == ROW_7 && end_square.row() == ROW_5) ||
-         (origin_square.row() == ROW_2 && end_square.row() == ROW_4));
-
-    if (is_move_double_push) {
-        const Square eps(origin_square.row() == ROW_2 ? ROW_3 : ROW_6, end_square.col());
-        game_state.set_en_passant_square(eps);
-        check_and_modify_en_passant_rule();
+    switch (move.type()) {
+    case MoveType::NORMAL: make_normal_move(move); break;
+    case MoveType::CASTLING: make_castling_move(move); break;
+    case MoveType::EN_PASSANT: make_enPassant_move(move); break;
+    case MoveType::PROMOTION: make_promotion_move(move); break;
+    default: break;
     }
 
 
@@ -179,19 +128,13 @@ void Board::make_move(Move move)
     // increment 50 move rule if the move is not a pawn move or is not a capture move
 
     const bool is_move_capture = end_piece != Piece::EMPTY || move.type() == MoveType::EN_PASSANT;
-
-    const uint32_t new_50_rule_move_counter =
-        is_move_capture || piece_to_pieceType(origin_piece) == PieceType::PAWN
-        ? 0UL
-        : game_state.fifty_move_rule_counter() + 1UL;
-
+    const bool is_pawn_move = piece_to_pieceType(origin_piece) == PieceType::PAWN;
+    const uint8_t new_50_rule_move_counter =
+        is_move_capture || is_pawn_move ? 0U : game_state.fifty_move_rule_counter() + 1U;
     game_state.set_fifty_move_rule_counter(new_50_rule_move_counter);
 
     // change side to move
-    const ChessColor next_side_to_move =
-        game_state.side_to_move() == ChessColor::WHITE ? ChessColor::BLACK : ChessColor::WHITE;
-
-    game_state.set_side_to_move(next_side_to_move);
+    game_state.set_side_to_move(opposite_color(game_state.side_to_move()));
 }
 
 /**
@@ -210,10 +153,10 @@ void Board::unmake_move(Move move, GameState previous_state)
     assert(move.is_valid());
 
     switch (move.type()) {
-    case MoveType::NORMAL: unmake_normal_move(*this, move); break;
-    case MoveType::CASTLING: unmake_castling_move(*this, move); break;
-    case MoveType::EN_PASSANT: unmake_enPassant_move(*this, move); break;
-    case MoveType::PROMOTION: unmake_promotion_move(*this, move); break;
+    case MoveType::NORMAL: unmake_normal_move(move); break;
+    case MoveType::CASTLING: unmake_castling_move(move); break;
+    case MoveType::EN_PASSANT: unmake_enPassant_move(move); break;
+    case MoveType::PROMOTION: unmake_promotion_move(move); break;
     default: break;
     }
 
@@ -223,7 +166,7 @@ void Board::unmake_move(Move move, GameState previous_state)
 /**
  * @brief load_fen
  * 
- * Set the position represented as fen on the chess board.
+ * Set the position represented as fen on the chess 
  * 
  *  https://www.chess.com/terms/fen-chess
  *  https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
@@ -429,6 +372,275 @@ std::ostream& operator<<(std::ostream& os, const Board& board)
     return os;
 }
 
+void Board::make_normal_move(Move normal_move)
+{
+    assert(normal_move.is_valid());
+    assert(normal_move.type() == MoveType::NORMAL);
+    assert(!is_empty(normal_move.square_from()));
+
+    const Square origin_square(normal_move.square_from());
+    const Square end_square(normal_move.square_to());
+    const Piece origin_piece = get_piece(origin_square);
+    const Piece end_piece = get_piece(end_square);
+
+    put_piece(origin_piece, end_square);
+    remove_piece(origin_square);
+
+    // captured piece will be Empty if move was not a capture
+    game_state.set_last_captured_piece(piece_to_pieceType(end_piece));
+    //en Passant will be invalid
+
+
+    // if move is double push pawn then update the square where enPassant is available
+
+    const bool is_pawn_move = (piece_to_pieceType(origin_piece) == PieceType::PAWN);
+    const bool is_move_double_push = is_pawn_move &&
+        ((origin_square.row() == ROW_7 && end_square.row() == ROW_5) ||
+         (origin_square.row() == ROW_2 && end_square.row() == ROW_4));
+
+    if (is_move_double_push) {
+        const Square eps(origin_square.row() == ROW_2 ? ROW_3 : ROW_6, end_square.col());
+        game_state.set_en_passant_square(eps);
+        check_and_modify_en_passant_rule();
+    }
+    else {
+        game_state.set_en_passant_square(Square::SQ_INVALID);
+    }
+}
+
+void Board::unmake_normal_move(Move normal_move)
+{
+    assert(normal_move.is_valid());
+    assert(normal_move.type() == MoveType::NORMAL);
+    assert(!is_empty(normal_move.square_to()));
+
+    const Square origin_square(normal_move.square_from());
+    const Square end_square(normal_move.square_to());
+    const Piece moved_piece = get_piece(end_square);
+    const PieceType captured_piece_type = game_state.last_captured_piece();
+    const ChessColor captured_piece_color = opposite_color(get_color(moved_piece));
+    const Piece captured_piece = create_piece(captured_piece_type, captured_piece_color);
+
+    put_piece(moved_piece, origin_square);
+
+    // captured piece will be Empty if move was not a capture
+    put_piece(captured_piece, end_square);
+}
+
+void Board::make_promotion_move(Move promotion_move)
+{
+    assert(promotion_move.is_valid());
+    assert(promotion_move.type() == MoveType::PROMOTION);
+    assert(is_valid_pieceType(promotion_move.promotion_piece()));
+    assert(!is_empty(promotion_move.square_from()));
+
+    const Square origin_square(promotion_move.square_from());
+    const Square end_square(promotion_move.square_to());
+    const Piece moved_piece = get_piece(origin_square);
+    const Piece end_piece = get_piece(end_square);
+
+    const PieceType promo_piece_type = promotion_move.promotion_piece();
+    const ChessColor promo_piece_color = get_color(moved_piece);
+    const Piece promotion_piece = create_piece(promo_piece_type, promo_piece_color);
+
+    remove_piece(origin_square);
+    put_piece(promotion_piece, end_square);
+
+    // captured piece will be Empty if move was not a capture
+    game_state.set_last_captured_piece(piece_to_pieceType(end_piece));
+    //en Passant will be invalid
+    game_state.set_en_passant_square(Square::SQ_INVALID);
+}
+
+void Board::unmake_promotion_move(Move promotion_move)
+{
+    assert(promotion_move.is_valid());
+    assert(promotion_move.type() == MoveType::PROMOTION);
+    assert(is_valid_pieceType(promotion_move.promotion_piece()));
+    assert(!is_empty(promotion_move.square_to()));
+    assert(is_empty(promotion_move.square_from()));
+
+    const Square origin_square(promotion_move.square_from());
+    const Square end_square(promotion_move.square_to());
+    const ChessColor moved_pawn_color = get_color(get_piece(end_square));
+    const PieceType captured_piece_type = game_state.last_captured_piece();
+    const ChessColor captured_piece_color = opposite_color(moved_pawn_color);
+    const Piece captured_piece = create_piece(captured_piece_type, captured_piece_color);
+
+    put_piece(create_piece(PieceType::PAWN, moved_pawn_color), origin_square);
+
+    // captured piece will be Empty if move was not a capture
+    put_piece(captured_piece, end_square);
+}
+
+void Board::make_castling_move(Move castling_move)
+{
+    assert(castling_move.is_valid());
+    assert(castling_move.type() == MoveType::CASTLING);
+
+    if (castling_move == Move::castle_white_king()) {
+
+        assert(game_state.castle_king_white());
+        assert(get_piece(Square::SQ_E1) == Piece::W_KING);
+        assert(get_piece(Square::SQ_H1) == Piece::W_ROOK);
+        assert(is_empty(Square::SQ_F1) && is_empty(Square::SQ_G1));
+
+        put_piece(Piece::W_KING, Square::SQ_G1);
+        put_piece(Piece::W_ROOK, Square::SQ_F1);
+        remove_piece(Square::SQ_E1);
+        remove_piece(Square::SQ_H1);
+
+        game_state.set_castle_king_white(false);
+        game_state.set_castle_queen_white(false);
+    }
+    else if (castling_move == Move::castle_black_king()) {
+
+        assert(game_state.castle_king_black());
+        assert(get_piece(Square::SQ_E8) == Piece::B_KING);
+        assert(get_piece(Square::SQ_H8) == Piece::B_ROOK);
+        assert(is_empty(Square::SQ_F8) && is_empty(Square::SQ_G8));
+
+        put_piece(Piece::B_KING, Square::SQ_G8);
+        put_piece(Piece::B_ROOK, Square::SQ_F8);
+        remove_piece(Square::SQ_E8);
+        remove_piece(Square::SQ_H8);
+
+        game_state.set_castle_king_black(false);
+        game_state.set_castle_queen_black(false);
+    }
+    else if (castling_move == Move::castle_white_queen()) {
+
+        assert(game_state.castle_queen_white());
+        assert(get_piece(Square::SQ_E1) == Piece::W_KING);
+        assert(get_piece(Square::SQ_A1) == Piece::W_ROOK);
+        assert(is_empty(Square::SQ_D1) && is_empty(Square::SQ_C1) && is_empty(Square::SQ_B1));
+
+        put_piece(Piece::W_KING, Square::SQ_C1);
+        put_piece(Piece::W_ROOK, Square::SQ_D1);
+        remove_piece(Square::SQ_E1);
+        remove_piece(Square::SQ_A1);
+
+        game_state.set_castle_queen_white(false);
+        game_state.set_castle_king_white(false);
+    }
+    else if (castling_move == Move::castle_black_queen()) {
+
+        assert(game_state.castle_queen_black());
+        assert(get_piece(Square::SQ_E8) == Piece::B_KING);
+        assert(get_piece(Square::SQ_A8) == Piece::B_ROOK);
+        assert(is_empty(Square::SQ_D8) && is_empty(Square::SQ_C8) && is_empty(Square::SQ_B8));
+
+        put_piece(Piece::B_KING, Square::SQ_C8);
+        put_piece(Piece::B_ROOK, Square::SQ_D8);
+        remove_piece(Square::SQ_E8);
+        remove_piece(Square::SQ_A8);
+
+        game_state.set_castle_queen_black(false);
+        game_state.set_castle_king_black(false);
+    }
+
+    game_state.set_last_captured_piece(PieceType::EMPTY);
+
+    //en Passant will be invalid
+    game_state.set_en_passant_square(Square::SQ_INVALID);
+}
+
+void Board::unmake_castling_move(Move castling_move)
+{
+    assert(castling_move.is_valid());
+    assert(castling_move.type() == MoveType::CASTLING);
+
+    if (castling_move == Move::castle_white_king()) {
+
+        assert(get_piece(Square::SQ_G1) == Piece::W_KING);
+        assert(get_piece(Square::SQ_F1) == Piece::W_ROOK);
+
+        put_piece(Piece::W_KING, Square::SQ_E1);
+        put_piece(Piece::W_ROOK, Square::SQ_H1);
+        remove_piece(Square::SQ_G1);
+        remove_piece(Square::SQ_F1);
+    }
+    else if (castling_move == Move::castle_black_king()) {
+
+        assert(get_piece(Square::SQ_G8) == Piece::B_KING);
+        assert(get_piece(Square::SQ_F8) == Piece::B_ROOK);
+
+        put_piece(Piece::B_KING, Square::SQ_E8);
+        put_piece(Piece::B_ROOK, Square::SQ_H8);
+        remove_piece(Square::SQ_G8);
+        remove_piece(Square::SQ_F8);
+    }
+    else if (castling_move == Move::castle_white_queen()) {
+
+        assert(get_piece(Square::SQ_C1) == Piece::W_KING);
+        assert(get_piece(Square::SQ_D1) == Piece::W_ROOK);
+
+        put_piece(Piece::W_KING, Square::SQ_E1);
+        put_piece(Piece::W_ROOK, Square::SQ_A1);
+        remove_piece(Square::SQ_C1);
+        remove_piece(Square::SQ_D1);
+    }
+    else if (castling_move == Move::castle_black_queen()) {
+
+        assert(get_piece(Square::SQ_C8) == Piece::B_KING);
+        assert(get_piece(Square::SQ_D8) == Piece::B_ROOK);
+
+        put_piece(Piece::B_KING, Square::SQ_E8);
+        put_piece(Piece::B_ROOK, Square::SQ_A8);
+        remove_piece(Square::SQ_C8);
+        remove_piece(Square::SQ_D8);
+    }
+}
+
+void Board::make_enPassant_move(Move enPassant_move)
+{
+    assert(enPassant_move.is_valid());
+    assert(enPassant_move.type() == MoveType::EN_PASSANT);
+    assert(game_state.en_passant_square().is_valid());
+    assert(game_state.en_passant_square() == enPassant_move.square_to());
+    assert(is_empty(enPassant_move.square_to()));
+
+    const Square origin_square(enPassant_move.square_from());
+    const Square end_square(enPassant_move.square_to());
+    const Square captured_pawn_square(origin_square.row(), end_square.col());
+    const Piece attacker_pawn_piece(get_piece(origin_square));
+
+    assert(piece_to_pieceType(get_piece(origin_square)) == PieceType::PAWN);
+    assert(piece_to_pieceType(get_piece(captured_pawn_square)) == PieceType::PAWN);
+
+
+    put_piece(attacker_pawn_piece, end_square);
+    remove_piece(origin_square);
+    remove_piece(captured_pawn_square);
+
+    game_state.set_last_captured_piece(PieceType::PAWN);
+
+    //en Passant will be invalid
+    game_state.set_en_passant_square(Square::SQ_INVALID);
+}
+
+void Board::unmake_enPassant_move(Move enPassant_move)
+{
+    assert(enPassant_move.is_valid());
+    assert(enPassant_move.type() == MoveType::EN_PASSANT);
+    assert(piece_to_pieceType(get_piece(enPassant_move.square_to())) == PieceType::PAWN);
+
+    const Square origin_square(enPassant_move.square_from());
+    const Square end_square(enPassant_move.square_to());
+    const Square captured_pawn_square(origin_square.row(), end_square.col());
+
+    const Piece attacker_pawn_piece(get_piece(end_square));
+    const ChessColor captured_pawn_color =
+        get_color(attacker_pawn_piece) == ChessColor::WHITE ? ChessColor::BLACK : ChessColor::WHITE;
+
+    const Piece captured_pawn_piece = create_piece(PieceType::PAWN, captured_pawn_color);
+
+
+    put_piece(attacker_pawn_piece, origin_square);
+    put_piece(captured_pawn_piece, captured_pawn_square);
+    remove_piece(end_square);
+}
+
 
 /**
  * @brief check_and_modify_castle_rights
@@ -524,193 +736,4 @@ void Board::check_and_modify_en_passant_rule()
     }
 
     game_state.set_en_passant_square(has_pawn_attacker ? eps : Square::SQ_INVALID);
-}
-
-static inline void make_normal_move(Board& board, Move normal_move)
-{
-    assert(normal_move.is_valid());
-    assert(normal_move.type() == MoveType::NORMAL);
-
-    const Square origin_square(normal_move.square_from());
-    const Square end_square(normal_move.square_to());
-    const Piece origin_piece = board.get_piece(origin_square);
-    const Piece end_piece = board.get_piece(end_square);
-
-    board.remove_piece(end_square);
-    board.put_piece(origin_piece, end_square);
-    board.remove_piece(origin_square);
-
-    board.state().set_last_captured_piece(piece_to_pieceType(end_piece));
-}
-
-static inline void unmake_normal_move(Board& board, Move normal_move) { }
-
-static inline void make_promotion_move(Board& board, Move promotion_move) { }
-
-static inline void unmake_promotion_move(Board& board, Move promotion_move)
-{
-    /*const PieceType promotion_piece = move.promotion_piece();
-    put_piece(create_piece(promotion_piece, get_color(end_piece)), origin_square);
-
-    // if last move was not a capture captured piece will be EMPTY.
-    const PieceType captured_piece = game_state.last_captured_piece();
-    put_piece(create_piece(captured_piece, game_state.side_to_move()), end_square);*/
-}
-
-static void make_castling_move(Board& board, Move castling_move)
-{
-    assert(castling_move.is_valid());
-    assert(castling_move.type() == MoveType::CASTLING);
-
-    if (castling_move == Move::castle_white_king()) {
-
-        assert(board.state().castle_king_white());
-        assert(board.get_piece(Square::SQ_E1) == Piece::W_KING);
-        assert(board.get_piece(Square::SQ_H1) == Piece::W_ROOK);
-        assert(board.is_empty(Square::SQ_F1) && board.is_empty(Square::SQ_G1));
-
-        board.put_piece(Piece::W_KING, Square::SQ_G1);
-        board.put_piece(Piece::W_ROOK, Square::SQ_F1);
-        board.remove_piece(Square::SQ_E1);
-        board.remove_piece(Square::SQ_H1);
-
-        board.state().set_castle_king_white(false);
-    }
-    else if (castling_move == Move::castle_black_king()) {
-
-        assert(board.state().castle_king_black());
-        assert(board.get_piece(Square::SQ_E8) == Piece::B_KING);
-        assert(board.get_piece(Square::SQ_H8) == Piece::B_ROOK);
-        assert(board.is_empty(Square::SQ_F8) && board.is_empty(Square::SQ_G8));
-
-        board.put_piece(Piece::B_KING, Square::SQ_G8);
-        board.put_piece(Piece::B_ROOK, Square::SQ_F8);
-        board.remove_piece(Square::SQ_E8);
-        board.remove_piece(Square::SQ_H8);
-
-        board.state().set_castle_king_black(false);
-    }
-    else if (castling_move == Move::castle_white_queen()) {
-
-        assert(board.state().castle_queen_white());
-        assert(board.get_piece(Square::SQ_E1) == Piece::W_KING);
-        assert(board.get_piece(Square::SQ_A1) == Piece::W_ROOK);
-        assert(board.is_empty(Square::SQ_D1) && board.is_empty(Square::SQ_C1) &&
-               board.is_empty(Square::SQ_B1));
-
-        board.put_piece(Piece::W_KING, Square::SQ_C1);
-        board.put_piece(Piece::W_ROOK, Square::SQ_D1);
-        board.remove_piece(Square::SQ_E1);
-        board.remove_piece(Square::SQ_A1);
-
-        board.state().set_castle_queen_white(false);
-    }
-    else if (castling_move == Move::castle_black_queen()) {
-
-        assert(board.state().castle_queen_black());
-        assert(board.get_piece(Square::SQ_E8) == Piece::B_KING);
-        assert(board.get_piece(Square::SQ_A8) == Piece::B_ROOK);
-        assert(board.is_empty(Square::SQ_D8) && board.is_empty(Square::SQ_C8) &&
-               board.is_empty(Square::SQ_B8));
-
-        board.put_piece(Piece::B_KING, Square::SQ_C8);
-        board.put_piece(Piece::B_ROOK, Square::SQ_D8);
-        board.remove_piece(Square::SQ_E8);
-        board.remove_piece(Square::SQ_A8);
-
-        board.state().set_castle_queen_black(false);
-    }
-}
-
-static void unmake_castling_move(Board& board, Move castling_move)
-{
-    assert(castling_move.is_valid());
-    assert(castling_move.type() == MoveType::CASTLING);
-
-    if (castling_move == Move::castle_white_king()) {
-
-        assert(board.get_piece(Square::SQ_G1) == Piece::W_KING);
-        assert(board.get_piece(Square::SQ_F1) == Piece::W_ROOK);
-
-        board.put_piece(Piece::W_KING, Square::SQ_E1);
-        board.put_piece(Piece::W_ROOK, Square::SQ_H1);
-        board.remove_piece(Square::SQ_G1);
-        board.remove_piece(Square::SQ_F1);
-    }
-    else if (castling_move == Move::castle_black_king()) {
-
-        assert(board.get_piece(Square::SQ_G8) == Piece::B_KING);
-        assert(board.get_piece(Square::SQ_F8) == Piece::B_ROOK);
-
-        board.put_piece(Piece::B_KING, Square::SQ_E8);
-        board.put_piece(Piece::B_ROOK, Square::SQ_H8);
-        board.remove_piece(Square::SQ_G8);
-        board.remove_piece(Square::SQ_F8);
-    }
-    else if (castling_move == Move::castle_white_queen()) {
-
-        assert(board.get_piece(Square::SQ_C1) == Piece::W_KING);
-        assert(board.get_piece(Square::SQ_D1) == Piece::W_ROOK);
-
-        board.put_piece(Piece::W_KING, Square::SQ_E1);
-        board.put_piece(Piece::W_ROOK, Square::SQ_A1);
-        board.remove_piece(Square::SQ_C1);
-        board.remove_piece(Square::SQ_D1);
-    }
-    else if (castling_move == Move::castle_black_queen()) {
-
-        assert(board.get_piece(Square::SQ_C8) == Piece::B_KING);
-        assert(board.get_piece(Square::SQ_D8) == Piece::B_ROOK);
-
-        board.put_piece(Piece::B_KING, Square::SQ_E8);
-        board.put_piece(Piece::B_ROOK, Square::SQ_A8);
-        board.remove_piece(Square::SQ_C8);
-        board.remove_piece(Square::SQ_D8);
-    }
-}
-
-static void make_enPassant_move(Board& board, Move enPassant_move)
-{
-    assert(enPassant_move.is_valid());
-    assert(enPassant_move.type() == MoveType::EN_PASSANT);
-    assert(board.state().en_passant_square().is_valid());
-    assert(board.state().en_passant_square() == enPassant_move.square_to());
-    assert(board.is_empty(enPassant_move.square_to()));
-
-    const Square origin_square(enPassant_move.square_from());
-    const Square end_square(enPassant_move.square_to());
-    const Square captured_pawn_square(origin_square.row(), end_square.col());
-    const Piece attacker_pawn_piece(board.get_piece(origin_square));
-
-    assert(piece_to_pieceType(board.get_piece(origin_square)) == PieceType::PAWN);
-    assert(piece_to_pieceType(board.get_piece(captured_pawn_square)) == PieceType::PAWN);
-
-
-    board.put_piece(attacker_pawn_piece, end_square);
-    board.remove_piece(origin_square);
-    board.remove_piece(captured_pawn_square);
-
-    board.state().set_last_captured_piece(PieceType::PAWN);
-}
-
-static void unmake_enPassant_move(Board& board, Move enPassant_move)
-{
-    assert(enPassant_move.is_valid());
-    assert(enPassant_move.type() == MoveType::EN_PASSANT);
-    assert(piece_to_pieceType(board.get_piece(enPassant_move.square_to())) == PieceType::PAWN);
-
-    const Square origin_square(enPassant_move.square_from());
-    const Square end_square(enPassant_move.square_to());
-    const Square captured_pawn_square(origin_square.row(), end_square.col());
-
-    const Piece attacker_pawn_piece(board.get_piece(end_square));
-    const ChessColor captured_pawn_color =
-        get_color(attacker_pawn_piece) == ChessColor::WHITE ? ChessColor::BLACK : ChessColor::WHITE;
-
-    const Piece captured_pawn_piece = create_piece(PieceType::PAWN, captured_pawn_color);
-
-
-    board.put_piece(attacker_pawn_piece, origin_square);
-    board.put_piece(captured_pawn_piece, captured_pawn_square);
-    board.remove_piece(end_square);
 }
