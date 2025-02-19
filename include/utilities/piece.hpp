@@ -189,6 +189,25 @@ constexpr inline bool is_valid_color(ChessColor color)
 }
 
 /**
+ * @brief opposite_color 
+ * 
+ * Returns the opposite color.
+ * 
+ * @param[in] color selected color
+ * 
+ * @return
+ * - WHITE if color == BLACK
+ * - BLACK if color == WHITE.
+ * 
+ */
+constexpr inline ChessColor opposite_color(ChessColor color)
+{
+    assert(is_valid_color(color));
+    
+    return static_cast<ChessColor>(static_cast<int>(color) ^ 1);
+}
+
+/**
  * @brief pieceToChar
  * 
  * Returns the character piece representation  

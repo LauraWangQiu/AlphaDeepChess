@@ -18,6 +18,7 @@ static void pieceType_sub_test();
 static void is_valid_piece_test();
 static void is_valid_pieceType_test();
 static void is_valid_color_test();
+static void opposite_color_test();
 
 void piece_test()
 {
@@ -40,6 +41,7 @@ void piece_test()
     is_valid_piece_test();
     is_valid_pieceType_test();
     is_valid_color_test();
+    opposite_color_test();
 }
 
 static void piece_to_char_test()
@@ -546,5 +548,18 @@ static void is_valid_color_test()
     }
     if (!is_valid_color(ChessColor::BLACK)) {
         PRINT_TEST_FAILED(test_name, "!is_valid_color(ChessColor::BLACK)");
+    }
+}
+
+static void opposite_color_test()
+{
+    const std::string test_name = "opposite_color_test";
+
+    if (opposite_color(ChessColor::WHITE) != ChessColor::BLACK) {
+        PRINT_TEST_FAILED(test_name, "opposite_color(ChessColor::WHITE) != ChessColor::BLACK");
+    }
+
+    if (opposite_color(ChessColor::BLACK) != ChessColor::WHITE) {
+        PRINT_TEST_FAILED(test_name, "opposite_color(ChessColor::BLACK) != ChessColor::WHITE");
     }
 }
