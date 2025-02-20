@@ -135,6 +135,9 @@ void Board::make_move(Move move)
 
     // change side to move
     game_state.set_side_to_move(opposite_color(game_state.side_to_move()));
+
+    // check if castling is still available
+    check_and_modify_castle_rights();
 }
 
 /**

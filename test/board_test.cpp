@@ -15,6 +15,7 @@ static void board_clean_test();
 static void board_make_unmake_castling_move_test();
 static void board_make_unmake_enPassant_move_test();
 static void board_make_unmake_normal_move_test();
+static void board_make_unmake_promotion_move_test();
 static void board_make_unmake_move_test();
 static void board_fen_test();
 static void board_initialization_test();
@@ -37,7 +38,7 @@ void board_test()
     board_make_unmake_castling_move_test();
     board_make_unmake_enPassant_move_test();
     board_make_unmake_normal_move_test();
-
+    board_make_unmake_promotion_move_test();
     board_make_unmake_move_test();
     board_fen_test();
     board_initialization_test();
@@ -297,7 +298,7 @@ static void board_set_side_to_move_test()
     }
 
     board.set_side_to_move(ChessColor::WHITE);
-    
+
     if (board.state().side_to_move() != ChessColor::WHITE) {
         PRINT_TEST_FAILED(test_name, "board.state().side_to_move() != ChessColor::WHITE");
     }
@@ -657,15 +658,169 @@ static void board_make_unmake_normal_move_test()
 {
     const std::string test_name = "board_make_unmake_normal_move_test";
 
+    Board board;
+    const auto start_white_fen = "r3k2r/1p6/8/3b1pP1/3B2p1/8/P4P2/R3K2R w KQkq f6 0 2";
+    const auto start_black_fen = "r3k2r/1p3p2/8/3b2P1/3B1Pp1/8/P7/R3K2R b KQkq f3 0 1";
+
     //super normal move white
+    board.load_fen(start_white_fen);
+    const GameState start_white_fen_state = board.state();
+    const Move normal_move_white(Square::SQ_H1, Square::SQ_H7);
+    const auto end_normal_white_fen = "r3k2r/1p5R/8/3b1pP1/3B2p1/8/P4P2/R3K3 b Qkq - 1 2";
+
+    board.make_move(normal_move_white);
+    if (board.fen() != end_normal_white_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_normal_white_fen");
+    }
+    board.unmake_move(normal_move_white, start_white_fen_state);
+    if (board.fen() != start_white_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_white_fen");
+    }
 
     //super normal move black
+    board.load_fen(start_black_fen);
+    const GameState start_black_fen_state = board.state();
+    const Move normal_move_black(Square::SQ_H8, Square::SQ_H2);
+    const auto end_normal_black_fen = "r3k3/1p3p2/8/3b2P1/3B1Pp1/8/P6r/R3K2R w KQq - 1 2";
+
+    board.make_move(normal_move_black);
+    if (board.fen() != end_normal_black_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_normal_black_fen");
+    }
+    board.unmake_move(normal_move_black, start_black_fen_state);
+    if (board.fen() != start_black_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_black_fen");
+    }
 
     //move with capture white
+    board.load_fen(start_white_fen);
+    const Move capture_move_white(Square::SQ_D4, Square::SQ_H8);
+    const auto end_capture_white_fen = "r3k2B/1p6/8/3b1pP1/6p1/8/P4P2/R3K2R b KQq - 0 2";
+
+    board.make_move(capture_move_white);
+    if (board.fen() != end_capture_white_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_capture_white_fen");
+    }
+    board.unmake_move(capture_move_white, start_white_fen_state);
+    if (board.fen() != start_white_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_white_fen");
+    }
 
     //move with capture black
+    board.load_fen(start_black_fen);
+    const Move capture_move_black(Square::SQ_D5, Square::SQ_H1);
+    const auto end_capture_black_fen = "r3k2r/1p3p2/8/6P1/3B1Pp1/8/P7/R3K2b w Qkq - 0 2";
+
+    board.make_move(capture_move_black);
+    if (board.fen() != end_capture_black_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_capture_black_fen");
+    }
+    board.unmake_move(capture_move_black, start_black_fen_state);
+    if (board.fen() != start_black_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_black_fen");
+    }
 
     //double pawn push white
+    board.load_fen(start_white_fen);
+    const Move double_push_move_white(Square::SQ_A2, Square::SQ_A4);
+    const auto end_double_push_white_fen = "r3k2r/1p6/8/3b1pP1/P2B2p1/8/5P2/R3K2R b KQkq - 0 2";
+
+    board.make_move(double_push_move_white);
+    if (board.fen() != end_double_push_white_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_double_push_white_fen");
+    }
+    board.unmake_move(double_push_move_white, start_white_fen_state);
+    if (board.fen() != start_white_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_white_fen");
+    }
 
     //double pawn push black
+    board.load_fen(start_black_fen);
+    const Move double_push_move_black(Square::SQ_B7, Square::SQ_B5);
+    const auto end_double_push_black_fen = "r3k2r/5p2/8/1p1b2P1/3B1Pp1/8/P7/R3K2R w KQkq - 0 2";
+
+    board.make_move(double_push_move_black);
+    if (board.fen() != end_double_push_black_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_double_push_black_fen");
+    }
+    board.unmake_move(double_push_move_black, start_black_fen_state);
+    if (board.fen() != start_black_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_black_fen");
+    }
+}
+
+static void board_make_unmake_promotion_move_test()
+{
+    const std::string test_name = "board_make_unmake_promotion_move_test";
+    Board board;
+
+    //promotion knight move white
+    const auto start_promo_white_fen = "4n3/3P3k/8/Pp6/1p6/8/P2p3K/4N3 w - b6 0 2";
+    const auto end_promo_knight_white_fen = "3Nn3/7k/8/Pp6/1p6/8/P2p3K/4N3 b - - 0 2";
+
+    const Move promo_move_knight_white(Square::SQ_D7, Square::SQ_D8, MoveType::PROMOTION,
+                                       PieceType::KNIGHT);
+
+    board.load_fen(start_promo_white_fen);
+    const GameState start_white_fen_state = board.state();
+
+    board.make_move(promo_move_knight_white);
+    if (board.fen() != end_promo_knight_white_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_promo_white_fen");
+    }
+    board.unmake_move(promo_move_knight_white, start_white_fen_state);
+    if (board.fen() != start_promo_white_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_promo_white_fen");
+    }
+
+    //promotion queen move black
+    const auto start_promo_black_fen = "4n3/1p1P3k/8/P7/Pp6/8/3p3K/4N3 b - a3 0 1";
+    const auto end_promo_queen_black_fen = "4n3/1p1P3k/8/P7/Pp6/8/7K/3qN3 w - - 0 2";
+
+    const Move promo_move_queen_black(Square::SQ_D2, Square::SQ_D1, MoveType::PROMOTION,
+                                      PieceType::QUEEN);
+
+    board.load_fen(start_promo_black_fen);
+    const GameState start_black_fen_state = board.state();
+
+    board.make_move(promo_move_queen_black);
+    if (board.fen() != end_promo_queen_black_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_promo_queen_black_fen");
+    }
+    board.unmake_move(promo_move_queen_black, start_black_fen_state);
+    if (board.fen() != start_promo_black_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_promo_black_fen");
+    }
+
+    //promotion bishop with capture white
+    const auto end_promo_bishop_white_fen = "4B3/7k/8/Pp6/1p6/8/P2p3K/4N3 b - - 0 2";
+    const Move promo_move_bishop_white(Square::SQ_D7, Square::SQ_E8, MoveType::PROMOTION,
+                                       PieceType::BISHOP);
+
+    board.load_fen(start_promo_white_fen);
+
+    board.make_move(promo_move_bishop_white);
+    if (board.fen() != end_promo_bishop_white_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_promo_bishop_white_fen");
+    }
+    board.unmake_move(promo_move_bishop_white, start_white_fen_state);
+    if (board.fen() != start_promo_white_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_promo_white_fen");
+    }
+
+    //promotion rook with capture
+    const auto end_promo_rook_black_fen = "4n3/1p1P3k/8/P7/Pp6/8/7K/4r3 w - - 0 2";
+    const Move promo_move_rook_black(Square::SQ_D2, Square::SQ_E1, MoveType::PROMOTION,
+                                     PieceType::ROOK);
+
+    board.load_fen(start_promo_black_fen);
+
+    board.make_move(promo_move_rook_black);
+    if (board.fen() != end_promo_rook_black_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != end_promo_rook_black_fen");
+    }
+    board.unmake_move(promo_move_rook_black, start_black_fen_state);
+    if (board.fen() != start_promo_black_fen) {
+        PRINT_TEST_FAILED(test_name, "board.fen() != start_promo_black_fen");
+    }
 }

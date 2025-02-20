@@ -21,6 +21,11 @@ struct PerftEntry
     std::vector<uint64_t> perftResults;
 };
 
+/**
+ * 
+ * https://www.chessprogramming.org/Perft_Results
+ * 
+ */
 static std::unordered_map<std::string, PerftEntry> perftResults = {
     {"FEN_START_POS",
      {"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",

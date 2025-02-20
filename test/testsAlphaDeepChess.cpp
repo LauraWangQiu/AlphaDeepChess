@@ -22,7 +22,7 @@ int main()
     move_list_test();
     board_test();
     diagonal_test();
-    //move_generator_test();
+    move_generator_test();
 
     return 0;
 }
