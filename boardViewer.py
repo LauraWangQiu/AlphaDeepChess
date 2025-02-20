@@ -7,7 +7,7 @@ from boardViewerSrc.ui.textbox import TextBox
 pygame.init()
 
 # Constants
-SCREEN_WIDTH, SCREEN_HEIGHT = 600, 700
+SCREEN_WIDTH, SCREEN_HEIGHT = 700, 800
 
 FONT = pygame.font.Font(None, 28)
 
@@ -22,7 +22,7 @@ if not os.path.exists(ENGINE_PATH):
 # Initialize board
 
 board = ChessBoard(posX=0, posY=0, size=SCREEN_WIDTH, engine_path=ENGINE_PATH)
-fenTextBox = TextBox(posX=0,posY=SCREEN_WIDTH,width=SCREEN_WIDTH,height=50,font=FONT)
+fenTextBox = TextBox(posX=0,posY=SCREEN_WIDTH,width=SCREEN_WIDTH,height=50,font=FONT, text=board.get_fen())
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Chess Board")

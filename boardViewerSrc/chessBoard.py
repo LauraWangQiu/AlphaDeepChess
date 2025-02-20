@@ -4,6 +4,15 @@ import chess
 from boardViewerSrc.uci import Uci
 from enum import Enum, auto
 
+def is_valid_fen(fen):
+    assert isinstance(fen, str), "fen must be a string"
+
+    try:
+        chess.Board(fen)
+        return True
+    except ValueError:
+        return False
+
 class ChessBoard:
     class State(Enum):
         IDLE = auto()
@@ -22,13 +31,11 @@ class ChessBoard:
     SELECTED_SQUARE_COLOR = (0, 200, 0)
     LAST_MOVE_SQUARE_COLOR = (200, 200, 0)
 
-    def __init__(self, posX, posY, size, engine_path, fen=chess.STARTING_FEN):
+    def __init__(self, posX, posY, size, engine_path):
 
         assert isinstance(posX, (int, float)) and isinstance(posY, (int, float)), "posX and posY should be numbers"
         assert isinstance(size, (int, float)) , "size should be number"
-
         assert isinstance(engine_path, str), "engine_path must be a string"
-        assert isinstance(fen, str), "fen must be a string"
 
         self.posX = posX
         self.posY = posY
@@ -39,13 +46,10 @@ class ChessBoard:
 
         # Initialize engine
         self.UCI = Uci(engine_path)
-        self.UCI.set_fen(fen)
-        self.board = chess.Board(self.UCI.get_fen())
-
         self.load_images()
-        self.update_legal_moves()
         self.orientation = self.Orientation.WHITE
         self.last_move = None
+        self.set_fen(chess.STARTING_FEN)
 
     def draw(self, screen):
         """Draws the chessboard and pieces with highlights."""
@@ -143,6 +147,23 @@ class ChessBoard:
 
     def rotate_orientation(self):
         self.orientation = self.Orientation.WHITE if self.orientation == self.Orientation.BLACK else self.Orientation.BLACK
+
+    def get_fen(self):
+        return self.UCI.get_fen()
+
+    def set_fen(self, fen):
+        '''return true if fen is valid, return false if error in setting the invalid fen'''
+
+        assert isinstance(fen, str), "fen must be a string"
+
+        if is_valid_fen(fen):
+            self.UCI.set_fen(fen)
+            self.board = chess.Board(self.UCI.get_fen())
+            self.update_legal_moves()
+            return True
+        else:
+            return False
+
 
     def __del__(self):
         del self.UCI
