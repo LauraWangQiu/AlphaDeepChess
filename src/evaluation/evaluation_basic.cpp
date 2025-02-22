@@ -22,9 +22,9 @@
  *  - (+) if position is evaluated as white is better.
  *  - (-) if position is evaluated as black is better.
  */
-int evaluate_position(const Board& board)
+float evaluate_position(const Board& board)
 {
-    int evaluation = 0;
+    float evaluation = 0;
 
     // Take into consideration that there should be 
     // minimum the two kings on the board and in a 

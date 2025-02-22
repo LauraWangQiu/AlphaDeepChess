@@ -10,6 +10,17 @@
 
 #include "board.hpp"
 
+/**
+ * @brief OPENING = 0  
+ * @brief MIDDLEGAME = 1
+ * @brief ENDGAME = 2
+ */
+enum class GamePhase {
+    OPENING,
+    MIDDLEGAME,
+    ENDGAME
+};
+
 /** 
  * @brief evaluate_position
  *
@@ -24,4 +35,4 @@
  *  - (+) if position is evaluated as white is better.
  *  - (-) if position is evaluated as black is better.
  */
-int evaluate_position(const Board& board);
+float evaluate_position(const Board& board);

@@ -341,10 +341,10 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
         const uint64_t in_between_squares_mask =
             Square(king_sq.row(), COL_F).mask() | Square(king_sq.row(), COL_G).mask();
 
-        const bool avaliable =
+        const bool available =
             (in_between_squares_mask & empty_mask & ~king_danger_mask) == in_between_squares_mask;
 
-        if (avaliable) {
+        if (available) {
             moves.add(side_to_move == ChessColor::WHITE ? Move::castle_white_king()
                                                         : Move::castle_black_king());
         }

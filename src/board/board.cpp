@@ -495,6 +495,7 @@ void Board::make_castling_move(Move castling_move)
 
         game_state.set_castle_king_white(false);
         game_state.set_castle_queen_white(false);
+        game_state.set_castled_white(true);
     }
     else if (castling_move == Move::castle_black_king()) {
 
@@ -510,6 +511,7 @@ void Board::make_castling_move(Move castling_move)
 
         game_state.set_castle_king_black(false);
         game_state.set_castle_queen_black(false);
+        game_state.set_castled_black(true);
     }
     else if (castling_move == Move::castle_white_queen()) {
 
@@ -525,6 +527,7 @@ void Board::make_castling_move(Move castling_move)
 
         game_state.set_castle_queen_white(false);
         game_state.set_castle_king_white(false);
+        game_state.set_castled_white(true);
     }
     else if (castling_move == Move::castle_black_queen()) {
 
@@ -540,6 +543,7 @@ void Board::make_castling_move(Move castling_move)
 
         game_state.set_castle_queen_black(false);
         game_state.set_castle_king_black(false);
+        game_state.set_castled_black(true);
     }
 
     game_state.set_last_captured_piece(PieceType::EMPTY);
@@ -653,7 +657,6 @@ void Board::unmake_enPassant_move(Move enPassant_move)
  */
 void Board::check_and_modify_castle_rights()
 {
-
     // Check for white king-side castling rights
     if (game_state.castle_king_white()) {
 
