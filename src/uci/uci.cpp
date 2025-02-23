@@ -107,8 +107,14 @@ void Uci::loop()
         else {
             unknown_command_action();
         }
-
+        // Clear the tokens array
+        tokens.fill("");
     } while (!exit);
+
+    // Ensure the search thread is joined before exiting
+    if (searchThread.joinable()) {
+        searchThread.join();
+    }
 }
 
 /**
@@ -149,12 +155,6 @@ void Uci::new_game_command_action() { board.load_fen(StartFEN); }
  */
 void Uci::go_command_action(const TokenArray& tokens)
 {
-    uint32_t wtime = 0U;       // Time left for white player
-    uint32_t btime = 0U;       // Time left for black player
-    uint32_t winc = 0U;        // Time increment for white player
-    uint32_t binc = 0U;        // Time increment for black player
-    uint32_t movetime = 0U;    // Time to spend on a move
-    uint32_t movestogo = 0U;   // Number of moves to the next time control
     uint32_t depth = 5U;       // Depth to search (default value)
     uint32_t nodes = 0U;       // Number of nodes to search
     uint32_t mate = 0U;        // Search for a mate in x moves
@@ -182,46 +182,6 @@ void Uci::go_command_action(const TokenArray& tokens)
         else if (tokens[i] == "ponder") {
             // TODO
         }
-        else if (tokens[i] == "wtime" && i + 1 < tokens.size()) {
-            try {
-                wtime = std::stoul(tokens[i + 1]);
-                ++i;   // Skip the number value of the wtime
-            } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command: go wtime\n";
-            }
-        }
-        else if (tokens[i] == "btime" && i + 1 < tokens.size()) {
-            try {
-                btime = std::stoul(tokens[i + 1]);
-                ++i;   // Skip the number value of the btime
-            } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command: go btime\n";
-            }
-        }
-        else if (tokens[i] == "winc" && i + 1 < tokens.size()) {
-            try {
-                winc = std::stoul(tokens[i + 1]);
-                ++i;   // Skip the number value of the winc
-            } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command: go winc\n";
-            }
-        }
-        else if (tokens[i] == "binc" && i + 1 < tokens.size()) {
-            try {
-                binc = std::stoul(tokens[i + 1]);
-                ++i;   // Skip the number value of the binc
-            } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command: go binc\n";
-            }
-        }
-        else if (tokens[i] == "movestogo" && i + 1 < tokens.size()) {
-            try {
-                movestogo = std::stoul(tokens[i + 1]);
-                ++i;   // Skip the number value of the movestogo
-            } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command: go movestogo\n";
-            }
-        }
         else if (tokens[i] == "depth" && i + 1 < tokens.size()) {
             try {
                 depth = std::stoul(tokens[i + 1]);
@@ -246,41 +206,32 @@ void Uci::go_command_action(const TokenArray& tokens)
                 std::cout << "Invalid argument for command : go mate\n";
             }
         }
-        else if (tokens[i] == "movetime" && i + 1 < tokens.size()) {
-            try {
-                movetime = std::stoul(tokens[i + 1]);
-                ++i;   // Skip the number value of the movetime
-            } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command: go movetime\n";
-            }
-        }
         else if (tokens[i] == "infinite") {
             depth = INFINITE_SEARCH_DEPTH_VALUE;
         }
         else {
             std::cout << "Invalid argument for command : go ( " << tokens[i] << " )\n";
+            return;
         }
     }
 
-    /*
     stopSearch.store(false);
 
     // Launch a new thread to search for the best move
     searchThread = std::thread(
-        [this, depth]() {
+        [this, depth, search_moves]() {
             try {
-                bestMove = search_best_move(board, depth, stopSearch);
-                std::cout << "Best move found : " << bestMove.to_string() << std::endl;
+                for (uint32_t i = 1; i <= depth; i++) {
+                    bestMove = search_best_move(board, i, search_moves, stopSearch);
+                    std::cout << "info depth " << i << " score " << evaluate_position(board) <<
+                    " bestMove " << bestMove.to_string() << std::endl;
+                }
             } catch (const std::exception& e) {
                 std::cerr << "Exception in search thread: " << e.what() << std::endl;
             } catch (...) {
                 std::cerr << "Unknown exception in search thread" << std::endl;
             }
         });
-    */
-
-    bestMove = search_best_move(board, depth, search_moves, stopSearch);
-    std::cout << "Best move found : " << bestMove.to_string() << std::endl;
 }
 
 /**
@@ -298,7 +249,6 @@ void Uci::stop_command_action()
         searchThread.join();
     }
 
-    std::cout << "Search stopped." << std::endl;
     std::cout << "Best move found : " << bestMove.to_string() << std::endl;
 }
 

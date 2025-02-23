@@ -33,7 +33,7 @@ int alpha_beta(Board& board, uint32_t depth, int alpha, int beta, bool is_maximi
  *  - move, best move found in the position.
  *  - move.none() if no move was found.
  */
-Move search_best_move(Board& board, uint32_t max_depth, MoveList search_moves, std::atomic<bool>& stop) {
+Move search_best_move(Board board, uint32_t max_depth, MoveList search_moves, std::atomic<bool>& stop) {
     Move best_move = Move::null();
     int best_value = -INF;
     int alpha = -INF;
@@ -43,19 +43,19 @@ Move search_best_move(Board& board, uint32_t max_depth, MoveList search_moves, s
     generate_legal_moves(legal_moves, board);
     const GameState game_state = board.state();
 
-    // if (search_moves.size() > 0) {
-    //     // Check if all search moves are legal
-    //     MoveList temp_legal_moves;
-    //     for (int i = 0; i < search_moves.size(); i++) {
-    //         for (int j = 0; j < legal_moves.size(); j++) {
-    //             if (search_moves[i] == legal_moves[j]) {
-    //                 temp_legal_moves.add(search_moves[i]);
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //     legal_moves = temp_legal_moves;
-    // }
+    if (search_moves.size() > 0) {
+        // Check if all search moves are legal
+        MoveList temp_legal_moves;
+        for (int i = 0; i < search_moves.size(); i++) {
+            for (int j = 0; j < legal_moves.size(); j++) {
+                if (search_moves[i] == legal_moves[j]) {
+                    temp_legal_moves.add(search_moves[i]);
+                    break;
+                }
+            }
+        }
+        legal_moves = temp_legal_moves;
+    }
 
     for (int i = 0; i < legal_moves.size(); i++) {
         board.make_move(legal_moves[i]);
@@ -85,7 +85,6 @@ int alpha_beta(Board& board, uint32_t depth, int alpha, int beta, bool is_maximi
     if (legal_moves.size() == 0) {
         return evaluate_position(board);
     }
-
     const GameState game_state = board.state();
 
     if (is_maximizing_player) {
