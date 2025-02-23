@@ -1,7 +1,9 @@
 #chessBoard.py
-import pygame
+from tkinter import Canvas, Tk, PhotoImage
+from PIL import Image, ImageTk
+import customtkinter as ctk
 import chess
-from boardViewerSrc.uci import Uci
+from gui.uci import Uci
 from enum import Enum, auto
 
 def is_valid_fen(fen):
@@ -26,16 +28,19 @@ class ChessBoard:
     NUM_ROWS = 8
     NUM_COLS = 8
 
-    WHITE_SQUARES_COLOR = (238, 238, 210)
-    BLACK_SQUARES_COLOR = (118, 150, 86)
-    SELECTED_SQUARE_COLOR = (0, 200, 0)
-    LAST_MOVE_SQUARE_COLOR = (200, 200, 0)
+    WHITE_SQUARES_COLOR = "#eeeeed"
+    BLACK_SQUARES_COLOR = "#769656"
+    SELECTED_SQUARE_COLOR = "#00c800"
+    LAST_MOVE_SQUARE_COLOR = "#c8c800"
 
-    def __init__(self, posX, posY, size, engine_path):
+    def __init__(self,window, posX, posY, size, engine_path):
 
         assert isinstance(posX, (int, float)) and isinstance(posY, (int, float)), "posX and posY should be numbers"
         assert isinstance(size, (int, float)) , "size should be number"
         assert isinstance(engine_path, str), "engine_path must be a string"
+
+        self.canvas = Canvas(window, width=size, height=size, highlightthickness=0)
+        self.canvas.place(x=posX, y=posY)  # Changed from pack() to place()
 
         self.posX = posX
         self.posY = posY
@@ -44,50 +49,50 @@ class ChessBoard:
         self.selected_square = None
         self.state = self.State.IDLE
 
-        # Initialize engine
         self.UCI = Uci(engine_path)
         self.load_images()
         self.orientation = self.Orientation.WHITE
         self.last_move = None
         self.set_fen(chess.STARTING_FEN)
+        self.draw()
+        self.canvas.bind("<Button-1>", self.on_click)  
 
-    def draw(self, screen):
-        """Draws the chessboard and pieces with highlights."""
-        
-        assert screen 
-        
-        SQUARE_SIZE = self.SQUARE_SIZE
 
+    def draw(self):
         for row in range(self.NUM_ROWS):
             for col in range(self.NUM_COLS):
-                square = chess.square(col, (7 - row) if self.orientation == self.Orientation.WHITE else row) 
-                color = self.WHITE_SQUARES_COLOR if (row + col) % 2 == 0 else self.BLACK_SQUARES_COLOR
+                self.draw_square(row,col)
 
-                if self.selected_square == square:
-                    color = self.SELECTED_SQUARE_COLOR
-                elif self.selected_square and square in self.get_squares_to_move(self.selected_square):
-                    color = self.SELECTED_SQUARE_COLOR
-                elif self.last_move and (square == self.last_move.to_square or square == self.last_move.from_square):
-                    color = self.LAST_MOVE_SQUARE_COLOR
+    def draw_square(self, row, col):
+        square = chess.square(col, (7 - row) if self.orientation == self.Orientation.WHITE else row) 
+        color = self.WHITE_SQUARES_COLOR if (row + col) % 2 == 0 else self.BLACK_SQUARES_COLOR
+        SQUARE_SIZE = self.SQUARE_SIZE
 
-                pygame.draw.rect(screen, color, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+        if self.selected_square == square:
+            color = self.SELECTED_SQUARE_COLOR
+        elif self.selected_square and square in self.get_squares_to_move(self.selected_square):
+            color = self.SELECTED_SQUARE_COLOR
+        elif self.last_move and (square == self.last_move.to_square or square == self.last_move.from_square):
+            color = self.LAST_MOVE_SQUARE_COLOR
 
-                piece = self.board.piece_at(square)
-                if piece:
-                    screen.blit(self.PIECE_IMAGES[piece.symbol()], (col * SQUARE_SIZE, row * SQUARE_SIZE))
+        self.canvas.create_rectangle(col * SQUARE_SIZE,
+                                        row * SQUARE_SIZE,
+                                        col * SQUARE_SIZE + SQUARE_SIZE,
+                                        row * SQUARE_SIZE +SQUARE_SIZE,
+                                        fill=color, outline="")
 
-    def is_clicked(self, mouseX, mouseY):
-        """Check if the board was clicked."""
-        assert isinstance(mouseX, (int, float)) and isinstance(mouseY, (int, float)), "mouseX and mouseY should be numbers"
+        piece = self.board.piece_at(square)
+        if piece:
+            self.canvas.create_image(
+                (col + 0.5) * SQUARE_SIZE,
+                (row + 0.5) * SQUARE_SIZE,
+                image=self.PIECE_IMAGES[piece.symbol()]
+            )
+            
+    def on_click(self, event):
 
-        return self.posX <= mouseX <= self.posX + self.SIZE and self.posY <= mouseY <= self.posY + self.SIZE
-
-    def on_click(self, mouseX, mouseY):
-        """Handles mouse clicks."""
-        assert isinstance(mouseX, (int, float)) and isinstance(mouseY, (int, float)), "mouseX and mouseY should be numbers"
-
-        col = int((mouseX - self.posX) // self.SQUARE_SIZE)
-        row = int((mouseY - self.posY) // self.SQUARE_SIZE)
+        col = int((event.x - self.posX) // self.SQUARE_SIZE)
+        row = int((event.y - self.posY) // self.SQUARE_SIZE)
 
         clicked_square = chess.square(col, (7 - row) if self.orientation == self.Orientation.WHITE else row)
 
@@ -99,6 +104,9 @@ class ChessBoard:
             self.make_move(self.selected_square, clicked_square)
             self.selected_square = None
             self.state = self.State.IDLE
+        
+        self.draw()  # Refresh board after move
+
 
     def make_move(self, origin_sq, end_sq, promotion_piece=None):
         
@@ -140,8 +148,9 @@ class ChessBoard:
         self.PIECE_IMAGES = {}
         for piece, filename in piece_files.items():
             try:
-                image = pygame.image.load(f'boardViewerSrc/assets/{filename}')
-                self.PIECE_IMAGES[piece] = pygame.transform.scale(image, (SQUARE_SIZE, SQUARE_SIZE))
+                img = Image.open(f'gui/assets/{filename}')
+                img = img.resize((SQUARE_SIZE, SQUARE_SIZE), Image.LANCZOS)
+                self.PIECE_IMAGES[piece] = ImageTk.PhotoImage(img)  # Convert for Tkinter
             except Exception as e:
                 print(f"Error loading image {filename}: {e}")
 

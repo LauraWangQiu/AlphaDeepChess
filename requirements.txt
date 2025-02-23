@@ -1,2 +1,3 @@
-pygame
+customtkinter
+pillow
 python-chess

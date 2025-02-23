@@ -44,10 +44,10 @@
         },
 
         {
-            "name": "BoardViewer",
+            "name": "GUI",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/boardViewer.py",
+            "program": "${workspaceFolder}/AlphaDeepChessGUI.py",
             "console": "integratedTerminal"
         }
     ],
