@@ -6,15 +6,6 @@ import chess
 from gui.uci import Uci
 from enum import Enum, auto
 
-def is_valid_fen(fen):
-    assert isinstance(fen, str), "fen must be a string"
-
-    try:
-        chess.Board(fen)
-        return True
-    except ValueError:
-        return False
-
 class ChessBoard:
     class State(Enum):
         IDLE = auto()
@@ -55,8 +46,9 @@ class ChessBoard:
         self.last_move = None
         self.set_fen(chess.STARTING_FEN)
         self.draw()
+        window.bind("<KeyPress-r>", self.rotate_orientation)
         self.canvas.bind("<Button-1>", self.on_click)  
-
+        self.canvas.bind("<KeyPress-r>", self.rotate_orientation)
 
     def draw(self):
         for row in range(self.NUM_ROWS):
@@ -88,7 +80,7 @@ class ChessBoard:
                 (row + 0.5) * SQUARE_SIZE,
                 image=self.PIECE_IMAGES[piece.symbol()]
             )
-            
+
     def on_click(self, event):
 
         col = int((event.x - self.posX) // self.SQUARE_SIZE)
@@ -154,9 +146,19 @@ class ChessBoard:
             except Exception as e:
                 print(f"Error loading image {filename}: {e}")
 
-    def rotate_orientation(self):
+    def rotate_orientation(self, event=None):
         self.orientation = self.Orientation.WHITE if self.orientation == self.Orientation.BLACK else self.Orientation.BLACK
+        self.draw()
 
+    def is_valid_fen(self,fen):
+        assert isinstance(fen, str), "fen must be a string"
+
+        try:
+            chess.Board(fen)
+            return True
+        except ValueError:
+            return False
+    
     def get_fen(self):
         return self.UCI.get_fen()
 
@@ -165,7 +167,7 @@ class ChessBoard:
 
         assert isinstance(fen, str), "fen must be a string"
 
-        if is_valid_fen(fen):
+        if self.is_valid_fen(fen):
             self.UCI.set_fen(fen)
             self.board = chess.Board(self.UCI.get_fen())
             self.update_legal_moves()
