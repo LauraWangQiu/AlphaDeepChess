@@ -25,7 +25,8 @@
 #define BLOCKED_PAWNS_PENALTY_VALUE -0.5
 #define ISOLATED_PAWNS_PENALTY_VALUE -0.5
 
-#define PAWN_SHIELD_FOR_KING_SAFETY_PENALTY_VALUE 0.1
+#define PAWN_SHIELD_FOR_KING_SAFETY_PENALTY_VALUE -0.1
+#define PAWN_STORM_FOR_KING_SAFETY_PENALTY_VALUE -0.05
 
 #define MOBILITY_VALUE 0.1
 
@@ -238,22 +239,34 @@ float evaluate_piece(Piece piece, int row, int col, const Board& board, const Ga
                     // https://www.chessprogramming.org/King_Safety
                     // If king has castled
                     if ((color == ChessColor::WHITE && board.state().has_castled_white()) || (color == ChessColor::BLACK && board.state().has_castled_black())) {
-                        // Pawn shield
-                        // Get only the 3 same color pawns in the front row of the king after castled
-                        // If there are not pawns, then it is a penalty
-                        // (NOT taking into consideration of long castle)
                         for (int i = 0; i < 3; i++) {
                             if (Square(Row(row + sign), Col(col - 1 + i)).is_valid()) {
                                 Piece possiblePawn = board.get_piece(Square(Row(row + sign), Col(col - 1 + i)));
+                                // Pawn shield
+                                // Get only the 3 same color pawns in the front row of the king after castled
+                                // If there are not pawns, then it is a penalty
+                                // (NOT taking into consideration of long castle)
                                 // If there is no piece or the piece is not the same color
                                 // or the piece is not a pawn, give penalty
                                 if (possiblePawn == Piece::EMPTY || get_color(possiblePawn) != color || piece_to_pieceType(possiblePawn) != PieceType::PAWN) {
                                     evaluation += PAWN_SHIELD_FOR_KING_SAFETY_PENALTY_VALUE;
                                 }
+                                
+                                // Pawn storm
+                                // If the enemy pawns are near to the king, there might be a threat of 
+                                // opening a file, even if the pawn shield is intact
+                                // Iterate columns
+                                for (int j = 1; j < 7; j++) {
+                                    possiblePawn = board.get_piece(Square(Row(row + sign * j), Col(col - 1 + i)));
+                                    if (possiblePawn != Piece::EMPTY && get_color(possiblePawn) != color && piece_to_pieceType(possiblePawn) == PieceType::PAWN) {
+                                        // Smaller the distance, bigger the penalty
+                                        float distance = board.get_distance_chebyshev(Square(Row(row), Col(col)), Square(Row(row + sign * j), Col(col - 1 + i)));
+                                        evaluation += PAWN_STORM_FOR_KING_SAFETY_PENALTY_VALUE * 1 / distance;
+                                    }
+                                }
                             }
                         }
 
-                        // TODO: Pawn storm
                         // TODO: King Tropism
                         // TODO: Attacking King Zone
                         // TODO: Square Control

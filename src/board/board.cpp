@@ -216,6 +216,8 @@ void Board::load_fen(const std::string& fen)
     game_state.set_castle_queen_white(false);
     game_state.set_castle_king_black(false);
     game_state.set_castle_queen_black(false);
+    game_state.set_castled_white(false);
+    game_state.set_castled_black(false);
 
     while ((ss >> token) && !isspace(token)) {
         if (token == 'K') {
@@ -233,6 +235,15 @@ void Board::load_fen(const std::string& fen)
     }
 
     check_and_modify_castle_rights();
+
+    // No possibility of castling, means that the player "has castled" or
+    // that the player has lost the right to castle. In both cases, we set the castled flag
+    if (!game_state.castle_king_white() && !game_state.castle_queen_white()) {
+        game_state.set_castled_white(true);
+    }
+    if (!game_state.castle_king_black() && !game_state.castle_queen_black()) {
+        game_state.set_castled_black(true);
+    }
 
     // 4. En passant square.
 
