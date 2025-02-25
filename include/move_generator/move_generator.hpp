@@ -18,8 +18,8 @@
  * 
  * @param[out] moves move list.
  * @param[in] board chess position.
- * @param[out] isMate return true if the position is check mate.
- * @param[out] isStaleMate return true if the position is stalemate.
+ * @param[out] isMate (optional) return true if the position is check mate.
+ * @param[out] isStaleMate (optional) return true if the position is stalemate.
  * 
  */
-void generate_legal_moves(MoveList& moves, const Board& board, bool& isMate, bool& isStaleMate);
+void generate_legal_moves(MoveList& moves, const Board& board, bool* isMate = nullptr, bool* isStaleMate = nullptr);

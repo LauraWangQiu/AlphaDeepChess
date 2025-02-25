@@ -53,8 +53,7 @@ void perft(const std::string& FEN, uint64_t depth, MoveNodesList& moveNodeList, 
     MoveList moves;
     moveNodeList.reserve(moves.size());
 
-    bool isMate, isStaleMate;
-    generate_legal_moves(moves, board, isMate, isStaleMate);
+    generate_legal_moves(moves, board);
 
     for (int i = 0; i < moves.size(); i++) {
         moveNodeList.emplace_back(moves[i], 0ULL);
@@ -97,8 +96,7 @@ static uint64_t perft_recursive(Board& board, uint32_t depth)
 
     uint64_t nodes = 0;
     MoveList moves;
-    bool isMate, isStaleMate;
-    generate_legal_moves(moves, board, isMate, isStaleMate);
+    generate_legal_moves(moves, board);
 
     const GameState game_state = board.state();
 

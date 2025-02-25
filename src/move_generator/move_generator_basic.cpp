@@ -43,23 +43,24 @@ static void calculate_queen_moves(Square queen_sq, MoveGeneratorInfo& moveGenera
  * 
  * @param[out] moves move list.
  * @param[in] board chess position.
- * @param[out] isMate return true if the position is check mate.
- * @param[out] isStaleMate return true if the position is stalemate.
+ * @param[out] isMate (optional) return true if the position is check mate.
+ * @param[out] isStaleMate (optional) return true if the position is stalemate.
  * 
  */
-void generate_legal_moves(MoveList& moves, const Board& board, bool& isMate, bool& isStaleMate)
+void generate_legal_moves(MoveList& moves, const Board& board, bool* isMate, bool* isStaleMate)
 {
     MoveGeneratorInfo moveGeneratorInfo(board, moves);
 
     update_move_generator_info(moveGeneratorInfo);
 
     const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
+    const uint8_t num_checkers = moveGeneratorInfo.number_of_checkers;
 
-    if (moveGeneratorInfo.number_of_checkers >= 2) {
+    if (num_checkers >= 2) {
         // when double check only king moves allowed
         calculate_king_moves(moveGeneratorInfo.side_to_move_king_square, moveGeneratorInfo);
-        isMate = (moves.size() == 0);
-        isStaleMate = false;
+        if (isMate) *isMate = (moves.size() == 0);
+        if (isStaleMate) *isStaleMate = false;
         return;
     }
 
@@ -81,8 +82,8 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool& isMate, boo
         }
     }
 
-    isMate = (moves.size() == 0) && (moveGeneratorInfo.number_of_checkers > 0);
-    isStaleMate = (moves.size() == 0) && (moveGeneratorInfo.number_of_checkers == 0);
+    if (isMate) *isMate = (moves.size() == 0) && (num_checkers > 0);
+    if (isStaleMate) *isStaleMate = (moves.size() == 0) && (num_checkers == 0);
 }
 
 static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)

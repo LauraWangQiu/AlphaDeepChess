@@ -80,10 +80,10 @@ float evaluate_position(const Board& board)
     board_copy.set_side_to_move(opponent);
     MoveList legal_moves;
 
-    generate_legal_moves(legal_moves, board, isMate, isStaleMate);
+    generate_legal_moves(legal_moves, board, &isMate, &isStaleMate);
     evaluation += evaluate_legal_moves(legal_moves) * sign;
 
-    generate_legal_moves(legal_moves, board_copy, isMate, isStaleMate);
+    generate_legal_moves(legal_moves, board_copy, &isMate, &isStaleMate);
     evaluation += evaluate_legal_moves(legal_moves) * sign_opponent;
 
     return evaluation;

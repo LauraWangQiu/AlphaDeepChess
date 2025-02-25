@@ -36,7 +36,7 @@ BraceWrapping:
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom
 BreakConstructorInitializers: BeforeColon
-ColumnLimit: 100
+ColumnLimit: 120
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth : 4
 Cpp11BracedListStyle: true
