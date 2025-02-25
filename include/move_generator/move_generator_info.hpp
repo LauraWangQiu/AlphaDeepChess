@@ -21,7 +21,6 @@
 class MoveGeneratorInfo
 {
 public:
-    //uint64_t attacked_squares_mask;      // squares that enemy pieces directly attack
     uint64_t pinned_squares_mask;        // squares where pinned pieces could move
     uint64_t king_danger_squares_mask;   // squares that enemy pieces attack if the king is removed
     uint64_t push_squares_mask;          // squares where pieces could move to block a check

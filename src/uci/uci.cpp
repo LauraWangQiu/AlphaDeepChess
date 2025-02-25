@@ -155,59 +155,22 @@ void Uci::new_game_command_action() { board.load_fen(StartFEN); }
  */
 void Uci::go_command_action(const TokenArray& tokens)
 {
-    uint32_t depth = 5U;       // Depth to search (default value)
-    uint32_t nodes = 0U;       // Number of nodes to search
-    uint32_t mate = 0U;        // Search for a mate in x moves
-    MoveList search_moves;     // List of moves to search before another argument
+    uint32_t depth = INFINITE_DEPTH;
 
     // Parse the command line arguments
     for (uint32_t i = 1; i < tokens.size(); ++i) {
         if (tokens[i].empty()) {
             continue;
         }
-
-        if (tokens[i] == "searchmoves") {
-            search_moves.clear();
-            while (++i < tokens.size()) {
-                Move move = create_move_from_string(tokens[i], board);
-                if (move.is_valid()) {
-                    search_moves.add(move);
-                }
-                else {
-                    break;
-                }
-            }
-            --i;
-        }
-        else if (tokens[i] == "ponder") {
-            // TODO
-        }
-        else if (tokens[i] == "depth" && i + 1 < tokens.size()) {
+        else if (tokens[i] == "depth") {
             try {
-                depth = std::stoul(tokens[i + 1]);
-                ++i;   // Skip the number value of the depth
+                depth = std::stoul(tokens[i++]);
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command : go depth\n";
             }
         }
-        else if (tokens[i] == "nodes" && i + 1 < tokens.size()) {
-            try {
-                nodes = std::stoul(tokens[i + 1]);
-                ++i;   // Skip the number value of the nodes
-            } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command : go nodes\n";
-            }
-        }
-        else if (tokens[i] == "mate" && i + 1 < tokens.size()) {
-            try {
-                mate = std::stoul(tokens[i + 1]);
-                ++i;   // Skip the number value of searching mate
-            } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command : go mate\n";
-            }
-        }
         else if (tokens[i] == "infinite") {
-            depth = INFINITE_SEARCH_DEPTH_VALUE;
+            depth = INFINITE_DEPTH;
         }
         else {
             std::cout << "Invalid argument for command : go ( " << tokens[i] << " )\n";
@@ -215,17 +178,12 @@ void Uci::go_command_action(const TokenArray& tokens)
         }
     }
 
-    stopSearch.store(false);
-
     // Launch a new thread to search for the best move
     searchThread = std::thread(
-        [this, depth, search_moves]() {
+        [this, depth]() {
             try {
-                for (uint32_t i = 1; i <= depth; i++) {
-                    bestMove = search_best_move(board, i, search_moves, stopSearch);
-                    std::cout << "info depth " << i << " score " << evaluate_position(board) <<
-                    " bestMove " << bestMove.to_string() << std::endl;
-                }
+                std::cout << "search started with depth " << depth << "\n";
+                Move bestMove = search_best_move(board, depth);
             } catch (const std::exception& e) {
                 std::cerr << "Exception in search thread: " << e.what() << std::endl;
             } catch (...) {
@@ -242,14 +200,14 @@ void Uci::go_command_action(const TokenArray& tokens)
  */
 void Uci::stop_command_action()
 {
-    stopSearch.store(true);
+    search_stop();
 
     // Wait for the search thread to finish if it's running
     if (searchThread.joinable()) {
         searchThread.join();
     }
 
-    std::cout << "Best move found : " << bestMove.to_string() << std::endl;
+    //std::cout << "Best move found : " << bestMove.to_string() << std::endl;
 }
 
 /**
@@ -260,7 +218,7 @@ void Uci::stop_command_action()
  */
 void Uci::eval_command_action() const
 {
-    std::cout << "Evaluation : " << evaluate_position(board) << std::endl;
+    std::cout << "Evaluation: " << evaluate_position(board) << std::endl;
 }
 
 /**

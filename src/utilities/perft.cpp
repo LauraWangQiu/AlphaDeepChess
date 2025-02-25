@@ -49,16 +49,15 @@ void perft(const std::string& FEN, uint64_t depth, MoveNodesList& moveNodeList, 
 {
     Board board;
     board.load_fen(FEN);
-    
+
     MoveList moves;
     moveNodeList.reserve(moves.size());
 
+    bool isMate, isStaleMate;
+    generate_legal_moves(moves, board, isMate, isStaleMate);
 
-    generate_legal_moves(moves,board);
-
-    for (int i = 0; i < moves.size(); i++)
-    {
-        moveNodeList.emplace_back(moves[i],0ULL);
+    for (int i = 0; i < moves.size(); i++) {
+        moveNodeList.emplace_back(moves[i], 0ULL);
     }
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -66,8 +65,7 @@ void perft(const std::string& FEN, uint64_t depth, MoveNodesList& moveNodeList, 
 
     const GameState game_state = board.state();
 
-    for (int i = 0; i < moves.size(); i++)
-    {
+    for (int i = 0; i < moves.size(); i++) {
         board.make_move(moves[i]);
         moveNodeList[i].second = perft_recursive(board, depth - 1);
         board.unmake_move(moves[i], game_state);
@@ -93,19 +91,18 @@ void perft(const std::string& FEN, uint64_t depth, MoveNodesList& moveNodeList, 
  */
 static uint64_t perft_recursive(Board& board, uint32_t depth)
 {
-    if (depth == 0)
-    {
+    if (depth == 0) {
         return 1;
     }
 
     uint64_t nodes = 0;
     MoveList moves;
-    generate_legal_moves(moves,board);
+    bool isMate, isStaleMate;
+    generate_legal_moves(moves, board, isMate, isStaleMate);
 
     const GameState game_state = board.state();
 
-    for (int i = 0; i < moves.size(); i++)
-    {
+    for (int i = 0; i < moves.size(); i++) {
         board.make_move(moves[i]);
         nodes += perft_recursive(board, depth - 1);
         board.unmake_move(moves[i], game_state);

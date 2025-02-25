@@ -47,7 +47,8 @@ public:
     {
         assert(square1.is_valid() && square2.is_valid());
         // TODO: Precompute the distance between all squares
-        return std::max(std::abs(int(square1.row()) - int(square2.row())), std::abs(int(square1.col()) - int(square2.col())));
+        return std::max(std::abs(int(square1.row()) - int(square2.row())),
+                        std::abs(int(square1.col()) - int(square2.col())));
     }
 
     /**
@@ -65,7 +66,8 @@ public:
     {
         assert(square1.is_valid() && square2.is_valid());
         // TODO: Precompute the distance between all squares
-        return std::abs(int(square1.row()) - int(square2.row())) + std::abs(int(square1.col()) - int(square2.col()));
+        return std::abs(int(square1.row()) - int(square2.row())) +
+            std::abs(int(square1.col()) - int(square2.col()));
     }
 
     /**
@@ -225,6 +227,23 @@ public:
      * 
      */
     void unmake_move(Move move, GameState previous_state);
+
+    /**
+     * @brief move_is_capture
+     * 
+     * calculate if a move is a capture in the board
+     * 
+     * 
+     * @param[in] move chess move.
+     * 
+     * @return True if move is En Passant or end square is not empty
+     * 
+     */
+    constexpr bool move_is_capture(Move move)
+    {
+        assert(move.is_valid());
+        return move.type() == MoveType::EN_PASSANT || (!is_empty(move.square_to()));
+    }
 
     /**
      * @brief load_fen

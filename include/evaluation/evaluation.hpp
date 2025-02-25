@@ -21,6 +21,8 @@ enum class GamePhase {
     ENDGAME
 };
 
+constexpr int32_t MATE_IN_ONE_SCORE = 32000U;
+
 /** 
  * @brief evaluate_position
  *

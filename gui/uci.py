@@ -3,10 +3,9 @@
 import subprocess
 
 class Uci:
-    def __init__(self, engine_path):
+    def __init__(self, engine_path: str):
 
-        assert isinstance(engine_path, str), "engine_path must be a string"
-
+        self.in_infinite_search = False
         self.ENGINE_PATH = engine_path
         self.process = subprocess.Popen(
             self.ENGINE_PATH,
@@ -24,7 +23,7 @@ class Uci:
         print("UCI mode initialized.")
 
 
-    def set_fen(self, fen):
+    def set_fen(self, fen: str) -> None:
         """Sets a board position from a FEN string."""
         assert isinstance(fen, str), "fen must be a string"
 
@@ -33,7 +32,7 @@ class Uci:
         self.wait_for("readyok")  # Ensure it's done
         
            
-    def get_fen(self):
+    def get_fen(self) -> str:
         """Gets the FEN of the current position."""
         self.send_command("d")  # The "d" command outputs position details
         output = self.wait_for("Fen:")
@@ -42,7 +41,7 @@ class Uci:
                 return line.split("Fen: ")[1].strip()
         return None
     
-    def make_move(self, move_string):
+    def make_move(self, move_string: str) -> None:
         """Applies a move in UCI format."""
 
         assert isinstance(move_string, str), "move_string must be a string"
@@ -52,7 +51,7 @@ class Uci:
         self.send_command("isready")  # Confirm engine has processed move
         self.wait_for("readyok")
 
-    def get_legal_moves(self):
+    def get_legal_moves(self) -> list:
         """Retrieves all legal moves."""
         self.send_command("perft 1")  # "perft 1" lists all legal moves
         output = self.wait_for("Nodes searched:")
@@ -83,6 +82,18 @@ class Uci:
             if line.startswith("bestmove"):
                 return line.split()[1]
         return None
+    
+    def get_evaluation(self) -> float:
+        self.send_command("eval")
+        output = self.wait_for("Evaluation:")
+        for line in output:
+            if line.startswith("Evaluation:"):
+                value = line.split("Evaluation:")[1].strip()
+                try:
+                    return float(value)
+                except ValueError:
+                    raise ValueError(f"Could not convert evaluation '{value}' to float")
+        raise ValueError("No evaluation found in output")
     
     def wait_for(self, expected):
         """

@@ -1,10 +1,11 @@
 #chessBoard.py
-from tkinter import Canvas, Tk, PhotoImage
-from PIL import Image, ImageTk
+from tkinter import Canvas
 import customtkinter as ctk
+from PIL import Image, ImageTk
 import chess
 from gui.uci import Uci
 from enum import Enum, auto
+from collections import defaultdict
 
 class ChessBoard:
     class State(Enum):
@@ -24,31 +25,35 @@ class ChessBoard:
     SELECTED_SQUARE_COLOR = "#00c800"
     LAST_MOVE_SQUARE_COLOR = "#c8c800"
 
-    def __init__(self,window, posX, posY, size, engine_path):
+    def __init__(self,window, size : int, UCI : Uci):
+        
+        self.window = window
+    
+        self.boardContainer = ctk.CTkFrame(window)
+        self.boardContainer.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
 
-        assert isinstance(posX, (int, float)) and isinstance(posY, (int, float)), "posX and posY should be numbers"
-        assert isinstance(size, (int, float)) , "size should be number"
-        assert isinstance(engine_path, str), "engine_path must be a string"
+        self.canvas = Canvas(self.boardContainer, width=size, height=size, highlightthickness=0)
+        self.canvas.pack()
 
-        self.canvas = Canvas(window, width=size, height=size, highlightthickness=0)
-        self.canvas.place(x=posX, y=posY)  # Changed from pack() to place()
-
-        self.posX = posX
-        self.posY = posY
         self.SIZE = size
         self.SQUARE_SIZE = size / self.NUM_COLS
         self.selected_square = None
         self.state = self.State.IDLE
 
-        self.UCI = Uci(engine_path)
+        self.UCI = UCI
         self.load_images()
         self.orientation = self.Orientation.WHITE
         self.last_move = None
+        self.legal_moves_dict = defaultdict(list)
+
         self.set_fen(chess.STARTING_FEN)
+
         self.draw()
         window.bind("<KeyPress-r>", self.rotate_orientation)
         self.canvas.bind("<Button-1>", self.on_click)  
         self.canvas.bind("<KeyPress-r>", self.rotate_orientation)
+        self.eventManager = None
+
 
     def draw(self):
         for row in range(self.NUM_ROWS):
@@ -82,9 +87,9 @@ class ChessBoard:
             )
 
     def on_click(self, event):
-
-        col = int((event.x - self.posX) // self.SQUARE_SIZE)
-        row = int((event.y - self.posY) // self.SQUARE_SIZE)
+        posX, posY = 0, 0
+        col = int((event.x - posX) // self.SQUARE_SIZE)
+        row = int((event.y - posY) // self.SQUARE_SIZE)
 
         clicked_square = chess.square(col, (7 - row) if self.orientation == self.Orientation.WHITE else row)
 
@@ -99,7 +104,6 @@ class ChessBoard:
         
         self.draw()  # Refresh board after move
 
-
     def make_move(self, origin_sq, end_sq, promotion_piece=None):
         
         """Make a move on the board."""
@@ -112,21 +116,29 @@ class ChessBoard:
             self.UCI.make_move(move.uci())  # Update engine
             self.board.push(move)  # Apply move on board
             self.update_legal_moves()
+            self.fen = self.UCI.get_fen()
             self.last_move = move
+            self.eventManager.chessBoardMakeMove(self.fen)
+            
 
     def update_legal_moves(self):
         """Updates the list of legal moves."""
         legal_moves_uci = self.UCI.get_legal_moves()
         self.legal_moves = []
+        self.legal_moves_dict.clear()
+
         for uci_move in legal_moves_uci:
-            self.legal_moves.append(chess.Move.from_uci(uci_move))
+            move = chess.Move.from_uci(uci_move)
+            self.legal_moves.append(move)
+            self.legal_moves_dict[move.from_square].append(move.to_square)
 
     def get_squares_to_move(self, origin_square):
         """Returns all possible end squares from a given origin square."""
 
-        assert isinstance(origin_square, int) and 0 <= origin_square <= 63, f"Invalid origin square: {origin_square}"
+        #assert isinstance(origin_square, int) and 0 <= origin_square <= 63, f"Invalid origin square: {origin_square}"
+        return self.legal_moves_dict.get(origin_square, [])
 
-        return [move.to_square for move in self.legal_moves if move.from_square == origin_square]
+       # return [move.to_square for move in self.legal_moves if move.from_square == origin_square]
 
     def load_images(self):
         """Loads piece images."""
@@ -150,9 +162,7 @@ class ChessBoard:
         self.orientation = self.Orientation.WHITE if self.orientation == self.Orientation.BLACK else self.Orientation.BLACK
         self.draw()
 
-    def is_valid_fen(self,fen):
-        assert isinstance(fen, str), "fen must be a string"
-
+    def is_valid_fen(self,fen: str) -> bool:
         try:
             chess.Board(fen)
             return True
@@ -160,21 +170,23 @@ class ChessBoard:
             return False
     
     def get_fen(self):
-        return self.UCI.get_fen()
+        return self.fen
 
-    def set_fen(self, fen):
-        '''return true if fen is valid, return false if error in setting the invalid fen'''
-
-        assert isinstance(fen, str), "fen must be a string"
+    def set_fen(self, fen: str) -> bool:
+        '''set fen if fen is valid return true if fen is valid'''
 
         if self.is_valid_fen(fen):
             self.UCI.set_fen(fen)
-            self.board = chess.Board(self.UCI.get_fen())
+            self.fen = fen
+            self.board = chess.Board(fen)
             self.update_legal_moves()
+            self.draw()
             return True
         else:
             return False
 
+    def set_eventManager(self, eventManager):
+        self.eventManager = eventManager
 
     def __del__(self):
         del self.UCI

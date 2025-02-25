@@ -6,118 +6,210 @@
  * 
  */
 
+#include <iostream>
 #include "search.hpp"
 #include "move_generator.hpp"
 #include "evaluation.hpp"
+#include "move_ordering.hpp"
 #include "move_list.hpp"
 
-#include <limits>
-
-// Constants for infinity
 const int INF = std::numeric_limits<int>::max();
+const int32_t INMEDIATE_MATE_SCORE = 32000;
+const int32_t MATE_THRESHOLD = INMEDIATE_MATE_SCORE - 10000U;
 
-int alpha_beta(Board& board, uint32_t depth, int alpha, int beta, bool is_maximizing_player, std::atomic<bool>& stop);
+std::atomic<bool> stop;
+Move bestMoveFound;
+int bestEvalFound;
+bool hasSearchedAtLeastOneMove;
+Move bestMoveInIteration;
+int bestEvalInIteration;
+
+/**
+ * @brief search_stop
+ * 
+ * stop the search process, this method is thread safe
+ * 
+ */
+void search_stop() { stop.store(true); }
+
+
+static void iterative_deepening(Board& board, int max_depth);
+static int alpha_beta(Board& board, int depth, int ply, int alpha, int beta);
+static int alpha_beta_captures(Board& board, int alpha, int beta);
 
 /**
  * @brief search_best_move
  * 
  * Calculate the best legal move in the chess position.
  * 
- * @note The function is prepared to be called in a separated thread, you could use stop signal.
+ * @note This method is thread safe
  * 
  * @param[in] board chess position.
- * @param[in] max_depth use INFINITE_SEARCH_DEPTH_VALUE to do an infinite search.
- * @param[in] stop signal to stop the search.
+ * @param[in] max_depth maximum depth of search, default value is INFINITE_DEPTH
  * 
- * @return 
- *  - move, best move found in the position.
- *  - move.none() if no move was found.
+ * @return best move found in the position.
+ * 
  */
-Move search_best_move(Board board, uint32_t max_depth, MoveList search_moves, std::atomic<bool>& stop) {
-    Move best_move = Move::null();
-    int best_value = -INF;
-    int alpha = -INF;
-    int beta = INF;
+Move search_best_move(Board board, int32_t max_depth)
+{
 
-    MoveList legal_moves;
-    generate_legal_moves(legal_moves, board);
-    const GameState game_state = board.state();
+    bestEvalInIteration = 0;
+    bestMoveInIteration = Move::null();
+    bestMoveFound = bestMoveInIteration;
+    bestEvalFound = bestEvalInIteration;
 
-    if (search_moves.size() > 0) {
-        // Check if all search moves are legal
-        MoveList temp_legal_moves;
-        for (int i = 0; i < search_moves.size(); i++) {
-            for (int j = 0; j < legal_moves.size(); j++) {
-                if (search_moves[i] == legal_moves[j]) {
-                    temp_legal_moves.add(search_moves[i]);
-                    break;
-                }
-            }
-        }
-        legal_moves = temp_legal_moves;
+    iterative_deepening(board, max_depth);
+
+    // not enough time to find a move, select random move
+    if (!bestMoveFound.is_valid()) {
+        MoveList moves;
+        bool isMate, isStaleMate;
+        generate_legal_moves(moves, board, isMate, isStaleMate);
+        bestMoveFound = moves[0];
+        std::cout << "random move selected " << bestMoveFound.to_string() << "\n";
     }
-
-    for (int i = 0; i < legal_moves.size(); i++) {
-        board.make_move(legal_moves[i]);
-        int move_value = alpha_beta(board, max_depth - 1, alpha, beta, false, stop);
-        board.unmake_move(legal_moves[i], game_state);
-
-        if (move_value > best_value) {
-            best_value = move_value;
-            best_move = legal_moves[i];
-        }
-
-        if (stop) {
-            break;
-        }
-    }
-
-    return best_move;
+    return bestMoveFound;
 }
 
-int alpha_beta(Board& board, uint32_t depth, int alpha, int beta, bool is_maximizing_player, std::atomic<bool>& stop) {
-    if (depth == 0 || stop) {
-        return evaluate_position(board);
+void iterative_deepening(Board& board, int max_depth)
+{
+
+    stop = false;
+
+    for (int depth = 1; depth <= max_depth; depth++) {
+        hasSearchedAtLeastOneMove = false;
+
+
+        alpha_beta(board, depth, 0, -INF, +INF);
+
+        if (stop) {
+            if (hasSearchedAtLeastOneMove) {
+                bestMoveFound = bestMoveInIteration;
+                bestEvalFound = bestEvalInIteration;
+            }
+
+            break;
+        }
+        else {
+
+            bestMoveFound = bestMoveInIteration;
+            bestEvalFound = bestEvalInIteration;
+
+            if (abs(bestEvalFound) > MATE_THRESHOLD) {
+                break;   // We found a checkmate
+            }
+        }
+
+        std::cout << "info depth " << depth << " score " << bestEvalFound << " bestMove "
+                  << bestMoveFound.to_string() << "\n";
+    }
+}
+
+int alpha_beta(Board& board, int depth, int ply, int alpha, int beta)
+{
+
+    if (stop) return 0;
+
+    if (ply > 0) {
+        // mate in less moves has better score than in more moves
+        alpha = std::max(alpha, -MATE_IN_ONE_SCORE + ply);
+        beta = std::min(beta, MATE_IN_ONE_SCORE - ply);
+        if (alpha >= beta) {
+            //numCutoffs++; // debug
+            return alpha;
+        }
     }
 
-    MoveList legal_moves;
-    generate_legal_moves(legal_moves, board);
-    if (legal_moves.size() == 0) {
-        return evaluate_position(board);
+    if (depth == 0) {
+        return alpha_beta_captures(board, alpha, beta);
     }
+
+    MoveList moves;
+    bool isCheckMate, isStaleMate = false;
+    generate_legal_moves(moves, board, isCheckMate, isStaleMate);
+
+    if (isCheckMate) {
+        int mateScore = MATE_IN_ONE_SCORE - ply;
+        return -mateScore;
+    }
+    else if (isStaleMate) {
+        return 0;
+    }
+    order_moves(moves, board);
+
+    Move bestMoveInPosition;
     const GameState game_state = board.state();
 
-    if (is_maximizing_player) {
-        int max_eval = -INF;
+    for (int i = 0; i < moves.size(); i++) {
 
-        for (int i = 0; i < legal_moves.size(); i++) {
-            board.make_move(legal_moves[i]);
-            int eval = alpha_beta(board, depth - 1, alpha, beta, false, stop);
-            board.unmake_move(legal_moves[i], game_state);
+        board.make_move(moves[i]);
+        int evaluation = -alpha_beta(board, depth - 1, ply + 1, -beta, -alpha);
+        board.unmake_move(moves[i], game_state);
 
-            max_eval = std::max(max_eval, eval);
-            alpha = std::max(alpha, eval);
-            if (beta <= alpha) {
-                break; // Poda beta
-            }
+        if (stop) {
+            return 0;
         }
 
-        return max_eval;
-    } else {
-        int min_eval = INF;
-
-        for (int i = 0; i < legal_moves.size(); i++) {
-            board.make_move(legal_moves[i]);
-            int eval = alpha_beta(board, depth - 1, alpha, beta, true, stop);
-            board.unmake_move(legal_moves[i], game_state);
-
-            min_eval = std::min(min_eval, eval);
-            beta = std::min(beta, eval);
-            if (beta <= alpha) {
-                break; // Poda alfa
-            }
+        if (evaluation >= beta) {
+            return beta;
         }
 
-        return min_eval;
+        if (evaluation > alpha) {
+            bestMoveInPosition = moves[i];
+            alpha = evaluation;
+            if (ply == 0) {
+                bestMoveInIteration = moves[i];
+                bestEvalInIteration = evaluation;
+                hasSearchedAtLeastOneMove = true;
+            }
+        }
     }
+
+    return alpha;
+}
+
+int alpha_beta_captures(Board& board, int alpha, int beta)
+{
+    if (stop) {
+        return 0;
+    }
+
+    int evaluation = evaluate_position(board);
+
+    if (evaluation >= beta) {
+        return beta;
+    }
+    if (evaluation > alpha) {
+        alpha = evaluation;
+    }
+
+    MoveList moves;
+    bool isCheckMate, isStaleMate = false;
+    generate_legal_moves(moves, board, isCheckMate, isStaleMate);
+
+    order_moves(moves, board);
+
+    Move bestMoveInPosition;
+    const GameState game_state = board.state();
+
+    for (int i = 0; i < moves.size(); i++) {
+        if (!board.move_is_capture(moves[i])) continue;
+
+        board.make_move(moves[i]);
+        int evaluation = -alpha_beta_captures(board, -beta, -alpha);
+        board.unmake_move(moves[i], game_state);
+
+        if (stop) {
+            return 0;
+        }
+
+        if (evaluation >= beta) {
+            return beta;
+        }
+        if (evaluation > alpha) {
+            alpha = evaluation;
+        }
+    }
+
+    return alpha;
 }

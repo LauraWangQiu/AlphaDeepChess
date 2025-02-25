@@ -17,7 +17,6 @@
 
 #include <array>
 #include <string>
-#include <atomic>
 #include <thread>
 
 /**
@@ -82,22 +81,6 @@ private:
      * 
      */
     std::thread searchThread;
-
-    /**
-     * @brief stopSearch
-     * 
-     * signal to stop the search in the searchThread.
-     * 
-     */
-    std::atomic<bool> stopSearch;
-
-    /**
-     * @brief bestMove
-     * 
-     * best move in the position
-     * 
-     */
-    Move bestMove;
 
     /**
      * @brief uci_command_action

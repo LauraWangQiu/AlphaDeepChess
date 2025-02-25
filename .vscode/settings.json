@@ -71,6 +71,7 @@
         "cassert": "cpp",
         "xlocale": "cpp",
         "ios": "cpp",
-        "xiosbase": "cpp"
+        "xiosbase": "cpp",
+        "text_encoding": "cpp"
     }
 }
