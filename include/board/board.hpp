@@ -30,46 +30,7 @@
  */
 class Board
 {
-
 public:
-    /**
-     * @brief get_distance_chebyshev 
-     * 
-     * Get the distance between two squares using Chebyshev's Distance.
-     * https://en.wikipedia.org/wiki/Chebyshev_distance
-     * 
-     * @note None.
-     * 
-     * @return distance.
-     * 
-     */
-    inline float get_distance_chebyshev(Square square1, Square square2) const
-    {
-        assert(square1.is_valid() && square2.is_valid());
-        // TODO: Precompute the distance between all squares
-        return std::max(std::abs(int(square1.row()) - int(square2.row())),
-                        std::abs(int(square1.col()) - int(square2.col())));
-    }
-
-    /**
-     * @brief get_distance_manhattan 
-     * 
-     * Get the distance between two squares using Manhattan's Distance.
-     * https://simple.wikipedia.org/wiki/Manhattan_distance
-     * 
-     * @note None.
-     * 
-     * @return distance.
-     * 
-     */
-    inline float get_distance_manhattan(Square square1, Square square2) const
-    {
-        assert(square1.is_valid() && square2.is_valid());
-        // TODO: Precompute the distance between all squares
-        return std::abs(int(square1.row()) - int(square2.row())) +
-            std::abs(int(square1.col()) - int(square2.col()));
-    }
-
     /**
      * @brief get_piece 
      * 
