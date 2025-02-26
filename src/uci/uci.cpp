@@ -186,8 +186,6 @@ void Uci::go_command_action(const TokenArray& tokens)
                 Move bestMove = search_best_move(board, depth);
             } catch (const std::exception& e) {
                 std::cerr << "Exception in search thread: " << e.what() << std::endl;
-            } catch (...) {
-                std::cerr << "Unknown exception in search thread" << std::endl;
             }
         });
 }

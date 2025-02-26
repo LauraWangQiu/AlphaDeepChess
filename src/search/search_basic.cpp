@@ -69,7 +69,9 @@ Move search_best_move(Board board, int32_t max_depth)
     if (!bestMoveFound.is_valid()) {
         MoveList moves;
         generate_legal_moves(moves, board);
-        bestMoveFound = moves[0];
+        if (moves.size() > 0) {
+            bestMoveFound = moves[0];
+        }
         std::cout << "random move selected " << bestMoveFound.to_string() << "\n";
     }
     return bestMoveFound;
@@ -83,6 +85,7 @@ void iterative_deepening(Board& board, int max_depth)
     const ChessColor side_to_move = board.state().side_to_move();
 
     for (int depth = 1; depth <= max_depth; depth++) {
+
         hasSearchedAtLeastOneMove = false;
         bestMoveInIteration = Move::null();
         bestEvalInIteration = side_to_move == ChessColor::WHITE ? -INF : +INF;
@@ -227,7 +230,7 @@ int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int b
             bestMoveInIteration = moves[i];
             hasSearchedAtLeastOneMove = true;
         }
-
+  
         min_evaluation = std::min(min_evaluation, evaluation);
         beta = std::min(beta, evaluation);
 
@@ -291,22 +294,22 @@ int quiescence_maximize_white(Board& board, int ply, int alpha, int beta)
     order_moves(capture_moves, board);
 
     const GameState game_state = board.state();
-    int max_eval = static_evaluation;
+    int max_evaluation = static_evaluation;
 
     for (int i = 0; i < capture_moves.size(); i++) {
         board.make_move(capture_moves[i]);
         int eval = quiescence_minimize_black(board, ply + 1, alpha, beta);
         board.unmake_move(capture_moves[i], game_state);
 
-        max_eval = std::max(max_eval, eval);
+        max_evaluation = std::max(max_evaluation, eval);
         alpha = std::max(alpha, eval);
 
-        if (alpha >= beta) {
+        if (max_evaluation >= beta) {
             break;   // Beta cutoff
         }
     }
 
-    return max_eval;
+    return max_evaluation;
 }
 
 /**
@@ -360,20 +363,20 @@ int quiescence_minimize_black(Board& board, int ply, int alpha, int beta)
     order_moves(capture_moves, board);
 
     const GameState game_state = board.state();
-    int min_eval = static_evaluation;
+    int min_evaluation = static_evaluation;
 
     for (int i = 0; i < capture_moves.size(); i++) {
         board.make_move(capture_moves[i]);
         int eval = quiescence_maximize_white(board, ply + 1, alpha, beta);
         board.unmake_move(capture_moves[i], game_state);
 
-        min_eval = std::min(min_eval, eval);
+        min_evaluation = std::min(min_evaluation, eval);
         beta = std::min(beta, eval);
 
-        if (beta <= alpha) {
+        if (min_evaluation <= alpha) {
             break;   // Alpha cutoff
         }
     }
 
-    return min_eval;
+    return min_evaluation;
 }

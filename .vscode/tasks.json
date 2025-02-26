@@ -18,6 +18,21 @@
         },
 
         {
+            "label": "release",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build/release",
+                "--config",
+                "Release"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
             "label": "tests_build",
             "type": "shell",
             "command": "cmake",

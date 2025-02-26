@@ -25,7 +25,12 @@ void Board::put_piece(Piece piece, Square square)
     assert(is_valid_piece(piece));
     assert(square.is_valid());
 
-    uint64_t mask = square.mask();
+    if (piece == Piece::EMPTY) {
+        remove_piece(square);
+        return;
+    }
+
+    const uint64_t mask = square.mask();
 
     // first remove the previous piece
     bitboard_piece[static_cast<int>(get_piece(square))] &= ~mask;
@@ -60,7 +65,7 @@ void Board::remove_piece(Square square)
 {
     assert(square.is_valid());
 
-    uint64_t mask = square.mask();
+    const uint64_t mask = square.mask();
 
     bitboard_piece[static_cast<int>(get_piece(square))] &= ~mask;
     array_piece[square] = Piece::EMPTY;
@@ -83,9 +88,10 @@ void Board::clean()
     bitboard_black = 0ULL;
     bitboard_white = 0ULL;
 
-    for (int piece = 0; piece < NUM_CHESS_PIECES; piece++) {
+    for (int piece = 0; piece < NUM_CHESS_PIECES - 1; piece++) {
         bitboard_piece[piece] = 0ULL;
     }
+    bitboard_piece[static_cast<int>(Piece::EMPTY)] = 0xffffffffffffffffULL;
 
     for (int square = 0; square < NUM_SQUARES; square++) {
         array_piece[square] = Piece::EMPTY;
@@ -348,10 +354,7 @@ std::string Board::fen() const
  * 
  *  Constructor of Board class.
  */
-Board::Board() : bitboard_all(0ULL), bitboard_white(0ULL), bitboard_black(0ULL), game_state()
-{
-    clean();
-}
+Board::Board() : bitboard_all(0ULL), bitboard_white(0ULL), bitboard_black(0ULL), game_state() { clean(); }
 
 /**
  * @brief ~Board
@@ -671,16 +674,14 @@ void Board::check_and_modify_castle_rights()
     // Check for white king-side castling rights
     if (game_state.castle_king_white()) {
 
-        if (get_piece({ROW_1, COL_E}) != Piece::W_KING ||
-            get_piece({ROW_1, COL_H}) != Piece::W_ROOK) {
+        if (get_piece({ROW_1, COL_E}) != Piece::W_KING || get_piece({ROW_1, COL_H}) != Piece::W_ROOK) {
             game_state.set_castle_king_white(false);
         }
     }
     // Check for white queen-side castling rights
     if (game_state.castle_queen_white()) {
 
-        if (get_piece({ROW_1, COL_E}) != Piece::W_KING ||
-            get_piece({ROW_1, COL_A}) != Piece::W_ROOK) {
+        if (get_piece({ROW_1, COL_E}) != Piece::W_KING || get_piece({ROW_1, COL_A}) != Piece::W_ROOK) {
             game_state.set_castle_queen_white(false);
         }
     }
@@ -688,8 +689,7 @@ void Board::check_and_modify_castle_rights()
     // Check for black king-side castling rights
     if (game_state.castle_king_black()) {
 
-        if (get_piece({ROW_8, COL_E}) != Piece::B_KING ||
-            get_piece({ROW_8, COL_H}) != Piece::B_ROOK) {
+        if (get_piece({ROW_8, COL_E}) != Piece::B_KING || get_piece({ROW_8, COL_H}) != Piece::B_ROOK) {
             game_state.set_castle_king_black(false);
         }
     }
@@ -697,8 +697,7 @@ void Board::check_and_modify_castle_rights()
     // Check for black queen-side castling rights
     if (game_state.castle_queen_black()) {
 
-        if (get_piece({ROW_8, COL_E}) != Piece::B_KING ||
-            get_piece({ROW_8, COL_A}) != Piece::B_ROOK) {
+        if (get_piece({ROW_8, COL_E}) != Piece::B_KING || get_piece({ROW_8, COL_A}) != Piece::B_ROOK) {
             game_state.set_castle_queen_black(false);
         }
     }

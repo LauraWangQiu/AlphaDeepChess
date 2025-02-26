@@ -69,9 +69,14 @@ endif()
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     target_compile_definitions(AlphaDeepChess PRIVATE _RELEASE NDEBUG)
     target_compile_options(AlphaDeepChess PRIVATE 
-        -O3                              # No optimization
-        #-Ofast                          # Maximum and aggressive optimization
-        -march=native                   # Enables the use of machine architecture-specific instructions
-        -mtune=native                   # Optimize for current CPU
+        #-O3                   
+        -Ofast                # Aggressive optimization
+        -march=native         # CPU-specific instructions
+        -mtune=native         # Tune for current CPU
+        -flto=auto            # Link-time optimization with parallel jobs
+        -funroll-loops        # Unroll loops
+        -fomit-frame-pointer  # Free up a register
+        #-fno-exceptions       # Disable exceptions
+        -fno-rtti             # Disable RTTI
     )
 endif()
