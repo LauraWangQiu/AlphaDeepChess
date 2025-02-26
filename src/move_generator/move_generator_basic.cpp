@@ -15,8 +15,7 @@
 
 static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo);
 
-static void update_danger_in_direction(Square piece_sq, Direction d,
-                                       MoveGeneratorInfo& moveGeneratorInfo);
+static void update_danger_in_direction(Square piece_sq, Direction d, MoveGeneratorInfo& moveGeneratorInfo);
 
 static void update_king_danger(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
 static void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo);
@@ -25,8 +24,7 @@ static void update_rook_danger(Square rook_sq, MoveGeneratorInfo& moveGeneratorI
 static void update_bishop_danger(Square bishop_sq, MoveGeneratorInfo& moveGeneratorInfo);
 static void update_queen_danger(Square queen_sq, MoveGeneratorInfo& moveGeneratorInfo);
 
-static void calculate_moves_in_direction(Square piece_sq, Direction d,
-                                         MoveGeneratorInfo& moveGeneratorInfo);
+static void calculate_moves_in_direction(Square piece_sq, Direction d, MoveGeneratorInfo& moveGeneratorInfo);
 
 static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
 static void calculate_king_moves(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
@@ -35,6 +33,8 @@ static void calculate_knight_moves(Square knight_sq, MoveGeneratorInfo& moveGene
 static void calculate_rook_moves(Square rook_sq, MoveGeneratorInfo& moveGeneratorInfo);
 static void calculate_bishop_moves(Square bishop_sq, MoveGeneratorInfo& moveGeneratorInfo);
 static void calculate_queen_moves(Square queen_sq, MoveGeneratorInfo& moveGeneratorInfo);
+
+static bool en_passant_move_doesnt_allow_king_capture(Move enPassant_move, MoveGeneratorInfo& moveGeneratorInfo);
 
 /**
  * @brief generate_legal_moves
@@ -110,8 +110,7 @@ static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
     }
 }
 
-static void update_danger_in_direction(Square piece_sq, Direction d,
-                                       MoveGeneratorInfo& moveGeneratorInfo)
+static void update_danger_in_direction(Square piece_sq, Direction d, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(piece_sq.is_valid());
 
@@ -148,9 +147,9 @@ static void update_danger_in_direction(Square piece_sq, Direction d,
 
         while (attack_sq.is_valid()) {
 
+            piece_atacks |= attack_sq.mask();
+
             if (board.is_empty(attack_sq)) {
-                // rook attacks the square if is not a friendly piece
-                piece_atacks |= attack_sq.mask();
                 attack_sq.to_direction(d);
             }
             else {
@@ -252,16 +251,14 @@ static void update_queen_danger(Square queen_sq, MoveGeneratorInfo& moveGenerato
 {
     assert(queen_sq.is_valid());
 
-    const Direction dirs[8] = {NORTH,      SOUTH,      EAST,       WEST,
-                               NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
+    const Direction dirs[8] = {NORTH, SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
 
     for (Direction dir : dirs) {
         update_danger_in_direction(queen_sq, dir, moveGeneratorInfo);
     }
 }
 
-static void calculate_moves_in_direction(Square piece_sq, Direction d,
-                                         MoveGeneratorInfo& moveGeneratorInfo)
+static void calculate_moves_in_direction(Square piece_sq, Direction d, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(piece_sq.is_valid());
 
@@ -313,8 +310,7 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
     MoveList& moves = moveGeneratorInfo.moves;
     const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
 
-    const Square origin_castle_king_square =
-        side_to_move == ChessColor::WHITE ? Square ::SQ_E1 : Square::SQ_E8;
+    const Square origin_castle_king_square = side_to_move == ChessColor::WHITE ? Square ::SQ_E1 : Square::SQ_E8;
 
     const Piece king_piece = side_to_move == ChessColor::WHITE ? Piece::W_KING : Piece::B_KING;
     const Piece rook_piece = side_to_move == ChessColor::WHITE ? Piece::W_ROOK : Piece::B_ROOK;
@@ -331,25 +327,21 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
     const uint64_t king_danger_mask = moveGeneratorInfo.king_danger_squares_mask;
     const uint64_t empty_mask = ~board.get_bitboard_all();
 
-    const bool king_side_castle_available = side_to_move == ChessColor::WHITE
-        ? board.state().castle_king_white()
-        : board.state().castle_king_black();
+    const bool king_side_castle_available =
+        side_to_move == ChessColor::WHITE ? board.state().castle_king_white() : board.state().castle_king_black();
 
-    const bool queen_side_castle_available = side_to_move == ChessColor::WHITE
-        ? board.state().castle_queen_white()
-        : board.state().castle_queen_black();
+    const bool queen_side_castle_available =
+        side_to_move == ChessColor::WHITE ? board.state().castle_queen_white() : board.state().castle_queen_black();
 
     if (king_side_castle_available && board.get_piece(king_side_rook_sq) == rook_piece) {
 
         const uint64_t in_between_squares_mask =
             Square(king_sq.row(), COL_F).mask() | Square(king_sq.row(), COL_G).mask();
 
-        const bool available =
-            (in_between_squares_mask & empty_mask & ~king_danger_mask) == in_between_squares_mask;
+        const bool available = (in_between_squares_mask & empty_mask & ~king_danger_mask) == in_between_squares_mask;
 
         if (available) {
-            moves.add(side_to_move == ChessColor::WHITE ? Move::castle_white_king()
-                                                        : Move::castle_black_king());
+            moves.add(side_to_move == ChessColor::WHITE ? Move::castle_white_king() : Move::castle_black_king());
         }
     }
 
@@ -358,13 +350,12 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
         const uint64_t in_between_squares_mask =
             Square(king_sq.row(), COL_D).mask() | Square(king_sq.row(), COL_C).mask();
 
-        const bool avaliable = ((in_between_squares_mask & empty_mask & ~king_danger_mask) ==
-                                in_between_squares_mask) &&
+        const bool avaliable =
+            ((in_between_squares_mask & empty_mask & ~king_danger_mask) == in_between_squares_mask) &&
             board.is_empty(Square(king_sq.row(), COL_B));
 
         if (avaliable) {
-            moves.add(side_to_move == ChessColor::WHITE ? Move::castle_white_queen()
-                                                        : Move::castle_black_queen());
+            moves.add(side_to_move == ChessColor::WHITE ? Move::castle_white_queen() : Move::castle_black_queen());
         }
     }
 }
@@ -403,9 +394,8 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
 
     const Square en_passant_square = board.state().en_passant_square();
 
-    const uint64_t pawn_attacks = side_to_move == ChessColor::WHITE
-        ? PrecomputedMoveData::whitePawnAttacks(pawn_sq)
-        : PrecomputedMoveData::blackPawnAttacks(pawn_sq);
+    const uint64_t pawn_attacks = side_to_move == ChessColor::WHITE ? PrecomputedMoveData::whitePawnAttacks(pawn_sq)
+                                                                    : PrecomputedMoveData::blackPawnAttacks(pawn_sq);
 
     const uint64_t enemy_mask = moveGeneratorInfo.side_waiting_pieces_mask;
     const uint64_t capture_mask = moveGeneratorInfo.capture_squares_mask;
@@ -418,14 +408,11 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
     pawn_moves_mask |= pawn_attacks & en_passant_square.mask();
 
     // pawn push
-    const Square pawn_push_sq =
-        side_to_move == ChessColor::WHITE ? pawn_sq.north() : pawn_sq.south();
+    const Square pawn_push_sq = side_to_move == ChessColor::WHITE ? pawn_sq.north() : pawn_sq.south();
 
-    const Square pawn_double_push_sq =
-        side_to_move == ChessColor::WHITE ? pawn_push_sq.north() : pawn_push_sq.south();
+    const Square pawn_double_push_sq = side_to_move == ChessColor::WHITE ? pawn_push_sq.north() : pawn_push_sq.south();
 
-    const bool double_push_available =
-        pawn_sq.row() == moveGeneratorInfo.row_where_double_push_is_available;
+    const bool double_push_available = pawn_sq.row() == moveGeneratorInfo.row_where_double_push_is_available;
 
     if (board.is_empty(pawn_push_sq)) {
         pawn_moves_mask |= pawn_push_sq.mask();
@@ -450,7 +437,13 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
     if (pawn_sq.row() == moveGeneratorInfo.row_where_en_passant_is_available) {
         // en passant mask will be 0 if en passant not valid
         if (pawn_moves_mask & en_passant_square.mask()) {
-            moves.add(Move(pawn_sq, en_passant_square, MoveType::EN_PASSANT));
+            const Move enPassant_move(pawn_sq, en_passant_square, MoveType::EN_PASSANT);
+
+            // check edge case where en passant is illegal because king and enemy slider are behind the pawns
+            if (en_passant_move_doesnt_allow_king_capture(enPassant_move, moveGeneratorInfo)) {
+                moves.add(enPassant_move);
+            }
+
             // delete the en passant move from pawn_moves_mask
             pawn_moves_mask &= ~en_passant_square.mask();
         }
@@ -522,9 +515,73 @@ static void calculate_queen_moves(Square queen_sq, MoveGeneratorInfo& moveGenera
 {
     assert(queen_sq.is_valid());
 
-    const Direction dirs[8] = {NORTH,      SOUTH,      EAST,       WEST,
-                               NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
+    const Direction dirs[8] = {NORTH, SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
     for (Direction dir : dirs) {
         calculate_moves_in_direction(queen_sq, dir, moveGeneratorInfo);
     }
+}
+
+/**
+ * @brief en_passant_move_doesnt_allow_king_capture
+ * 
+ * Calculate if en passant move is legal, it covers the edge case where 
+ * the king and an enemy slider are on the same row as the enPassant pawns.
+ * If en passant is produced the king could be capture by the slider if no blockers are in the middle.
+ * 
+ * the move is illegal if between the enemy slider and the king there are only the 
+ * two pawns taking part in the en passant
+ * 
+ * @param[out] enPassant_move en passant move to check
+ * @param[in] moveGeneratorInfo info about the position.
+ * 
+ * @return TRUE if move is legal
+ *         FALSE if move is not legal
+ */
+static bool en_passant_move_doesnt_allow_king_capture(Move enPassant_move, MoveGeneratorInfo& moveGeneratorInfo)
+{
+    assert(enPassant_move.is_valid());
+    assert(enPassant_move.type() == MoveType::EN_PASSANT);
+
+    const Board& board = moveGeneratorInfo.board;
+    const ChessColor enemy_color = moveGeneratorInfo.side_waiting;
+    const Square friendly_king_square = moveGeneratorInfo.side_to_move_king_square;
+    const Square origin_square = enPassant_move.square_from();
+    const Row row = origin_square.row();
+
+    if (friendly_king_square.row() != row) {
+        return true;   // legal move, king is not in the same row as the en passant pawns
+    }
+
+    bool enemy_slider_found = false;
+    uint8_t pieces_between = 0;
+
+    const Direction dir = get_direction(row, friendly_king_square.col(), row, origin_square.col());
+
+    assert(dir == Direction::EAST || dir == Direction::WEST);
+
+    Square aux_sq = friendly_king_square;
+
+    aux_sq.to_direction(dir);
+
+    while (aux_sq.is_valid()) {
+
+        const Piece piece_found = board.get_piece(aux_sq);
+        const PieceType pieceType_found = piece_to_pieceType(piece_found);
+
+        if (piece_found != Piece::EMPTY) {
+
+            if (is_slider(pieceType_found) && get_color(piece_found) == enemy_color) {
+                enemy_slider_found = true;
+                return pieces_between != 2;   // illegal move if only two pieces between
+            }
+            else {
+                if (++pieces_between > 2) {
+                    return true;   // legal move if more that two pieces between
+                }
+            }
+        }
+        aux_sq.to_direction(dir);
+    }
+
+    return true;   // move legal
 }
