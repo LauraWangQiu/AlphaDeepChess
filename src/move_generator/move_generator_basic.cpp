@@ -422,8 +422,17 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
         }
     }
 
+    uint64_t en_passant_square_capturable_mask = 0ULL;
+    if (pawn_attacks & en_passant_square.mask()) {
+        // edge case pawn that gives check (is in capture mask) can be capture via enPassant
+        const Square capturable_pawn(pawn_sq.row(), en_passant_square.col());
+        if (capture_mask & capturable_pawn.mask()) {
+            en_passant_square_capturable_mask |= en_passant_square.mask();
+        }
+    }
+
     // restrict moves if king is in check to capture and push mask
-    pawn_moves_mask &= (capture_mask | push_mask);
+    pawn_moves_mask &= (push_mask | capture_mask | en_passant_square_capturable_mask);
 
     // if pawn is pinned pawn can only moved in the direction of the pin
     if (moveGeneratorInfo.pinned_squares_mask & pawn_sq.mask()) {
@@ -443,7 +452,6 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
             if (en_passant_move_doesnt_allow_king_capture(enPassant_move, moveGeneratorInfo)) {
                 moves.add(enPassant_move);
             }
-
             // delete the en passant move from pawn_moves_mask
             pawn_moves_mask &= ~en_passant_square.mask();
         }

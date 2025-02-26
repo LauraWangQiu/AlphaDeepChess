@@ -39,7 +39,7 @@ public:
     Row row_where_promotion_is_available;
     Row row_where_en_passant_is_available;
     Row row_where_double_push_is_available;
-    
+
     /**
      * @brief MoveGeneratorInfo
      * 
@@ -65,21 +65,18 @@ public:
         king_white_square = lsb(board.get_bitboard_piece(Piece::W_KING));
         king_black_square = lsb(board.get_bitboard_piece(Piece::B_KING));
 
-        side_to_move_king_square =
-            side_to_move == ChessColor::WHITE ? king_white_square : king_black_square;
+        side_to_move_king_square = side_to_move == ChessColor::WHITE ? king_white_square : king_black_square;
 
-        side_waiting_king_square =
-            side_to_move == ChessColor::WHITE ? king_black_square : king_white_square;
+        side_waiting_king_square = side_to_move == ChessColor::WHITE ? king_black_square : king_white_square;
 
-        side_to_move_pieces_mask = side_to_move == ChessColor::WHITE ? board.get_bitboard_white()
-                                                                     : board.get_bitboard_black();
-        side_waiting_pieces_mask = side_to_move == ChessColor::WHITE ? board.get_bitboard_black()
-                                                                     : board.get_bitboard_white();
+        side_to_move_pieces_mask =
+            side_to_move == ChessColor::WHITE ? board.get_bitboard_white() : board.get_bitboard_black();
+        side_waiting_pieces_mask =
+            side_to_move == ChessColor::WHITE ? board.get_bitboard_black() : board.get_bitboard_white();
 
         row_where_promotion_is_available = side_to_move == ChessColor::WHITE ? ROW_7 : ROW_2;
         row_where_en_passant_is_available = side_to_move == ChessColor::WHITE ? ROW_5 : ROW_4;
         row_where_double_push_is_available = side_to_move == ChessColor::WHITE ? ROW_2 : ROW_7;
-
     }
     ~MoveGeneratorInfo() { }
 
@@ -97,6 +94,7 @@ public:
         assert(checker_sq.is_valid());
 
         capture_squares_mask = checker_sq.mask();
+
         push_squares_mask = new_push_mask;
 
         number_of_checkers++;
