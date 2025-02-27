@@ -5,7 +5,7 @@
             "name": "Debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/AlphaDeepChess",
+            "program": "${workspaceFolder}/build/debug/AlphaDeepChess",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -42,10 +42,10 @@
             "preLaunchTask": "release"
         },
         {
-            "name": "tests",
+            "name": "tests_debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/test/build/testsAlphaDeepChess",
+            "program": "${workspaceFolder}/test/build/debug/testsAlphaDeepChess",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/test",
@@ -59,9 +59,28 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "tests_build"
+            "preLaunchTask": "tests_debug"
         },
-
+        {
+            "name": "tests_release",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/test/build/release/testsAlphaDeepChess",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/test",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "tests_release"
+        },
         {
             "name": "GUI",
             "type": "debugpy",

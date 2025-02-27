@@ -33,7 +33,7 @@ static std::unordered_map<std::string, PerftEntry> perftResults = {
      {"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
       {1, 48, 2039, 97862, 4085603, 193690690, 8031647685}}},
     {"FEN_TALKCHESS",
-     {"rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8", {1, 44, 1486, 62379, 2103487, 89941194, 0}}},
+     {"rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8", {1, 44, 1486, 62379, 2103487, 89941194, 3048196529}}},
     {"FEN_EDWARDS2",
      {"r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
       {1, 46, 2079, 89890, 3894594, 164075551, 6923051137}}},
@@ -49,7 +49,7 @@ static std::unordered_map<std::string, PerftEntry> perftResults = {
 
 void move_generator_test()
 {
-    const int MAX_DEPTH = 4;
+    const int MAX_DEPTH = 6;
 
     for (const auto& [key, entry] : perftResults) {
         std::cout << "\n\n" << key;
@@ -81,6 +81,7 @@ void move_generator_test()
                     std::cout << moveNode.first.to_string() << ": " << moveNode.second << '\n';
                 }
             }
+            std::cout.flush();
         }
     }
 }

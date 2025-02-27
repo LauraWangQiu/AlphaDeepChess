@@ -7,7 +7,7 @@
             "command": "cmake",
             "args": [
                 "--build",
-                "${workspaceFolder}/build",
+                "${workspaceFolder}/build/debug",
                 "--config",
                 "Debug"
             ],
@@ -33,14 +33,29 @@
             }
         },
         {
-            "label": "tests_build",
+            "label": "tests_debug",
             "type": "shell",
             "command": "cmake",
             "args": [
                 "--build",
-                "${workspaceFolder}/test/build",
+                "${workspaceFolder}/test/build/debug",
                 "--config",
                 "Debug"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "tests_release",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/test/build/release",
+                "--config",
+                "Release"
             ],
             "group": {
                 "kind": "test",

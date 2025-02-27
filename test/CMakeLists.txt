@@ -45,11 +45,30 @@ else()
     target_compile_definitions(testsAlphaDeepChess PRIVATE ALGO_BASIC)
 endif()
 
-target_compile_definitions(testsAlphaDeepChess PRIVATE _DEBUG)
-target_compile_options(testsAlphaDeepChess PRIVATE 
-    -g                               # Generate debugging information
-    -O0                              # No optimization
-    -Wall                            # Enable basic warnings
-    -Wextra                          # Enable additional warnings
-    -Wpedantic                       # Enable strict standard warnings
-)
+# Compilation settings for Debug mode
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(testsAlphaDeepChess PRIVATE _DEBUG)
+    target_compile_options(testsAlphaDeepChess PRIVATE 
+        -g                               # Generate debugging information
+        -O0                              # No optimization
+        -Wall                            # Enable basic warnings
+        -Wextra                          # Enable additional warnings
+        -Wpedantic                       # Enable strict standard warnings
+    )
+endif()
+
+# Compilation settings for Release mode
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    target_compile_definitions(testsAlphaDeepChess PRIVATE _RELEASE NDEBUG)
+    target_compile_options(testsAlphaDeepChess PRIVATE 
+        #-O3                   
+        -Ofast                # Aggressive optimization
+        -march=native         # CPU-specific instructions
+        -mtune=native         # Tune for current CPU
+        -flto=auto            # Link-time optimization with parallel jobs
+        -funroll-loops        # Unroll loops
+        -fomit-frame-pointer  # Free up a register
+        #-fno-exceptions       # Disable exceptions
+        -fno-rtti             # Disable RTTI
+    )
+endif()

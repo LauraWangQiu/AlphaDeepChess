@@ -56,7 +56,9 @@ These instructions will help you set up and build the project on your local mach
 
     configure the PATH enviroment variable  
     configure cmake build folder
-
+    ```bash
+    cmake ../.. -DCMAKE_BUILD_TYPE=Debug -G "MinGW Makefiles"
+    ```
 ### MacOS
 
 1. **Install homebrew, git and clone the repository**:
