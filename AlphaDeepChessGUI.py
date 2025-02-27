@@ -10,7 +10,7 @@ from gui.ui.rightPanel import RightPanel
 from gui.eventManager import EventManager
 from gui.uci import Uci
 
-ENGINE_PATH = "build/AlphaDeepChess"
+ENGINE_PATH = "build/release/AlphaDeepChess"
 if sys.platform.startswith("win"):
     ENGINE_PATH += ".exe"
 

@@ -73,6 +73,7 @@
         "ios": "cpp",
         "xiosbase": "cpp",
         "text_encoding": "cpp",
-        "cstdbool": "cpp"
+        "cstdbool": "cpp",
+        "mutex": "cpp"
     }
 }
