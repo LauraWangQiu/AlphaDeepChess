@@ -4,14 +4,13 @@
  *
  * chess position basic evaluation implementation.
  * https://www.chessprogramming.org/Evaluation
+ * https://www.chessprogramming.org/Simplified_Evaluation_Function
  * 
  */
 #include "evaluation.hpp"
 #include "move_list.hpp"
 #include "move_generator.hpp"
 #include "precomputed_data.hpp"
-
-// https://www.chessprogramming.org/Evaluation
 
 #define MATE_VALUE -10000
 
@@ -30,14 +29,21 @@
 #define PAWN_SHIELD_FOR_KING_SAFETY_PENALTY_VALUE -10
 #define PAWN_STORM_FOR_KING_SAFETY_PENALTY_VALUE -15
 
+#define ROOK_CONSTANT_FOR_KING_ZONE_PENALTY_VALUE -40
+#define KNIGHT_CONSTANT_FOR_KING_ZONE_PENALTY_VALUE -20
+#define BISHOP_CONSTANT_FOR_KING_ZONE_PENALTY_VALUE -20
+#define QUEEN_CONSTANT_FOR_KING_ZONE_PENALTY_VALUE -80
+
 #define MOBILITY_VALUE 10
 
 #define OPENING_MATERIAL 40
 #define MIDDLEGAME_MATERIAL 20
 
+int evaluate_legal_moves(const Board& board);
 GamePhase determine_game_phase(const Board& board);
 int evaluate_piece(Piece piece, int row, int col, const Board& board, const GamePhase& game_phase);
-int evaluate_legal_moves(const MoveList& legal_moves);
+uint64_t get_king_zone_mask(Square king_square);
+int evaluate_king_safety(const Board& board, Square king_square, ChessColor color);
 
 /** 
  * @brief evaluate_position
@@ -55,7 +61,6 @@ int evaluate_legal_moves(const MoveList& legal_moves);
  */
 int evaluate_position(const Board& board)
 {
-    bool isMate, isOpponentMate, isStaleMate;
     int evaluation = 0;
 
     // Evaluate legal moves for each side
@@ -65,16 +70,9 @@ int evaluate_position(const Board& board)
     int sign_opponent = -sign;
     Board board_copy = board;
     board_copy.set_side_to_move(opponent);
-    MoveList legal_moves;
-    MoveList legal_moves_opponent;
 
-    generate_legal_moves(legal_moves, board, &isMate, &isStaleMate);
-    generate_legal_moves(legal_moves_opponent, board_copy, &isOpponentMate, &isStaleMate);
-    if (isMate || isOpponentMate || isStaleMate) {
-        return (isMate || isOpponentMate) ? MATE_VALUE * sign : 0;
-    }
-    evaluation += evaluate_legal_moves(legal_moves) * sign;
-    evaluation += evaluate_legal_moves(legal_moves_opponent) * sign_opponent;
+    evaluation += evaluate_legal_moves(board) * sign;
+    evaluation += evaluate_legal_moves(board_copy) * sign_opponent;
 
     // Evaluate game phase
     GamePhase game_phase = determine_game_phase(board);
@@ -89,6 +87,38 @@ int evaluate_position(const Board& board)
         }
     }
 
+    return evaluation;
+}
+
+
+/** 
+ * @brief evaluate_legal_moves
+ *
+ * Evaluate list of legal moves taking into consideration the side to move.
+ *  
+ * @note None.
+ * 
+ * @param[in] board board to evaluate.
+ *
+ * @returns
+ *  - (0) if position is evaluated as equal.
+ *  - (+) if position is evaluated as white is better.
+ *  - (-) if position is evaluated as black is better.
+ */
+int evaluate_legal_moves(const Board& board) {
+    MoveList legal_moves;
+    bool isMate, isStaleMate;
+    generate_legal_moves(legal_moves, board, &isMate, &isStaleMate);
+    if (isMate || isStaleMate) {
+        return (isMate) ? MATE_VALUE : 0;
+    }
+
+    int evaluation = 0;
+    for (int i = 0; i < legal_moves.size(); i++) {
+        if (legal_moves[i].is_valid()) {
+            evaluation += MOBILITY_VALUE;
+        }
+    }
     return evaluation;
 }
 
@@ -261,19 +291,21 @@ int evaluate_piece(Piece piece, int row, int col, const Board& board, const Game
                                 // If the enemy pawns are near to the king, there might be a threat of 
                                 // opening a file, even if the pawn shield is intact
                                 // Iterate columns
-                                // for (int j = 1; j < 7; j++) {
-                                //     possiblePawn = board.get_piece(Square(Row(row + sign * j), Col(col - 1 + i)));
-                                //     if (possiblePawn != Piece::EMPTY && get_color(possiblePawn) != color && piece_to_pieceType(possiblePawn) == PieceType::PAWN) {
-                                //         // Smaller the distance, bigger the penalty
-                                //         float distance = PrecomputedData::get_distance_chebyshev(Square(Row(row), Col(col)), Square(Row(row + sign * j), Col(col - 1 + i)));
-                                //         evaluation += PAWN_STORM_FOR_KING_SAFETY_PENALTY_VALUE * 1 / distance;
-                                //     }
-                                // }
+                                for (int j = 1; j < 7; j++) {
+                                    if (Square(Row(row + sign * j), Col(col - 1 + i)).is_valid()) {
+                                        Piece possiblePawn = board.get_piece(Square(Row(row + sign * j), Col(col - 1 + i)));
+                                        if (possiblePawn != Piece::EMPTY && get_color(possiblePawn) != color && piece_to_pieceType(possiblePawn) == PieceType::PAWN) {
+                                            // Smaller the distance, bigger the penalty
+                                            float distance = PrecomputedData::get_distance_chebyshev(Square(Row(row), Col(col)), Square(Row(row + sign * j), Col(col - 1 + i)));
+                                            evaluation += PAWN_STORM_FOR_KING_SAFETY_PENALTY_VALUE * 1 / distance;
+                                        }
+                                    }
+                                }
                             }
                         }
 
                         // TODO: King Tropism
-                        // TODO: Attacking King Zone
+                        // TODO: Attacking King Zone // evaluate_king_safety(board, Square(Row(row), Col(col)), color);
                         // TODO: Square Control
                         // TODO: Attack Units
                     }
@@ -291,25 +323,63 @@ int evaluate_piece(Piece piece, int row, int col, const Board& board, const Game
 }
 
 /** 
- * @brief evaluate_legal_moves
+ * @brief get_king_zone
  *
- * Evaluate list of legal moves taking into consideration the side to move.
- *  
+ * Get the king zone of a given king square.
+ * 
  * @note None.
  * 
- * @param[in] legal_moves list of legal moves.
+ * @param[in] king_square position of the king.
+ * @param[in] color color of the king.
  *
- * @returns
- *  - (0) if position is evaluated as equal.
- *  - (+) if position is evaluated as white is better.
- *  - (-) if position is evaluated as black is better.
+ * @returns set of squares that are in the king zone.
  */
-int evaluate_legal_moves(const MoveList& legal_moves) {
-    int evaluation = 0;
-    for (int i = 0; i < legal_moves.size(); i++) {
-        if (legal_moves[i].is_valid()) {
-            evaluation += MOBILITY_VALUE;
+uint64_t get_king_zone_mask(Square king_square) {
+    uint64_t king_zone_mask;
+    int row = king_square.row();
+    int col = king_square.col();
+
+    // Adjascent squares
+    // TODO: Which distance is considered good for the king zone?
+    for (int i = -1; i <= 1; ++i) {
+        for (int j = -1; j <= 1; ++j) {
+            if (i != 0 || j != 0) {
+                Square adj_square = Square(Row(row + i), Col(col + j));
+                if (adj_square.is_valid()) {
+                    king_zone_mask |= adj_square.mask();
+                }
+            }
         }
     }
+
+    return king_zone_mask;
+}
+
+/** 
+ * @brief evaluate_king_safety
+ *
+ * Evaluate the king safety of a given king square and color.
+ * 
+ * @note None.
+ * 
+ * @param[in] board board to evaluate.
+ * @param[in] king_square position of the king.
+ * @param[in] color color of the king.
+ *
+ * @returns set of squares that are in the king zone.
+ */
+int evaluate_king_safety(const Board& board, Square king_square, ChessColor color) {
+    int evaluation = 0;
+
+    const int attack_weights[] = { 0, 0, 50, 75, 88, 94, 97, 99 };
+    uint64_t king_zone_mask = get_king_zone_mask(king_square);
+    int attackingPiecesCount = 0;
+
+    // For each piece on the board, check if it attacks the king zone
+    // considering if the piece is an enemy piece
+    // attackingPiecesCount++
+
+    // evaluation += valueOfAttack * attack_weights[attackingPiecesCount];
+
     return evaluation;
 }

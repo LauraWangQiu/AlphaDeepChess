@@ -34,7 +34,6 @@ static int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha
 static int quiescence_maximize_white(Board& board, int ply, int alpha, int beta);
 static int quiescence_minimize_black(Board& board, int ply, int alpha, int beta);
 
-
 /**
  * @brief search_stop
  * 
@@ -79,7 +78,6 @@ Move search_best_move(Board board, int32_t max_depth)
 
 void iterative_deepening(Board& board, int max_depth)
 {
-
     stop = false;
 
     const ChessColor side_to_move = board.state().side_to_move();
@@ -104,13 +102,12 @@ void iterative_deepening(Board& board, int max_depth)
         bestMoveFound = bestMoveInIteration;
         bestEvalFound = bestEvalInIteration;
 
+        std::cout << "info depth " << depth << " score " << bestEvalFound << " bestMove " << bestMoveFound.to_string()
+                  << "\n";
+
         if (abs(bestEvalFound) > MATE_THRESHOLD) {
             break;   // We found a checkmate, we stop because we cant find a shorter checkMate
         }
-
-
-        std::cout << "info depth " << depth << " score " << bestEvalFound << " bestMove " << bestMoveFound.to_string()
-                  << "\n";
     }
 }
 
