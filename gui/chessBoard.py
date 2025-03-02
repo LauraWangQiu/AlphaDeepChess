@@ -3,7 +3,6 @@ from tkinter import Canvas
 import customtkinter as ctk
 from PIL import Image, ImageTk
 import chess
-from gui.uci import Uci
 from enum import Enum, auto
 from collections import defaultdict
 
@@ -24,8 +23,10 @@ class ChessBoard:
     BLACK_SQUARES_COLOR = "#769656"
     SELECTED_SQUARE_COLOR = "#00c800"
     LAST_MOVE_SQUARE_COLOR = "#c8c800"
+    ENGINE_MOVE_SQUARE_COLOR = "#ADD8E6"
 
-    def __init__(self,window, size : int, UCI : Uci):
+
+    def __init__(self,window, size : int):
         
         self.window = window
     
@@ -41,7 +42,8 @@ class ChessBoard:
         self.state = self.State.IDLE
         self.orientation = self.Orientation.WHITE
         self.last_move = None
-        self.UCI = UCI
+        self.engine_move = None
+
         self.legal_squares_dictionary = defaultdict(list)
         self.boardInitialize = False
         self.eventManager = None
@@ -81,15 +83,15 @@ class ChessBoard:
         except ValueError:
             return False
     
-    def get_fen(self):
-        return self.fen
+    def get_fen(self) -> str:
+        return self.board.fen()
 
     def set_fen(self, fen: str) -> bool:
         '''set fen if fen is valid return true if fen is valid'''
 
         if self.is_valid_fen(fen):
-            self.UCI.set_fen(fen)
-            self.fen = fen
+            self.last_move = None
+            self.engine_move = None
             self.board = chess.Board(fen)
             self.update_legal_moves()
             self.draw()
@@ -126,12 +128,12 @@ class ChessBoard:
         move = chess.Move(origin_sq, end_sq, promotion_piece) if promotion_piece else chess.Move(origin_sq, end_sq)
 
         if move in self.board.legal_moves:
-            self.fen = self.UCI.make_move(move.uci())  # Update engine
             self.board.push(move)  
             self.update_legal_moves()
 
             self.last_move = move
-            self.eventManager.chessBoardMakeMove(self.fen)
+            self.engine_move = None
+            self.eventManager.chessBoardMakeMove(self.get_fen())
             
 
     def update_legal_moves(self):
@@ -201,11 +203,18 @@ class ChessBoard:
         #col = chess.square_file(square) if self.orientation == self.Orientation.WHITE else 7 - chess.square_file(square)
         col = chess.square_file(square)
         base_color = self.WHITE_SQUARES_COLOR if (row + col) % 2 == 0 else self.BLACK_SQUARES_COLOR
+
         if self.selected_square == square or (self.selected_square and square in self.get_squares_to_move(self.selected_square)):
             return self.SELECTED_SQUARE_COLOR
+        elif self.engine_move and (square == self.engine_move.from_square or square == self.engine_move.to_square):
+            return self.ENGINE_MOVE_SQUARE_COLOR
         elif self.last_move and (square == self.last_move.from_square or square == self.last_move.to_square):
             return self.LAST_MOVE_SQUARE_COLOR
         return base_color
 
-    def __del__(self):
-        del self.UCI
+    def set_engine_move(self, move: str) -> None:
+        '''Set the engine move in UCI format'''
+        if move is not None:
+            self.engine_move = chess.Move.from_uci(move)
+            self.draw()
+

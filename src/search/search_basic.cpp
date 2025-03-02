@@ -71,7 +71,7 @@ Move search_best_move(Board board, int32_t max_depth)
         if (moves.size() > 0) {
             bestMoveFound = moves[0];
         }
-        std::cout << "random move selected " << bestMoveFound.to_string() << "\n";
+        std::cout << "random move selected " << bestMoveFound.to_string() << std::endl;
     }
     return bestMoveFound;
 }
@@ -103,7 +103,7 @@ void iterative_deepening(Board& board, int max_depth)
         bestEvalFound = bestEvalInIteration;
 
         std::cout << "info depth " << depth << " score " << bestEvalFound << " bestMove " << bestMoveFound.to_string()
-                  << "\n";
+                  << std::endl;
 
         if (abs(bestEvalFound) > MATE_THRESHOLD) {
             break;   // We found a checkmate, we stop because we cant find a shorter checkMate
@@ -227,7 +227,7 @@ int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int b
             bestMoveInIteration = moves[i];
             hasSearchedAtLeastOneMove = true;
         }
-  
+
         min_evaluation = std::min(min_evaluation, evaluation);
         beta = std::min(beta, evaluation);
 

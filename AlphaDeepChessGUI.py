@@ -27,22 +27,22 @@ class MainWindow:
         self.window.title("Chess Game")
         self.window.geometry(f"{self.SCREEN_WIDTH}x{self.SCREEN_HEIGHT}")
         
-        self.UCI = Uci(ENGINE_PATH)
-
         # Configure grid layout
         self.window.grid_rowconfigure(1, weight=1)  # Main content area
         self.window.grid_columnconfigure(0, weight=1)  # Chessboard column
         self.window.grid_columnconfigure(1, weight=0)  # Right panel column
         
+        self.UCI = Uci(ENGINE_PATH)
+
         self.navigationBar = NavigationBar(self.window)
         
-        self.chessBoard = ChessBoard(window=self.window, size=700, UCI=self.UCI)
+        self.chessBoard = ChessBoard(window=self.window, size=700)
         
         self.fenText = FenText(window=self.window, initialFen=self.chessBoard.get_fen())
 
-        self.rightPanel = RightPanel(window=self.window, UCI=self.UCI)
-        # Create event Manager
-        self.eventManager = EventManager(self.chessBoard, self.fenText, self.rightPanel)
+        self.rightPanel = RightPanel(window=self.window)
+
+        self.eventManager = EventManager(self.UCI ,self.chessBoard, self.fenText, self.rightPanel)
         
         # Set minimum window size
         self.window.minsize(800, 600)
