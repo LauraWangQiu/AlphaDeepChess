@@ -13,7 +13,6 @@
  */
 
 #include "board.hpp"
-#include "move_list.hpp"
 
 #include <array>
 #include <string>
@@ -25,7 +24,7 @@
  * max tokens that user can input in the console.
  * 
  */
-constexpr int TOKEN_ARRAY_SIZE = 1000;
+constexpr int TOKEN_ARRAY_SIZE = 1024;
 
 typedef std::array<std::string, TOKEN_ARRAY_SIZE> TokenArray;
 
@@ -73,7 +72,7 @@ private:
      * 
      */
     Board board;
-    
+
     /**
      * @brief searchThread
      * 
@@ -81,6 +80,14 @@ private:
      * 
      */
     std::thread searchThread;
+
+    /**
+     * @brief readerThread
+     * 
+     * thread in charge of reading the search output
+     * 
+     */
+    std::thread readerThread;
 
     /**
      * @brief uci_command_action

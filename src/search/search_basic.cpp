@@ -10,7 +10,7 @@
  * 
  */
 
-#include <iostream>
+#include <limits>
 #include "search.hpp"
 #include "move_generator.hpp"
 #include "evaluation.hpp"
@@ -21,26 +21,38 @@ const int INF = std::numeric_limits<int>::max();
 const int INMEDIATE_MATE_SCORE = 32000;
 const int MATE_THRESHOLD = INMEDIATE_MATE_SCORE - 1000U;
 
-std::atomic<bool> stop;
-Move bestMoveFound;
-int bestEvalFound;
-Move bestMoveInIteration;
-int bestEvalInIteration;
-bool hasSearchedAtLeastOneMove;
+static volatile std::atomic<bool> stop;
+static Move bestMoveFound;
+static int bestEvalFound;
+static Move bestMoveInIteration;
+static int bestEvalInIteration;
 
-static void iterative_deepening(Board& board, int max_depth);
+static inline void iterative_deepening(SearchResults& searchResults, Board& board, int max_depth);
 static int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int beta);
 static int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int beta);
 static int quiescence_maximize_white(Board& board, int ply, int alpha, int beta);
 static int quiescence_minimize_black(Board& board, int ply, int alpha, int beta);
+static void insert_new_result(SearchResults& searchResults, int depth, int evaluation, Move move);
 
 /**
  * @brief search_stop
  * 
- * stop the search process, this method is thread safe
+ * @note this method is thread safe
+ * 
+ * stop the search process
  * 
  */
 void search_stop() { stop.store(true); }
+
+/**
+ * @brief is_search_running
+ * 
+ * @note this method is thread safe
+ * 
+ * @return True if the search is running (stop is false)
+ * 
+ */
+bool is_search_running() { return !stop.load(); }
 
 /**
  * @brief search_best_move
@@ -55,36 +67,25 @@ void search_stop() { stop.store(true); }
  * @return best move found in the position.
  * 
  */
-Move search_best_move(Board board, int32_t max_depth)
+void search_best_move(SearchResults& searchResults, Board board, int32_t max_depth)
 {
     const ChessColor side_to_move = board.state().side_to_move();
 
     bestEvalFound = side_to_move == ChessColor::WHITE ? -INF : +INF;
     bestMoveFound = Move::null();
+    searchResults.depthReached = 0;
+    stop = false;
 
-    iterative_deepening(board, max_depth);
-
-    // not enough time to find a move, select random move
-    if (!bestMoveFound.is_valid()) {
-        MoveList moves;
-        generate_legal_moves(moves, board);
-        if (moves.size() > 0) {
-            bestMoveFound = moves[0];
-        }
-        std::cout << "random move selected " << bestMoveFound.to_string() << std::endl;
-    }
-    return bestMoveFound;
+    iterative_deepening(searchResults, board, max_depth);
 }
 
-void iterative_deepening(Board& board, int max_depth)
+void iterative_deepening(SearchResults& searchResults, Board& board, int max_depth)
 {
-    stop = false;
 
     const ChessColor side_to_move = board.state().side_to_move();
 
     for (int depth = 1; depth <= max_depth; depth++) {
 
-        hasSearchedAtLeastOneMove = false;
         bestMoveInIteration = Move::null();
         bestEvalInIteration = side_to_move == ChessColor::WHITE ? -INF : +INF;
 
@@ -92,18 +93,15 @@ void iterative_deepening(Board& board, int max_depth)
                                           : alpha_beta_minimize_black(board, depth, 0, -INF, +INF);
 
         if (stop) {
-            if (hasSearchedAtLeastOneMove) {
-                bestMoveFound = bestMoveInIteration;
-                bestEvalFound = bestEvalInIteration;
-            }
             break;
         }
 
         bestMoveFound = bestMoveInIteration;
         bestEvalFound = bestEvalInIteration;
 
-        std::cout << "info depth " << depth << " score " << bestEvalFound << " bestMove " << bestMoveFound.to_string()
-                  << std::endl;
+        assert(bestMoveFound.is_valid());
+
+        insert_new_result(searchResults, depth, bestEvalFound, bestMoveFound);
 
         if (abs(bestEvalFound) > MATE_THRESHOLD) {
             break;   // We found a checkmate, we stop because we cant find a shorter checkMate
@@ -161,7 +159,6 @@ int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int b
             // if we are in the root node update the best move
             bestEvalInIteration = evaluation;
             bestMoveInIteration = moves[i];
-            hasSearchedAtLeastOneMove = true;
         }
 
         max_evaluation = std::max(max_evaluation, evaluation);
@@ -225,7 +222,6 @@ int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int b
             // if we are in the root node update the best move
             bestEvalInIteration = evaluation;
             bestMoveInIteration = moves[i];
-            hasSearchedAtLeastOneMove = true;
         }
 
         min_evaluation = std::min(min_evaluation, evaluation);
@@ -376,4 +372,10 @@ int quiescence_minimize_black(Board& board, int ply, int alpha, int beta)
     }
 
     return min_evaluation;
+}
+
+static inline void insert_new_result(SearchResults& searchResults, int depth, int evaluation, Move move)
+{
+    assert(searchResults.depthReached < INFINITE_DEPTH);
+    searchResults.results[searchResults.depthReached++] = {depth, evaluation, move};
 }

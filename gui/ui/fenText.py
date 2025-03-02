@@ -22,7 +22,7 @@ class FenText:
             undo=True)
         
         self.fenText.insert("0.0", initialFen)
-        self.fenText.grid(row=2, column=0, columnspan=1, padx=0, pady=0)
+        self.fenText.grid(row=2, column=0, columnspan=1, padx=30, pady=30)
 
         
         self.fenText.bind("<<Modified>>", self.on_text_change)

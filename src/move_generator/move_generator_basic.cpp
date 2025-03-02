@@ -560,7 +560,6 @@ static bool en_passant_move_doesnt_allow_king_capture(Move enPassant_move, MoveG
         return true;   // legal move, king is not in the same row as the en passant pawns
     }
 
-    bool enemy_slider_found = false;
     uint8_t pieces_between = 0;
 
     const Direction dir = get_direction(row, friendly_king_square.col(), row, origin_square.col());
@@ -579,7 +578,6 @@ static bool en_passant_move_doesnt_allow_king_capture(Move enPassant_move, MoveG
         if (piece_found != Piece::EMPTY) {
 
             if (is_slider(pieceType_found) && get_color(piece_found) == enemy_color) {
-                enemy_slider_found = true;
                 return pieces_between != 2;   // illegal move if only two pieces between
             }
             else {

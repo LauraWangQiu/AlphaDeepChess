@@ -105,9 +105,6 @@ class Uci:
 
     def __del__(self):
         """Stops the chess engine cleanly."""
-        if self.searching:
-            self.stop_search()
-        self.send_command("quit")
         self.process.terminate()
         self.process.wait()
         self.process = None

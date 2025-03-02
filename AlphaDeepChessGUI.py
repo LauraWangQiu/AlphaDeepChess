@@ -49,6 +49,7 @@ class MainWindow:
         self.window.minsize(800, 600)
         # Enable CTk's native scaling
         ctk.set_window_scaling(1.3)  # Improves high-DPI handling
+
         self.window.mainloop()
 
 if __name__ == "__main__":

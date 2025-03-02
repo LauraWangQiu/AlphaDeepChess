@@ -11,9 +11,7 @@
 #include "board.hpp"
 #include "move.hpp"
 #include "move_list.hpp"
-#include <limits>
 #include <atomic>
-
 
 /**
  * @brief INFINITE_SEARCH_DEPTH_VALUE
@@ -21,7 +19,20 @@
  * Value that represents an infinite search depth.
  * 
  */
-constexpr const int32_t INFINITE_DEPTH = std::numeric_limits<int32_t>::max();
+constexpr int32_t INFINITE_DEPTH = 1024;
+
+struct SearchResult
+{
+    int depth;
+    int evaluation;
+    Move bestMove;
+};
+
+struct SearchResults
+{
+    volatile std::atomic<int> depthReached;
+    SearchResult results[INFINITE_DEPTH];
+};
 
 /**
  * @brief search_best_move
@@ -36,12 +47,24 @@ constexpr const int32_t INFINITE_DEPTH = std::numeric_limits<int32_t>::max();
  * @return best move found in the position.
  * 
  */
-Move search_best_move(Board board, int32_t max_depth = INFINITE_DEPTH);
+void search_best_move(SearchResults& searchResults, Board board, int32_t max_depth = INFINITE_DEPTH);
 
 /**
  * @brief search_stop
  * 
- * stop the search process, this method is thread safe
+ * @note this method is thread safe
+ * 
+ * stop the search process
  * 
  */
 void search_stop();
+
+/**
+ * @brief is_search_running
+ * 
+ * @note this method is thread safe
+ * 
+ * @return True if the search is running (stop is false)
+ * 
+ */
+bool is_search_running();

@@ -12,8 +12,8 @@ class NavigationBar:
         # Left-aligned items
         left_frame = ctk.CTkFrame(self.navbar, fg_color="transparent")
         left_frame.grid(row=0, column=0, sticky="w")
-        ctk.CTkButton(left_frame, text="New Game").grid(row=0, column=0, padx=5)
-        ctk.CTkButton(left_frame, text="Settings").grid(row=0, column=1, padx=5)
+        ctk.CTkButton(left_frame, text="Button1").grid(row=0, column=0, padx=5)
+        ctk.CTkButton(left_frame, text="Button2").grid(row=0, column=1, padx=5)
         
         # Right-aligned items
         right_frame = ctk.CTkFrame(self.navbar, fg_color="transparent")

@@ -20,9 +20,14 @@
 #include <sstream>
 
 constexpr auto StartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-constexpr auto EnPassantFEN = "rnbqkb1r/2pp2pn/1p6/pP1PppPp/8/2N5/P1P1PP1P/R1BQKBNR w KQkq f6 0 8";
-constexpr auto PromotionFEN = "r3kb1r/pbpqn1P1/1pn4p/5Q2/2P5/2N5/PP1BN1pP/R3KB1R w KQkq - 2 13";
-constexpr auto KiwipeteFEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
+
+/**
+ * @brief searchResults
+ * 
+ * array to store the search results.
+ * 
+ */
+static SearchResults searchResults;
 
 /**
  * @brief loop
@@ -32,10 +37,11 @@ constexpr auto KiwipeteFEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/
  */
 void Uci::loop()
 {
+    static TokenArray tokens;
+
     std::string command;
     std::string line;
 
-    TokenArray tokens;
     bool exit = false;
 
     board.load_fen(StartFEN);
@@ -110,11 +116,6 @@ void Uci::loop()
         // Clear the tokens array
         tokens.fill("");
     } while (!exit);
-
-    // Ensure the search thread is joined before exiting
-    if (searchThread.joinable()) {
-        searchThread.join();
-    }
 }
 
 /**
@@ -188,15 +189,24 @@ void Uci::go_command_action(const TokenArray& tokens)
     }
 
     // Launch a new thread to search for the best move
-    searchThread = std::thread(
-        [this, depth]() {
-            try {
-                std::cout << "search started with depth " << depth << "\n";
-                Move bestMove = search_best_move(board, depth);
-            } catch (const std::exception& e) {
-                std::cerr << "Exception in search thread: " << e.what() << std::endl;
+    searchThread = std::thread([this, depth]() { search_best_move(searchResults, board, depth); });
+
+    readerThread = std::thread([]() {
+        int depthReaded = 0;
+
+        std::cout << "Search started" << std::endl;
+
+        while (is_search_running()) {
+            if (depthReaded < searchResults.depthReached) {
+                const SearchResult result = searchResults.results[depthReaded++];
+
+                std::cout << "info depth " << result.depth << " score " << result.evaluation << " bestMove "
+                          << result.bestMove.to_string() << std::endl;
             }
-        });
+        }
+
+        std::cout << "Search finished" << std::endl;
+    });
 }
 
 /**
@@ -209,12 +219,13 @@ void Uci::stop_command_action()
 {
     search_stop();
 
-    // Wait for the search thread to finish if it's running
     if (searchThread.joinable()) {
         searchThread.join();
     }
 
-    //std::cout << "Best move found : " << bestMove.to_string() << std::endl;
+    if (readerThread.joinable()) {
+        readerThread.join();
+    }
 }
 
 /**
@@ -223,10 +234,7 @@ void Uci::stop_command_action()
  * Evaluate chess position.
  * 
  */
-void Uci::eval_command_action() const
-{
-    std::cout << "Evaluation: " << evaluate_position(board) << std::endl;
-}
+void Uci::eval_command_action() const { std::cout << "Evaluation: " << evaluate_position(board) << std::endl; }
 
 /**
  * @brief position_command_action
@@ -272,14 +280,12 @@ bool Uci::position_command_action(const TokenArray& tokens, uint32_t num_tokens)
 
         while (token_i < num_tokens && tokens[token_i] != "moves") {
             fen += tokens[token_i++] + " ";
-
         }
-        if(fen.empty())
-        {
+        if (fen.empty()) {
             return false;
         }
 
-        fen.pop_back(); // remove last " "
+        fen.pop_back();   // remove last " "
 
         board.load_fen(fen);
     }
@@ -310,10 +316,7 @@ bool Uci::position_command_action(const TokenArray& tokens, uint32_t num_tokens)
  * Prints the board and fen of the position.
  * 
  */
-void Uci::diagram_command_action() const
-{
-    std::cout << board << std::endl;
-}
+void Uci::diagram_command_action() const { std::cout << board << std::endl; }
 
 /**
  * @brief help_command_action
@@ -323,43 +326,42 @@ void Uci::diagram_command_action() const
  */
 void Uci::help_command_action() const
 {
-    std::cout
-        << "Commands:\n"
-           "----------------------------------------\n"
-           "uci\n"
-           "\tTell engine to use the UCI (Universal Chess Interface).\n"
-           "\tThe engine must respond with 'uciok'.\n\n"
+    std::cout << "Commands:\n"
+                 "----------------------------------------\n"
+                 "uci\n"
+                 "\tTell engine to use the UCI (Universal Chess Interface).\n"
+                 "\tThe engine must respond with 'uciok'.\n\n"
 
-           "isready\n"
-           "\tSynchronize the engine with the GUI. The engine must respond with 'readyok'.\n\n"
+                 "isready\n"
+                 "\tSynchronize the engine with the GUI. The engine must respond with 'readyok'.\n\n"
 
-           "ucinewgame\n"
-           "\tStart of a new game.\n\n"
+                 "ucinewgame\n"
+                 "\tStart of a new game.\n\n"
 
-           "position [fen <fenstring> | startpos | actualpos] moves <move1> .... <movei>\n"
-           "\tSet up the position on the internal board.\n\n"
-           "\t\tMove format:\n\n"
-           "\t\tThe move format is in long algebraic notation.\n"
-           "\t\tA nullmove from the Engine to the GUI should be sent as 0000.\n"
-           "\t\tExamples:  e2e4, e7e5, e1g1 (white short castling), e7e8q (for promotion)\n\n"
-           "go\n"
-           "\tStart calculating.\n"
-           "\tOptional parameters: searchmoves, ponder, wtime, btime, winc, binc, movestogo, "
-           "\tdepth, nodes, mate, movetime, infinite.\n\n"
+                 "position [fen <fenstring> | startpos | actualpos] moves <move1> .... <movei>\n"
+                 "\tSet up the position on the internal board.\n\n"
+                 "\t\tMove format:\n\n"
+                 "\t\tThe move format is in long algebraic notation.\n"
+                 "\t\tA nullmove from the Engine to the GUI should be sent as 0000.\n"
+                 "\t\tExamples:  e2e4, e7e5, e1g1 (white short castling), e7e8q (for promotion)\n\n"
+                 "go\n"
+                 "\tStart calculating.\n"
+                 "\tOptional parameters: searchmoves, ponder, wtime, btime, winc, binc, movestogo, "
+                 "\tdepth, nodes, mate, movetime, infinite.\n\n"
 
-           "stop\n"
-           "\tStop calculating.\n\n"
+                 "stop\n"
+                 "\tStop calculating.\n\n"
 
-           "quit\n"
-           "\tQuit the program.\n\n"
+                 "quit\n"
+                 "\tQuit the program.\n\n"
 
-           "perft depth\n"
-           "\tExecutes perft test to the desired depth.\n\n"
+                 "perft depth\n"
+                 "\tExecutes perft test to the desired depth.\n\n"
 
-           "d\n"
-           "\tDisplay the current position on the board.\n\n"
+                 "d\n"
+                 "\tDisplay the current position on the board.\n\n"
 
-        << std::endl;
+              << std::endl;
 }
 
 /**

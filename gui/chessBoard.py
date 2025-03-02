@@ -192,7 +192,9 @@ class ChessBoard:
 
             self.last_move = move
             self.engine_move = None
+            self.draw()
             self.eventManager.chessBoardMakeMove(self.get_fen())
+        
             
 
     def update_legal_moves(self) -> None:
