@@ -12,10 +12,6 @@ class ChessBoard:
         PIECE_SELECTED = auto()
         PROMOTION_SELECTOR = auto()
 
-    class Orientation(Enum):
-        WHITE = auto()
-        BLACK = auto()
-
     NUM_ROWS = 8
     NUM_COLS = 8
 
@@ -24,9 +20,10 @@ class ChessBoard:
     SELECTED_SQUARE_COLOR = "#00c800"
     LAST_MOVE_SQUARE_COLOR = "#c8c800"
     ENGINE_MOVE_SQUARE_COLOR = "#ADD8E6"
+    PROMOTION_SELECTOR_SQUARE_COLOR = "#808080"
 
 
-    def __init__(self,window, size : int):
+    def __init__(self, window, size : int):
         
         self.window = window
     
@@ -40,9 +37,13 @@ class ChessBoard:
         self.SQUARE_SIZE = size / self.NUM_COLS
         self.selected_square = None
         self.state = self.State.IDLE
-        self.orientation = self.Orientation.WHITE
+        self.orientation = chess.WHITE
         self.last_move = None
         self.engine_move = None
+        self.promotion_queen_selector_square = None
+        self.promotion_knight_selector_square = None
+        self.promotion_rook_selector_square = None
+        self.promotion_bishop_selector_square = None
 
         self.legal_squares_dictionary = defaultdict(list)
         self.boardInitialize = False
@@ -56,27 +57,43 @@ class ChessBoard:
 
         self.set_fen(chess.STARTING_FEN)
 
-    def draw(self):
+    def draw(self) -> None:
 
         """Update square colors and piece images based on current state."""
-        for square in chess.SQUARES:
-            # Update square color
-            color = self.get_square_color(square)
-            self.canvas.itemconfig(self.square_ids[square], fill=color)
-            # Update piece image
-            piece = self.board.piece_at(square)
-            image_id = self.piece_image_ids[square]
-            if piece:
-                self.canvas.itemconfig(image_id, image=self.PIECE_IMAGES[piece.symbol()], state="normal")
-            else:
-                self.canvas.itemconfig(image_id, state="hidden")
+        for row in range(self.NUM_ROWS):
+            for col in range(self.NUM_COLS):
 
-    def rotate_orientation(self, event=None):
-        self.orientation = self.Orientation.WHITE if self.orientation == self.Orientation.BLACK else self.Orientation.BLACK
+                square = chess.square(col, row)
+
+                # Update square color
+                color = self.get_square_color(square)
+                self.canvas.itemconfig(self.square_ids[square], fill=color)
+                # Update piece image
+
+                piece = self.board.piece_at(square)
+                image_id = self.piece_image_ids[square]
+
+                promo_color = chess.WHITE if row >= 4 else chess.BLACK
+
+                if square == self.promotion_queen_selector_square:
+                    self.canvas.itemconfig(image_id, image=self.PIECE_IMAGES['Q' if promo_color == chess.WHITE else 'q'], state="normal")
+                elif square == self.promotion_knight_selector_square:
+                    self.canvas.itemconfig(image_id, image=self.PIECE_IMAGES['N' if promo_color == chess.WHITE else 'n'], state="normal")
+                elif square == self.promotion_rook_selector_square:
+                    self.canvas.itemconfig(image_id, image=self.PIECE_IMAGES['R' if promo_color == chess.WHITE else 'r'], state="normal")
+                elif square == self.promotion_bishop_selector_square:
+                    self.canvas.itemconfig(image_id, image=self.PIECE_IMAGES['B' if promo_color == chess.WHITE else 'b'], state="normal")
+                elif piece:
+                    self.canvas.itemconfig(image_id, image=self.PIECE_IMAGES[piece.symbol()], state="normal")
+                else:
+                    self.canvas.itemconfig(image_id, state="hidden")
+
+    def rotate_orientation(self, event) -> None:
+        self.orientation = chess.WHITE if self.orientation == chess.BLACK else chess.BLACK
         self.init_canvas_items()
         self.draw()
 
-    def is_valid_fen(self,fen: str) -> bool:
+    def is_valid_fen(self, fen: str) -> bool:
         try:
             chess.Board(fen)
             return True
@@ -92,6 +109,10 @@ class ChessBoard:
         if self.is_valid_fen(fen):
             self.last_move = None
             self.engine_move = None
+            self.promotion_queen_selector_square = None
+            self.promotion_knight_selector_square = None
+            self.promotion_rook_selector_square = None
+            self.promotion_bishop_selector_square = None
             self.board = chess.Board(fen)
             self.update_legal_moves()
             self.draw()
@@ -99,33 +120,71 @@ class ChessBoard:
         else:
             return False
 
-    def set_eventManager(self, eventManager):
+    def set_eventManager(self, eventManager) -> None:
         self.eventManager = eventManager
         
 
-    def on_click(self, event):
+    def on_click(self, event) -> None:
         posX, posY = 0, 0
         col = int((event.x - posX) // self.SQUARE_SIZE)
         row = int((event.y - posY) // self.SQUARE_SIZE)
+        
+        if self.orientation == chess.WHITE:
+            row = 7 - row
+        else:
+            col = 7 - col
 
-        clicked_square = chess.square(col, (7 - row) if self.orientation == self.Orientation.WHITE else row)
+        clicked_square = chess.square(col, row)
 
         if self.state == self.State.IDLE:
             if self.board.piece_at(clicked_square):  
                 self.selected_square = clicked_square
                 self.state = self.State.PIECE_SELECTED
         elif self.state == self.State.PIECE_SELECTED:
-            self.make_move(self.selected_square, clicked_square)
-            self.selected_square = None
-            self.state = self.State.IDLE
-        
+            if (
+                self.board.piece_type_at(self.selected_square) == chess.PAWN
+                and (row == 7 or row == 0)
+                and clicked_square in self.get_squares_to_move(self.selected_square)
+            ):
+                d = +1 if row == 0 else -1
+
+                self.promotion_queen_selector_square = clicked_square
+                self.promotion_knight_selector_square = chess.square(col, row + d)
+                self.promotion_rook_selector_square = chess.square(col, row + 2*d)
+                self.promotion_bishop_selector_square = chess.square(col, row + 3*d)
+
+                self.state = self.State.PROMOTION_SELECTOR
+            else:
+                self.make_move(self.selected_square, clicked_square)
+                self.selected_square = None
+                self.state = self.State.IDLE
+        elif self.state == self.State.PROMOTION_SELECTOR:
+                
+                promo_square = self.promotion_queen_selector_square
+
+                if clicked_square == self.promotion_queen_selector_square:
+                    self.make_move(self.selected_square, promo_square, chess.QUEEN)
+                elif clicked_square == self.promotion_knight_selector_square:
+                    self.make_move(self.selected_square, promo_square, chess.KNIGHT)
+                elif clicked_square == self.promotion_rook_selector_square:
+                    self.make_move(self.selected_square, promo_square, chess.ROOK)
+                elif clicked_square == self.promotion_bishop_selector_square:
+                    self.make_move(self.selected_square, promo_square, chess.BISHOP)
+
+                self.selected_square = None
+                self.promotion_queen_selector_square = None
+                self.promotion_knight_selector_square = None
+                self.promotion_rook_selector_square = None
+                self.promotion_bishop_selector_square = None
+                self.state = self.State.IDLE
+
         self.draw()  
 
-    def make_move(self, origin_sq: int, end_sq: int, promotion_piece=None):
+    def make_move(self, origin_sq: chess.Square, end_sq: chess.Square, promotion_piece : chess.PieceType = None) -> None:
         
         """Make a move on the board."""
-    
-        move = chess.Move(origin_sq, end_sq, promotion_piece) if promotion_piece else chess.Move(origin_sq, end_sq)
+
+        move = chess.Move(origin_sq, end_sq, promotion=promotion_piece)
 
         if move in self.board.legal_moves:
             self.board.push(move)  
@@ -136,8 +195,8 @@ class ChessBoard:
             self.eventManager.chessBoardMakeMove(self.get_fen())
             
 
-    def update_legal_moves(self):
-        """Updates the list of legal moves."""
+    def update_legal_moves(self) -> None:
+        """Updates the legal squares dictionary."""
 
         self.legal_squares_dictionary.clear()
 
@@ -149,7 +208,7 @@ class ChessBoard:
         return self.legal_squares_dictionary.get(origin_square, [])
 
 
-    def load_images(self):
+    def load_images(self) -> None:
         """Loads piece images."""
         SQUARE_SIZE = int(self.SQUARE_SIZE)
         piece_files = {
@@ -167,7 +226,7 @@ class ChessBoard:
             except Exception as e:
                 print(f"Error loading image {filename}: {e}")
 
-    def init_canvas_items(self):
+    def init_canvas_items(self) -> None:
         """Initialize canvas items based on current orientation."""
         self.canvas.delete("all")
         self.square_ids = {} 
@@ -175,19 +234,18 @@ class ChessBoard:
 
         for row in range(self.NUM_ROWS):
             for col in range(self.NUM_COLS):
-
-                if self.orientation == self.Orientation.WHITE:
+                
+                if self.orientation == chess.WHITE:
                     square = chess.square(col, 7 - row)
                 else:
-                    square = chess.square(col, row)
+                    square = chess.square(7 - col, row)
 
                 x1 = col * self.SQUARE_SIZE
                 y1 = row * self.SQUARE_SIZE
                 x2 = x1 + self.SQUARE_SIZE
                 y2 = y1 + self.SQUARE_SIZE
 
-                base_color = self.WHITE_SQUARES_COLOR if (row + col) % 2 == 0 else self.BLACK_SQUARES_COLOR
-                rect_id = self.canvas.create_rectangle(x1, y1, x2, y2, fill=base_color, outline="")
+                rect_id = self.canvas.create_rectangle(x1, y1, x2, y2, fill=self.BLACK_SQUARES_COLOR, outline="")
                 self.square_ids[square] = rect_id
                 image_id = self.canvas.create_image(
                     (col + 0.5) * self.SQUARE_SIZE,
@@ -197,20 +255,32 @@ class ChessBoard:
                 )
                 self.piece_image_ids[square] = image_id
 
-    def get_square_color(self, square):
-        """Determine the color of a square based on its state."""
-        row = 7 - chess.square_rank(square) if self.orientation == self.Orientation.WHITE else chess.square_rank(square)
-        #col = chess.square_file(square) if self.orientation == self.Orientation.WHITE else 7 - chess.square_file(square)
-        col = chess.square_file(square)
-        base_color = self.WHITE_SQUARES_COLOR if (row + col) % 2 == 0 else self.BLACK_SQUARES_COLOR
 
-        if self.selected_square == square or (self.selected_square and square in self.get_squares_to_move(self.selected_square)):
+    def get_square_color(self, square : chess.Square) -> str:
+        """Determine the color of a square based on its state."""
+        row = chess.square_rank(square)
+        col = chess.square_file(square)                             
+
+        if (
+            self.promotion_queen_selector_square
+            and (
+                square == self.promotion_queen_selector_square
+                or square == self.promotion_knight_selector_square
+                or square == self.promotion_rook_selector_square
+                or square == self.promotion_bishop_selector_square
+            )
+        ):
+            return self.PROMOTION_SELECTOR_SQUARE_COLOR
+        elif self.selected_square == square or (self.selected_square and square in self.get_squares_to_move(self.selected_square)):
             return self.SELECTED_SQUARE_COLOR
         elif self.engine_move and (square == self.engine_move.from_square or square == self.engine_move.to_square):
             return self.ENGINE_MOVE_SQUARE_COLOR
         elif self.last_move and (square == self.last_move.from_square or square == self.last_move.to_square):
             return self.LAST_MOVE_SQUARE_COLOR
-        return base_color
+        elif self.orientation == chess.WHITE:
+            return self.WHITE_SQUARES_COLOR if ((7 - row) + col) % 2 == 0 else self.BLACK_SQUARES_COLOR
+        else:
+            return self.WHITE_SQUARES_COLOR if (row + col) % 2 == 0 else self.BLACK_SQUARES_COLOR
 
     def set_engine_move(self, move: str) -> None:
         '''Set the engine move in UCI format'''
