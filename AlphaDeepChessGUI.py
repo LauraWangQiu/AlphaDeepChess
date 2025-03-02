@@ -28,9 +28,10 @@ class MainWindow:
         self.window.geometry(f"{self.SCREEN_WIDTH}x{self.SCREEN_HEIGHT}")
         
         # Configure grid layout
-        self.window.grid_rowconfigure(1, weight=1)  # Main content area
+        #self.window.grid_rowconfigure(1, weight=1)  # Main content area
         self.window.grid_columnconfigure(0, weight=1)  # Chessboard column
         self.window.grid_columnconfigure(1, weight=0)  # Right panel column
+
         
         self.UCI = Uci(ENGINE_PATH)
 

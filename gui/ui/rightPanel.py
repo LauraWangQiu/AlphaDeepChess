@@ -11,6 +11,19 @@ class RightPanel:
         
         self.searching = False
         
+        # Rotate board button
+        self.rotate_button = ctk.CTkButton(
+            self.right_panel,
+            text="🔄",
+            font=("Arial", 60),
+            width=60,  
+            height=60, 
+            corner_radius=0, 
+            command=self.rotate_board
+        )
+        self.rotate_button.pack(pady=10, padx=10)
+
+
         # Engine evaluation switch
         self.engine_switch = ctk.CTkSwitch(
             self.right_panel,
@@ -61,6 +74,10 @@ class RightPanel:
     
     def set_eventManager(self, eventManager):
         self.eventManager = eventManager
+
+    def rotate_board(self) -> None:
+        """Calls eventManager's rotate_board function."""
+        self.eventManager.rotate_board()
 
     def engine_switch_clicked(self):
         if self.engine_switch.get():

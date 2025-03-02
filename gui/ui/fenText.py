@@ -6,15 +6,27 @@ class FenText:
     BORDER_COLOR_INVALID = "#ff0000"
     BORDER_COLOR_DEFAULT = "#808080"
 
+    FONT_SIZE = 18
+    MAX_FEN_CHARACTERS = 100
+    HEIGHT = FONT_SIZE + FONT_SIZE//2
+    WIDTH = (FONT_SIZE + 1) * MAX_FEN_CHARACTERS
+
     def __init__(self, window, initialFen):
         
-        # Create the textbox and initialize it with the current FEN from chessBoard
-        self.fenText = ctk.CTkTextbox(window, height=100, border_width=2, undo=True)
+        self.fenText = ctk.CTkTextbox(
+            window,
+            height=self.HEIGHT,
+            width=self.WIDTH,
+            border_width=2,
+            font=("Arial", self.FONT_SIZE),
+            undo=True)
+        
         self.fenText.insert("0.0", initialFen)
-        self.fenText.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
+        self.fenText.grid(row=2, column=0, columnspan=1, padx=0, pady=0)
 
-        # Bind the <<Modified>> event to check the FEN on text change
+        
         self.fenText.bind("<<Modified>>", self.on_text_change)
+        self.fenText.bind("<KeyRelease>", self.limit_text_length)  # Enforce max length
 
         # Reset the modified flag after initialization
         self.fenText.edit_modified(False)
@@ -46,3 +58,10 @@ class FenText:
 
     def set_eventManager(self, eventManager):
         self.eventManager = eventManager
+
+    def limit_text_length(self, event):
+        """Ensures the text does not exceed 100 characters."""
+        text = self.fenText.get("0.0", "end").strip()
+        if len(text) > self.MAX_FEN_CHARACTERS:
+            self.fenText.delete("0.0", "end")
+            self.fenText.insert("0.0", text[:self.MAX_FEN_CHARACTERS])  # Truncate

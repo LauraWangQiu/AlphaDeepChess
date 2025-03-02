@@ -42,5 +42,8 @@ class EventManager:
     def set_engine_move(self, move: str) -> None:
         '''Set the engine move in UCI format'''
         self.chessBoard.set_engine_move(move)
+    
+    def rotate_board(self) -> None:
+        self.chessBoard.rotate_orientation()
 
     

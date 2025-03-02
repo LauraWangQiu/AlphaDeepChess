@@ -88,7 +88,7 @@ class ChessBoard:
                 else:
                     self.canvas.itemconfig(image_id, state="hidden")
 
-    def rotate_orientation(self, event) -> None:
+    def rotate_orientation(self, event = None) -> None:
         self.orientation = chess.WHITE if self.orientation == chess.BLACK else chess.BLACK
         self.init_canvas_items()
         self.draw()
