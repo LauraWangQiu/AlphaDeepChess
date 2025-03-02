@@ -189,6 +189,7 @@ public:
             ? static_cast<AntiDiagonal>(static_cast<int>(row()) + static_cast<int>(col()))
             : ANTIDIAGONAL_INVALID;
     }
+
     /**
      * @brief to_string
      * 
