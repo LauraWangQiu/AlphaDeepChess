@@ -49,18 +49,15 @@ class Uci:
                 return line.split("Fen: ")[1].strip()
         return None
     
-    def make_move(self, move_string: str) -> None:
-        """Applies a move in UCI format."""
-
-        assert isinstance(move_string, str), "move_string must be a string"
-        assert len(move_string) in (4, 5), f"Invalid UCI move length: {move_string}"
+    def make_move(self, move: str) -> str:
+        """Applies a move in UCI format, returns the new fen"""
 
         if self.searching:
             self.stop_search()
         
-        self.send_command(f"position actualpos moves {move_string}")
-        self.send_command("isready")  # Confirm engine has processed move
-        self.wait_for("readyok")
+        self.send_command(f"position actualpos moves {move}")
+
+        return self.get_fen()
 
     def get_legal_moves(self) -> list:
         """Retrieves all legal moves."""
@@ -82,24 +79,24 @@ class Uci:
 
     def start_search(self) -> None:
         '''Starts the infinite search'''
-        print("start_search")
+        '''print("start_search")
 
         assert self.searching == False, "start_search called but uci is currently searching"
 
         self.send_command("go")
         self.searching = True
-   
+        '''
     def stop_search(self) -> None:
         '''Stop the infinite search'''
-        print("stop search")
+        '''print("stop search")
         self.send_command("stop")     
         self.send_command("isready")  # Force engine to process it
         self.wait_for("readyok")  # Ensure it's done
         self.searching = False
-
+        '''
     def get_search_info(self, eval, best_move):
         """Gets the latest search info"""
-        print("get_search_info")
+        #print("get_search_info")
 
         eval = self.last_eval
         best_move = self.last_best_move 

@@ -55,7 +55,6 @@ class RightPanel:
     def get_search_info(self):
         """Method to continuously update the evaluation when engine is on"""
 
-        print("get_search_info")
         if self.engine_switch.get():
             self.UCI.get_search_info(self.last_eval, self.last_move)
             self.right_panel.after(500, self.get_search_info)
