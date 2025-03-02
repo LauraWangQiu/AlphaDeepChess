@@ -42,7 +42,7 @@ class MainWindow:
 
         self.rightPanel = RightPanel(window=self.window, UCI=self.UCI)
         # Create event Manager
-        self.eventManager = EventManager(self.chessBoard, self.fenText)
+        self.eventManager = EventManager(self.chessBoard, self.fenText, self.rightPanel)
         
         # Set minimum window size
         self.window.minsize(800, 600)

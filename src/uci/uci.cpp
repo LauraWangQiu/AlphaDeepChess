@@ -164,13 +164,22 @@ void Uci::go_command_action(const TokenArray& tokens)
         }
         else if (tokens[i] == "depth") {
             try {
-                depth = std::stoul(tokens[i++]);
+                depth = std::stoul(tokens[++i]);
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command : go depth\n";
             }
         }
         else if (tokens[i] == "infinite") {
             depth = INFINITE_DEPTH;
+        }
+        else if (tokens[i] == "perft") {
+            try {
+                depth = std::stoul(tokens[++i]);
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command : go perft\n";
+            }
+            perft_command_action(depth);
+            return;
         }
         else {
             std::cout << "Invalid argument for command : go ( " << tokens[i] << " )\n";
