@@ -1,4 +1,6 @@
 {
+    "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}",
+    "cmake.generator": "Ninja",
     "cmake.configureOnOpen": true,
     "files.associations": {
         "array": "cpp",
@@ -74,6 +76,7 @@
         "xiosbase": "cpp",
         "text_encoding": "cpp",
         "cstdbool": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "xlocmon": "cpp"
     }
 }
