@@ -198,10 +198,10 @@ void Uci::go_command_action(const TokenArray& tokens)
 
         while (is_search_running()) {
             if (depthReaded < searchResults.depthReached) {
-                const SearchResult result = searchResults.results[depthReaded++];
+                const SearchResult& result = searchResults.results[depthReaded++];
 
                 std::cout << "info depth " << result.depth << " score " << result.evaluation << " bestMove "
-                          << result.bestMove.to_string() << std::endl;
+                          << Move(result.bestMove_data).to_string() << std::endl;
             }
         }
 

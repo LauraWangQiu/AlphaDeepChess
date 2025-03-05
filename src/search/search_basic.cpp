@@ -21,7 +21,7 @@ const int INF = std::numeric_limits<int>::max();
 const int INMEDIATE_MATE_SCORE = 32000;
 const int MATE_THRESHOLD = INMEDIATE_MATE_SCORE - 1000U;
 
-static volatile std::atomic<bool> stop;
+static std::atomic<bool> stop;
 static Move bestMoveFound;
 static int bestEvalFound;
 static Move bestMoveInIteration;
@@ -374,8 +374,11 @@ int quiescence_minimize_black(Board& board, int ply, int alpha, int beta)
     return min_evaluation;
 }
 
-static inline void insert_new_result(SearchResults& searchResults, int depth, int evaluation, Move move)
+static inline void insert_new_result (SearchResults& searchResults, int depth, int evaluation, Move move)
 {
     assert(searchResults.depthReached < INFINITE_DEPTH);
-    searchResults.results[searchResults.depthReached++] = {depth, evaluation, move};
+    searchResults.results[searchResults.depthReached].depth = depth;
+    searchResults.results[searchResults.depthReached].evaluation = evaluation;
+    searchResults.results[searchResults.depthReached].bestMove_data = move.raw_data();
+    searchResults.depthReached++;
 }

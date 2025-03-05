@@ -23,14 +23,14 @@ constexpr int32_t INFINITE_DEPTH = 1024;
 
 struct SearchResult
 {
-    int depth;
-    int evaluation;
-    Move bestMove;
+    std::atomic<int> depth;
+    std::atomic<int> evaluation;
+    std::atomic<uint16_t> bestMove_data;
 };
 
 struct SearchResults
 {
-    volatile std::atomic<int> depthReached;
+    std::atomic<int> depthReached;
     SearchResult results[INFINITE_DEPTH];
 };
 

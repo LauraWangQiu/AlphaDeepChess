@@ -100,8 +100,7 @@ public:
      */
     constexpr Move(Square square_from, Square square_to, MoveType move_type = MoveType::NORMAL,
                    PieceType promotion_piece = PieceType::KNIGHT)
-        : data((square_from.value() << SHIFT_ORIGIN_SQUARE) |
-               square_to.value() << SHIFT_END_SQUARE |
+        : data((square_from.value() << SHIFT_ORIGIN_SQUARE) | square_to.value() << SHIFT_END_SQUARE |
                ((static_cast<uint16_t>(promotion_piece) - 1) << SHIFT_PROMOTION_PIECE) |
                (static_cast<uint16_t>(move_type) << SHIFT_MOVE_TYPE))
     {
@@ -123,10 +122,7 @@ public:
      * @return origin square.
      * 
      */
-    constexpr inline Square square_from() const
-    {
-        return Square((data & MASK_ORIGIN_SQUARE) >> SHIFT_ORIGIN_SQUARE);
-    }
+    constexpr inline Square square_from() const { return Square((data & MASK_ORIGIN_SQUARE) >> SHIFT_ORIGIN_SQUARE); }
 
     /**
      * @brief square_to
@@ -136,10 +132,7 @@ public:
      * @return destination square.
      * 
      */
-    constexpr inline Square square_to() const
-    {
-        return Square((data & MASK_END_SQUARE) << SHIFT_END_SQUARE);
-    }
+    constexpr inline Square square_to() const { return Square((data & MASK_END_SQUARE) << SHIFT_END_SQUARE); }
 
     /**
      * @brief type
@@ -153,10 +146,7 @@ public:
      *  - CASTLING(11)
      * 
      */
-    constexpr inline MoveType type() const
-    {
-        return static_cast<MoveType>((data & MASK_MOVE_TYPE) >> SHIFT_MOVE_TYPE);
-    }
+    constexpr inline MoveType type() const { return static_cast<MoveType>((data & MASK_MOVE_TYPE) >> SHIFT_MOVE_TYPE); }
 
     /**
      * @brief promotion_piece
@@ -176,6 +166,16 @@ public:
         // E.g Knight = 0 and PieceType::KNIGHT = 1
         return static_cast<PieceType>(((data & MASK_PROMOTION_PIECE) >> SHIFT_PROMOTION_PIECE) + 1);
     }
+
+    /**
+     * @brief raw_data
+     * 
+     * Return raw data of the move.
+     * 
+     * @return uint16_t data
+     * 
+     */
+    constexpr inline uint16_t raw_data() const { return data; }
 
     /**
      * @brief is_valid
@@ -210,10 +210,7 @@ public:
      * @return Move(Square::SQ_E1, Square::SQ_G1, MoveType::CASTLING).
      * 
      */
-    static constexpr Move castle_white_king()
-    {
-        return Move(Square::SQ_E1, Square::SQ_G1, MoveType::CASTLING);
-    }
+    static constexpr Move castle_white_king() { return Move(Square::SQ_E1, Square::SQ_G1, MoveType::CASTLING); }
 
     /**
      * @brief castle_white_queen
@@ -223,10 +220,7 @@ public:
      * @return Move(Square::SQ_E1, Square::SQ_C1, MoveType::CASTLING).
      * 
      */
-    static constexpr Move castle_white_queen()
-    {
-        return Move(Square::SQ_E1, Square::SQ_C1, MoveType::CASTLING);
-    }
+    static constexpr Move castle_white_queen() { return Move(Square::SQ_E1, Square::SQ_C1, MoveType::CASTLING); }
 
     /**
      * @brief castle_black_king
@@ -236,10 +230,7 @@ public:
      * @return Move(Square::SQ_E8, Square::SQ_G8, MoveType::CASTLING).
      * 
      */
-    static constexpr Move castle_black_king()
-    {
-        return Move(Square::SQ_E8, Square::SQ_G8, MoveType::CASTLING);
-    }
+    static constexpr Move castle_black_king() { return Move(Square::SQ_E8, Square::SQ_G8, MoveType::CASTLING); }
 
     /**
      * @brief castle_black_queen
@@ -249,10 +240,7 @@ public:
      * @return Move(Square::SQ_E8, Square::SQ_C8, MoveType::CASTLING).
      * 
      */
-    static constexpr Move castle_black_queen()
-    {
-        return Move(Square::SQ_E8, Square::SQ_C8, MoveType::CASTLING);
-    }
+    static constexpr Move castle_black_queen() { return Move(Square::SQ_E8, Square::SQ_C8, MoveType::CASTLING); }
 
     /**
      * @brief operator==(const Move& sq)
@@ -305,7 +293,7 @@ public:
     inline std::string to_string() const;
 
 private:
-    std::uint16_t data;
+    uint16_t data;
 };
 
 /**
@@ -323,8 +311,7 @@ inline std::string Move::to_string() const
         return "invalid";
     }
     else if (type() == MoveType::PROMOTION) {
-        return square_from().to_string() + square_to().to_string() +
-            pieceType_to_char(promotion_piece());
+        return square_from().to_string() + square_to().to_string() + pieceType_to_char(promotion_piece());
     }
     else {
         return square_from().to_string() + square_to().to_string();
