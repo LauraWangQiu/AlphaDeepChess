@@ -13,6 +13,7 @@
  */
 
 #include "board.hpp"
+#include "search.hpp"
 
 #include <array>
 #include <string>
@@ -53,7 +54,12 @@ public:
      * Uci destructor.
      * 
      */
-    ~Uci() {}
+    ~Uci() 
+    {
+        search_stop();
+        if (searchThread.joinable()) searchThread.join();
+        if (readerThread.joinable()) readerThread.join();
+    }
 
     /**
      * @brief loop
@@ -88,6 +94,14 @@ private:
      * 
      */
     std::thread readerThread;
+
+    /**
+     * @brief searchResults
+     * 
+     * array to store the search results.
+     * 
+     */
+    SearchResults searchResults;
 
     /**
      * @brief uci_command_action

@@ -13,21 +13,12 @@
 
 #include "evaluation.hpp"
 #include "move_generator.hpp"
-#include "search.hpp"
 #include "perft.hpp"
 
 #include <iostream>
 #include <sstream>
 
 constexpr auto StartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
-/**
- * @brief searchResults
- * 
- * array to store the search results.
- * 
- */
-static SearchResults searchResults;
 
 /**
  * @brief loop
@@ -188,20 +179,40 @@ void Uci::go_command_action(const TokenArray& tokens)
         }
     }
 
+    // stop and wait for previous search to end
+    search_stop();
+
+    if (searchThread.joinable()) {
+        searchThread.join(); 
+    }
+    if (readerThread.joinable()) {
+        readerThread.join();
+    }
+
     // Launch a new thread to search for the best move
     searchThread = std::thread([this, depth]() { search_best_move(searchResults, board, depth); });
 
-    readerThread = std::thread([]() {
+    readerThread = std::thread([this]() {
         int depthReaded = 0;
 
         std::cout << "Search started" << std::endl;
 
-        while (is_search_running()) {
-            if (depthReaded < searchResults.depthReached) {
+        while (is_search_running() || (depthReaded < searchResults.depthReached)) {
+
+            while (depthReaded < searchResults.depthReached) {
                 const SearchResult& result = searchResults.results[depthReaded++];
 
                 std::cout << "info depth " << result.depth << " score " << result.evaluation << " bestMove "
                           << Move(result.bestMove_data).to_string() << std::endl;
+            }
+            
+            {
+                std::unique_lock<std::mutex> lock(searchResults.mtx_data_avaliable_cv);
+
+                if (is_search_running() && depthReaded >= searchResults.depthReached) {
+                    // thread goes to sleep until more data is avaliable or search stop
+                    searchResults.data_avaliable_cv.wait(lock);
+                }
             }
         }
 
@@ -391,10 +402,10 @@ void Uci::perft_command_action(uint64_t depth) const
     std::cout << '\n';
 
     for (const auto& moveNode : moveNodesList) {
-        std::cout << moveNode.first.to_string() << ": " << moveNode.second << '\n';
+        std::cout << moveNode.first.to_string() << ": " << moveNode.second << std::endl;
         nodes += moveNode.second;
     }
-    std::cout << "\nNodes searched: " << nodes << "\nExecution time: " << time << " ms\n";
+    std::cout << "\nNodes searched: " << nodes << "\nExecution time: " << time << " ms" << std::endl;
 }
 
 /**

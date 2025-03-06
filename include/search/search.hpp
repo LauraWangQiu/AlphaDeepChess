@@ -12,6 +12,8 @@
 #include "move.hpp"
 #include "move_list.hpp"
 #include <atomic>
+#include <condition_variable>
+#include <mutex>
 
 /**
  * @brief INFINITE_SEARCH_DEPTH_VALUE
@@ -30,6 +32,8 @@ struct SearchResult
 
 struct SearchResults
 {
+    std::mutex mtx_data_avaliable_cv;
+    std::condition_variable data_avaliable_cv;
     std::atomic<int> depthReached;
     SearchResult results[INFINITE_DEPTH];
 };

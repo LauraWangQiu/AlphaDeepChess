@@ -77,6 +77,14 @@ void search_best_move(SearchResults& searchResults, Board board, int32_t max_dep
     stop = false;
 
     iterative_deepening(searchResults, board, max_depth);
+
+    stop = true;
+
+    {   
+        //notify the reader thread that search has stopped
+        std::lock_guard<std::mutex> lock(searchResults.mtx_data_avaliable_cv);
+        searchResults.data_avaliable_cv.notify_one();
+    }
 }
 
 void iterative_deepening(SearchResults& searchResults, Board& board, int max_depth)
@@ -381,4 +389,9 @@ static inline void insert_new_result (SearchResults& searchResults, int depth, i
     searchResults.results[searchResults.depthReached].evaluation = evaluation;
     searchResults.results[searchResults.depthReached].bestMove_data = move.raw_data();
     searchResults.depthReached++;
+
+    {
+        std::lock_guard<std::mutex> lock(searchResults.mtx_data_avaliable_cv);
+        searchResults.data_avaliable_cv.notify_one();
+    }
 }
