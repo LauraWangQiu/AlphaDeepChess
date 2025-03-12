@@ -57,6 +57,8 @@ static constexpr uint64_t MASK_MOVE_NUMBER = (0xfffffULL << SHIFT_MOVE_NUMBER);
  * 26-20 : en_passant_square : 0-63 if available, >=64 if not available
  * 19-0 : move_number : 0-1048575 number of moves in the game.
  * 
+ * 63-0 zobrist_key : zobrist hash key of the position
+ * 
  */
 class GameState
 {
@@ -201,6 +203,16 @@ public:
     constexpr inline uint64_t move_number() const;
 
     /**
+     * @brief get_zobrist_key
+     * 
+     * get the zobrist_key.
+     * 
+     * @return zobrist_key.
+     * 
+     */
+    constexpr inline uint64_t get_zobrist_key() const { return zobrist_key; };
+
+    /**
      * @brief set_castled_white
      * 
      * set if white has castled.
@@ -334,6 +346,16 @@ public:
     constexpr inline void set_move_number(uint64_t move_number);
 
     /**
+     * @brief set_zobrist_key
+     * 
+     * set the zobrist_key.
+     * 
+     * @param[in] key zobrist key
+     * 
+     */
+    constexpr inline void set_zobrist_key(uint64_t key) { zobrist_key = key; };
+
+    /**
      * @brief clean
      * 
      *  Cleans the game state to 0 (initial value)
@@ -345,6 +367,7 @@ public:
     constexpr inline void clean()
     {
         state_register = 0ULL;
+        zobrist_key = 0ULL;
         set_move_number(1ULL);
         set_side_to_move(ChessColor::WHITE);
         set_en_passant_square(Square::SQ_INVALID);
@@ -365,7 +388,7 @@ public:
      * set_last_captured_piece(PieceType::EMPTY);
      * 
      */
-    constexpr GameState() : state_register(0ULL) { clean(); }
+    constexpr GameState() : state_register(0ULL), zobrist_key(0ULL) { clean(); }
 
     /**
      * @brief GameState
@@ -375,7 +398,7 @@ public:
      * @param[in] gs gameState where to copy the initial value.
      * 
      */
-    constexpr GameState(const GameState& gs) : state_register(gs.state_register) { }
+    constexpr GameState(const GameState& gs) : state_register(gs.state_register), zobrist_key(zobrist_key) { }
 
     /**
      * @brief operator==
@@ -385,13 +408,13 @@ public:
      * @param[in] gs gameState to compare with.
      * 
      * @return
-     * - TRUE if state_register == gs.state_register.
-     * - FALSE state_register != gs.state_register.
+     * - TRUE if state_register == gs.state_register && zobrist_key == gs.zobrist_key.
+     * - FALSE else.
      * 
      */
     constexpr bool operator==(const GameState& gs) const
     {
-        return state_register == gs.state_register;
+        return state_register == gs.state_register && zobrist_key == gs.zobrist_key;
     }
 
     /**
@@ -408,7 +431,7 @@ public:
      */
     constexpr bool operator!=(const GameState& gs) const
     {
-        return state_register != gs.state_register;
+        return state_register != gs.state_register || zobrist_key != gs.zobrist_key;
     }
 
     /**
@@ -426,6 +449,7 @@ public:
         if (this != &other)   // not a self-assignment
         {
             this->state_register = other.state_register;
+            this->zobrist_key = other.zobrist_key;
         }
         return *this;
     }
@@ -438,6 +462,14 @@ private:
      * 
      */
     uint64_t state_register;
+
+    /**
+     * @brief zobrist_key
+     * 
+     * Zobrist hash key
+     * 
+     */
+    uint64_t zobrist_key;
 };
 
 /**
@@ -543,10 +575,7 @@ constexpr inline ChessColor GameState::side_to_move() const
  * - TRUE if castle is available.
  * - FALSE if castle is not available.
  */
-constexpr inline bool GameState::castle_king_white() const
-{
-    return state_register & MASK_CASTLE_KING_WHITE;
-}
+constexpr inline bool GameState::castle_king_white() const { return state_register & MASK_CASTLE_KING_WHITE; }
 
 /**
  * @brief castle_queen_white
@@ -557,10 +586,7 @@ constexpr inline bool GameState::castle_king_white() const
  * - TRUE if castle is available.
  * - FALSE if castle is not available.
  */
-constexpr inline bool GameState::castle_queen_white() const
-{
-    return state_register & MASK_CASTLE_QUEEN_WHITE;
-}
+constexpr inline bool GameState::castle_queen_white() const { return state_register & MASK_CASTLE_QUEEN_WHITE; }
 
 /**
  * @brief castle_king_black
@@ -571,10 +597,7 @@ constexpr inline bool GameState::castle_queen_white() const
  * - TRUE if castle is available.
  * - FALSE if castle is not available.
  */
-constexpr inline bool GameState::castle_king_black() const
-{
-    return state_register & MASK_CASTLE_KING_BLACK;
-}
+constexpr inline bool GameState::castle_king_black() const { return state_register & MASK_CASTLE_KING_BLACK; }
 
 /**
  * @brief castle_queen_black
@@ -585,10 +608,7 @@ constexpr inline bool GameState::castle_king_black() const
  * - TRUE if castle is available.
  * - FALSE if castle is not available.
  */
-constexpr inline bool GameState::castle_queen_black() const
-{
-    return state_register & MASK_CASTLE_QUEEN_BLACK;
-}
+constexpr inline bool GameState::castle_queen_black() const { return state_register & MASK_CASTLE_QUEEN_BLACK; }
 
 /**
  * @brief en_passsant_square
@@ -627,7 +647,7 @@ constexpr inline uint64_t GameState::move_number() const
  * @param[in] castled TRUE if white has castled, FALSE if not.
  * 
  */
-constexpr inline void GameState::set_castled_white(bool castled) 
+constexpr inline void GameState::set_castled_white(bool castled)
 {
     state_register &= ~MASK_HAS_CASTLED_WHITE;
     state_register |= static_cast<uint64_t>(castled) << SHIFT_HAS_CASTLED_WHITE;
