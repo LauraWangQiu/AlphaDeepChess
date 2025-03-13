@@ -8,7 +8,6 @@
  * 
  */
 
-#include "zobrist.hpp"
 #include <vector>
 
 /**
@@ -42,12 +41,16 @@ public:
     {
     public:
         uint64_t key;         // zobrist key
-        int32_t evaluation;   // score of the position
+        int evaluation;       // score of the position
         Move best_move;       // best move found in position
         NodeType node_type;   // node type
         uint8_t depth;        // depth where the calculation has been done
 
         Entry() : key(0ULL), evaluation(0), best_move(), node_type(NodeType::FAILED), depth(0U) { }
+
+        Entry(uint64_t key, int evaluation, Move best_move, NodeType node_type, uint8_t depth)
+            : key(key), evaluation(evaluation), best_move(best_move), node_type(node_type), depth(depth)
+        { }
 
         // check if entry is valid
         bool is_valid() const { return node_type != NodeType::FAILED; }
@@ -70,47 +73,31 @@ public:
      * @return valid entry or failed entry
      * 
      */
-    Entry get_entry(uint64_t zobrist_key, int evaluation, int depth, int ply, int alpha, int beta) const
+    Entry get_entry(uint64_t zobrist_key) const
     {
-
         const Entry& entry = entries[index_in_table(zobrist_key)];
 
-        if (!entry.is_valid()) {
-            return Entry::failed_entry();   // invalid entry
-        }
-        else if (entry.key != zobrist_key) {
-            return Entry::failed_entry();   // invalid entry
-        }
-        else if (entry.depth < depth) {
-            return Entry::failed_entry();   // invalid entry
-        }
-        else if (entry.node_type == NodeType::EXACT) {
-            return entry;
-        }
-        else if (entry.node_type == NodeType::UPPER_BOUND && evaluation <= alpha) {
-            // We have stored the upper bound of the eval for this position.
-            return entry;
-        }
-        else if (entry.node_type == NodeType::LOWER_BOUND && evaluation >= beta) {
-            // We have stored the lower bound of the eval for this position.
-            return entry;
-        }
-        else {
-            return Entry::failed_entry();   // invalid entry
-        }
+        return entry.is_valid() && entry.key == zobrist_key ? entry : Entry::failed_entry();
     }
 
     /**
-     * @brief get_entry(uint64_t)
+     * @brief store_entry(uint64_t)
      * 
      * returns the entry in the table indexed by the zobrist hash key
      * 
-     * @param[in] zobrist_key zobrist hash key of the position 
+     * @param[in] zobrist zobrist hash key of the position 
+     * @param[in] eval evaluation of the position
+     * @param[in] move best mode of the position
+     * @param[in] node_type node type 
+     * @param[in] depth depth 
      * 
      * @return entries[index_in_table(zobrist_key)]
      * 
      */
-    void set_entry(const Entry& entry) { entries[index_in_table(entry.key)] = entry; }
+    void store_entry(uint64_t zobrist, int eval, Move move, NodeType node_type, uint8_t depth)
+    {
+        entries[index_in_table(zobrist)] = {zobrist, eval, move, node_type, depth};
+    }
 
     /**
      * @brief TranspositionTable()

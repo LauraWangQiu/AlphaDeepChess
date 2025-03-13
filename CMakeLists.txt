@@ -32,7 +32,7 @@ target_link_libraries(AlphaDeepChess PRIVATE ${OpenCL_LIBRARY})
 # Add basic algorithm source files
 set(BASIC_SOURCES
     src/evaluation/evaluation_basic.cpp
-    src/search/search_basic.cpp
+    src/search/search_transposition_table.cpp
     src/move_ordering/move_ordering_basic.cpp
     src/move_generator/move_generator_basic.cpp
 )

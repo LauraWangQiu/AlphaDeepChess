@@ -5,9 +5,12 @@
  */
 
 #include "board.hpp"
+#include "zobrist.hpp"
 
 #include <sstream>
 #include <stdexcept>
+
+static Zobrist zobrist;
 
 /**
  * @brief put_piece
@@ -144,6 +147,8 @@ void Board::make_move(Move move)
 
     // check if castling is still available
     check_and_modify_castle_rights();
+
+    game_state.set_zobrist_key(zobrist.hash(*this));
 }
 
 /**
@@ -272,6 +277,8 @@ void Board::load_fen(const std::string& fen)
 
     game_state.set_fifty_move_rule_counter(fifty_move_rule_counter);
     game_state.set_move_number(moveNumber);
+
+    game_state.set_zobrist_key(zobrist.hash(*this));
 }
 
 /**
