@@ -129,6 +129,26 @@ public:
         return moves[index];
     }
 
+    /**
+     * @brief begin
+     * 
+     * Returns an iterator to the beginning of the move list.
+     * 
+     * @return Iterator to the first move.
+     * 
+     */
+    constexpr inline Move* begin() { return moves; }
+
+    /**
+     * @brief end
+     * 
+     * Returns an iterator to the end of the move list.
+     * 
+     * @return Iterator to one past the last move.
+     * 
+     */
+    constexpr inline Move* end() { return moves + num_moves; }
+
 private:
     /**
      * @brief moves

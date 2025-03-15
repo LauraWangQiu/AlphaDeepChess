@@ -60,8 +60,6 @@ static uint64_t perft_recursive(Board& board, uint8_t depth, bool use_tt);
  */
 void perft(const std::string& FEN, uint64_t depth, MoveNodesList& moveNodeList, int64_t& time, bool use_tt)
 {
-    use_tt = true;
-
     Board board;
     board.load_fen(FEN);
 

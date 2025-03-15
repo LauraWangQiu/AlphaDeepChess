@@ -97,7 +97,7 @@ void Uci::loop()
         else if (command == "h" || command == "help") {
             help_command_action();
         }
-        else if (command == "q" || command == "quit") {
+        else if (command == "q" || command == "quit" || command == "exit") {
             quit_command_action();
             exit = true;
         }
@@ -183,7 +183,7 @@ void Uci::go_command_action(const TokenArray& tokens)
     search_stop();
 
     if (searchThread.joinable()) {
-        searchThread.join(); 
+        searchThread.join();
     }
     if (readerThread.joinable()) {
         readerThread.join();
@@ -205,7 +205,7 @@ void Uci::go_command_action(const TokenArray& tokens)
                 std::cout << "info depth " << result.depth << " score " << result.evaluation << " bestMove "
                           << Move(result.bestMove_data).to_string() << std::endl;
             }
-            
+
             {
                 std::unique_lock<std::mutex> lock(searchResults.mtx_data_avaliable_cv);
 
