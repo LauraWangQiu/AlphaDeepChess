@@ -14,7 +14,7 @@
 #include "evaluation.hpp"
 #include "move_generator.hpp"
 #include "perft.hpp"
-
+#include <cassert>
 #include <iostream>
 #include <sstream>
 

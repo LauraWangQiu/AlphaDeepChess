@@ -87,29 +87,6 @@
             "request": "launch",
             "program": "${workspaceFolder}/AlphaDeepChessGUI.py",
             "console": "integratedTerminal"
-        },
-        {
-            "name": "Profiling_Release",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "/bin/sh",              
-            "args": [
-                "-c",                            
-                "sudo perf record -g ${workspaceFolder}/build/release/AlphaDeepChess && perf report"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "release"
         }
     ],
 

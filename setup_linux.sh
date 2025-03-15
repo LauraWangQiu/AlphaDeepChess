@@ -9,11 +9,11 @@ fi
 # Create and configure the build debug and release directory
 mkdir -p build/debug
 cd build/debug
-cmake ../..
+cmake -DCMAKE_BUILD_TYPE=Debug ../..
 cd ../..
 mkdir -p build/release
 cd build/release
-cmake ../..
+cmake -DCMAKE_BUILD_TYPE=Release ../..
 cd ../..
 
 # Check if there is a CMakeLists.txt file inside the test folder
@@ -26,9 +26,9 @@ fi
 cd test
 mkdir -p build/debug
 cd build/debug
-cmake ../..
+cmake -DCMAKE_BUILD_TYPE=Debug ../..
 cd ../..
 mkdir -p build/release
 cd build/release
-cmake ../..
+cmake -DCMAKE_BUILD_TYPE=Release ../..
 cd ../../..
