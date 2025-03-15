@@ -9,6 +9,8 @@
  */
 
 #include <vector>
+#include <bit_utilities.hpp>
+#include "move.hpp"
 
 /**
  * @brief TranspositionTable
@@ -19,6 +21,22 @@
 class TranspositionTable
 {
 public:
+    enum class SIZE : int
+    {
+        MB_1 = 1 << 0,
+        MB_2 = 1 << 1,
+        MB_4 = 1 << 2,
+        MB_8 = 1 << 3,
+        MB_16 = 1 << 4,
+        MB_32 = 1 << 5,
+        MB_64 = 1 << 6,
+        MB_128 = 1 << 7,
+        MB_256 = 1 << 8,
+        MB_512 = 1 << 9,
+        MB_1024 = 1 << 10,
+        MB_2048 = 1 << 11
+    };
+
     /**
      * @brief NodeType
      *
@@ -29,7 +47,7 @@ public:
      * or low enough to set the upper bound, it is good to store that information also.
      * 
      */
-    typedef enum class NodeType
+    enum class NodeType : uint8_t
     {
         FAILED,        // failed entry
         EXACT,         // PV-Node, Score is Exact
@@ -42,14 +60,19 @@ public:
     public:
         uint64_t key;         // zobrist key
         int evaluation;       // score of the position
-        Move best_move;       // best move found in position
+        Move move;            // best move found in position
         NodeType node_type;   // node type
         uint8_t depth;        // depth where the calculation has been done
 
-        Entry() : key(0ULL), evaluation(0), best_move(), node_type(NodeType::FAILED), depth(0U) { }
+        Entry() : key(0ULL), evaluation(0), move(), node_type(NodeType::FAILED), depth(0U) { }
 
-        Entry(uint64_t key, int evaluation, Move best_move, NodeType node_type, uint8_t depth)
-            : key(key), evaluation(evaluation), best_move(best_move), node_type(node_type), depth(depth)
+        constexpr Entry(const Entry& entry)
+            : key(entry.key), evaluation(entry.evaluation), move(entry.move), node_type(entry.node_type),
+              depth(entry.depth)
+        { }
+
+        Entry(uint64_t key, int evaluation, Move move, NodeType node_type, uint8_t depth)
+            : key(key), evaluation(evaluation), move(move), node_type(node_type), depth(depth)
         { }
 
         // check if entry is valid
@@ -57,6 +80,27 @@ public:
 
         // returns a failed entry
         static Entry failed_entry() { return Entry(); }
+
+        constexpr bool operator==(const Entry& other) const
+        {
+            return key == other.key && evaluation == other.evaluation && move == other.move &&
+                node_type == other.node_type && depth == other.depth;
+        }
+
+        constexpr bool operator!=(const Entry& other) const { return !(*this == other); }
+
+        constexpr Entry& operator=(const Entry& other)
+        {
+            if (this != &other)   // not a self-assignment
+            {
+                this->key = other.key;
+                this->evaluation = other.evaluation;
+                this->move = other.move;
+                this->node_type = other.node_type;
+                this->depth = other.depth;
+            }
+            return *this;
+        }
     };
 
     /**
@@ -65,10 +109,6 @@ public:
      * returns the entry in the table indexed by the zobrist hash key
      * 
      * @param[in] zobrist_key zobrist hash key of the position 
-     * @param[in] depth actual depth of the search 
-     * @param[in] ply ply from root in the search 
-     * @param[in] alpha alpha value in the search 
-     * @param[in] beta beta value in the search 
      * 
      * @return valid entry or failed entry
      * 
@@ -83,7 +123,7 @@ public:
     /**
      * @brief store_entry(uint64_t)
      * 
-     * returns the entry in the table indexed by the zobrist hash key
+     * stores an entry in the transposition table
      * 
      * @param[in] zobrist zobrist hash key of the position 
      * @param[in] eval evaluation of the position
@@ -91,27 +131,60 @@ public:
      * @param[in] node_type node type 
      * @param[in] depth depth 
      * 
-     * @return entries[index_in_table(zobrist_key)]
-     * 
      */
     void store_entry(uint64_t zobrist, int eval, Move move, NodeType node_type, uint8_t depth)
     {
-        entries[index_in_table(zobrist)] = {zobrist, eval, move, node_type, depth};
+        entries[index_in_table(zobrist)] = Entry(zobrist, eval, move, node_type, depth);
+        assert(entries[index_in_table(zobrist)].is_valid());
+        assert(move.is_valid());
     }
 
     /**
-     * @brief TranspositionTable()
+     * @brief store_entry(const Entry&)
      * 
+     * stores an entry in the transposition table
+     * 
+     * @param[in] entry entry to store 
+     * 
+     */
+    void store_entry(const Entry& entry)
+    {
+        entries[index_in_table(entry.key)] = entry;
+        assert(entries[index_in_table(entry.key)].is_valid());
+        assert(entry.move.is_valid());
+    }
+
+    /**
+     * @brief get_num_entries()
+     *
+     * return num of entries in transposition table
+     * 
+     * @return num_entries
+     */
+    inline uint32_t get_num_entries() const { return num_entries; }
+
+    /**
+     * @brief TranspositionTable(SIZE)
+     * 
+     * @param[in] size_MB zobrist hash key of the position 
+
      * constructor of the TranspositionTable.
      * 
      */
-    TranspositionTable(uint32_t size_MB = 64U) : num_entries(0ULL)
+    TranspositionTable(SIZE size_MB = SIZE::MB_64) : num_entries(0ULL)
     {
-        const uint32_t size_table_bytes = size_MB * 1024 * 1024;
-        num_entries = size_table_bytes / sizeof(Entry);
+        const uint64_t size_table_bytes = mb_to_bytes(static_cast<uint64_t>(size_MB));
 
-        entries.resize(num_entries);
+        num_entries = size_table_bytes >> lsb(next_power_of_two(sizeof(Entry)));
+
+        assert(num_entries * next_power_of_two(sizeof(Entry)) == size_table_bytes);
+        assert(is_power_of_two(num_entries));
+        assert(is_power_of_two(size_table_bytes));
+
+        resize(num_entries);
     }
+
+    TranspositionTable() = delete;
 
     /**
      * @brief ~TranspositionTable()
@@ -130,10 +203,34 @@ private:
      * 
      * @param[in] zobrist_key zobrist hash key of the position 
      * 
-     * @return index key of the entry in the table
+     * @return zobrist_key % num_entries
      * 
      */
-    uint64_t index_in_table(uint64_t zobrist_key) const { return zobrist_key % num_entries; }
+    uint64_t index_in_table(uint64_t zobrist_key) const
+    {
+        assert(is_power_of_two(num_entries));
+
+        return zobrist_key & (num_entries - 1ULL);
+    }
+
+    /**
+     * @brief resize(uint64_t)
+     * 
+     * @note new_num_entries must be power of two
+     * 
+     * @param[in] new_num_entries new number of entries in the transposition table
+     * 
+     */
+    void resize(uint64_t new_num_entries)
+    {
+        assert(is_power_of_two(new_num_entries));
+
+        num_entries = new_num_entries;
+        entries.resize(num_entries);
+        for (Entry& entry : entries) {
+            entry = Entry();
+        }
+    }
 
     /**
      * @brief entries
@@ -149,5 +246,5 @@ private:
      * size of the entries vector
      * 
      */
-    uint32_t num_entries;
+    uint64_t num_entries;
 };

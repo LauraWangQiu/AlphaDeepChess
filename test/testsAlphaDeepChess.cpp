@@ -9,6 +9,8 @@
 #include "row_test.cpp"
 #include "col_test.cpp"
 #include "diagonal_test.cpp"
+#include "zobrist_test.cpp"
+#include "transposition_table_test.cpp"
 
 int main()
 {
@@ -22,6 +24,8 @@ int main()
     move_list_test();
     board_test();
     diagonal_test();
+    zobrist_test();
+    transposition_table_test();
     move_generator_test();
 
     return 0;

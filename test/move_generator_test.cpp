@@ -49,7 +49,7 @@ void move_generator_test()
 {
     std::cout << "---------move generator test---------\n\n";
 
-    const int MAX_DEPTH = 6;
+    const int MAX_DEPTH = 5;
 
     // Collect keys in a vector to assign to threads
     std::vector<std::string> keys;

@@ -26,7 +26,7 @@ static Move bestMoveFound;
 static int bestEvalFound;
 static Move bestMoveInIteration;
 static int bestEvalInIteration;
-static TranspositionTable transpositionTable;
+static TranspositionTable transpositionTable(TranspositionTable::SIZE::MB_256);
 
 static inline void iterative_deepening(SearchResults& searchResults, Board& board, int max_depth);
 static int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int beta);
@@ -163,7 +163,9 @@ int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int b
         return quiescence_maximize_white(board, ply, alpha, beta);
     }
 
-    TranspositionTable::NodeType tt_bound = TranspositionTable::NodeType::EXACT;
+    TranspositionTable::NodeType node_tt = TranspositionTable::NodeType::EXACT;
+    Move best_move_in_pos_for_tt;
+    int best_eval_in_pos_for_tt = -INF;
 
     int max_evaluation = -INF;
     const GameState game_state = board.state();
@@ -180,6 +182,12 @@ int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int b
         int evaluation = alpha_beta_minimize_black(board, depth - 1, ply + 1, alpha, beta);
         board.unmake_move(moves[i], game_state);
 
+        if (evaluation > best_eval_in_pos_for_tt) {
+            // this statement is to store the best move of the position in the transposition table
+            best_eval_in_pos_for_tt = evaluation;
+            best_move_in_pos_for_tt = moves[i];
+        }
+
         if (ply == 0 && evaluation > bestEvalInIteration) {
             // if we are in the root node update the best move
             bestEvalInIteration = evaluation;
@@ -190,13 +198,14 @@ int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int b
         alpha = std::max(alpha, evaluation);
 
         if (max_evaluation >= beta) {
-            tt_bound = TranspositionTable::NodeType::LOWER_BOUND;
+            node_tt = TranspositionTable::NodeType::LOWER_BOUND;
             break;   // beta cutoff
         }
     }
 
-    transpositionTable.store_entry(zobrist_key,bestEvalInIteration, bestMoveInIteration, tt_bound, depth);
-
+    if (best_move_in_pos_for_tt.is_valid()) {
+        transpositionTable.store_entry(zobrist_key, best_eval_in_pos_for_tt, best_move_in_pos_for_tt, node_tt, depth);
+    }
     return max_evaluation;
 }
 
@@ -244,7 +253,9 @@ int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int b
         return quiescence_minimize_black(board, ply, alpha, beta);
     }
 
-    TranspositionTable::NodeType tt_bound = TranspositionTable::NodeType::EXACT;
+    TranspositionTable::NodeType node_tt = TranspositionTable::NodeType::EXACT;
+    Move best_move_in_pos_for_tt;
+    int best_eval_in_pos_for_tt = +INF;
 
     int min_evaluation = +INF;
     const GameState game_state = board.state();
@@ -261,6 +272,12 @@ int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int b
         int evaluation = alpha_beta_maximize_white(board, depth - 1, ply + 1, alpha, beta);
         board.unmake_move(moves[i], game_state);
 
+        if (evaluation < best_eval_in_pos_for_tt) {
+            // this statement is to store the best move of the position in the transposition table
+            best_eval_in_pos_for_tt = evaluation;
+            best_move_in_pos_for_tt = moves[i];
+        }
+
         if (ply == 0 && evaluation < bestEvalInIteration) {
             // if we are in the root node update the best move
             bestEvalInIteration = evaluation;
@@ -271,13 +288,14 @@ int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int b
         beta = std::min(beta, evaluation);
 
         if (min_evaluation <= alpha) {
-            tt_bound = TranspositionTable::NodeType::UPPER_BOUND;
+            node_tt = TranspositionTable::NodeType::UPPER_BOUND;
             break;   // alpha cutoff
         }
     }
 
-    transpositionTable.store_entry(zobrist_key,bestEvalInIteration, bestMoveInIteration, tt_bound, depth);
-
+    if (best_move_in_pos_for_tt.is_valid()) {
+        transpositionTable.store_entry(zobrist_key, best_eval_in_pos_for_tt, best_move_in_pos_for_tt, node_tt, depth);
+    }
     return min_evaluation;
 }
 
@@ -439,9 +457,12 @@ static bool get_entry_in_transposition_table(uint64_t zobrist, int depth, int al
     const TranspositionTable::Entry entry = transpositionTable.get_entry(zobrist);
 
     eval = entry.evaluation;
-    move = entry.best_move;
+    move = entry.move;
 
-    if (entry.depth < depth) {
+    if (!entry.is_valid()) {
+        return false;
+    }
+    else if (entry.depth < depth) {
         return false;   // entry with a not valid eval because it was calculated at less depth
     }
 

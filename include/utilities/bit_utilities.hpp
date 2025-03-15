@@ -11,6 +11,38 @@
 #include <cassert>
 
 /**
+ * @brief is_power_of_two()
+ * 
+ * Checks if the given number is a power of two.
+ * 
+ * @param[in] number The number to check.
+ * 
+ * @return true if the number is a power of two, false otherwise.
+ */
+constexpr inline bool is_power_of_two(uint64_t number) { return std::has_single_bit(number); }
+
+/**
+ * @brief mb_to_bytes()
+ * 
+ * Converts megabytes to bytes
+ * 
+ * @param[in] megabytes The number of megabytes to convert.
+ * 
+ * @return megabytes * 1024 * 1024
+ */
+constexpr inline uint64_t mb_to_bytes(uint64_t megabytes) { return megabytes << 20U; }
+
+/**
+ * @brief next_power_of_two()
+ * 
+ * Calculates the smallest integral power of two that is not less than the given number.
+ * 
+ * @param[in] number The selected number.
+ * @return The next power of two.
+ */
+constexpr inline uint64_t next_power_of_two(uint64_t number) { return std::bit_ceil(number); }
+
+/**
  * @brief lsb(uint64_t bits)
  * 
  * Returns the index of the least significant bit (LSB) that is set.
@@ -41,7 +73,7 @@ constexpr inline uint8_t lsb(uint64_t bits)
 constexpr inline uint8_t msb(uint64_t bits)
 {
     assert(bits);
-    return 63 - std::countl_zero(bits);  // 63 - leading zeros gives the MSB index
+    return 63 - std::countl_zero(bits);   // 63 - leading zeros gives the MSB index
 }
 
 /**
@@ -80,6 +112,6 @@ constexpr inline uint8_t pop_msb(uint64_t& bits)
     assert(bits);
 
     uint8_t msb_index = 63 - std::countl_zero(bits);
-    bits &= ~(1ULL << msb_index);  // Clears the MSB
+    bits &= ~(1ULL << msb_index);   // Clears the MSB
     return msb_index;
 }

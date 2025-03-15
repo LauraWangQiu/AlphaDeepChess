@@ -34,5 +34,7 @@ typedef std::vector<std::pair<Move, uint64_t>> MoveNodesList;
  * @param[in] depth depth to reach.
  * @param[out] moveNodeList legal moves and their number of nodes
  * @param[out] time ms passed to complete the perft test.
+ * @param[in] use_tt use of transposition table to speed up process
+ * 
  */
-void perft(const std::string& FEN, uint64_t depth, MoveNodesList& moveNodeList, int64_t& time);
+void perft(const std::string& FEN, uint64_t depth, MoveNodesList& moveNodeList, int64_t& time, bool use_tt = true);

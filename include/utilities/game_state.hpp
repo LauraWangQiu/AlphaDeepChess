@@ -356,6 +356,16 @@ public:
     constexpr inline void set_zobrist_key(uint64_t key) { zobrist_key = key; };
 
     /**
+     * @brief xor_zobrist
+     * 
+     * modify the zobrist_key ( zobrist_key ^= seed ).
+     * 
+     * @param[in] seed seed hash key modifier
+     * 
+     */
+    constexpr inline void xor_zobrist(uint64_t seed) { zobrist_key ^= seed; };
+
+    /**
      * @brief clean
      * 
      *  Cleans the game state to 0 (initial value)
@@ -398,7 +408,7 @@ public:
      * @param[in] gs gameState where to copy the initial value.
      * 
      */
-    constexpr GameState(const GameState& gs) : state_register(gs.state_register), zobrist_key(zobrist_key) { }
+    constexpr GameState(const GameState& gs) : state_register(gs.state_register), zobrist_key(gs.zobrist_key) { }
 
     /**
      * @brief operator==

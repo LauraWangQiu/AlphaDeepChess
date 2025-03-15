@@ -10,8 +10,6 @@
 #include <sstream>
 #include <stdexcept>
 
-static Zobrist zobrist;
-
 /**
  * @brief put_piece
  * 
@@ -120,6 +118,12 @@ void Board::make_move(Move move)
     const Piece origin_piece = get_piece(origin_square);
     const Piece end_piece = get_piece(end_square);
 
+    // if en passant was valid update hash
+    if (game_state.en_passant_square().is_valid()) {
+        const Square eps = game_state.en_passant_square();
+        game_state.xor_zobrist(Zobrist::get_en_passant_seed(eps.col()));
+    }
+
     switch (move.type()) {
     case MoveType::NORMAL: make_normal_move(move); break;
     case MoveType::CASTLING: make_castling_move(move); break;
@@ -144,11 +148,10 @@ void Board::make_move(Move move)
 
     // change side to move
     game_state.set_side_to_move(opposite_color(game_state.side_to_move()));
+    game_state.xor_zobrist(Zobrist::get_black_to_move_seed());
 
     // check if castling is still available
     check_and_modify_castle_rights();
-
-    game_state.set_zobrist_key(zobrist.hash(*this));
 }
 
 /**
@@ -278,7 +281,7 @@ void Board::load_fen(const std::string& fen)
     game_state.set_fifty_move_rule_counter(fifty_move_rule_counter);
     game_state.set_move_number(moveNumber);
 
-    game_state.set_zobrist_key(zobrist.hash(*this));
+    game_state.set_zobrist_key(Zobrist::hash(*this));
 }
 
 /**
@@ -402,32 +405,36 @@ void Board::make_normal_move(Move normal_move)
     assert(normal_move.type() == MoveType::NORMAL);
     assert(!is_empty(normal_move.square_from()));
 
-    const Square origin_square(normal_move.square_from());
-    const Square end_square(normal_move.square_to());
-    const Piece origin_piece = get_piece(origin_square);
-    const Piece end_piece = get_piece(end_square);
+    const Square origin_sq(normal_move.square_from());
+    const Square end_sq(normal_move.square_to());
+    const Piece origin_piece = get_piece(origin_sq);
+    const Piece end_piece = get_piece(end_sq);
 
-    put_piece(origin_piece, end_square);
-    remove_piece(origin_square);
+    put_piece(origin_piece, end_sq);
+    remove_piece(origin_sq);
+
+    // update zobrist hash with the movement of the pieces
+    game_state.xor_zobrist(Zobrist::get_seed(origin_sq, origin_piece) ^ Zobrist::get_seed(end_sq, origin_piece));
+
+    if (end_piece != Piece::EMPTY) {
+        game_state.xor_zobrist(Zobrist::get_seed(end_sq, end_piece));
+    }
 
     // captured piece will be Empty if move was not a capture
     game_state.set_last_captured_piece(piece_to_pieceType(end_piece));
-    //en Passant will be invalid
-
 
     // if move is double push pawn then update the square where enPassant is available
-
     const bool is_pawn_move = (piece_to_pieceType(origin_piece) == PieceType::PAWN);
     const bool is_move_double_push = is_pawn_move &&
-        ((origin_square.row() == ROW_7 && end_square.row() == ROW_5) ||
-         (origin_square.row() == ROW_2 && end_square.row() == ROW_4));
+        ((origin_sq.row() == ROW_7 && end_sq.row() == ROW_5) || (origin_sq.row() == ROW_2 && end_sq.row() == ROW_4));
 
     if (is_move_double_push) {
-        const Square eps(origin_square.row() == ROW_2 ? ROW_3 : ROW_6, end_square.col());
+        const Square eps(origin_sq.row() == ROW_2 ? ROW_3 : ROW_6, end_sq.col());
         game_state.set_en_passant_square(eps);
         check_and_modify_en_passant_rule();
     }
     else {
+
         game_state.set_en_passant_square(Square::SQ_INVALID);
     }
 }
@@ -465,10 +472,17 @@ void Board::make_promotion_move(Move promotion_move)
 
     const PieceType promo_piece_type = promotion_move.promotion_piece();
     const ChessColor promo_piece_color = get_color(moved_piece);
-    const Piece promotion_piece = create_piece(promo_piece_type, promo_piece_color);
+    const Piece promo_piece = create_piece(promo_piece_type, promo_piece_color);
 
     remove_piece(origin_square);
-    put_piece(promotion_piece, end_square);
+    put_piece(promo_piece, end_square);
+
+    // update zobrist hash with the movement of the pieces
+    game_state.xor_zobrist(Zobrist::get_seed(origin_square, moved_piece) ^ Zobrist::get_seed(end_square, promo_piece));
+
+    if (end_piece != Piece::EMPTY) {
+        game_state.xor_zobrist(Zobrist::get_seed(end_square, end_piece));
+    }
 
     // captured piece will be Empty if move was not a capture
     game_state.set_last_captured_piece(piece_to_pieceType(end_piece));
@@ -509,13 +523,18 @@ void Board::make_castling_move(Move castling_move)
         assert(get_piece(Square::SQ_H1) == Piece::W_ROOK);
         assert(is_empty(Square::SQ_F1) && is_empty(Square::SQ_G1));
 
+        // update zobrist hash with the movement of the pieces
+        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_E1, Piece::W_KING) ^
+                               Zobrist::get_seed(Square::SQ_G1, Piece::W_KING));
+
+        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_H1, Piece::W_ROOK) ^
+                               Zobrist::get_seed(Square::SQ_F1, Piece::W_ROOK));
+
         put_piece(Piece::W_KING, Square::SQ_G1);
         put_piece(Piece::W_ROOK, Square::SQ_F1);
         remove_piece(Square::SQ_E1);
         remove_piece(Square::SQ_H1);
 
-        game_state.set_castle_king_white(false);
-        game_state.set_castle_queen_white(false);
         game_state.set_castled_white(true);
     }
     else if (castling_move == Move::castle_black_king()) {
@@ -525,13 +544,17 @@ void Board::make_castling_move(Move castling_move)
         assert(get_piece(Square::SQ_H8) == Piece::B_ROOK);
         assert(is_empty(Square::SQ_F8) && is_empty(Square::SQ_G8));
 
+        // update zobrist hash with the movement of the pieces
+        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_E8, Piece::B_KING) ^
+                               Zobrist::get_seed(Square::SQ_G8, Piece::B_KING));
+        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_H8, Piece::B_ROOK) ^
+                               Zobrist::get_seed(Square::SQ_F8, Piece::B_ROOK));
+
         put_piece(Piece::B_KING, Square::SQ_G8);
         put_piece(Piece::B_ROOK, Square::SQ_F8);
         remove_piece(Square::SQ_E8);
         remove_piece(Square::SQ_H8);
 
-        game_state.set_castle_king_black(false);
-        game_state.set_castle_queen_black(false);
         game_state.set_castled_black(true);
     }
     else if (castling_move == Move::castle_white_queen()) {
@@ -541,13 +564,17 @@ void Board::make_castling_move(Move castling_move)
         assert(get_piece(Square::SQ_A1) == Piece::W_ROOK);
         assert(is_empty(Square::SQ_D1) && is_empty(Square::SQ_C1) && is_empty(Square::SQ_B1));
 
+        // update zobrist hash with the movement of the pieces
+        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_E1, Piece::W_KING) ^
+                               Zobrist::get_seed(Square::SQ_C1, Piece::W_KING));
+        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_A1, Piece::W_ROOK) ^
+                               Zobrist::get_seed(Square::SQ_D1, Piece::W_ROOK));
+
         put_piece(Piece::W_KING, Square::SQ_C1);
         put_piece(Piece::W_ROOK, Square::SQ_D1);
         remove_piece(Square::SQ_E1);
         remove_piece(Square::SQ_A1);
 
-        game_state.set_castle_queen_white(false);
-        game_state.set_castle_king_white(false);
         game_state.set_castled_white(true);
     }
     else if (castling_move == Move::castle_black_queen()) {
@@ -557,13 +584,17 @@ void Board::make_castling_move(Move castling_move)
         assert(get_piece(Square::SQ_A8) == Piece::B_ROOK);
         assert(is_empty(Square::SQ_D8) && is_empty(Square::SQ_C8) && is_empty(Square::SQ_B8));
 
+        // update zobrist hash with the movement of the pieces
+        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_E8, Piece::B_KING) ^
+                               Zobrist::get_seed(Square::SQ_C8, Piece::B_KING));
+        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_A8, Piece::B_ROOK) ^
+                               Zobrist::get_seed(Square::SQ_D8, Piece::B_ROOK));
+
         put_piece(Piece::B_KING, Square::SQ_C8);
         put_piece(Piece::B_ROOK, Square::SQ_D8);
         remove_piece(Square::SQ_E8);
         remove_piece(Square::SQ_A8);
 
-        game_state.set_castle_queen_black(false);
-        game_state.set_castle_king_black(false);
         game_state.set_castled_black(true);
     }
 
@@ -632,10 +663,16 @@ void Board::make_enPassant_move(Move enPassant_move)
     const Square end_square(enPassant_move.square_to());
     const Square captured_pawn_square(origin_square.row(), end_square.col());
     const Piece attacker_pawn_piece(get_piece(origin_square));
+    const Piece captured_pawn_piece(get_piece(captured_pawn_square));
 
     assert(piece_to_pieceType(get_piece(origin_square)) == PieceType::PAWN);
     assert(piece_to_pieceType(get_piece(captured_pawn_square)) == PieceType::PAWN);
 
+    // update zobrist hash with the movement of the pieces
+    game_state.xor_zobrist(Zobrist::get_seed(origin_square, attacker_pawn_piece) ^
+                           Zobrist::get_seed(end_square, attacker_pawn_piece));
+
+    game_state.xor_zobrist(Zobrist::get_seed(captured_pawn_square, captured_pawn_piece));
 
     put_piece(attacker_pawn_piece, end_square);
     remove_piece(origin_square);
@@ -683,6 +720,7 @@ void Board::check_and_modify_castle_rights()
 
         if (get_piece({ROW_1, COL_E}) != Piece::W_KING || get_piece({ROW_1, COL_H}) != Piece::W_ROOK) {
             game_state.set_castle_king_white(false);
+            game_state.xor_zobrist(Zobrist::get_king_white_castle_seed());
         }
     }
     // Check for white queen-side castling rights
@@ -690,6 +728,7 @@ void Board::check_and_modify_castle_rights()
 
         if (get_piece({ROW_1, COL_E}) != Piece::W_KING || get_piece({ROW_1, COL_A}) != Piece::W_ROOK) {
             game_state.set_castle_queen_white(false);
+            game_state.xor_zobrist(Zobrist::get_queen_white_castle_seed());
         }
     }
 
@@ -698,6 +737,7 @@ void Board::check_and_modify_castle_rights()
 
         if (get_piece({ROW_8, COL_E}) != Piece::B_KING || get_piece({ROW_8, COL_H}) != Piece::B_ROOK) {
             game_state.set_castle_king_black(false);
+            game_state.xor_zobrist(Zobrist::get_king_black_castle_seed());
         }
     }
 
@@ -706,6 +746,7 @@ void Board::check_and_modify_castle_rights()
 
         if (get_piece({ROW_8, COL_E}) != Piece::B_KING || get_piece({ROW_8, COL_A}) != Piece::B_ROOK) {
             game_state.set_castle_queen_black(false);
+            game_state.xor_zobrist(Zobrist::get_queen_black_castle_seed());
         }
     }
 }
@@ -759,4 +800,9 @@ void Board::check_and_modify_en_passant_rule()
     }
 
     game_state.set_en_passant_square(has_pawn_attacker ? eps : Square::SQ_INVALID);
+
+    // update hash with new en passant col
+    if (game_state.en_passant_square().is_valid()) {
+        game_state.xor_zobrist(Zobrist::get_en_passant_seed(eps.col()));
+    }
 }
