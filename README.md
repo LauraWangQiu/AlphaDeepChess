@@ -15,7 +15,7 @@ These instructions will help you set up and build the project on your local mach
     git clone https://github.com/LauraWangQiu/AlphaDeepChess.git
     ```
 
-2. **Install g++, cmake and OpenCL**:
+2. **Install g++ and cmake**:
 
     ```bash
     sudo apt-get install g++
@@ -41,11 +41,7 @@ These instructions will help you set up and build the project on your local mach
     git clone https://github.com/LauraWangQiu/AlphaDeepChess.git
     ```
 
-2. **OPTION 1 : use Visual Studio (EASY)**:
-
-    You can directly run the project from Visual Studio IDE
-
-3. **OPTION 2 : download g++(mingw), cmake and OpenCL (HARD)**:
+2. **download g++(mingw), cmake**:
 
     [Mingw](https://www.mingw-w64.org/downloads/)  
     [CMake](https://cmake.org/download/)  
@@ -70,7 +66,7 @@ These instructions will help you set up and build the project on your local mach
     git clone https://github.com/LauraWangQiu/AlphaDeepChess.git
     ```
 
-2. **Install g++, cmake and OpenCL**:
+2. **Install g++ and cmake**:
 
     ```bash
     brew install gcc
@@ -85,6 +81,16 @@ These instructions will help you set up and build the project on your local mach
     cd ./AlphaDeepChess
     chmod +x setup_linux.sh
     ./setupLinux.sh
+    ```
+
+## Profiling (only in Linux)
+
+1. **Profile analysis with perf linux tool**:
+
+    ```bash
+    cd ./AlphaDeepChess
+    chmod +x profile_release.sh
+    ./profile_release.sh
     ```
 
 ## Doxygen Commenting Guidelines

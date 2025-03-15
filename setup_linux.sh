@@ -6,12 +6,15 @@ if [ ! -f "CMakeLists.txt" ]; then
     exit 1
 fi
 
-# Create and configure the build directory
-mkdir -p build
-cd build
-cmake ..
-
-cd ..
+# Create and configure the build debug and release directory
+mkdir -p build/debug
+cd build/debug
+cmake ../..
+cd ../..
+mkdir -p build/release
+cd build/release
+cmake ../..
+cd ../..
 
 # Check if there is a CMakeLists.txt file inside the test folder
 if [ ! -f "test/CMakeLists.txt" ]; then
@@ -19,8 +22,13 @@ if [ ! -f "test/CMakeLists.txt" ]; then
     exit 1
 fi
 
-# Create and configure the test build directory
+# Create and configure the test build debug and release directory
 cd test
-mkdir -p build
-cd build
-cmake ..
+mkdir -p build/debug
+cd build/debug
+cmake ../..
+cd ../..
+mkdir -p build/release
+cd build/release
+cmake ../..
+cd ../../..
