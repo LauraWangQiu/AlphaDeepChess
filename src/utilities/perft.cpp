@@ -15,9 +15,6 @@
 #include "zobrist.hpp"
 #include <chrono>
 
-
-static TranspositionTable transpositionTable(TranspositionTable::SIZE::MB_32);
-
 // store node result in transposition table
 static inline void store_nodes_in_tt(uint64_t zobrist_key, uint8_t depth, int nodes);
 
@@ -143,19 +140,19 @@ static uint64_t perft_recursive(Board& board, uint8_t depth, bool use_tt)
 // store node result in transposition table
 static inline void store_nodes_in_tt(uint64_t zobrist_key, uint8_t depth, int nodes)
 {
-    const TranspositionTable::Entry entry = transpositionTable.get_entry(zobrist_key);
+    const TranspositionTable::Entry entry = TranspositionTable::get_entry(zobrist_key);
 
     if (entry.is_valid() && depth <= entry.depth) {
         return;
     }
 
-    transpositionTable.store_entry(zobrist_key, nodes, Move(2U), TranspositionTable::NodeType::EXACT, depth);
+    TranspositionTable::store_entry(zobrist_key, nodes, Move(2U), TranspositionTable::NodeType::EXACT, depth);
 }
 
 // return false if no entry in transposition table
 static inline bool get_nodes_in_tt(uint64_t zobrist_key, uint8_t depth, int& nodes)
 {
-    const TranspositionTable::Entry entry = transpositionTable.get_entry(zobrist_key);
+    const TranspositionTable::Entry entry = TranspositionTable::get_entry(zobrist_key);
 
     nodes = entry.evaluation;   // we store the nodes in the evaluation field
 

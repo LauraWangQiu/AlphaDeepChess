@@ -26,7 +26,6 @@ static Move bestMoveFound;
 static int bestEvalFound;
 static Move bestMoveInIteration;
 static int bestEvalInIteration;
-static TranspositionTable transpositionTable(TranspositionTable::SIZE::MB_256);
 
 static inline void iterative_deepening(SearchResults& searchResults, Board& board, int max_depth);
 static int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int beta);
@@ -204,7 +203,7 @@ int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int b
     }
 
     if (best_move_in_pos_for_tt.is_valid()) {
-        transpositionTable.store_entry(zobrist_key, best_eval_in_pos_for_tt, best_move_in_pos_for_tt, node_tt, depth);
+        TranspositionTable::store_entry(zobrist_key, best_eval_in_pos_for_tt, best_move_in_pos_for_tt, node_tt, depth);
     }
     return max_evaluation;
 }
@@ -294,7 +293,7 @@ int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int b
     }
 
     if (best_move_in_pos_for_tt.is_valid()) {
-        transpositionTable.store_entry(zobrist_key, best_eval_in_pos_for_tt, best_move_in_pos_for_tt, node_tt, depth);
+        TranspositionTable::store_entry(zobrist_key, best_eval_in_pos_for_tt, best_move_in_pos_for_tt, node_tt, depth);
     }
     return min_evaluation;
 }
@@ -454,7 +453,7 @@ static inline void insert_new_result(SearchResults& searchResults, int depth, in
 
 static bool get_entry_in_transposition_table(uint64_t zobrist, int depth, int alpha, int beta, int& eval, Move& move)
 {
-    const TranspositionTable::Entry entry = transpositionTable.get_entry(zobrist);
+    const TranspositionTable::Entry entry = TranspositionTable::get_entry(zobrist);
 
     eval = entry.evaluation;
     move = entry.move;

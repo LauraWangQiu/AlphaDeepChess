@@ -214,6 +214,20 @@ private:
     void perft_command_action(uint64_t depth) const;
 
     /**
+     * @brief setoption_command_action
+     * 
+     * Setoption command detected, use to change internal parameters of the engine.
+     * 
+     * @param[in] tokens buffer array with the user input tokens.
+     * @param[in] num_tokens number of tokens.
+     * 
+     *  @return 
+     *      - TRUE if success.
+     *      - FALSE if error detected, probably error in user input.
+     */
+    bool setoption_command_action(const TokenArray& tokens, uint32_t num_tokens);
+
+    /**
      * @brief unknown_command_action
      * 
      * Invalid command detected.

@@ -7,6 +7,7 @@
 #include <sstream>
 #include <mutex>
 #include "perft.hpp"
+#include "transposition_table.hpp"
 
 static constexpr auto RESET_COLOR = "\033[0m";
 static constexpr auto RED_COLOR = "\033[31m";
@@ -48,6 +49,8 @@ static const std::unordered_map<std::string, PerftEntry> perftResults = {
 void move_generator_test()
 {
     std::cout << "---------move generator test---------\n\n";
+
+    TranspositionTable::resize(TranspositionTable::SIZE::MB_256);
 
     const int MAX_DEPTH = 5;
 

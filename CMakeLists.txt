@@ -24,6 +24,7 @@ src/main.cpp
 src/board/board.cpp
 src/uci/uci.cpp
 src/utilities/perft.cpp
+src/utilities/transposition_table.cpp
 )
 
 target_include_directories(AlphaDeepChess PRIVATE ${OpenCL_INCLUDE_DIR})

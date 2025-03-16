@@ -89,8 +89,8 @@ These instructions will help you set up and build the project on your local mach
 
     ```bash
     cd ./AlphaDeepChess
-    chmod +x profile_release.sh
-    ./profile_release.sh
+    chmod +x profile.sh
+    ./profile.sh
     ```
 
 ## Doxygen Commenting Guidelines

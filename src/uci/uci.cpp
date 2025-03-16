@@ -14,6 +14,7 @@
 #include "evaluation.hpp"
 #include "move_generator.hpp"
 #include "perft.hpp"
+#include "transposition_table.hpp"
 #include <cassert>
 #include <iostream>
 #include <sstream>
@@ -91,6 +92,11 @@ void Uci::loop()
                 std::cout << "error in setting the position\n";
             }
         }
+        else if (command == "setoption") {
+            if (!setoption_command_action(tokens, num_tokens)) {
+                std::cout << "error in setoption command\n";
+            }
+        }
         else if (command == "d" || command == "diagram") {
             diagram_command_action();
         }
@@ -159,6 +165,7 @@ void Uci::go_command_action(const TokenArray& tokens)
                 depth = std::stoul(tokens[++i]);
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command : go depth\n";
+                return;
             }
         }
         else if (tokens[i] == "infinite") {
@@ -355,10 +362,13 @@ void Uci::help_command_action() const
                  "\t\tThe move format is in long algebraic notation.\n"
                  "\t\tA nullmove from the Engine to the GUI should be sent as 0000.\n"
                  "\t\tExamples:  e2e4, e7e5, e1g1 (white short castling), e7e8q (for promotion)\n\n"
-                 "go\n"
-                 "\tStart calculating.\n"
-                 "\tOptional parameters: searchmoves, ponder, wtime, btime, winc, binc, movestogo, "
-                 "\tdepth, nodes, mate, movetime, infinite.\n\n"
+
+                 "go [depth <depth> | infinite | perft <perft_depth>]\n"
+                 "\tStart calculating the best move until the specified depth.\n"
+                 "\tIn order to finish search use stop command, \n\n"
+
+                 "setoption [hash <size_mb_power_of_two>]\n"
+                 "\tChange internal parameters of the chess engine \n\n"
 
                  "stop\n"
                  "\tStop calculating.\n\n"
@@ -406,6 +416,49 @@ void Uci::perft_command_action(uint64_t depth) const
         nodes += moveNode.second;
     }
     std::cout << "\nNodes searched: " << nodes << "\nExecution time: " << time << " ms" << std::endl;
+}
+
+/**
+ * @brief setoption_command_action
+ * 
+ * Setoption command detected, use to change internal parameters of the engine.
+ * 
+ * @param[in] tokens buffer array with the user input tokens.
+ * @param[in] num_tokens number of tokens.
+ * 
+ *  @return 
+ *      - TRUE if success.
+ *      - FALSE if error detected, probably error in user input.
+ */
+bool Uci::setoption_command_action(const TokenArray& tokens, uint32_t num_tokens)
+{
+    if (num_tokens < 2) {
+        return false;
+    }
+    uint32_t token_i = 1;
+
+    if (tokens[token_i++] == "hash") {
+        try {
+            uint32_t size_mb = stoul(tokens[token_i++]);
+            TranspositionTable::SIZE size_tt = TranspositionTable::int_to_tt_size(size_mb);
+
+            if (size_tt != TranspositionTable::SIZE::INVALID) {
+                TranspositionTable::resize(size_tt);
+            }
+            else {
+                std::cout << "Invalid size for command : setoption hash <mb size power of two>\n";
+            }
+
+        } catch (const std::exception& e) {
+            std::cout << "Invalid argument for command : setoption hash\n";
+            return false;
+        }
+    }
+    else {
+        return false;
+    }
+
+    return true;
 }
 
 /**
