@@ -16,8 +16,8 @@ include_directories(include/move_generator)
 
 #find_package(OpenCL REQUIRED)
 
-message(STATUS "OpenCL include directory: ${OpenCL_INCLUDE_DIR}")
-message(STATUS "OpenCL library path: ${OpenCL_LIBRARY}")
+# message(STATUS "OpenCL include directory: ${OpenCL_INCLUDE_DIR}")
+# message(STATUS "OpenCL library path: ${OpenCL_LIBRARY}")
 
 add_executable(AlphaDeepChess 
 src/main.cpp

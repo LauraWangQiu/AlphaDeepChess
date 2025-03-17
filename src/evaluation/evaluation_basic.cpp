@@ -30,9 +30,9 @@
 #define BISHOP_VALUE 330
 #define QUEEN_VALUE 900
 
-#define DOUBLED_PAWNS_PENALTY_VALUE -5
-#define BLOCKED_PAWNS_PENALTY_VALUE -5
-#define ISOLATED_PAWNS_PENALTY_VALUE -5
+#define DOUBLED_PAWNS_PENALTY_VALUE -50
+#define BLOCKED_PAWNS_PENALTY_VALUE -50
+#define ISOLATED_PAWNS_PENALTY_VALUE -50
 
 #define PAWN_SHIELD_FOR_KING_SAFETY_PENALTY_VALUE -10
 #define PAWN_STORM_FOR_KING_SAFETY_PENALTY_VALUE -15
@@ -106,6 +106,11 @@ int evaluate_position(const Board& board)
             evaluation += evaluate_piece(board, game_phase, piece, row, col);
         }
     }
+
+    // TODO: Draw Evaluation (Insufficient material)
+    // https://www.chessprogramming.org/Draw_Evaluation
+    // https://www.chessprogramming.org/Interior_Node_Recognizer
+    // Related to transposition table
 
     return evaluation;
 }
@@ -221,6 +226,8 @@ int evaluate_piece(const Board& board, const GamePhase& game_phase, Piece piece,
     ChessColor color = get_color(piece);
     int sign = (color == ChessColor::WHITE) ? 1 : -1;
 
+    // Further evaluation based on piece type
+    // https://www.chessprogramming.org/Evaluation_of_Pieces
     switch (type) {
         case PieceType::PAWN:   evaluation += evaluate_pawn(board, piece, row, col, color);     break;
         case PieceType::ROOK:   evaluation += evaluate_rook(row, col, color);                   break;
@@ -256,9 +263,14 @@ int evaluate_pawn(const Board& board, Piece piece, int pawn_row, int pawn_col, C
     int sign = (color == ChessColor::WHITE) ? 1 : -1;
 
     // Pawn structure
+    // TODO: Pawn Hash Table for better performance
+    // https://www.chessprogramming.org/Pawn_Hash_Table
+    // related to magic bitboards
+    // TODO: Others
+    // https://www.chessprogramming.org/Pawn_Structure
     if (pawn_row > 0 && pawn_row < 7) {
-        // Doubled pawns = -5 penalty for each side
-        // Blocked pawns = -5 penalty for each side
+        // Doubled pawns = -50 penalty for each side
+        // Blocked pawns = -50 penalty for each side
         // https://en.wikipedia.org/wiki/Doubled_pawns
         if (Square(Row(pawn_row + sign), Col(pawn_col)).is_valid()) {
             Piece front_piece = board.get_piece(Square(Row(pawn_row + sign), Col(pawn_col)));
@@ -271,7 +283,7 @@ int evaluate_pawn(const Board& board, Piece piece, int pawn_row, int pawn_col, C
             }
         }
 
-        // Isolated pawns = -5 penalty for each side
+        // Isolated pawns = -50 penalty for each side
         // https://en.wikipedia.org/wiki/Isolated_pawn
         // Check if there are pawns in the adjacent files/columns
         bool isolated = true;
@@ -299,9 +311,9 @@ int evaluate_pawn(const Board& board, Piece piece, int pawn_row, int pawn_col, C
             evaluation += ISOLATED_PAWNS_PENALTY_VALUE;
         }
 
-        // TODO:
-        // Passed pawns = 1 point for each side
+        // TODO: Passed pawns
         // https://en.wikipedia.org/wiki/Passed_pawn
+        // https://www.chessprogramming.org/Blockade_of_Stop
     }
 
     evaluation += PrecomputedData::get_pawn_piece_square_table(Square(Row(pawn_row), Col(pawn_col)), color);
