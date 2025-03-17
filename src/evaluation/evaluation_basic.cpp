@@ -24,11 +24,6 @@
 // B + N > R + P
 // B + N = R + 1.5P
 // Q + P = 2R
-#define PAWN_VALUE 100
-#define ROOK_VALUE 500
-#define KNIGHT_VALUE 320
-#define BISHOP_VALUE 330
-#define QUEEN_VALUE 900
 
 #define DOUBLED_PAWNS_PENALTY_VALUE -50
 #define BLOCKED_PAWNS_PENALTY_VALUE -50
@@ -56,10 +51,10 @@ int evaluate_legal_moves(const Board& board);
 GamePhase determine_game_phase(const Board& board);
 int evaluate_piece(const Board& board, const GamePhase& game_phase, Piece piece, int row, int col);
 int evaluate_pawn(const Board& board, Piece piece, int pawn_row, int pawn_col, ChessColor color);
-int evaluate_rook(int rook_row, int rook_col, ChessColor color);
-int evaluate_knight(int knight_row, int knight_col, ChessColor color);
-int evaluate_bishop(int bishop_row, int bishop_col, ChessColor color);
-int evaluate_queen(int queen_row, int queen_col, ChessColor color);
+int evaluate_rook(Piece piece, int rook_row, int rook_col, ChessColor color);
+int evaluate_knight(Piece piece, int knight_row, int knight_col, ChessColor color);
+int evaluate_bishop(Piece piece, int bishop_row, int bishop_col, ChessColor color);
+int evaluate_queen(Piece piece, int queen_row, int queen_col, ChessColor color);
 int evaluate_king(const GamePhase& game_phase, const Board& board, int row, int col, ChessColor color);
 uint64_t get_king_zone_mask(int king_row, int king_col, ChessColor color);
 int evaluate_king_safety_middle_game(const Board& board, int king_row, int king_col, ChessColor color);
@@ -170,27 +165,7 @@ GamePhase determine_game_phase(const Board& board)
 
     for (int i = 0; i < 64; i++) {
         Piece piece = board.get_piece(i);
-        PieceType type = piece_to_pieceType(piece);
-        switch (type) {
-            case PieceType::PAWN:
-                total_material += PAWN_VALUE;
-                break;
-            case PieceType::ROOK:
-                total_material += ROOK_VALUE;
-                break;
-            case PieceType::KNIGHT:
-                total_material += KNIGHT_VALUE;
-                break;
-            case PieceType::BISHOP:
-                total_material += BISHOP_VALUE;
-                break;
-            case PieceType::QUEEN:
-                total_material += QUEEN_VALUE;
-                ++queens;
-                break;
-            default:
-                break;
-        }
+        total_material += raw_value(piece);
     }
 
     if (total_material > OPENING_MATERIAL) {
@@ -230,10 +205,10 @@ int evaluate_piece(const Board& board, const GamePhase& game_phase, Piece piece,
     // https://www.chessprogramming.org/Evaluation_of_Pieces
     switch (type) {
         case PieceType::PAWN:   evaluation += evaluate_pawn(board, piece, row, col, color);     break;
-        case PieceType::ROOK:   evaluation += evaluate_rook(row, col, color);                   break;
-        case PieceType::KNIGHT: evaluation += evaluate_knight(row, col, color);                 break;
-        case PieceType::BISHOP: evaluation += evaluate_bishop(row, col, color);                 break;
-        case PieceType::QUEEN:  evaluation += evaluate_queen(row, col, color);                  break;
+        case PieceType::ROOK:   evaluation += evaluate_rook(piece, row, col, color);                   break;
+        case PieceType::KNIGHT: evaluation += evaluate_knight(piece, row, col, color);                 break;
+        case PieceType::BISHOP: evaluation += evaluate_bishop(piece, row, col, color);                 break;
+        case PieceType::QUEEN:  evaluation += evaluate_queen(piece, row, col, color);                  break;
         case PieceType::KING:   evaluation += evaluate_king(game_phase, board, row, col, color);break;
         default: break;
     }
@@ -259,7 +234,7 @@ int evaluate_piece(const Board& board, const GamePhase& game_phase, Piece piece,
 int evaluate_pawn(const Board& board, Piece piece, int pawn_row, int pawn_col, ChessColor color)
 {
     // Pawn base material value
-    int evaluation = PAWN_VALUE;
+    int evaluation = raw_value(piece);
     int sign = (color == ChessColor::WHITE) ? 1 : -1;
 
     // Pawn structure
@@ -333,10 +308,10 @@ int evaluate_pawn(const Board& board, Piece piece, int pawn_row, int pawn_col, C
  *
  * @returns evaluation of the rook.
  */
-int evaluate_rook(int rook_row, int rook_col, ChessColor color)
+int evaluate_rook(Piece piece, int rook_row, int rook_col, ChessColor color)
 {
     // Rook base material value
-    int evaluation = ROOK_VALUE;
+    int evaluation = raw_value(piece);
 
     evaluation += PrecomputedData::get_rook_piece_square_table(Square(Row(rook_row), Col(rook_col)), color);
 
@@ -355,10 +330,10 @@ int evaluate_rook(int rook_row, int rook_col, ChessColor color)
  *
  * @returns evaluation of the knight.
  */
-int evaluate_knight(int knight_row, int knight_col, ChessColor color)
+int evaluate_knight(Piece piece, int knight_row, int knight_col, ChessColor color)
 {
     // Knight base material value
-    int evaluation = KNIGHT_VALUE;
+    int evaluation = raw_value(piece);
 
     evaluation += PrecomputedData::get_knight_piece_square_table(Square(Row(knight_row), Col(knight_col)), color);
 
@@ -377,10 +352,10 @@ int evaluate_knight(int knight_row, int knight_col, ChessColor color)
  *
  * @returns evaluation of the bishop.
  */
-int evaluate_bishop(int bishop_row, int bishop_col, ChessColor color)
+int evaluate_bishop(Piece piece, int bishop_row, int bishop_col, ChessColor color)
 {
     // Bishop base material value
-    int evaluation = BISHOP_VALUE;
+    int evaluation = raw_value(piece);
 
     evaluation += PrecomputedData::get_bishop_piece_square_table(Square(Row(bishop_row), Col(bishop_col)), color);
 
@@ -399,10 +374,10 @@ int evaluate_bishop(int bishop_row, int bishop_col, ChessColor color)
  *
  * @returns evaluation of the queen.
  */
-int evaluate_queen(int queen_row, int queen_col, ChessColor color)
+int evaluate_queen(Piece piece, int queen_row, int queen_col, ChessColor color)
 {
     // Queen base material value
-    int evaluation = QUEEN_VALUE;
+    int evaluation = raw_value(piece);
 
     evaluation += PrecomputedData::get_queen_piece_square_table(Square(Row(queen_row), Col(queen_col)), color);
 

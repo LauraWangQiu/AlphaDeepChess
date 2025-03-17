@@ -100,69 +100,32 @@ These instructions will help you set up and build the project on your local mach
 
 ## Comparing engines with CuteChess
 
-To compare engines, we will use the `cutechess` tool. This tool allows us to run matches between two engines and get the results in a `.pgn` file. We will compare it with the `stockfish` engine.
+To compare engines, we will use the `cutechess` tool. This tool allows us to run matches between two engines and get the results in a `.pgn` file and the final positions in a `epd` file. We will compare it with the `stockfish` engine.
 
 > We encourage you to take a look to the documentation of [CuteChess](https://github.com/cutechess/cutechess/wiki/Building-from-source) to know how to download and build it from source if you want to use the latest version or use the graphical interface.
 
-In an automated way, we created a script to download `cutechess` and `stockfish` portable version. To run it, continue with the following steps depending on your OS:
-
-### Linux
-
-> Ubuntu documentation: <https://learn.microsoft.com/en-us/powershell/scripting/install/install-ubuntu?view=powershell-7.5>  
-> Debian documentation: <https://learn.microsoft.com/en-us/powershell/scripting/install/install-debian?view=powershell-7.5>
-
-If `powershell` is not installed, you can install it with the following command:
+In an automated way, we created a script to download `cutechess` and `stockfish` portable version. To run it:
 
 ```bash
-# Prerequisites
-sudo apt-get install -y wget
-source /etc/os-release
-wget -q https://packages.microsoft.com/config/debian/$VERSION_ID/packages-microsoft-prod.deb
-sudo dpkg -i packages-microsoft-prod.deb
-rm packages-microsoft-prod.deb
-sudo apt-get update
-# Install PowerShell
-sudo apt-get install -y powershell
+py .\setupComparator.py
 ```
 
-Then, run the script:
-
-```bash
-pwsh ./comparative.ps1
-```
-
-### Windows
-
-In a PowerShell terminal, run the script:
-
-```bash
-./comparative.ps1
-```
-
-### MacOS
-
-If `powershell` is not installed, you can install it with the following command:
-
-```bash
-brew install --cask powershell
-```
-
-Then, run the script:
-
-```bash
-./comparative.ps1
-```
-
-There should be a new directory called `comparative` with the `cutechess` and `stockfish` portable version.
+There should be a new directory called `enginesComparator` with the `cutechess` and `stockfish` portable version.
 
 ```txt
-/comparative
+/enginesComparator
 |-- /cutechess
 |   |-- cutechess-cli
 |   |-- ...
 |-- /stockfish
 |   |-- stockfish_X_x86_64
 |   |-- ...
+```
+
+To compare the engines, we will use the `cutechess-cli` tool. We will run a match between `stockfish` and our engine. To do so, we will use the `compareEngines.py`.
+
+```bash
+py .\compareEngines.py -buildType [Debug (default=Release)] -games [num_games (default=10)] -tc [time_control (default=40/60)] -st [search_time (default=INF)] -depth [depth (default=INF)] -concurrency [concurrency (default=0)]
 ```
 
 ## Doxygen Commenting Guidelines

@@ -1,0 +1,481 @@
+%---------------------------------------------------------------------
+%
+%                          TeXiS.sty
+%
+%---------------------------------------------------------------------
+%
+% TeXiS.sty
+% Copyright 2009 Marco Antonio Gomez-Martin, Pedro Pablo Gomez-Martin
+%
+% This file belongs to TeXiS, a LaTeX template for writting
+% Thesis and other documents. The complete last TeXiS package can
+% be obtained from http://gaia.fdi.ucm.es/projects/texis/
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainers of this work are Marco Antonio Gomez-Martin
+% and Pedro Pablo Gomez-Martin
+%
+%---------------------------------------------------------------------
+%
+% Fichero que declara nuevos comandos LaTeX usados a lo largo
+% del documento
+%
+%---------------------------------------------------------------------
+
+\ProvidesPackage{TeXiS/TeXiS}
+
+\RequirePackage{verbatim}  % Se necesita para el comando "example".
+                           % Si el paquete por alguna razón no es
+                           % compatible con alguno otro utilizado
+                           % puedes quitar el comando example y
+                           % eliminar la dependencia; el comando
+                           % example es utilizado en el manual de la
+                           % plantilla, pero no es probable que lo
+                           % necesites en otro tipo de documentos.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Constante:
+% \texisVer
+% Resultado:
+% Versión de la plantilla.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\texisVer{1.0}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Constante:
+%
+%       \texis
+%
+% Resultado: 
+%
+% Escribe TeXiS elevando y bajando las vocales.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\newcommand{\texis}{\TeX iS}
+\def\texis{\TeX \raise.15em\hbox{\textsc{i}}S}
+
+%\def\texis{\TeX
+%  \kern-.36em%
+%  {\setbox0=\hbox{T}%
+%\kern+.35em%
+%    \vbox to \ht0{\hbox{\the\scriptfont0 I}\vss}}%
+%  %\kern-.15em%
+%  S
+%}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% COMANDOS GENERALES NO DEPENDIENTES DEL MODO DE COMPILACIóN
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Comando:
+% \imagen{nombre-fich}{argumentos}
+% Resultado:
+% Inserta una figura, utilizando \includegraphics.
+% Es conveniente utilizar esta macro, porque ahorra la indicación
+% explícita del directorio Imagenes, en el que se asume que estará
+% la figura.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\imagen}[2]{%
+\includegraphics[#2]{Imagenes/#1}%
+} % \newcommand{\imagen}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Comando:
+% \figura{nombre-fichero}{argumentos}{etiqueta}{título}
+% Resultado:
+% Inserta una figura. "La figura~\ref{etiqueta} muestra..." permite
+% referenciar la figura desde el texto.
+% argumentos: width=Xcm,height=Ycm,angle=Z
+% No se debe poner extensión en el nombre del fichero. Si si está
+% compilando con LaTeX se asumirá .eps. Si se está usando pdflatex
+% se asumirá que es .pdf.
+%
+% Nota: Si se quiere incluir un título más corto para el índice,
+% utilizar el comando \figuraEx
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\figura}[4]{%
+\begin{figure}[t]%
+\begin{center}%
+\imagen{#1}{#2}%
+\caption{#4} \label{#3}%
+\end{center}%
+\end{figure}%
+} % \newcommand{\figura}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Comando:
+% \figuraEx{nombre-fich}{argumentos}{etiqueta}{título}{titulo_corto}
+% Resultado:
+% Inserta una figura. "La figura~\ref{etiqueta} muestra..." permite
+% referenciar la figura desde el texto.
+% argumentos: width=Xcm,height=Ycm,angle=Z
+% No se debe poner extensión en el nombre del fichero. Si si está
+% compilando con LaTeX se asumirá .eps. Si se está usando pdflatex
+% se asumirá que es .pdf.
+% El último parámetro define el título que aparecerá en el índice de
+% figuras.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\figuraEx}[5]{%
+\begin{figure}[t]%
+\begin{center}%
+\imagen{#1}{#2}%
+\caption[#5]{#4} \label{#3}%
+\end{center}%
+\end{figure}%
+} % \newcommand{\figura}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Entorno:
+% resumen
+% Uso:
+% Sirve para marcar los resúmenes que aparecen al principio de cada
+% capítulo.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newenvironment{resumen}{%
+\begin{quotation}\noindent\begin{small}\textbf{\textsc{Resumen:}}%
+}%
+{%
+\end{small}\end{quotation}%
+\bigskip%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Comando:
+%
+%       \begin{FraseCelebre}
+%             \begin{Frase}
+%                Y así, del mucho leer y del poco dormir...
+%             \end{Frase}
+%             \begin{Fuente}
+%                Don Quijote de la Mancha
+%
+%                Miguel de Cervantes
+%             \end{Fuente}
+%       \begin{FraseCelebre}
+%
+% Resultado:
+%
+% Añade la frase célebre del principio de un capítulo.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newenvironment{FraseCelebre}% Definición del entorno de FraseCelebre
+ {\begin{list}{}{%
+     \setlength{\leftmargin}{0.5\textwidth}% Desplazamos el inicio de
+                                 % los párrafos a la derecha la mitad
+                                 % de la anchura de la línea de texto.
+                                 % Puede que quieras cambiar esto
+                                 % por otra cantidad como '5cm'.
+     \setlength{\parsep}{0cm}% La separación entre párrafos de la
+                             % frase o de la fuente es normal, sin
+                             % espacio extra.
+     \addtolength{\topsep}{0.5cm}% Aumentamos un poco la separación
+                                 % entre la parte de la fase célebre
+                                 % y los párrafos de alrededor
+   }
+ }
+ {\unskip \end{list}}
+
+\newenvironment{Frase}%
+  {\item \begin{flushright}\small\em}%
+  {\end{flushright}}
+
+\newenvironment{Fuente}%
+  {\item \begin{flushright}\small}%
+  {\end{flushright}}
+%
+% Notas de lo que hace:
+% El entorno FraseCelebre es un entorno de lista. Uno de esos entornos
+% sirve para hacer tus \begin{enumerate} o \begin{itemize}
+% particulares.  Se definen cosas como el margen izquierdo y derecho
+% de cada párrafo, la separación entre cada párrafo dentro del mismo
+% \item, la separación entre items y cosas así. Todo eso se hace en la
+% definición del entorno de la lista, en nuestro caso en FraseCelebre.
+% Hay información sobre las cosas parametrizables en la página 62 del
+% libro "The LaTeX companion".  Luego para la frase y el autor
+% podríamos poner \item y el texto y listo.  Pero en lugar de eso he
+% creado otros dos entornos para poderlos alinear a la derecha (no he
+% conseguido crearlo directamente en la definición de la lista de
+% FraseCelebre... a parte de que haciendolo así podría decidir no
+% alinear el autor y funcionaría ;-))
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Comando:
+%
+%       \begin{example}
+%       Algún código LaTeX
+%       \begin{example}
+%
+% Resultado:
+%
+% Divide en dos columnas la salida; en la izquierda añade el código
+% LaTeX literal contenido en el entorno, y en el derecho el resultado
+% de su compilación.
+%
+% Fuente:
+%
+% Este comando es una adaptación del utilizado en el libro "The not so
+% short introduction to LaTeX2e" cuyo código fuente está
+% disponible. Se han invertido las columnas (en el libro el código
+% LaTeX aparecía a la derecha), y se ha añadido algún comentario.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newwrite\example@out
+\newenvironment{example}%
+% Al principio del entorno, se abre un fichero auxiliar
+% donde se graba todo lo que se lee dentro del entorno
+ {\begingroup
+  \@bsphack
+  \immediate\openout \example@out \jobname.exa
+  \let\do\@makeother\dospecials\catcode`\^^M\active
+  \def\verbatim@processline{%
+    \immediate\write\example@out{\the\verbatim@line}}%
+  \verbatim@start}%
+% Al final del entorno, se cierra el fichero auxiliar y...
+ {\immediate\closeout\example@out\@esphack\endgroup%
+%
+% ... se copia en dos minipage distintas, una que tiene un verbatim
+% para que el texto quede tal cual, y otra normal para que se
+% compile.
+%
+  \par\small\addvspace{3ex plus 1ex}\vskip -\parskip
+  \noindent
+  \makebox[0.5\linewidth][l]{%
+  \begin{minipage}[t]{0.50\linewidth}
+    \vspace*{-1ex}
+    \verbatiminput{\jobname.exa}
+  \end{minipage}}
+  \hfill%
+  \makebox[0.45\linewidth][l]{%
+  \begin{minipage}[t]{0.45\linewidth}
+    \vspace*{-2ex}
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{1ex plus 0.4ex minus 0.2ex}
+    \begin{trivlist}
+      \item\input{\jobname.exa}
+    \end{trivlist}
+  \end{minipage}}%
+  \par\addvspace{3ex plus 1ex}\vskip -\parskip
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Comando: 
+%
+%       \begin{cambiamargen}{izdo}{der}
+%            BLA BLA BLA
+%       \end{cambiamargen}
+%
+% Resultado: 
+%
+% Modifica el margen de la página en los párrafos que estén dentro del
+% entorno. Los dos parámetros indican el _desplazamiento_ del margen
+% respecto al margen original. Un valor positivo en ambos hace que las
+% líneas sean más cortas, y uno negativo las alarga.
+%
+% El funcionamiento se basa en utilizar un entorno lista, que permite
+% especificar directamente los desplazamientos respecto a los márgenes
+% originales de los extremos de sus párrafos. Pero la variable
+% \textwidth _no_ cambia, por lo que no cuentes con ella internamente
+% para, por ejemplo, ajustar tablas o algo así.
+%
+% Para más información sobre los márgenes, consulta el fichero de la
+% portada, TeXiS_cover.tex
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newenvironment{cambiamargen}[2]{%
+  \begin{list}{}{%
+    \setlength{\topsep}{0pt}%
+    \setlength{\leftmargin}{#1}%
+    \setlength{\rightmargin}{#2}%
+    \setlength{\listparindent}{\parindent}%
+    \setlength{\itemindent}{\parindent}%
+    \setlength{\parsep}{\parskip}%
+  }%
+  \item[]}{\end{list}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% COMANDOS DEPENDIENTES DEL MODO DE COMPILACIóN
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%
+% Definición  de las  constantes  que  se arrastran  en  el resto  del
+% documento para configurar el modo en el que se compila.
+%
+
+\ifx\release\undefined
+    % Símbolos a definir en modo debug
+    \def\debug{1}
+    \def\printtodos{1}
+    \def\printcoments{1}
+    %\psdraft
+    %  Si  se descomenta,  las  imágenes  no  se incluirán  en  el
+    % documento  (por lo  que compilará más  rápido); en  su lugar
+    % aparece  el recuadro  que ocuparán (de  esa forma  puede uno
+    % hacerse  a la idea  de su tamaño  y situación en  el texto).
+    % Para que este funcione, tiene que incluirse antes el paquete
+    % ps
+
+    % Para que  los comentarios salgan en un  recuadro en lugar de
+    % en un párrafo normal
+    \def\comsdestacados{1}
+\else
+    % Símbolos a definir en modo release
+    \def\generaindice{1}
+    \def\generatoc{1}
+    \ifx\acronimosEnRelease\undefined
+    \else
+        \def\generaacronimos{1}
+    \fi
+\fi
+
+%%%%%
+%%
+%% Explicación de los símbolos que cambian el comportamiento
+%%
+%%%%%
+%%
+%
+% \generatoc
+%
+% Si está definido, se genera la tabla de contenidos
+%
+%%%
+%
+% \generaindice
+%
+% Si está definido, se "genera" el índice de palabras.  En realidad el
+% soporte para el  índice de palabras es embrionario,  por lo que esta
+% constante en la práctica  *no* se utiliza. Consulta la documentación
+% en TeXiS_pream.tex  para más información.
+%
+%%%
+%
+% \generaacronimos
+%
+% Si está definido, se genera la lista de acrónimos
+%
+%%%
+%
+% \printtodos
+%
+% Si está definido, se escriben los 'TODOs'
+%
+%%%
+%
+% \printcoments
+%
+% Si está definido, se escriben los comentarios
+%
+%%%
+%
+% \comsdestacados
+%
+% Hace que los comentarios (si se están imprimiendo),
+% aparezcan resaltados.
+%
+%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Comando:
+% \todo{texto}
+% Resultado:
+% Utilizado para marcar cosas que quedan por hacer.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ifx\printtodos\undefined
+\newcommand{\todo}[1]{}
+\else
+\newcommand{\todo}[1]{\todoImpl{#1}}
+\fi
+
+\newcommand{\todoImpl}[1]{ \{\textbf{TODO TODO TODO:} #1\}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Comando:
+% \com{texto}
+% Resultado:
+% Usado para marcar comentarios que en fases de revisión deben
+% imprimirse. Para versiones ``definitivas'', en vez
+% de borrarlos, se cambia la definición del comando.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ifx\printcoments\undefined
+\newcommand{\com}[1]{}
+\else
+\ifx\comsdestacados\undefined
+\newcommand{\com}[1]{\textsc{Comentario:} #1}
+\else
+\newcommand{\com}[1]{\comImpl{#1}}
+\fi
+\fi
+
+\newcommand{\comImpl}[1]{\noindent \hspace*{-0.1\textwidth}
+\begin{small}
+\fbox{\parbox{1.1\textwidth}{
+ \textsc{Comentario:} #1}}
+\end{small}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Comando:
+% \comp{texto}
+% Resultado:
+% Usado para marcar  comentarios _dentro de párrafos_ que  en fases de
+% revisión deben imprimirse. Para versiones ``definitivas'', en vez de
+% borrarlos, se cambia la definición del comando.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ifx\printcoments\undefined
+\newcommand{\comp}[1]{}
+\else
+\ifx\comsdestacados\undefined
+\newcommand{\comp}[1]{({\small \textsc{Comentario: #1}})}
+\else
+\newcommand{\comp}[1]{\compImpl{#1}}
+\fi
+\fi
+
+\newcommand{\compImpl}[1]{ \textbf{({\small \textsc{Comentario: #1 }})}}
+
+% Incluimos el fichero que incorpora todos los paquetes necesarios
+\include{TeXiS/TeXiS_pream}
+
+% Incluimos el fichero que define la cabecera utilizada, y macros
+% útiles utilizadas en capítulos y secciones especiales
+\include{TeXiS/TeXiS_cab}
+
+% Fichero con las macros para crear las portadas
+\include{TeXiS/TeXiS_cover}
+
+% Fichero con las macros para crear las dedicatorias
+\include{TeXiS/TeXiS_dedic}
+
+% Fichero con las macros para crear la bibliografia
+\include{TeXiS/TeXiS_bib}
+
+% Variable local para emacs, para que encuentre el fichero
+% maestro de compilación
+%%%
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Tesis.tex"
+%%% End:

@@ -1,0 +1,27 @@
+% Fichero con acrónimos para su uso con GlossTeX
+%
+% El listado de acrónimos funciona de manera similar a las referencias
+% bibliográficas. Este  fichero es equivalente por tanto  al .bib, con
+% el listado de  los acrónimos disponibles. A lo  largo del documento,
+% cuando se  utilice alguno  de ellos, se  referencia para  indicar al
+% sistema que queremos que dicho  acrónimo aparezca en el glosario. En
+% contra de  lo que ocurre con  la bibliografía, el  texto original no
+% sufre ninguna modificación.
+%
+% Las entradas son:
+% @entry{<etiqueta>[,<item>[,<forma larga>]]} [<texto>]
+%
+% La etiqueta es el  nombre del acrónimo (equivalente a la etiqueta en
+% BibTeX) que luego se utiliza para "referenciarlo" en el texto.
+
+% Para  que  la  generación   en  Release  con  el  Makefile  funcione
+% correctamente, necesitarás  al menos tener  referenciado un acrónimo
+% dentro del  texto.  Si  no quieres usar  acrónimos, o de  momento no
+% tienes ninguno  referenciado, basta con que no  definas la constante
+% \acronimosEnRelease en config.tex
+
+@entry{CVS, , \emph{Control Version System}, Sistema de Control de Versiones}
+
+@entry{GPL, , \emph{General Public License}, Licencia Pública General de GNU}
+
+@entry{PC2, PC$^2$, \emph{Programming Contest Control}}

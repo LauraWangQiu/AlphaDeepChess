@@ -181,8 +181,7 @@ void Uci::go_command_action(const TokenArray& tokens)
             return;
         }
         else {
-            std::cout << "Invalid argument for command : go ( " << tokens[i] << " )\n";
-            return;
+            std::cout << "Invalid argument for command : go ( " << tokens[i] << " ). Continued using rest of the arguments\n";
         }
     }
 
@@ -214,11 +213,11 @@ void Uci::go_command_action(const TokenArray& tokens)
             }
 
             {
-                std::unique_lock<std::mutex> lock(searchResults.mtx_data_avaliable_cv);
+                std::unique_lock<std::mutex> lock(searchResults.mtx_data_available_cv);
 
                 if (is_search_running() && depthReaded >= searchResults.depthReached) {
                     // thread goes to sleep until more data is avaliable or search stop
-                    searchResults.data_avaliable_cv.wait(lock);
+                    searchResults.data_available_cv.wait(lock);
                 }
             }
         }

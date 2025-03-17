@@ -1,0 +1,771 @@
+%---------------------------------------------------------------------
+%
+%                        TeXiS_pream.tex
+%
+%---------------------------------------------------------------------
+%
+% TeXiS_pream.tex
+% Copyright 2009 Marco Antonio Gomez-Martin, Pedro Pablo Gomez-Martin
+%
+% This file belongs to TeXiS, a LaTeX template for writting
+% Thesis and other documents. The complete last TeXiS package can
+% be obtained from http://gaia.fdi.ucm.es/projects/texis/
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainers of this work are Marco Antonio Gomez-Martin
+% and Pedro Pablo Gomez-Martin
+%
+%---------------------------------------------------------------------
+%
+% Contiene la parte inicial del documento, antes del
+% \begin{document}. Carga los paquetes que se utilizarán.
+%
+%---------------------------------------------------------------------
+
+% El paquete verbatim  es utilizado por uno de  los comandos definidos
+% en TeXiS.  Aunque  el propio estilo indica que  necesita ese paquete
+% con \RequirePackage, lo  hacemos "explícito" incluyéndolo aquí antes
+% de incluir nuestro paquete.  Es necesario únicamente para el comando
+% "example",  específico del  manual y  que con  toda seguridad  no se
+% necesitará en  ningún otro tipo  de documento (Tesis, etc.),  por lo
+% que si por alguna razón  la inclusión de este paquete interfiere con
+% otros y se desea no tener que incluirlo, se puede cambiar TeXiS.sty,
+% y eliminar el comando example.
+\usepackage{verbatim}
+
+% El  paquete  "layout" es  de  "depuración".  Sirve  para definir  el
+% comando \layout que puedes meter  en cualquier sitio del documento y
+% te genera  un par de páginas  con un gráfico sobre  la estructura de
+% las  páginas,   es  decir,  con  información   sobre  los  márgenes,
+% posiciones de las notas a pie, los encabezados, y demás. Recibe como
+% parámetro un  idioma que  le sirve para  mostrar "la leyenda"  en un
+% idioma diferente al inglés.
+
+%\usepackage[spanish]{layout}
+
+% El  paquete  glosstex  te  permite  generar listas  de  acrónimos  y
+% glosarios.  En  realidad  te   permite  crear  listas  múltiples  de
+% cualquier cosa,  con tal de que  des un identificador  a cada lista.
+% Luego de  manera predeterminada controla  dos listas, una  de nombre
+% "acr" pensada para acrónimos, y otra "glo" para el glosario.
+
+%
+% La idea  es tener uno o  varios ficheros externos  donde se mantiene
+% una "base  de datos" de acrónimos,  de palabras para  el glosario, o
+% de, en  general, entradas  para cualquiera de  la lista  de términos
+% gestionadas por glosstex. Esos ficheros normalmente llevan extensión
+% .gdf (Glossary  Data File, supongo),  y, por aclarar,  son similares
+% conceptualmente a  los ficheros .bib. En cada  entrada se especifica
+% una etiqueta que  la identifica y que normalmente  se utiliza cuando
+% aparece dicha entrada en alguna de las listas en el documento final.
+% También  puede opcionalmente  especificarse un  texto en  LaTeX para
+% dicha entrada si  queremos poner otra o darle  formato (por ejemplo,
+% si  queremos meter  en  el glosario  el  término LaTeX,  normalmente
+% querremos usar  como etiqueta  identificativa la cadena  LaTeX, pero
+% luego queremos  que al escribirlo  en el documento salga  su versión
+% pija conseguida  mediante \LaTeX{}). También  tiene una "descripción
+% larga"  (útil dependiendo  de  la configuración)  y, finalmente,  la
+% descripción de la entrada.
+%
+%
+% Por ejemplo, una entrada sin descripción corta sería:
+%
+%   @entry{LaTeX, \LaTeX{}} Herramienta basada en \TeX{} para
+%   facilitar la creación de documentación.
+%
+
+% Puedes consultar  más información sobre  el formato en  el fichero
+% acronimos.gdf.
+
+% La idea es tener tantos ficheros gdf como queramos, y reutilizarlos
+% entre todos los documentos que necesitemos crear. Posteriormente, a
+% lo largo de esos documentos, referenciamos su uso. En concreto,
+% indicamos al sistema que queremos que una determinada entrada se
+% incluya en una de las listas gestionadas por GlossTeX.
+%
+% Para eso:
+%
+%  \glosstex[(<lista>)]{<etiqueta>}
+%
+% Lo de <lista> es opcional. Si no se especifica, se entiende "glo",
+% que se supone que contiene el glosario normal. El soporte "nativo"
+% para la lista de acrónimos queda patente porque para añadir uno
+% basta con:
+%
+%  \acronym{<etiqueta>}
+%
+% que es sinónimo de \glosstex(acr){<etiqueta>}
+%
+% La  aparición   de  estos   comandos  ocasionan  la   generación  de
+% anotaciones en los ficheros .aux correspondientes. Esos .aux hay que
+% procesarlos con la herramienta  glosstex, que genera un fichero .gxs
+% con información  sobre las entradas referenciadas y  su contenido, y
+% un .gxg con un log. El .gxs (si todo fue bien) es procesado de nuevo
+% para ser  ordenado y para aplicarle  estilo. Esto se  realiza con la
+% herramienta externa  makeindex, y usando el  estilo glosstex.ist. El
+% resultado es un  fichero .glx, que por fin  tiene todo correcto. Ese
+% fichero es  utilizado por el comando \printglosstex  dentro de algún
+% fichero .tex en la proxima invocación a LaTeX
+%
+% Una cosa interesante es en el uso de acrónimos. Al igual que podemos
+% utilizar  con natbib cosas  como \citeyear  o \citeauthor,  con esto
+% podemos  hacer \ac{<etiqueta>},  y el  sistema te  pone  el acrónimo
+% automáticamente.  Esto  no  parece   muy  útil,  si  se  piensa  que
+% normalmente el  acrónimo será igual a  la etiqueta ;-)  La gracia es
+% que, además,  la primera vez que  se hace, te  pone entre paréntesis
+% también la forma larga 8-)
+%
+% También puedes usar \acf si quieres  que te aparezca las siglas y el
+% significado  entre  paréntesis en  algún  momento.  En realidad  hay
+% muchas más cosas, pero no las he mirado todas.
+%
+% http://www.ctan.org/tex-archive/help/Catalogue/entries/glosstex.html
+\ifx\generaacronimos\undefined
+  % No queremos acrónimos. Como no incluiremos el paquete glosstex
+  % redefinimos sus comandos para que no cruja si se han usado.
+  \newcommand{\glosstex}[1]{}
+  \newcommand{\acronym}[1]{}
+  \newcommand{\ac}[1]{#1}
+  \newcommand{\acs}[1]{#1}
+  \newcommand{\acl}[1]{#1}
+  \newcommand{\acf}[1]{#1}
+\else
+  \usepackage{glosstex}
+\fi
+
+% shortvrb supuestamente define algunas macros cómodas como carácteres
+% de escape.  Por ejemplo, para poner  un < normalmente  hay que hacer
+% una  ecuación:   $<$.  Este   paquete  define  algunas   macros  más
+% intuitivas, en este caso bastaría  con \< De igual forma, para poner
+% algo en  verbatim, la versión  larga es \texttt{blabla},  la versión
+% corta es  \verb+blabla+ (el +  puede sustituirse por  cualquier otra
+% cosa,  como un  |  ), y  con  este paquete  basta  con |blabla|  (es
+% equivalente a \verb|blabla|).  Pero vamos... a mí no me funciona :-/
+
+\usepackage{shortvrb}
+
+% Modifica la codificación de  entrada para LaTeX. Básicamente permite
+% escribir cosas con acentos (á) y  él solo lo sustituye por \'a. Para
+% eso, se especifica  en el primer parámetro la  página de códigos que
+% estamos utilizando (latin1  significa ISO Latin 1, o  sea ISO 8859-1
+% supongo). Para cada página de códigos (en nuestro caso latin1) tiene
+% un fichero de definiciones (.def)  en el que mapea cada carácter por
+% encima del 128 a una orden LaTeX.
+%
+% Otra posible opción sería indicar utf8 (o utf8x) en lugar de latin1,
+% que podría  resultar útil para  aquellos que prefieran  escribir sus
+% fuentes  en  UTF-8 (como  tiende  a  ocurrir  actualmente de  manera
+% predeterminada  en  Ubuntu). No  obstante,  una  búsqueda rápida  en
+% google parece indicar  que el soporte para fuentes  TeX con UTF-8 no
+% está demasiado  bien soportado y  podría dar algunos  problemas.  En
+% TeXiS, además, seguro que generará conflictos, dado que si se indica
+% aquí utf8  se asumirá que  *todo* usa UTF-8, incluídos  los ficheros
+% del propio  TeXiS que en realidad  están con ISO  8859-1. Por tanto,
+% usa  utf8  *bajo tu  propia  responsabilidad*.  TeXiS, desde  luego,
+% recomienda el uso de ISO 8859-1.
+
+%\usepackage[latin1]{inputenc}
+\usepackage[utf8]{inputenc} % Para que pinte bien las tildes
+
+% Incluimos el  estilo de bibliografía natbib, para  poder citarlas de
+% forma más compleja.  Por ejemplo,  \citep{ref} para que nos lo saque
+% entre  paréntesis, \citet{ref}  normal  (si lo  referenciamos en  un
+% texto), \citeyear{ref} para la  fecha del artículo, libro, etcétera,
+% \citeauthor{ref} para los autores... Hay un montón de posibilidades.
+% Puedes ver información en http://merkel.zoneo.net/Latex/natbib.php
+%
+% Es importante incluirlo ANTES de  babel. Si primero se añade babel y
+% luego natbib,  cuando se tienen apellidos  "compuestos" (por ejemplo
+% "Du  Boulay" natbib  añade  un  ~ de  separación  para convertir  al
+% espacio  en un espacio  no separable  en dos  líneas, pero  al tener
+% activado  babel  el ~  aparece  en lugar  de  salir  el espacio.  En
+% cualquier  caso,  sigue  existiendo  un potencial  problema.  Natbib
+% abrevia los  nombres poniendo únicamente las  iniciales (por ejemplo
+% para  el nombre  compuesto Francisco  Nunes Ferreira  pone Ferreira,
+% F. N.). El  problema es que también pone la ~  para separar, de modo
+% que sale Ferreira F.Ñ. El problema está en que Babel automáticamente
+% da significado  a ~n y lo  sustituye sin que le  digamos nada... hay
+% más  información en  el comentario  de babel  y  en TeXiS_bib.tex
+% http://chico.rediris.es/cgi-bin/wa?A2=ind0601&L=es-tex&D=0&P=1989
+
+\usepackage[round]{natbib}
+
+% Activa el  uso de  español. Babel es  un paquete bastante  gordo que
+% afecta a  otros paquetes de  LaTeX que antes tenían  cableadas cosas
+% para el inglés... por ejemplo, hace  que la 'Ñ' vaya después de la N
+% en el orden alfabético, y cosas varias sobre español.
+% En algún sitio leí que "activeacute" nos permite poner á en lugar de
+% tener que escribir  \'a ... aunque eso en teoría  lo hace el paquete
+% inputenc :-m
+
+\usepackage[english,activeacute,spanish]{babel}
+
+
+
+% El paquete url sirve para poder  poner direcciones Web y no morir en
+% el intento,  sobre todo  en la bibliografía.   Es útil porque  si la
+% dirección  no entra  en una  línea,  la divide  de forma  coherente.
+% Además en  la bibliografía también  cambia el formato de  la fuente.
+% Se utiliza poniendo la  dirección con \url{http://...}  También vale
+% para direcciones de correo, etc.
+% No conviene  quitarlo, porque con  casi toda seguridad, al  menos la
+% bibliografía utilizará el comando.
+
+\usepackage{url}
+
+% El documento está  pensado para ser compilado o  bien con pdflatex o
+% bien con  latex. Algunas  cosas sólo se  soportan si se  compila con
+% pdflatex (por  ejemplo, añadir en  el "índice del documento"  PDF un
+% título para una sección para luego verlo cuando se ve en el visor de
+% PDF el  índice). Para  meter cómodamente las  líneas que  sólo deben
+% "ejecutarse" si  se compila el  documento con pdflatex  definimos un
+% nuevo "tipo de if".
+% En  realidad,  en vez  de  utilizar  el  paquete, se  puede  definir
+% directamente, utilizando:
+% \newif\ifpdf\ifx\pdfoutput\undefined\pdffalse\else\pdfoutput=1\pdftrue\fi
+%
+% La idea es luego poder tener:
+% \ifpdf ...
+% \else
+% ...
+% \fi
+
+\usepackage{ifpdf}
+
+% Juego (solo make latex) :-p
+%\usepackage[mirror,invert]{crop}
+
+
+% Estilo del título de los capítulos
+% Debe ir antes de hyperref
+\usepackage[Lenny]{fncychap}
+
+% Declaramos el comando \chapterquote para poder meter citas al comienzo de los capítulos
+\DeclareRobustCommand{\chapterquote}[2]{%
+	\begin{flushright}%
+		%\vspace{-1cm}%
+		\parbox{11cm}{\raggedleft\emph{``#1''}\\--- #2}%
+		%\vspace{1cm}%
+	\end{flushright}%
+}
+
+
+% Si estamos usando  pdflatex, queremos pedir que se  creen enlaces en
+% las  referencias  a figuras,  capítulos  y  bibliografía para  poder
+% "navegar" al visualizar el PDF. También queremos que esos enlaces NO
+% aparezcan rodeados de un marco que queda horrible.
+%
+% La opción "pdfpagelabels"  sirve para que en el  cuadrito del número
+% de página del Adobe Acrobat  salga el número de "página lógico", por
+% ejemplo  "v (5  de  180)"  (con número  romano  porque al  principio
+% empieza a numerarse así).
+%
+% La opción  hypertexnames=false sirve para que hyperref no se líe con
+% los marcadores de los  capítulos al  cambiar la numeración cuando se
+% pasa de capítulos en español a capítulos en inglés y viceversa.
+
+\ifpdf
+   \RequirePackage[pdfborder=0,hidelinks,hyperindex,pdfpagelabels,hypertexnames=false]{hyperref}
+   \def\pdfBorderAttrs{/Border [0 0 0] } % Ningún borde en los enlaces
+\fi
+
+% Cuando se  genera el  índice, se necesita  el paquete  hyperref, que
+% permite referencias  (o enlaces) en el propio  documento. El paquete
+% aparece como \RequirePackage cuando se está usando pdflatex, gracias
+% al comando anterior. Si no se está en pdf, se incluye directamente
+\ifpdf
+\else
+\usepackage{hyperref}
+\fi
+
+\hypersetup{colorlinks=false}
+
+
+% Durante  la infancia  de TeXiS  (es decir,  cuando estábamos  en las
+% primeras etapas de la escritura de nuestras tesis), teníamos la idea
+% de tener índice de palabras, es decir una lista de palabras usadas a
+% lo   largo  del   documento,  junto   con  las   páginas   donde  se
+% mencionaban. Esto aparece en algunos libros, permitiendo la búsqueda
+% rápida de los lugares donde se habla de ciertas cosas.
+%
+% El problema  de hacer  dicho índice no  es sólo "tecnológico"  en lo
+% referente al  uso de  LaTeX, sino  también a la  hora de  marcar qué
+% palabras (y en qué lugares) se quieren añadir a dicho índice.
+%
+% En nuestro  caso, después de haber superado  la barrera tecnológica,
+% decidimos que no  merecía la pena el esfuerzo  de recorrer las tesis
+% tras  ser  escritas  para  anotar  las palabras  importantes  y  que
+% aparecieran en el índice. Debido  a eso, ni siquiera el soporte está
+% terminado  (a  nivel, por  ejemplo,  del  Makefile).  Por lo  tanto,
+% podemos  decir que  TeXiS  tiene un  soporte  embrionario para  esas
+% listas de palabras,  pero que necesitaría algo más  de esfuerzo para
+% hacerlo amigable.  Para no crear  falsas expectativas, el  manual de
+% TeXiS, por  tanto, no menciona  nada de este asunto,  aunque dejamos
+% aquí esa configuración original del soporte básico.
+%
+% En realidad, para añadir un índice de palabras bastaría con:
+%
+%    - Modificar la parte final de Tesis.tex, e incluir siempre
+%      TeXiS/TeXiS_indice (ahora su inclusión está comentada).
+%    - Modificar el Makefile y descomentar las lineas
+%      -makeindex $(NOMBRE_LATEX)
+%      pare que se genere el índice de palabras.
+%
+% No se ha  hecho "oficial" este soporte (ni se  explica en el manual)
+% porque no se ha probado en "producción". No obstante, a continuación
+% se describe su uso, tanto a nivel de configuración (mucho de lo cual
+% TeXiS ya hace) como a nivel del usuario:
+
+
+% Permite crear  índices (de palabras)  en LaTeX (es decir,  el índice
+% que suele  haber al final de  los libros diciendo en  qué páginas se
+% habla de qué términos). La  generación no es una cosa trivial...  Lo
+% primero que hay que hacer  es poner '\makeindex' en el preámbulo del
+% documento (antes del  \begin{document}), luego poner \index{entrada}
+% a lo largo  de todo el documento para  indicar qué palabras queremos
+% que  aparezcan en  el índice  temático.  Por último,  hay que  poner
+% \printindex en  el lugar donde queramos  que se genere  y muestre el
+% índice.
+
+% Pero  eso no  es todo...  en realidad  la generación  del  índice se
+% realiza con  una herramienta externa a LaTeX  llamada makeindex (que
+% funciona  con  la  misma  "filosofía"  que bibtex,  como  una  etapa
+% posterior).  Total, que  hay que ejecutar LaTeX una  primera vez, lo
+% que  genera un  fichero  auxiliar  con extensión  .idx  con toda  la
+% información sobre las  palabras que deben salir en  el índice. Luego
+% se ejecuta  MakeIndex, que recoge  ese fichero y utiliza  un fichero
+% con extensión  .ist con información  sobre estilo para  generar otro
+% fichero,   esta   vez   con   extensión  .ind   (que   supongo   que
+% conceptualmente es  semejante al "bbl"  de BibTeX).  Por  último, se
+% vuelve a  ejecutar LaTeX que  recompila el fichero y,  utilizando el
+% .ind, mete por fín el índice bueno.
+
+% Aconsejan NO  poner los \index  según vas escribiendo  el documento,
+% porque el índice que te queda seguramente sea un poco malo. En lugar
+% de eso  dicen que utilices  "delatex" para sacar todas  las palabras
+% que utilizas en tu  documento, luego las "limpies" decidiendo cuales
+% quieres que aparezcan, y luego  metas todos los \index. En cualquier
+% caso,  el  programa "delatex"  no  se  instala  con la  distribución
+% habitual de latex.
+
+% Puedes anular la generación del índice si quitas el \makeindex en el
+% preámbulo (supongo que no se generará el .idx).
+ 
+% http://www.mpi.nl/world/persons/private/robstu/latex/how_to/indexes.html
+% http://ipagwww.med.yale.edu/latex/makeindex.pdf
+
+\usepackage{makeidx}
+
+
+% Paquete de  depuración. Se si utiliza,  en el margen  de cada página
+% aparecen  las palabras  que se  añadirán  al índice  de esa  página.
+% Pero... parece que no funciona con el pdflatex de Linux :'( En lugar
+% de sacar las palabras en la esquina de la página la saca en el sitio
+% donde están insertadas, en mitad del párrafo... y claro, es un tanto
+% caótico :'(
+% Por  eso, aunque  estemos en  modo "depuración",  si  estamos usando
+% pdflatex no se incluye.
+
+\ifpdf
+\else
+   \ifx\release\undefined
+      \usepackage{showidx}
+   \fi
+\fi
+
+%\citeindextrue Activa la aparición de las referencias en el índice
+%\citeindexfalse La desactiva
+
+
+% Para pedir que se genere  la información para el índice de palabras.
+% Para  no  ralentizar la  compilación,  sólo  se  genera cuando  está
+% definido el símbolo correspondiente.
+\ifx\generaindice\undefined
+\else
+\makeindex
+\fi
+
+% Pruebas con índices
+%\usepackage{index}
+%\newindex{default}{idx}{ind}{Índice}
+%\newindex{cite}{cdx}{cnd}{Índice de citas}
+%\renewcommand{\citeindextype}{cite}
+%\citeindextrue
+
+
+% Otro paquete  de depuración, para mostrar las  etiquetas del \label,
+% etc. Se  puede desactivar  el mostrado de  algunas de ellas  con las
+% opciones [notref]  y [notcite].  Lo tengo  desactivado, porque queda
+% demasiado  cargado.   Además,  provoca  errores de  compilación  con
+% algunas figuras  convertidas desde eps  a pdf cuando se  compila con
+% pdflatex.
+
+\ifx\release\undefined
+%\usepackage{showkeys}
+\fi
+
+
+% Para poder utilizar el entorno multicol, útil en los sitios donde se
+% quieren poner dos figuras una al lado de la otra.
+\usepackage{multicol}
+
+%
+% Para  poder poner  "subfiguras". El  paquete permite  incluir varias
+% figuras dentro  de un entorno  flotante (típicamente una  figura), y
+% puede  etiquetar  cada  una  con  una letra,  y  asociar  diferentes
+% descripciones a cada una.
+%
+% La idea  es crear  un entorno figura  tradicional, pero no  poner en
+% ella  directamente  el  \includegraphics  (o  cualquier  otra  cosa,
+% vamos), sino subdividir ese entorno  figura en varias partes. A cada
+% una  de   ellas  se  le   da  una  etiqueta  diferente   para  poder
+% referenciarlas, una descripción, etcétera.  Un ejemplo:
+%
+% \begin{figure}[t]
+%   \centering
+%   %
+%   \subfloat[<ParaElIndice1>][<Caption1>]{ 
+%      % Contenido para este "subelemento" (podrá ser una
+%      % figura, una tabla, o cualquier otra cosa).
+%      \includegraphics[width=5cm]{ficheroSinExtension}
+%      \label{fig:etiqueta1}
+%   }
+%   \subfloat[<ParaElIndice2>][<Caption2>]{
+%      % Contenido para este "subelemento" (podrá ser una
+%      % figura, una tabla, o cualquier otra cosa).
+%      \includegraphics[width=5cm]{ficheroSinExtension}
+%      \label{fig:etiqueta2}
+%   }
+%  \caption{Descripción global para la figura}
+%  \label{Etiqueta para toda la figura}
+% \end{figure}
+%
+% El sistema  automáticamente decide cuando poner  la siguiente figura
+% al lado, o  en otra linea. Es  posible forzar a que se  ponga en una
+% linea nueva si se deja una linea en blanco en el .tex. Esto tiene la
+% repercusión  de que  no deberías  dejar lineas  en blanco  en ningún
+% momento dentro  del entorno flotante,  para evitar que se  "salte de
+% linea"  en las  figuras.  Si quieres  por  legilibidad dejar  alguna
+% linea, pon un comentario vacio.
+%
+% La separación  entre dos figuras/tablas  que se colocan en  la misma
+% fila puede ser demasiado pequeña. Para seprarlas un poco más, puedes
+% poner \qquad entre el cierre llaves de un \subfloat y el siguiente:
+%
+% [...]
+%    \subfloat[..][..]{ ... }
+%    \qquad
+%    \subfloat[..][..]{ ... }
+% [...]
+%
+% Por otro lado,  el \subfloat tiene dos "parámetros",  que se colocan
+% entre   corchetes    justo   después.   En    realidad   ambos   son
+% opcionales. Podríamos poner directamente:
+%
+% \subfloat{ <comandos para el subelemento> }
+%
+% pero en ese caso no se etiquetará con una letra.
+%
+% El texto que se pone entre los primeros corchetes se utiliza para el
+% índice de figuras. En teoría, se mostrará en dicho índice primero la
+% descripción global de la figura,  y luego la de cada subelemento. Si
+% no  quieres que  ocurra,  deja  en blanco  el  contenido del  primer
+% corchete. En la  práctica... yo he puesto una cadena  y no ha salido
+% en el índice.
+% El  segundo  corchete  recibe   el  texto  con  la  descripción  del
+% subelemento,   es  decir  lo   que  aparecerá   junto  a   la  letra
+% identificativa.  Si lo  dejas vacío  (pero poniendo  los corchetes),
+% saldrá la letra, sin texto.  Si ni siquieras pones los corchetes, no
+% saldrá tampoco la letra.
+%
+% Para referenciar  uno de los subelementos  basta con \ref{etiqueta},
+% siendo  la   etiqueta  una  definida  mediante   \label  DENTRO  del
+% \subfloat. La  forma de salir  será, por ejemplo, 2.3a  Si prefieres
+% que salga  2.3 (a) (o quieres poner  "en la imagen (a)  de la figura
+% 2.3...")  puedes  utilizar  \subref{etiquitaDeSubelemento}.  \subref
+% escribirá el (a).  Combinándolo con la etiqueta global  de la figura
+% (del  entorno flotante contenedor,  vamos) que  mostrará el  2.3 del
+% ejemplo, puedes hacer cosas como la anterior con facilidad.
+%
+% Se pueden hacer muchas más pijadas, pero esto debería ser suficiente
+% la mayor parte de las veces. Mira el manual oficial para más
+% información (ftp://tug.ctan.org/pub/tex-archive/macros/latex/contrib/subfig/subfig.pdf)
+%
+% Por cierto,  este paquete es la  evolución de subfigure,  pero no es
+% compatible con él (por eso decidieron cambiarle el nombre).
+\usepackage{subfig}
+
+% El  paquete anterior  tiene un  problema  cuando se  utiliza en  los
+% subfloat entornos verbatim (eso incluye a los lstlistings), debido a
+% que  no  se  pueden  anidar  entornos verbatim  (bueno,  esa  es  la
+% explicación que  he encontrado,  aunque no tenía  ni idea de  que se
+% estuvieran anidando entornos verbatim :-) ).
+
+% Para  arreglarlo, en la  documentación de  subfig dan  una solución,
+% creando un  nuevo entorno,  SubFloat, que está  en una caja  LaTeX o
+% algo  así, y que  consigue poder  meterlos. El  entorno se  define a
+% continuación  (cortar  y  pegar  de  la  documentación  del  paquete
+% subfig).
+%
+% Los dos parámetros que teníamos  antes para el \subfloat (caption, y
+% caption para el índice) ahora se pasan de forma distinta:
+%
+% \begin{SubFloat}[texto indice]{Texto figura\label{<etiqueta>}
+%    <contenido>
+% \end{SubFloat}
+%
+% Es decir, hay que poner la etiqueta directamente en el parámetro del
+% entorno.
+%
+% Para que el SubFloat funcione,  hay que hacer algo más, no obstante,
+% ya que el entorno verbatim  (y lstlisting) NO definen en su creación
+% lo que ocupan, y por lo tanto el \subfloat no es capaz de determinar
+% cómo colocar las  subfiguras, ya que no conoce  su tamaño. Para eso,
+% el entorno verbatim (o lstlisting)  hay que enmarcarlo dentro de una
+% minipage en la que sí definimos (a mano) el tamaño. Un ejemplo puede
+% ser:
+%
+% \begin{SubFloat}{\label{fig:ejercicios1a3:2}Ejercicio 2}%
+% \begin{minipage}{0.4\linewidth}%
+% \begin{lstlisting}[frame=tb]
+% public void f(int b) {
+%     int a;
+%     a = 3 + b;
+% }
+% \end{lstlisting}%
+% \end{minipage}
+% \end{SubFloat}
+%
+% De esta  forma, se  hace que  el código en  el lstlisting  ocupe dos
+% quintas  partes del ancho  de la  página.  Se  podría pensar  que es
+% posible  utilizar  el  "parámetro"  linewidth  del  lstlisting,  que
+% permite     también     indicar      el     ancho     del     código
+% (\begin{lstlisting}[frame=tb,linediwth=0.4\linewidth]; sin embargo,
+% eso  no es  posible ya  que ese  ancho es  utilizado por  el entorno
+% lstlisting para  dibujar el marco  y, si tiene activado  el "romper"
+% las líneas  automáticamente, para romperlas; si todas  las líneas de
+% código  son más  cortas que  ese  espacio, el  espacio efectivo  del
+% código será el ancho de la línea más ancha.
+%
+% Otra desagradable sorpresa surge  con los subfloat: existe un margen
+% a los  lados del área reservada  a la subfigura, para  que no queden
+% todas  pegadas.   Esto  está  bien,  porque así  no  tienes  tú  que
+% encargarte de  definir el espacio; simplemente  decides cuánto ocupa
+% de ancho cada  subfigura, y él se encarga de  colocarlo todo. Lo que
+% ocurre es que parece no tener  en cuenta que, cuando a la derecha de
+% un subfloat NO hay otro (porque es el último de la "línea"), _sigue_
+% poniendo  el espacio  en blanco  para  separar con  el siguiente  (e
+% inexistente) subfloat, lo  que hace que, en caso  de estar centrando
+% los elementos, no quede perfectamente centrado :(
+
+\makeatletter
+\newbox\sf@box
+\newenvironment{SubFloat}[2][]%
+{\def\sf@one{#1}%
+\def\sf@two{#2}%
+\setbox\sf@box\hbox
+\bgroup}%
+{ \egroup
+\ifx\@empty\sf@two\@empty\relax
+\def\sf@two{\@empty}
+\fi
+\ifx\@empty\sf@one\@empty\relax
+\subfloat[\sf@two]{\box\sf@box}%
+\else
+\subfloat[\sf@one][\sf@two]{\box\sf@box}%
+\fi}
+\makeatother
+
+
+% Para poder  incluir código  fuente resaltado fácilmente.   El tamaño
+% básico de la letra, pequeño.
+\usepackage{listings}
+\lstset{basicstyle=\small}
+\lstset{showstringspaces=false}
+\lstset{tabsize=3}
+
+% Para poder utilizar el entorno tabularx, que sirve para hacer tablas
+% con  párrafos, sin tener  que indicar  el ancho  de cada  columna de
+% párrafo particular.
+\usepackage{tabularx}
+
+% Definimos  los  nombres para  las  tablas  y  el índice  de  tablas,
+% sobreescribiendo los de babel, que los llama 'cuadros'.
+\addto\captionsspanish{%
+  \def\tablename{Tabla}%
+  \def\contentsname{Índice}%
+  \def\listfigurename{Índice de figuras}%
+  \def\listtablename{Índice de tablas}%
+  \def\chaptername{Cap\'itulo}%
+}
+
+% Definimos los nombres en inglés para que ponga figures y tables
+% con minúscula
+\addto\captionsenglish{%
+	\def\listfigurename{List of figures}%
+	\def\listtablename{List of tables}
+}
+
+% Supuestamente,  codificación   que  tiene  'nativas'   las  palabras
+% acentuadas,  para poder  tener guionado  de palabras  con acentos...
+% aunque no estoy yo demasiado seguro...
+\usepackage[T1]{fontenc}
+
+% Paquete para poder utilizar figuras EPS
+\usepackage{epsfig}
+%\usepackage[dvips]{graphicx}
+%http://www.cidse.itcr.ac.cr/revistamate/HERRAmInternet/Latex/wmlatexrevista/node19.html
+
+% Hacemos que los  párrafos se separen con algo más  de espacio que lo
+% habitual.
+%\usepackage{parskip}
+\setlength{\parskip}{0.2ex}
+
+% El paquete  psboxit permite poner  una imagen Post Script  dentro de
+% una  caja de  TeX. La  imagen se  parametriza con  la posición  y el
+% tamaño de la caja TeX.
+
+%\usepackage{psboxit}
+
+% Permite hacer cálculos sencillos dentro  de un documento de LaTeX Lo
+% necesitamos en  la portada, para  poder ajustar los márgenes  con un
+% poco de independencia  del tamaño de la página.  Consulta el fichero
+% portada.tex para más información.
+\usepackage{calc}
+
+% Define el entorno  longtable que sirve para crear  tablas que ocupan
+% más de una página.
+
+%\usepackage{longtable}
+
+% Cuando en una tabla tenemos lineas dobles de separación entre filas
+% y columnas, LaTeX las pinta de manera que dé la sensación de que
+% cada celda es un rectángulo:
+%          | |
+%  [celda] | | [celda]
+%          | |
+% ---------+ +---------
+%                       <- hueco entre lineas
+% ---------+ +---------
+%          | |
+%  [celda] | | [celda]
+%          | |
+%
+% Si queremos que las líneas se corten:
+%          | |
+%  [celda] | | [celda]
+%          | |
+% ---------+-+---------
+%          | |          <- hueco entre lineas
+% ---------+-+---------
+%          | |
+%  [celda] | | [celda]
+%          | |
+%
+% podemos utilizar el paquete hhline, que permite concretar en gran
+% medida cómo queremos que queden los cruces
+% (http://www.cs.wright.edu/~jslater/hhline.pdf)
+%
+% Otro uso interesante de hhline es como sustitutivo de \cline. \cline
+% (nativo de LaTeX) permite poner lineas de separación entre filas que
+% no englobe  a todas las  columnas. El problema  es que \cline  no se
+% lleva bien con celdas con  fondo de color, porque queda _debajo_ del
+% relleno y no se ve. \hhline sin embargo queda por encima, por lo que
+% puede utilizarse para pintar lineas sencillas sin preocuparnos de la
+% interacción  con las líneas  horizontales (quizá  también sencillas)
+% pero aprovechar  que sí van a  verse.  En concreto, en  una tabla de
+% cuatro columnas  \cline{1-3} es  similar a \hhline{----~}  (el guión
+% indica  que  queremos  línea para  esa  columna,  y  el ~  que  no).
+% \usepackage{hhline}
+
+
+% Cambiamos el tamaño de las páginas para tener un poco más de espacio para escribir
+\usepackage{geometry}
+% \geometry{a4paper}
+% \geometry{twosideshift=0pt}
+\geometry{top=3cm,bottom=3cm,left=3cm,right=3cm}
+
+%
+% Paquete para  poder ampliar las  opciones de las tablas,  para poder
+% tener párrafos  dentro de una celda  y que nos los  ajuste el propio
+% LaTeX.
+%
+%\usepackage{tabulary}
+% Otras opciones anteriores
+%\usepackage{tabularx}  % Este está incluído por arriba
+%\usepackage{array}
+
+%\usepackage{slashbox}
+% Para poder poner líneas diagonales en una tabla:
+%
+% \ b|  
+%  \ |  ...
+% a \|
+% ---+----------
+%    |
+%    |
+%
+% En la casilla a dividir, \backslashbox{a}{b} & ...
+% Vamos... no queda muy bien... en algún sitio vi que para mejorar un
+% poco el aspecto se podía incluír pict2e también, aunque en cualquier
+% caso el resultado podía seguir siendo discutible.
+
+%
+% Paquete para poder poner celdas de colores en una tabla
+%
+%\usepackage{colortbl}
+%\usepackage{color}
+
+
+% Paquete  que permite  cambiar  el formato  en  el que  se ponen  los
+% títulos   de   capítulos,  secciones,   etc.    También  define   el
+% comando \chaptertitlename, que  equivale a \chaptername ("Capítulo")
+% cuando se está  dentro de un capítulo o  a \apendixname ("Apéndice")
+% cuando se  está en un apéndice.  Eso se utiliza en  la definición de
+% las cabeceras.
+\usepackage{titlesec}
+
+
+% Cambio del título de los capítulos (sacado de
+% http://aristarco.dnsalias.org/book/export/html/13)
+
+% \newcommand{\bigrule}{\titlerule[0.5mm]}
+
+% \titleformat{\chapter}[display] % cambiamos el formato de los capítulos
+% {\bfseries\Huge} % por defecto se usarán caracteres de tamaño \Huge en negrita
+% {% contenido de la etiqueta
+%  \titlerule % línea horizontal
+%  \filleft % texto alineado a la derecha
+%  \Large\chaptertitlename\ % "Capítulo" o "Apéndice" en tamaño \Large en lugar de \Huge
+%  \Large\thechapter} % número de capítulo en tamaño \Large
+% {0mm} % espacio mínimo entre etiqueta y cuerpo
+% {\filleft} % texto del cuerpo alineado a la derecha
+% [\vspace{0.5mm} \bigrule \vspace{1cm}] % después del cuerpo, dejar espacio vertical y trazar línea horizontal gruesa
+
+
+\usepackage{csquotes}
+\usepackage[final]{pdfpages}
+
+
+% para generar dummy text para mostrar el funcionamiento de la plantilla
+\usepackage{lipsum}
+
+
+% Variable local para emacs, para  que encuentre el fichero maestro de
+% compilación y funcionen mejor algunas teclas rápidas de AucTeX
+
+%%%
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Tesis.tex"
+%%% End:
+

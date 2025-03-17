@@ -1,0 +1,273 @@
+%---------------------------------------------------------------------
+%
+%                          TeXiS_cab.tex
+%
+%---------------------------------------------------------------------
+%
+% TeXiS_cab.tex
+% Copyright 2009 Marco Antonio Gomez-Martin, Pedro Pablo Gomez-Martin
+%
+% This file belongs to TeXiS, a LaTeX template for writting
+% Thesis and other documents. The complete last TeXiS package can
+% be obtained from http://gaia.fdi.ucm.es/projects/texis/
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainers of this work are Marco Antonio Gomez-Martin
+% and Pedro Pablo Gomez-Martin
+%
+%---------------------------------------------------------------------
+%
+% Contiene  los comandos  para poder  tener cabeceras  en  las páginas
+% distintas de las que se configuran por defecto.
+%
+% Define  además  algunos  comandos   para  utilizar  en  capítulos  y
+% secciones "especiales"  que no siguen  la cabecera normal,  como los
+% agradecimientos, resumen, tablas de índices y secciones de resumen y
+% notas bibliográficas.
+%
+%---------------------------------------------------------------------
+
+
+% EXPLICACIÓN DEL FANCYHDR (paquete utilizado para las cabeceras)
+
+% Para definir las cabeceras que  se quieren, se utilizan los comandos
+% \fancyhead y  \fancyfoot. Ambos reciben  como parámetro entre  [] el
+% sitio donde se  quiere establecer. Por ejemplo si  quiero cambiar lo
+% que aparece en las páginas pares (_E_ven), en la parte de la derecha
+% (_R_ight) de la cabecera  (_head_) se utiliza \fancyhead[ER]{Esto va
+%   a la  derecha en  las pares}. En  realidad, esos  parámetros entre
+% corchetes se pueden agrupar. Por  ejemplo, si queremos que el número
+% de página (\thepage)  aparezca en las pares a la  izquierda y en las
+% impares a la derecha, se usa \fancyhead[LE,RO]{\thepage}.
+%
+% Por otro  lado, en la  práctica se utiliza  un texto en  las páginas
+% izquierdas (es decir, las pares),  y otra en las derechas (es decir,
+% impares). Por eso, existen dos comandos preestablecidos, \righmark y
+% \leftmark,  que  contienen el  texto  que  aparecerá.  Lo normal  es
+% definir         después:         \fancyhead[LO]{\rightmark}        y
+% \fancyhead[RE]{\leftmark}, para  que a  la izquierda de  las páginas
+% impares aparezca la  marca destinada a las páginas  de la derecha, y
+% en  la  derecha  de las  pares  el  texto  para  las páginas  de  la
+% izquierda.
+%
+% Por  lo tanto,  si  queremos  que en  la  izquierda (páginas  pares)
+% aparezca el  nombre del capítulo,  habrá que "definir"  el \leftmark
+% con el nombre.  Si queremos que en la  derecha (impares) aparezca el
+% nombre de la sección, habrá que "definir" así el \rightmark.
+%
+% La realidad  es que no se  definen esos dos comandos  (de hecho creo
+% que no son  comandos como tal redefinibles...}, sino  que se utiliza
+% el comando \markboth. Según la documentación del paquete fancyhdr:
+%
+% The \leftmark  contains the Left  argument of the Last  \markboth on
+% the  page, the  \rihtmark contains  de Right  argument of  the first
+% \markboth or the only argument  of the first \markright on the page.
+% If no  marks are  present on  a page they  are "inherited"  from the
+% previous page.
+%
+% Es decir, el \markboth debe ser  algún tipo de comando que tiene dos
+% parámetros, y  que se puede poner  en cualquier lugar  de la página,
+% para cambiar el título. Por  ejemplo, se puede poner al principio de
+% un capítulo con \markboth{Titulo del capitulo}{}.
+%
+% En  realidad, ese \markboth  intuyo que  está ya  por defecto  en el
+% comando \chapter, igual  que hay otro similar en  las secciones.  Si
+% se quiere poner otros, basta con redefinir el comando \chaptermark y
+% \sectionmark, que intuyo que serán  como hooks dentro del \chapter y
+% de \section. Y eso es precisamente lo que he utilizado al definir la
+% cabecera.
+
+
+
+
+% Paquete  para mejorar  el estilo  de  las cabeceras.  El paquete  es
+% fancyhdr.   En  versiones   antiguas  de   LaTeX,  el   paquete  era
+% fancyheader, que es el utilizado por ejemplo en el tutorial de LaTeX
+% que sirvió de inspiración para  esta plantilla. Además de incluir el
+% paquete,  definimos   el  estilo  de  cabeceras   que  queremos.  En
+% particular, utilizaremos el  estilo "predefinido" fancy, con algunas
+% modificaciones. Además, cambio el estilo de las páginas de principio
+% del capítulo (técnicamente estilo "plain"), para que el número de la
+% página aparezca en la esquina de la derecha (abajo), en vez de en el
+% centro. Para los curiosos, explicación al final del fichero.
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+
+% Definición del estilo en las páginas normales:
+
+% Alargar la cabecera sería:
+%\addtolength{\headwidth}{\marginparwidth}
+
+% Hacemos un poco más alta la cabecera, ya que el valor por defecto
+% (12) no es suficiente para el tipo de letra y contenido de cabecera
+% elegido, lo que provoca warnings contínuos en la compilación
+\addtolength{\headheight}{2pt}
+
+% Establecemos el resto de parámetros de apariencia
+\newcommand{\restauraCabecera}{
+\fancyhead[LO]{\rightmark}
+\fancyhead[RE]{\leftmark}
+}
+
+\renewcommand{\headrulewidth}{0.2pt}
+\renewcommand{\chaptermark}[1]{%
+\markboth{\textsc{\chaptertitlename\ \thechapter.}\ #1}{}%
+}
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+\fancyhf{}
+\restauraCabecera
+\fancyhead[RO,LE]{\thepage}
+
+% Para los capítulos que no tienen numeración en el índice ni tienen
+% secciones, se debe cambiar la cabecera, para que no aparezca algo
+% como "Capítulo 0. Agradecimientos". En esos capítulos, la cabecera
+% es "especial", porque en las páginas impares, tampoco aparece el
+% nombre de la sección, sino también el nombre del "capítulo". Para
+% esos casos, se puede utilizar el comando siguiente.  
+
+% IMPORTANTE: este comando _sobreescribe_ el funcionamiento de la
+% cabecera, hasta que se llame al comando \restauraCabecera, por lo
+% después del "capítulo especial", debe invocarse a
+% \restauraCabecera. Y decir _después_ significa _después_, es decir
+% cuando el capítulo YA HA TERMINADO, y se ha empezado el siguiente, o
+% forzando final de página con \newpage (\newpage\restauracabecera).
+\newcommand{\cabeceraEspecial}[1]{
+\fancyhead[LO]{\textsc{#1}}
+\fancyhead[RE]{\textsc{#1}}
+}
+
+% La forma  "*" de  chapters y  sections NO llaman  a los  comandos de
+% marca (chaptermark y sectionmark) que son los que finalmente alteran
+% la cabecera. En  la tesis se utilizan secciones  sin numeración para
+% el resumen y notas bibliograficas de cada capítulo, y queda bastante
+% mal que  se mantenga en la  cabecera el nombre de  la última sección
+% con numeración.
+%
+% La solución es  modificar a mano la cabecera  (en concreto, la parte
+% izquierda  de las  páginas  impares, es  decir  el \markright).  Por
+% ejemplo, para las conclusiones habría que hacer:
+%
+% \section*{Resumen\markright{Resumen}}
+%
+% Para evitar tener  que hacerlo todo el tiempo,  creamos los comandos
+% \Resumen y  \NotasBibliograficas que lo  haga por nosotros.   El uso
+% será:
+%
+% \section*{
+%                   \Resumen
+% }
+%
+% Por otro lado, al ser secciones  sin numerar no se meten en la tabla
+% de contenidos ni  como marcador para que aparezca  en el "contenido"
+% del PDF mostrado  por el lector. Para que lo haga,  hay que añadir a
+% mano la entrada en el toc. Por ejemplo, para las conclusiones:
+%
+% \addcontentsline{toc}{section}{Resumen}
+%
+%
+% que dice "quiero meter en el TOC (Table Of Content) una entrada tipo
+% section, con el nombre 'Resumen  ".  Esto tiene el efecto lateral de
+% añadir el marcador en el PDF.
+%
+% Esto  ya   no  lo   podemos  meter  en   los  comandos   \Resumen  y
+% \NotasBibliograficas, porque como lo estamos usando _dentro_ del
+% \section*, LaTeX aún  no ha definido la posición en  el PDF y aunque
+% el  TOC sale  bien, el  enlace que  se  pone en  dicho TOC  y en  el
+% contenido del PDF  mostrado por el lector no sale  bien. En lugar de
+% eso,  hace referencia al  último marcador  (por ejemplo,  la sección
+% anterior, o la última figura).
+%
+%
+% Hay que ejecutar el comando \addcontentsline por tanto _después_ del
+% comando \section. Una alternativa sería definir \Resumen de modo que
+% él   mismo  hiciera   el  \section*{...}    completo,  y   luego  el
+% \addcontentsline... y así no habría problemas. Pero esta solución no
+% es  compatible  con  la   capacidad  de  los  editores  de  resaltar
+% secciones. Por tanto, cada vez que pongas la sección de conclusiones
+% o  de en  el próximo  capítulo  tienes que,  MANUALMENTE, añadir  el
+% \addcontentsline. Hazlo  _después_ del  \section*. En otro  caso, se
+% utilizará también en  el enlace del PDF la  última sección o figura.
+% Haciéndolo después  en realidad  no queda del  todo bien,  porque el
+% enlace queda a la primera letra de la sección, en lugar de al título
+% como ocurre con  las secciones numeradas, pero no  he encontrado una
+% forma de hacerlo mejor y tampoco quiero perder más tiempo.
+%
+% Para    eso,    hay    otros    dos    comandos,    \TocResumen    y
+% \TocNotasBibliograficas
+
+% En resumen. Modo de uso:
+%
+%%---------------------------------------------------------------------
+%\section*{
+%                               \Resumen
+%}
+%%---------------------------------------------------------------------
+%\TocResumen
+
+\newcommand{\Resumen}{Resumen\markright{Resumen}}
+\newcommand{\TocResumen}{\addcontentsline{toc}{section}{Resumen}}
+
+\newcommand{\NotasBibliograficas}{Notas bibliográficas\markright{Notas
+    bibliográficas}}
+\newcommand{\TocNotasBibliograficas}{\addcontentsline{toc}{section}{Notas
+    bibliográficas}}
+
+\newcommand{\ProximoCapitulo}{En el próximo
+  capítulo\ldots\markright{En el próximo capítulo\ldots}}
+\newcommand{\TocProximoCapitulo}{\addcontentsline{toc}{section}{En
+    el próximo capítulo}}
+
+\newcommand{\Conclusiones}{Conclusiones\markright{Conclusiones\ldots}}
+\newcommand{\TocConclusiones}{\addcontentsline{toc}{section}{Conclusiones}}
+
+% Para el apéndice, hay que indicar que queremos que ponga "Apéndice
+% X", y no "Capítulo X" como hace normalmente.
+
+% Si estamos en modo Debug, ponemos en el pie de página una indicación.
+
+\ifx\release\undefined
+\fancyfoot[LE,RO]{\vspace*{1cm}\small \sc Borrador -- \today}
+\else
+\fi
+
+% Definición del estilo en la  página de inicio de capítulo: Número de
+% la página abajo a la derecha, y sin línea en la zona superior.
+\fancypagestyle{plain}{%
+  \fancyhf{}  
+  \fancyfoot[R]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+% Cuando   se   cambia   de    capítulo,   se   ejecuta   el   comando
+% \cleardoublepage.  Si queremos que  la posible  página que  se queda
+% completamente en blanco NO tenga cabeceras, tenemos que redefinir el
+% comando. (Cogido de la documentación del fancyhdr)
+\makeatletter
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+  \hbox{}
+  \thispagestyle{empty}
+  \newpage
+  \if@twocolumn\hbox{}\newpage\fi\fi\fi}
+\makeatother
+
+
+
+% Variable local para emacs, para  que encuentre el fichero maestro de
+% compilación y funcionen mejor algunas teclas rápidas de AucTeX
+
+%%%
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Tesis.tex"
+%%% End:

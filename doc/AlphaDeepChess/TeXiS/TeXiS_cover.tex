@@ -1,0 +1,450 @@
+%---------------------------------------------------------------------
+%
+%                            TeXiS_cover.tex
+%
+%---------------------------------------------------------------------
+%
+% TeXiS_cover.tex
+% Copyright 2009 Marco Antonio Gomez-Martin, Pedro Pablo Gomez-Martin
+%
+% This file belongs to TeXiS, a LaTeX template for writting
+% Thesis and other documents. The complete last TeXiS package can
+% be obtained from http://gaia.fdi.ucm.es/projects/texis/
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainers of this work are Marco Antonio Gomez-Martin
+% and Pedro Pablo Gomez-Martin
+%
+%---------------------------------------------------------------------
+%
+% Fichero que  contiene la portada y  primera hoja de la  tesis, en la
+% que se vuelve a repetir el título.
+%
+% El contenido  de la  portada se configura  en un fichero  externo en
+% Cascaras/cover.tex
+%
+%---------------------------------------------------------------------
+
+%%%
+% Gestión de la configuración
+%%%
+
+% Título de la portada
+\def\tituloPortadaVal{\titulo}
+\newcommand{\tituloPortada}[1]{
+\def\tituloPortadaVal{#1}
+}
+
+% Título de la portada en ingles
+\def\tituloPortadaEngVal{\titulo}
+\newcommand{\tituloPortadaEng}[1]{
+	\def\tituloPortadaEngVal{#1}
+}
+
+% Autor
+\def\autorPortadaVal{\autor}
+\newcommand{\autorPortada}[1]{
+\def\autorPortadaVal{#1}
+}
+
+% Tutor
+\def\directorPortadaVal{Tutor no definido. Usa
+  \texttt{$\backslash$directorPortada}}
+\newcommand{\directorPortada}[1]{
+\def\directorPortadaVal{#1}
+}
+
+
+% Colaborador
+\def\colaboradorPortadaVal{Colaborador no definido. Usa
+	\texttt{$\backslash$colaboradorPortada}}
+\newcommand{\colaboradorPortada}[1]{
+	\def\colaboradorPortadaVal{#1}
+}
+
+
+% Fecha de publicacion
+\def\fechaPublicacionVal{}
+\newcommand{\fechaPublicacion}[1]{
+\def\fechaPublicacionVal{#1}
+}
+
+% Imagen de la portada (escudo)
+\def\imagenPortadaVal{Imagenes/Vectorial/Todo}
+\newcommand{\imagenPortada}[1]{
+\def\imagenPortadaVal{#1}
+}
+\def\escalaImagenPortadaVal{1.0}
+\newcommand{\escalaImagenPortada}[1]{
+\def\escalaImagenPortadaVal{#1}
+}
+% Tipo de documento (TESIS, MANUAL, ...)
+\def\tipoDocumentoVal{TESIS DOCTORAL}
+\newcommand{\tipoDocumento}[1]{
+\def\tipoDocumentoVal{#1}
+}
+
+% Institución
+\def\institucionVal{}
+\newcommand{\institucion}[1]{
+\def\institucionVal{#1}
+}
+
+% Primer subtítulo de la segunda portada
+\def\textoPrimerSubtituloPortadaVal{%
+\textit{Memoria que presenta para optar al título de Doctor en Informática}  \\ [0.3em]%
+\textbf{\autorPortadaVal}%
+}
+\newcommand{\textoPrimerSubtituloPortada}[1]{
+\def\textoPrimerSubtituloPortadaVal{#1}
+}
+
+% Segundo subtítulo de la segunda portada
+\def\textoSegundoSubtituloPortadaVal{%
+\textit{Dirigida por el Doctor}  \\ [0.3em]
+\textbf{\directorPortadaVal}
+}
+\newcommand{\textoSegundoSubtituloPortada}[1]{
+\def\textoSegundoSubtituloPortadaVal{#1}
+}
+
+% ISBN
+\newcommand{\isbn}[1]{
+\def\isbnVal{#1}
+}
+
+% Copyright
+\newcommand{\copyrightInfo}[1]{
+\def\copyrightInfoVal{#1}
+}
+
+% Créditos a TeXiS
+\newcommand{\noTeXiSCredits}{
+\def\noTeXiSCreditsVal{}
+}
+
+% Explicación sobre impresión a doble cara
+\newcommand{\explicacionDobleCara}{
+\def\explicacionDobleCaraVal{}
+}
+%%%
+% Configuración terminada
+%%%
+
+
+%%%
+%% COMANDO PARA CREAR LAS PORTADAS.
+%% CONTIENE TODO EL CÓDIGO LaTeX
+%%%
+\newcommand{\makeCover}{
+
+
+% Ponemos el marcador en el PDF
+\ifpdf
+\pdfbookmark{Página de Título}{titulo}
+\fi
+
+%
+%  MÁRGENES
+%
+% La maquetación de las páginas en LaTeX es bastante complicada en lo
+% que se refiere a los márgenes. Por ejemplo, _siempre_ hay un
+% desplazamiento de una pulgada hacia la derecha y hacia abajo, porque
+% por razones de maquetación se cree que es necesario ese espacio. Si
+% quieres (en una hoja impar, que son de las únicas que me he
+% preocupado) escribir por encima de la primera pulgada, o hacia la
+% izquierda, tienes que usar "márgenes" negativos.
+% 
+% Para poder seguir esto un poco, lo mejor es que ejecutes \layout con
+% el paquete layout cargado, para ver una imagen...
+%
+% Los valores importantes en lo que se refiere al margen (horizontal,
+% que es del único que me he preocupado) son:
+%
+%   - \hoffset : desplazamiento horizontal del "eje" de coordenadas. A
+%   este valor hay que sumarle, irremediablemente, una pulgada. El
+%   valor por defecto es 0 pt
+%   - \oddsidemargin : "margen" izquierdo (en las páginas impares). El
+%   texto principal de los párrafos comenzará en esa posición (es
+%   decir, 1 pulgada + \hoffset + \oddsidemargin). El valor por
+%   defecto es 22 pt
+%   - \textwidth : longitud del texto (de los párrafos). El valor por
+%   defecto son 360 pt.
+%   - \marginparsep : separador de la parte derecha del texto
+%   principal y el espacio a anotaciones en el margen (notas
+%   marginales). El valor por defecto es 7 pt.
+%   - \marginparwidth : ancho de la sección de notas marginales. El
+%   valor por defecto es 106 pt.
+%
+% Fijate que las notas marginales NO necesariamente llegarán hasta el
+% final del folio. La separación entre el extremo derecho de las notas
+% al margen y el final del folio en realidad dependerá del tamaño de
+% éste; no se especifica de ninguna manera. Esto significa que si
+% quieres ajustar exactamente el margen derecho tienes que echar
+% cuentas con respecto al tamaño del papel, que se mantiene en
+% \paperwidth.
+%
+% En realidad, no sé de qué manera pero todos los valores están
+% relacionados de algún modo, y un cambio en uno afecta a los demás de
+% maneras bastante inverosímiles. Además, _sólo_ pueden cambiarse en
+% el preámbulo (bueno... al menos \textwidth, \oddsidemargin se puede
+% cambiar en otros sitios, pero no se pueden hacer muchas cosas sólo
+% con aquellos que se pueden cambiar...).
+%
+% En general se recomienda que NO cambies los márgenes. Están elegidos
+% por especialistas que saben de maquetación y que han estudiado en
+% profundidad las mejores organizaciones. Por ejemplo, los cambios que
+% hagas pueden alargar demasiado las líneas, o dejarlas demasiado
+% cortas. Pero bueno, si aun así quieres cambiar los márgenes _a nivel
+% global_ es preferible que uses el paquete geometry, cuya inclusión
+% recibe los centímetros de márgen que quieres en cada lado, y él se
+% encarga de hacer las cuentas para que queden así, porque tocar tanto
+% valor es un infierno.
+%
+% Si quieres cambiar los márgenes momentáneamente, entonces lo mejor
+% es hacer uso de un entorno tipo "lista" que permite tocar algunos
+% contadores para ajustar las posiciones de los párrafos. Eso es
+% precisamente lo que hace el entorno cambiamargen definido en
+% TeXiS.sty
+%
+% El problema es que esos cambios son _relativos_ a los márgenes
+% oficiales. Si quieres hacer un cambio drástico (como el que
+% necesitamos en la portada, para que quede centrada), entonces es
+% necesario echar cuentas con los contadores anteriores para realizar
+% el desplazamiento adecuado en cada lado para conseguirlo.
+%
+% Para resumir, los valores usados en los márgenes eran:
+% 1 pulgada + hoffset + oddsidemargin +
+%          + textwidth +
+% + marginparsep + marginparwidth + AJUSTE 
+%                                          = paperwidth
+%
+% Lo que necesitamos en crear un entorno cambiamargen pasando los
+% valores adecuados para que quede centrado. Para eso, hay que hacer
+% cuentas, y eso es un tanto infierno en LaTeX a no ser que se incluya
+% el paquete calc que permite notación infija de operadores. Por
+% tanto, para que esto funcione hay que incluirlo.
+%
+% Para aclararnos, vamos a crear un par de longitudes para hacer las
+% cuentas poco a poco. Además, lo primero es asumir que queremos
+% _eliminar todos los márgenes_ y que los párrafos lleguen totalmente
+% de lado a lado. Para eso, en la izquierda tendremos que restar la
+% suma de los tres primeros valores (1 pulgada, \hoffset y
+% \oddsidemargin).
+
+\newlength{\cambioIzquierdo}
+\setlength{\cambioIzquierdo}{1in + \hoffset + \oddsidemargin}
+% Si te falla aquí, incluye el paquete calc en el preámbulo.
+% 1in = 1 pulgada = 72.27 pt
+
+% En la parte derecha hay que restar el "margen" visible total, que es
+% el tamaño de la hoja restando el espacio hasta la izquierda del
+% párrafo y su ancho. Aprovechamos que el primer espacio lo tenemos en
+% \cambioIzquierdo.
+\newlength{\cambioDerecho}
+\setlength{\cambioDerecho}{\cambioIzquierdo + \textwidth}
+\setlength{\cambioDerecho}{\paperwidth - \cambioDerecho}
+
+% Ya casi está. Si hicieramos
+%
+% \begin{cambiamargen}{-\cambioIzquierdo}{-\cambioDerecho}
+%    ...
+% \end{cambiamargen}
+%
+% tendriamos párrafos que van de extremo a extremo de la hoja. Como
+% eso es una exageración, restamos a cada longitud el márgen real que
+% queremos dejar.
+\newlength{\margenPortada}
+\setlength{\margenPortada}{3.5cm}
+
+\setlength{\cambioIzquierdo}{\cambioIzquierdo - \margenPortada}
+\setlength{\cambioDerecho}{\cambioDerecho - \margenPortada}
+
+
+%%%
+% Portada
+%%%
+
+
+% Página sin cabeceras
+\thispagestyle{empty}
+
+\begin{cambiamargen}{-\cambioIzquierdo}{-\cambioDerecho}
+
+
+% En la primera hoja no se entiende de páginas pares e impares
+\newlength{\evensidemarginOriginal}
+\setlength{\evensidemarginOriginal}{\evensidemargin}
+
+\newlength{\oddsidemarginOriginal}
+\setlength{\oddsidemarginOriginal}{\oddsidemargin}
+
+\setlength{\evensidemargin}{0cm}
+\setlength{\oddsidemargin}{0cm}
+
+% Comienza el tex...
+\begin{Large}
+\mbox{ }
+\vfill
+
+% Cuidado: Ajustarlo si el título cambia...
+\newlength{\longTitulo}
+\settowidth{\longTitulo}{%
+\textbf{Arquitectura y metodología para el uso }}
+\begin{center}
+\rule{\longTitulo}{.5mm}\\
+\vskip 1cm
+\textbf{\tituloPortadaVal}\\
+\textbf{\tituloPortadaEngVal}
+\vskip 0.7cm
+\rule{\longTitulo}{.5mm}\\
+\end{center}
+\end{Large}
+
+\vfill
+
+\begin{center}
+  \includegraphics[scale=\escalaImagenPortadaVal]{\imagenPortadaVal}
+\end{center}
+
+\vfill
+
+\newcounter{lastyear}
+\setcounter{lastyear}{\the\year}
+\addtocounter{lastyear}{-1}
+
+\begin{center}
+  {\Large \textbf{\tipoDocumentoVal}}\\
+  {\Large \textbf{Curso \thelastyear--\the\year}}
+  
+\end{center}
+
+\vfill
+
+\begin{large}
+\begin{center}
+{\Large \bfseries Autores}\\
+\textbf{\autorPortadaVal}\\[0.5cm]
+{\Large \bfseries Directores}\\
+\textbf{\directorPortadaVal}\\[0.5cm]
+{\Large \bfseries Colaborador}\\
+\textbf{\colaboradorPortadaVal}\\[0.5cm]
+\textbf{\institucionVal}\\[1em]
+%\textbf{\fechaPublicacionVal}
+\end{center}
+\end{large}
+
+\vfill
+
+\end{cambiamargen}
+
+\newpage
+
+% Página que en la cara de detrás del folio de la portada.
+% Ponemos que el documento esta maquetado con TeXiS y la
+% aclaración de que debe imprimirse a doble cara.
+\thispagestyle{empty}
+\mbox{ }
+%\vfill%space*{4cm}
+%\begin{small} 
+%\begin{center}
+%\ifx\noTeXiSCreditsVal\undefined
+%  Documento maquetado con \texis\ v.\texisVer.
+%\else
+%\mbox{ }
+%\fi
+%\end{center}
+%\end{small}
+%\vspace*{2cm}
+%\begin{small} 
+%\begin{center}
+%\ifx\explicacionDobleCaraVal\undefined
+%\mbox{ }
+%\else
+%\noindent Este documento está preparado para ser imprimido a doble
+%cara.
+%\fi
+%\end{center}
+%\end{small}
+
+%%%
+% Segunda portada
+%%%
+
+\newpage
+
+\thispagestyle{empty}
+
+\mbox{ }
+
+\begin{Huge}
+\begin{center}
+\tituloPortadaVal \\
+\tituloPortadaEngVal
+\end{center}
+\end{Huge}
+
+\vfill
+
+\begin{large}
+\begin{center}
+\textoPrimerSubtituloPortadaVal
+\mbox{ } \\ \mbox{ } \\ 
+{\Large \bfseries Autores}\\
+\textbf{\autorPortadaVal}\\[1.0cm]
+{\Large \bfseries Directores}\\
+\textbf{\directorPortadaVal}\\[0.3cm]
+{\Large \bfseries Colaborador}\\
+\textbf{\colaboradorPortadaVal}\\[0.3cm]
+\mbox{ } \\ \mbox{ } \\ 
+\textoSegundoSubtituloPortadaVal \\ [0.3em]
+\end{center}
+\end{large}
+
+\vfill
+
+\begin{large}
+\begin{center}
+\textbf{\institucionVal}\\[0.2em]
+    \mbox{ }  \\
+\textbf{\fechaPublicacionVal}
+\end{center}
+\end{large}
+
+
+\newpage
+\thispagestyle{empty}
+%\mbox{ }
+%
+%% Información del ISBN y copyright
+%\vskip 13cm
+%\ifx\copyrightInfoVal\undefined
+%\mbox{ }
+%\else
+%Copyright \textcopyright\ \copyrightInfoVal
+%\fi
+%\vskip 3cm
+%\ifx\isbnVal\undefined
+%\mbox{ }
+%\else
+%ISBN \isbnVal
+%\fi
+
+} % \newcommand{\makeCover}
+
+% Variable local para emacs, para que encuentre el fichero
+% maestro de compilación
+%%%
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Tesis.tex"
+%%% End:

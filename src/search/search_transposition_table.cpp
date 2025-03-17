@@ -83,8 +83,8 @@ void search_best_move(SearchResults& searchResults, Board board, int32_t max_dep
 
     {
         //notify the reader thread that search has stopped
-        std::lock_guard<std::mutex> lock(searchResults.mtx_data_avaliable_cv);
-        searchResults.data_avaliable_cv.notify_one();
+        std::lock_guard<std::mutex> lock(searchResults.mtx_data_available_cv);
+        searchResults.data_available_cv.notify_one();
     }
 }
 
@@ -446,8 +446,8 @@ static inline void insert_new_result(SearchResults& searchResults, int depth, in
     searchResults.depthReached++;
 
     {
-        std::lock_guard<std::mutex> lock(searchResults.mtx_data_avaliable_cv);
-        searchResults.data_avaliable_cv.notify_one();
+        std::lock_guard<std::mutex> lock(searchResults.mtx_data_available_cv);
+        searchResults.data_available_cv.notify_one();
     }
 }
 

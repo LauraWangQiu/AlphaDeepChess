@@ -32,8 +32,8 @@ struct SearchResult
 
 struct SearchResults
 {
-    std::mutex mtx_data_avaliable_cv;
-    std::condition_variable data_avaliable_cv;
+    std::mutex mtx_data_available_cv;
+    std::condition_variable data_available_cv;
     std::atomic<int> depthReached;
     SearchResult results[INFINITE_DEPTH];
 };

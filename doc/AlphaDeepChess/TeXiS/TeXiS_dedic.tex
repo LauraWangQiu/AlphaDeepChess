@@ -1,0 +1,147 @@
+%---------------------------------------------------------------------
+%
+%                      TeXiS_dedic.tex
+%
+%---------------------------------------------------------------------
+%
+% TeXiS_dedic.tex
+% Copyright 2009 Marco Antonio Gomez-Martin, Pedro Pablo Gomez-Martin
+%
+% This file belongs to TeXiS, a LaTeX template for writting
+% Thesis and other documents. The complete last TeXiS package can
+% be obtained from http://gaia.fdi.ucm.es/projects/texis/
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainers of this work are Marco Antonio Gomez-Martin
+% and Pedro Pablo Gomez-Martin
+%
+%---------------------------------------------------------------------
+%
+% Contiene la definición de las macros para crear las páginas de
+% dedicatorias.
+%
+%---------------------------------------------------------------------
+
+%%%
+% Gestión de la configuración
+%%%
+
+% Primera dedicatoria
+\newcommand{\dedicatoriaUno}[1]{
+\def\dedicatoriaUnoVal{#1}
+}
+
+% Segunda dedicatoria
+\newcommand{\dedicatoriaDos}[1]{
+\def\dedicatoriaDosVal{#1}
+}
+
+%%%
+% Configuración terminada
+%%%
+
+
+%%%
+%% COMANDO PARA CREAR LAS DEDICATORIAS
+%% CONTIENE TODO EL CÓDIGO LaTeX
+%%%
+\newcommand{\putDedicatoria}[1]{
+% Si no hemos puesto aún el marcador en el PDF, lo ponemos
+\ifx\marcadorDedicatorias\undefined
+\ifpdf
+   \pdfbookmark{Dedicatoria}{dedicatoria}
+\fi
+\def\marcadorDedicatorias{1}
+\fi
+% Primera pagina con la dedicatoria
+\thispagestyle{empty}\mbox{}
+\vspace*{4cm}
+\begin{flushright}
+#1
+\end{flushright}
+\newpage
+% Segunda página, vacia
+\thispagestyle{empty}\mbox{}
+\newpage
+} %\newcommand{\putDedicatoria}[1]
+
+\newcommand{\makeDedicatorias}{
+% Dedicatoria 1
+\ifx\dedicatoriaUnoVal\undefined
+\else
+\putDedicatoria{\dedicatoriaUnoVal}
+\fi
+% Dedicatoria 2
+\ifx\dedicatoriaDosVal\undefined
+\else
+\putDedicatoria{\dedicatoriaDosVal}
+\fi
+}
+
+
+
+% \newcommand{\makeDedicatorias}{
+% % Primera dedicatoria
+% \ifx\dedicatoriaUnoVal\undefined
+% \else
+% \thispagestyle{empty}\mbox{}
+
+% \vspace*{4cm}
+% \begin{flushright}
+% \dedicatoriaUnoVal
+% \end{flushright}
+% % \hfill \emph{Al duque de Béjar}
+
+% % \hfill \emph{y\qquad\quad}
+
+% % \hfill \emph{a tí, lector carísimo}
+
+% \newpage
+% \thispagestyle{empty}\mbox{}
+% \fi % \ifx\dedicatoriaDosVal\undefined
+% \newpage
+
+% % Una segunda dedicatoria
+% \ifx\dedicatoriaDosVal\undefined
+% \else
+
+% \thispagestyle{empty}\mbox{}
+
+% \vspace*{4cm}
+% \begin{flushright}
+% \dedicatoriaDosVal
+% \end{flushright}
+
+% % \hfill \emph{I can't go to a restaurant and}
+
+% % \hfill \emph{order food because I keep looking}
+
+% % \hfill \emph{at the fonts on the menu.}
+
+% % \hfill Donald Knuth
+
+% \newpage
+% \thispagestyle{empty}\mbox{}
+% \newpage
+
+% \fi % \ifx\dedicatoriaDosVal\undefined
+
+% } % \newcommand{\makeDedicatorias}
+
+%\newpage
+% Variable local para emacs, para que encuentre el fichero
+% maestro de compilación
+%%%
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Tesis.tex"
+%%% End:
