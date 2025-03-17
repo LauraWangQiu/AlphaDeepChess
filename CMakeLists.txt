@@ -25,6 +25,7 @@ src/board/board.cpp
 src/uci/uci.cpp
 src/utilities/perft.cpp
 src/utilities/transposition_table.cpp
+src/move_generator/precomputed_move_data.cpp
 )
 
 target_include_directories(AlphaDeepChess PRIVATE ${OpenCL_INCLUDE_DIR})

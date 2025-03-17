@@ -11,6 +11,7 @@
 #include "square.hpp"
 #include <array>
 #include <cassert>
+#include <unordered_map>
 
 /**
  * @brief PrecomputedMoveData
@@ -24,6 +25,52 @@ public:
     PrecomputedMoveData() = delete;
 
     ~PrecomputedMoveData() = delete;
+
+    /**
+     * @brief rookMoves
+     * 
+     * calculates the 64 bit mask with 1 on the squares that the piece could move
+     * 
+     * @note blockers bitboard cannot contain a piece outside the movement mask
+     * 
+     * @param[in] square rook square
+     * @param[in] blockers bitboard of pieces that block the rook movement
+     * 
+     * @return (*ROOK_MOVES[square])[blockers]
+     */
+    static inline uint64_t rookMoves(Square square, uint64_t blockers) { return (*ROOK_MOVES[square])[blockers]; }
+
+    /**
+     * @brief bishopMoves
+     * 
+     * calculates the 64 bit mask with 1 on the squares that the piece could move
+     * 
+     * @note blockers bitboard cannot contain a piece outside the movement mask
+     * 
+     * @param[in] square bishop square
+     * @param[in] blockers bitboard of pieces that block the bishop movement
+     * 
+     * @return (*BISHOP_MOVES[square])[blockers]
+     */
+    static inline uint64_t bishopMoves(Square square, uint64_t blockers) { return (*BISHOP_MOVES[square])[blockers]; }
+
+    /**
+     * @brief queenMoves
+     * 
+     * calculates the 64 bit mask with 1 on the squares that the piece could move
+     * 
+     * @note blockers bitboard cannot contain a piece outside the movement mask
+     * 
+     * @param[in] square queen square
+     * @param[in] ortogonal_blockers bitboard of pieces that block the queen movement vertically and horizontlly
+     * @param[in] diagonal_blockers bitboard of pieces that block the queen movement in diagonal
+     * 
+     * @return rookMoves(square, ortogonal_blockers) | bishopMoves(square, diagonal_blockers)
+     */
+    static inline uint64_t queenMoves(Square square, uint64_t ortogonal_blockers, uint64_t diagonal_blockers)
+    {
+        return rookMoves(square, ortogonal_blockers) | bishopMoves(square, diagonal_blockers);
+    }
 
     /**
      * @brief kingAttacks
@@ -153,6 +200,9 @@ private:
     static constexpr std::array<uint64_t, 64> initializeBishopAttacks();
     static constexpr std::array<uint64_t, 64> initializeQueenAttacks();
 
+    static uint64_t calculateLegalRookMoves(Square square, uint64_t blockerBB);
+    static uint64_t calculateLegalBishopMoves(Square square, uint64_t blockerBB);
+
     static std::array<uint64_t, 64> WHITE_PAWN_ATTACKS;
     static std::array<uint64_t, 64> BLACK_PAWN_ATTACKS;
     static std::array<uint64_t, 64> KING_ATTACKS;
@@ -160,168 +210,20 @@ private:
     static std::array<uint64_t, 64> BISHOP_ATTACKS;
     static std::array<uint64_t, 64> ROOK_ATTACKS;
     static std::array<uint64_t, 64> QUEEN_ATTACKS;
+
+    /**
+     * @brief ROOK_MOVES
+     *     
+     *  Lookup table for the bishop moves given
+     *  the square of the bishop and the bitboard of blocker pieces.
+     */
+    static std::unordered_map<uint64_t, uint64_t>* ROOK_MOVES[64];
+
+    /**
+     * @brief BISHOP_MOVES
+     *     
+     *  Lookup table for the bishop moves given
+     *  the square of the bishop and the bitboard of blocker pieces.
+     */
+    static std::unordered_map<uint64_t, uint64_t>* BISHOP_MOVES[64];
 };
-
-std::array<uint64_t, 64> PrecomputedMoveData::WHITE_PAWN_ATTACKS = initializeWhitePawnAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::BLACK_PAWN_ATTACKS = initializeBlackPawnAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::KING_ATTACKS = initializeKingAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::KNIGHT_ATTACKS = initializeKnightAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::BISHOP_ATTACKS = initializeBishopAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::ROOK_ATTACKS = initializeRookAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::QUEEN_ATTACKS = initializeQueenAttacks();
-
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeKingAttacks()
-{
-    std::array<uint64_t, 64> KING_ATTACKS {};
-
-    const int dirs[8][2] = {{1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}};
-
-
-    for (Row row = ROW_1; is_valid_row(row); row++) {
-        for (Col col = COL_A; is_valid_col(col); col++) {
-
-            const Square king_square = Square(row, col);
-
-            for (auto& dir : dirs) {
-
-                const Row attack_row = row + static_cast<Row>(dir[0]);
-                const Col attack_col = col + static_cast<Col>(dir[1]);
-
-                const Square attack_square = Square(attack_row, attack_col);
-
-                if (attack_square.is_valid()) {
-
-                    KING_ATTACKS[king_square] |= attack_square.mask();
-                }
-            }
-        }
-    }
-    return KING_ATTACKS;
-}
-
-
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeKnightAttacks()
-{
-    std::array<uint64_t, 64> KNIGHT_ATTACKS {};
-
-    const int dirs[8][2] = {{-2, -1}, {-2, 1}, {2, -1}, {2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}};
-
-    for (Row row = ROW_1; is_valid_row(row); row++) {
-        for (Col col = COL_A; is_valid_col(col); col++) {
-
-            const Square knight_square = Square(row, col);
-
-            for (auto& dir : dirs) {
-
-                const Row attack_row = row + static_cast<Row>(dir[0]);
-                const Col attack_col = col + static_cast<Col>(dir[1]);
-
-                const Square attack_square = Square(attack_row, attack_col);
-
-                if (attack_square.is_valid()) {
-                    KNIGHT_ATTACKS[knight_square] |= attack_square.mask();
-                }
-            }
-        }
-    }
-    return KNIGHT_ATTACKS;
-}
-
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeWhitePawnAttacks()
-{
-    std::array<uint64_t, 64> WHITE_PAWN_ATTACKS {};
-
-    const int dirs[2][2] = {{1, 1}, {1, -1}};
-
-    for (Row row = ROW_1; is_valid_row(row); row++) {
-        for (Col col = COL_A; is_valid_col(col); col++) {
-
-            const Square pawn_square = Square(row, col);
-
-            for (auto& dir : dirs) {
-
-                const Row attack_row = row + static_cast<Row>(dir[0]);
-                const Col attack_col = col + static_cast<Col>(dir[1]);
-
-                const Square attack_square = Square(attack_row, attack_col);
-
-                if (attack_square.is_valid()) {
-
-                    WHITE_PAWN_ATTACKS[pawn_square] |= attack_square.mask();
-                }
-            }
-        }
-    }
-    return WHITE_PAWN_ATTACKS;
-}
-
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeBlackPawnAttacks()
-{
-    std::array<uint64_t, 64> BLACK_PAWN_ATTACKS {};
-
-    const int dirs[2][2] = {{-1, -1}, {-1, +1}};
-
-    for (Row row = ROW_1; is_valid_row(row); row++) {
-        for (Col col = COL_A; is_valid_col(col); col++) {
-
-            const Square pawn_square = Square(row, col);
-
-            for (auto& dir : dirs) {
-
-                const Row attack_row = row + static_cast<Row>(dir[0]);
-                const Col attack_col = col + static_cast<Col>(dir[1]);
-
-                const Square attack_square = Square(attack_row, attack_col);
-
-                if (attack_square.is_valid()) {
-
-                    BLACK_PAWN_ATTACKS[pawn_square] |= attack_square.mask();
-                }
-            }
-        }
-    }
-    return BLACK_PAWN_ATTACKS;
-}
-
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeRookAttacks()
-{
-    std::array<uint64_t, 64> ROOK_ATTACKS {};
-
-    for (Row row = ROW_1; is_valid_row(row); row++) {
-        for (Col col = COL_A; is_valid_col(col); col++) {
-            const Square rook_square = Square(row, col);
-            ROOK_ATTACKS[rook_square] = get_row_mask(row) | get_col_mask(col);
-            ROOK_ATTACKS[rook_square] &= ~rook_square.mask();   // Remove the piece itself
-        }
-    }
-    return ROOK_ATTACKS;
-}
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeBishopAttacks()
-{
-    std::array<uint64_t, 64> BISHOP_ATTACKS {};
-
-    for (Row row = ROW_1; is_valid_row(row); row++) {
-        for (Col col = COL_A; is_valid_col(col); col++) {
-
-            const Square bishop_square = Square(row, col);
-
-            const Diagonal bishop_diagonal = bishop_square.diagonal();
-            const AntiDiagonal bishop_antidiagonal = bishop_square.antidiagonal();
-
-            BISHOP_ATTACKS[bishop_square] = get_diagonal_mask(bishop_diagonal);
-            BISHOP_ATTACKS[bishop_square] |= get_antidiagonal_mask(bishop_antidiagonal);
-
-            BISHOP_ATTACKS[bishop_square] &= ~bishop_square.mask();   // Remove the piece itself
-        }
-    }
-    return BISHOP_ATTACKS;
-}
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeQueenAttacks()
-{
-    std::array<uint64_t, 64> QUEEN_ATTACKS {};
-
-    for (Square sq = Square::SQ_A1; sq.is_valid(); sq++) {
-        QUEEN_ATTACKS[sq] = ROOK_ATTACKS[sq] | BISHOP_ATTACKS[sq];
-    }
-    return QUEEN_ATTACKS;
-}
