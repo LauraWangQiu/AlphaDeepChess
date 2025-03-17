@@ -13,10 +13,13 @@ def main(build_type, games, tc, st, depth, concurrency):
     default_comparator_dir = "enginesComparator"
     if is_windows:
         cutechess_internal_dir = "cutechess-1.3.1-win64"
+        stockfish_internal_dir = "stockfish-windows-x86-64"
     elif is_linux:
         cutechess_internal_dir = "cutechess-cli"
+        stockfish_internal_dir = "stockfish-ubuntu-x86-64"
     elif is_macos:
         cutechess_internal_dir = "build"
+        stockfish_internal_dir = "stockfish-macos-x86-64"
     cutechess_dir = os.path.join("cutechess", cutechess_internal_dir)
 
     os.chdir(default_comparator_dir)
@@ -31,7 +34,7 @@ def main(build_type, games, tc, st, depth, concurrency):
         {
             "name": "Stockfish",
             # Change this path depending on the OS
-            "command": "./stockfish/stockfish/stockfish-windows-x86-64",
+            "command": f"./stockfish/stockfish/{stockfish_internal_dir}",
             "protocol": "uci"
         }
     ]
