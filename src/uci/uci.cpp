@@ -154,11 +154,38 @@ void Uci::new_game_command_action() { board.load_fen(StartFEN); }
 void Uci::go_command_action(const TokenArray& tokens)
 {
     uint32_t depth = INFINITE_DEPTH;
+    uint32_t wtime = INFINITE_WTIME;
+    uint32_t btime = INFINITE_BTIME;
+    uint32_t movestogo = INFINITE_MOVES_TO_GO;
 
     // Parse the command line arguments
     for (uint32_t i = 1; i < tokens.size(); ++i) {
         if (tokens[i].empty()) {
             continue;
+        }
+        else if (tokens[i] == "wtime") {
+            try {
+                wtime = std::stoul(tokens[++i]);
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command : go wtime\n";
+                return;
+            }
+        }
+        else if (tokens[i] == "btime") {
+            try {
+                btime = std::stoul(tokens[++i]);
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command : go btime\n";
+                return;
+            }
+        }
+        else if (tokens[i] == "movestogo") {
+            try {
+                movestogo = std::stoul(tokens[++i]);
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command : go movestogo\n";
+                return;
+            }
         }
         else if (tokens[i] == "depth") {
             try {
@@ -196,19 +223,17 @@ void Uci::go_command_action(const TokenArray& tokens)
     }
 
     // Launch a new thread to search for the best move
-    searchThread = std::thread([this, depth]() { search_best_move(searchResults, board, depth); });
+    searchThread = std::thread([this, depth, wtime, btime, movestogo]() { search_best_move(searchResults, board, depth, wtime, btime, movestogo); });
 
     readerThread = std::thread([this]() {
         int depthReaded = 0;
-
-        std::cout << "Search started" << std::endl;
 
         while (is_search_running() || (depthReaded < searchResults.depthReached)) {
 
             while (depthReaded < searchResults.depthReached) {
                 const SearchResult& result = searchResults.results[depthReaded++];
 
-                std::cout << "info depth " << result.depth << " score " << result.evaluation << " bestMove "
+                std::cout << "info depth " << result.depth << " score cp " << result.evaluation << " bestMove "
                           << Move(result.bestMove_data).to_string() << std::endl;
             }
 
@@ -216,13 +241,13 @@ void Uci::go_command_action(const TokenArray& tokens)
                 std::unique_lock<std::mutex> lock(searchResults.mtx_data_available_cv);
 
                 if (is_search_running() && depthReaded >= searchResults.depthReached) {
-                    // thread goes to sleep until more data is avaliable or search stop
+                    // thread goes to sleep until more data is available or search stop
                     searchResults.data_available_cv.wait(lock);
                 }
             }
         }
 
-        std::cout << "Search finished" << std::endl;
+        std::cout << "bestmove " << Move(searchResults.results[depthReaded - 1].bestMove_data).to_string() << std::endl;
     });
 }
 

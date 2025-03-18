@@ -3,6 +3,7 @@ import platform
 import subprocess
 import json
 import argparse
+import re
 
 def main(build_type, games, tc, st, depth, concurrency):
     os_name = platform.system()
@@ -33,7 +34,6 @@ def main(build_type, games, tc, st, depth, concurrency):
         },
         {
             "name": "Stockfish",
-            # Change this path depending on the OS
             "command": f"./stockfish/stockfish/{stockfish_internal_dir}",
             "protocol": "uci"
         }
@@ -44,6 +44,7 @@ def main(build_type, games, tc, st, depth, concurrency):
 
     results_path = "results.pgn"
     edp_path = "results.epd"
+    log_path = "log.txt"
     cutechess_cmd = [
         os.path.join(cutechess_dir, "cutechess-cli"),
         "-engine", "conf=AlphaDeepChess",
@@ -65,9 +66,22 @@ def main(build_type, games, tc, st, depth, concurrency):
     if concurrency is not None:
         cutechess_cmd.append(f"concurrency={concurrency}")
 
-    subprocess.run(cutechess_cmd)
+    with open(log_path, 'w') as log_file:
+        process = subprocess.Popen(cutechess_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+
+        for line in process.stdout:
+            print(line, end='')
+            if not re.match(r'^\d', line):
+                log_file.write(line)
+            # if "illegal move" in line.lower():
+            #     print("Illegal move detected. Stopping execution.")
+            #     process.terminate()
+            #     break
+
+        process.wait()
 
     print(f"Results saved in {results_path}.")
+    print(f"Log saved in {log_path}.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compare chess engines.")
