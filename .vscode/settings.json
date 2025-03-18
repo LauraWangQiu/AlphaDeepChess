@@ -80,6 +80,20 @@
         "xlocmon": "cpp",
         "map": "cpp",
         "set": "cpp",
-        "expected": "cpp"
+        "expected": "cpp",
+        "csignal": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "locale": "cpp",
+        "queue": "cpp",
+        "stack": "cpp",
+        "xfacet": "cpp",
+        "xhash": "cpp",
+        "xlocbuf": "cpp",
+        "xlocinfo": "cpp",
+        "xlocmes": "cpp",
+        "xlocnum": "cpp",
+        "xloctime": "cpp",
+        "xtree": "cpp"
     }
 }

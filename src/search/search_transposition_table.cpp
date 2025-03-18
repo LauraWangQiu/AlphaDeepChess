@@ -10,6 +10,7 @@
  * 
  */
 #include <limits>
+#include <chrono>
 #include "search.hpp"
 #include "move_generator.hpp"
 #include "evaluation.hpp"
@@ -27,9 +28,9 @@ static int bestEvalFound;
 static Move bestMoveInIteration;
 static int bestEvalInIteration;
 
-static inline void iterative_deepening(SearchResults& searchResults, Board& board, int max_depth);
-static int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int beta);
-static int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int beta);
+static inline void iterative_deepening(SearchResults& searchResults, Board& board, int max_depth, std::chrono::steady_clock::time_point start_time, uint32_t time_limit);
+static int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int beta, std::chrono::steady_clock::time_point start_time, uint32_t time_limit);
+static int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int beta, std::chrono::steady_clock::time_point start_time, uint32_t time_limit);
 static int quiescence_maximize_white(Board& board, int ply, int alpha, int beta);
 static int quiescence_minimize_black(Board& board, int ply, int alpha, int beta);
 static void insert_new_result(SearchResults& searchResults, int depth, int evaluation, Move move);
@@ -68,7 +69,7 @@ bool is_search_running() { return !stop.load(); }
   * @return best move found in the position.
   * 
   */
-void search_best_move(SearchResults& searchResults, Board board, int32_t max_depth)
+void search_best_move(SearchResults& searchResults, Board board, int32_t max_depth, uint32_t wtime, uint32_t btime, uint32_t movestogo)
 {
     const ChessColor side_to_move = board.state().side_to_move();
 
@@ -77,7 +78,19 @@ void search_best_move(SearchResults& searchResults, Board board, int32_t max_dep
     searchResults.depthReached = 0;
     stop = false;
 
-    iterative_deepening(searchResults, board, max_depth);
+    uint32_t time_limit;
+    if (movestogo == INFINITE_MOVES_TO_GO) {
+        time_limit = std::numeric_limits<uint32_t>::max();
+    } else if (movestogo > 0) {
+        time_limit = (side_to_move == ChessColor::WHITE ? wtime : btime) / movestogo;
+    } else {
+        // Sudden death
+        time_limit = (side_to_move == ChessColor::WHITE ? wtime : btime);
+    }
+
+    auto start_time = std::chrono::steady_clock::now();
+
+    iterative_deepening(searchResults, board, max_depth, start_time, time_limit);
 
     stop = true;
 
@@ -88,9 +101,8 @@ void search_best_move(SearchResults& searchResults, Board board, int32_t max_dep
     }
 }
 
-void iterative_deepening(SearchResults& searchResults, Board& board, int max_depth)
+void iterative_deepening(SearchResults& searchResults, Board& board, int max_depth, std::chrono::steady_clock::time_point start_time, uint32_t time_limit)
 {
-
     const ChessColor side_to_move = board.state().side_to_move();
 
     for (int depth = 1; depth <= max_depth; depth++) {
@@ -98,8 +110,8 @@ void iterative_deepening(SearchResults& searchResults, Board& board, int max_dep
         bestMoveInIteration = Move::null();
         bestEvalInIteration = side_to_move == ChessColor::WHITE ? -INF : +INF;
 
-        side_to_move == ChessColor::WHITE ? alpha_beta_maximize_white(board, depth, 0, -INF, +INF)
-                                          : alpha_beta_minimize_black(board, depth, 0, -INF, +INF);
+        side_to_move == ChessColor::WHITE ? alpha_beta_maximize_white(board, depth, 0, -INF, +INF, start_time, time_limit)
+                                          : alpha_beta_minimize_black(board, depth, 0, -INF, +INF, start_time, time_limit);
 
         if (stop) {
             break;
@@ -107,7 +119,7 @@ void iterative_deepening(SearchResults& searchResults, Board& board, int max_dep
 
         bestMoveFound = bestMoveInIteration;
         bestEvalFound = bestEvalInIteration;
-
+        
         assert(bestMoveFound.is_valid());
 
         insert_new_result(searchResults, depth, bestEvalFound, bestMoveFound);
@@ -128,11 +140,13 @@ void iterative_deepening(SearchResults& searchResults, Board& board, int max_dep
   * @param[in] ply   current ply in the tree (use to track checkMate score)
   * @param[in] alpha maximum value that the maximizing player(white) can guarantee
   * @param[in] beta  minimum value that the minimizing player(black) can guarantee
+  * @param[in] start_time start time of the search
+  * @param[in] time_limit time limit for the search
   * 
   * @return best score possible for white in this node (maximum score possible)
   * 
   */
-int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int beta)
+int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int beta,std::chrono::steady_clock::time_point start_time, uint32_t time_limit)
 {
     const uint64_t zobrist_key = board.state().get_zobrist_key();
 
@@ -177,8 +191,15 @@ int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int b
             return 0;
         }
 
+        auto current_time = std::chrono::steady_clock::now();
+        auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();
+        if (elapsed_time >= time_limit) {
+            stop = true;
+            return 0;
+        }
+
         board.make_move(moves[i]);
-        int evaluation = alpha_beta_minimize_black(board, depth - 1, ply + 1, alpha, beta);
+        int evaluation = alpha_beta_minimize_black(board, depth - 1, ply + 1, alpha, beta, start_time, time_limit);
         board.unmake_move(moves[i], game_state);
 
         if (evaluation > best_eval_in_pos_for_tt) {
@@ -218,11 +239,13 @@ int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int b
   * @param[in] ply   current ply in the tree
   * @param[in] alpha maximum value that the maximizing player(white) can guarantee
   * @param[in] beta  minimum value that the minimizing player(black) can guarantee
+  * @param[in] start_time start time of the search
+  * @param[in] time_limit time limit for the search
   * 
   * @return best score possible for black in this node (minimum score possible)
   * 
   */
-int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int beta)
+int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int beta, std::chrono::steady_clock::time_point start_time, uint32_t time_limit)
 {
     const uint64_t zobrist_key = board.state().get_zobrist_key();
 
@@ -267,8 +290,15 @@ int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int b
             return 0;
         }
 
+        auto current_time = std::chrono::steady_clock::now();
+        auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();
+        if (elapsed_time >= time_limit) {
+            stop = true;
+            return 0;
+        }
+
         board.make_move(moves[i]);
-        int evaluation = alpha_beta_maximize_white(board, depth - 1, ply + 1, alpha, beta);
+        int evaluation = alpha_beta_maximize_white(board, depth - 1, ply + 1, alpha, beta, start_time, time_limit);
         board.unmake_move(moves[i], game_state);
 
         if (evaluation < best_eval_in_pos_for_tt) {
