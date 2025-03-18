@@ -4,6 +4,10 @@ project(AlphaDeepChess VERSION 1.0.0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+    message(FATAL_ERROR "Only 64-bit builds are supported!")
+endif()
+
 include_directories(include)
 include_directories(include/board)
 include_directories(include/move)
@@ -36,7 +40,7 @@ set(BASIC_SOURCES
     src/evaluation/evaluation_basic.cpp
     src/search/search_transposition_table.cpp
     src/move_ordering/move_ordering_MVV_LVA.cpp
-    src/move_generator/move_generator_basic.cpp
+    src/move_generator/move_generator_magic_bitboards.cpp
 )
 
 # Add advanced algorithm source files

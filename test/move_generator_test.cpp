@@ -67,6 +67,7 @@ void move_generator_test()
     // Launch threads
     std::vector<std::thread> threads;
     for (size_t i = 0; i < keys.size(); ++i) {
+
         threads.emplace_back([i, &keys, &cout_mutex, &threads_finished]() {
             const auto& key = keys[i];
             const auto& entry = perftResults.at(key);

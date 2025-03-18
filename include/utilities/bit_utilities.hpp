@@ -115,3 +115,14 @@ constexpr inline uint8_t pop_msb(uint64_t& bits)
     bits &= ~(1ULL << msb_index);   // Clears the MSB
     return msb_index;
 }
+
+/**
+ * @brief number_of_1_bits(uint64_t bits)
+ * 
+ * Returns the number bits that are 1.
+ * 
+ * @param[in] bits bits to count.
+ * 
+ * @return std::popcount(bits.
+ */
+constexpr inline int number_of_1_bits(uint64_t bits) { return std::popcount(bits); }

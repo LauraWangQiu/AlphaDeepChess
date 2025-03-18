@@ -10,18 +10,130 @@
 
 #include "precomputed_move_data.hpp"
 
+using ArrayBitboards = std::array<uint64_t, 64>;
+using ArrayBitboardsConst = const std::array<uint64_t, 64>;
 
-std::array<uint64_t, 64> PrecomputedMoveData::WHITE_PAWN_ATTACKS = initializeWhitePawnAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::BLACK_PAWN_ATTACKS = initializeBlackPawnAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::KING_ATTACKS = initializeKingAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::KNIGHT_ATTACKS = initializeKnightAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::BISHOP_ATTACKS = initializeBishopAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::ROOK_ATTACKS = initializeRookAttacks();
-std::array<uint64_t, 64> PrecomputedMoveData::QUEEN_ATTACKS = initializeQueenAttacks();
+static constexpr ArrayBitboardsConst initialize_white_pawn_attacks();
+static constexpr ArrayBitboardsConst initialize_black_pawn_attacks();
+static constexpr ArrayBitboardsConst initialize_king_attacks();
+static constexpr ArrayBitboardsConst initialize_knight_attacks();
+static constexpr ArrayBitboardsConst initialize_rook_attacks();
+static constexpr ArrayBitboardsConst initialize_bishop_attacks();
 
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeKingAttacks()
+static constexpr uint64_t calculate_rook_moves(Square square, uint64_t blockerBB);
+static constexpr uint64_t calculate_bishop_moves(Square square, uint64_t blockerBB);
+
+static const std::array<std::array<uint64_t, 4096>, 64> initialize_rook_legal_moves(ArrayBitboardsConst& ROOK_ATTACKS);
+static const std::array<std::array<uint64_t, 512>, 64>
+initialize_bishop_legal_moves(ArrayBitboardsConst& BISHOP_ATTACKS);
+
+
+ArrayBitboardsConst PrecomputedMoveData::WHITE_PAWN_ATTACKS = initialize_white_pawn_attacks();
+ArrayBitboardsConst PrecomputedMoveData::BLACK_PAWN_ATTACKS = initialize_black_pawn_attacks();
+ArrayBitboardsConst PrecomputedMoveData::KING_ATTACKS = initialize_king_attacks();
+ArrayBitboardsConst PrecomputedMoveData::KNIGHT_ATTACKS = initialize_knight_attacks();
+ArrayBitboardsConst PrecomputedMoveData::BISHOP_ATTACKS = initialize_bishop_attacks();
+ArrayBitboardsConst PrecomputedMoveData::ROOK_ATTACKS = initialize_rook_attacks();
+
+const std::array<std::array<uint64_t, 4096>, 64> PrecomputedMoveData::ROOK_MOVES =
+    initialize_rook_legal_moves(ROOK_ATTACKS);
+const std::array<std::array<uint64_t, 512>, 64> PrecomputedMoveData::BISHOP_MOVES =
+    initialize_bishop_legal_moves(BISHOP_ATTACKS);
+
+
+static const std::array<std::array<uint64_t, 4096>, 64> initialize_rook_legal_moves(ArrayBitboardsConst& ROOK_ATTACKS)
 {
-    std::array<uint64_t, 64> KING_ATTACKS {};
+    std::array<std::array<uint64_t, 4096>, 64> ROOK_MOVES;
+
+    for (Square square = Square::SQ_A1; square.is_valid(); square++) {
+        const uint64_t moves = ROOK_ATTACKS[square];
+        const uint64_t edges = ((ROW_1_MASK | ROW_8_MASK) & ~get_row_mask(square.row())) |
+            ((COL_A_MASK | COL_H_MASK) & ~get_col_mask(square.col()));
+
+        int indicesInMoveMask[64] = {0};
+        int numIndices = 0;
+
+        // Create a list of the indices of the bits that are set to 1 in the movement mask
+        for (int i = 0; i < 64; i++) {
+            if (moves & (1ULL << i)) {
+                indicesInMoveMask[numIndices++] = i;
+            }
+        }
+
+        // Calculate total number of different bitboards (2^n)
+        int numPatterns = 1 << numIndices;
+
+        // Create all bitboards
+        for (int patternIndex = 0; patternIndex < numPatterns; patternIndex++) {
+            // calculate blocker bitboard
+            uint64_t blockers = 0;
+            for (int bitIndex = 0; bitIndex < numIndices; bitIndex++) {
+                uint64_t bit = (patternIndex >> bitIndex) & 1;
+                blockers |= bit << indicesInMoveMask[bitIndex];
+            }
+
+            blockers &= ~edges;   // blockers minus the board edges, because they dont matter in the calculation
+
+            const uint64_t index = (blockers * rook_magic(square)) >> (64 - rook_occupancy_number(square));
+            assert(index < 4096);
+
+            // create entry in rook lookupTable
+            ROOK_MOVES[square][index] = calculate_rook_moves(square, blockers);
+        }
+    }
+
+    return ROOK_MOVES;
+}
+
+static const std::array<std::array<uint64_t, 512>, 64>
+initialize_bishop_legal_moves(ArrayBitboardsConst& BISHOP_ATTACKS)
+{
+    std::array<std::array<uint64_t, 512>, 64> BISHOP_MOVES;
+
+    for (Square square = Square::SQ_A1; square.is_valid(); square++) {
+
+        const uint64_t moves = BISHOP_ATTACKS[square];
+        const uint64_t edges = ((ROW_1_MASK | ROW_8_MASK) & ~get_row_mask(square.row())) |
+            ((COL_A_MASK | COL_H_MASK) & ~get_col_mask(square.col()));
+
+        int indicesInMoveMask[64] = {0};
+        int numIndices = 0;
+
+        // Create a list of the indices of the bits that are set to 1 in the movement mask
+        for (int i = 0; i < 64; i++) {
+            if (moves & (1ULL << i)) {
+                indicesInMoveMask[numIndices++] = i;
+            }
+        }
+
+        // Calculate total number of different bitboards (2^n)
+        int numPatterns = 1 << numIndices;
+
+        // Create all bitboards
+        for (int patternIndex = 0; patternIndex < numPatterns; patternIndex++) {
+            // calculate blocker bitboard
+            uint64_t blockers = 0;
+            for (int bitIndex = 0; bitIndex < numIndices; bitIndex++) {
+                uint64_t bit = (patternIndex >> bitIndex) & 1;
+                blockers |= bit << indicesInMoveMask[bitIndex];
+            }
+            blockers &= ~edges;   // blockers minus the board edges, because they dont matter in the calculation
+
+            const uint64_t index = (blockers * bishop_magic(square)) >> (64 - bishop_occupancy_number(square));
+            assert(index < 512);
+
+            // create entry in rook lookupTable
+            BISHOP_MOVES[square][index] = calculate_bishop_moves(square, blockers);
+        }
+    }
+
+    return BISHOP_MOVES;
+}
+
+
+constexpr ArrayBitboardsConst initialize_king_attacks()
+{
+    ArrayBitboards KING_ATTACKS {};
 
     const int dirs[8][2] = {{1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}};
 
@@ -49,9 +161,9 @@ constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeKingAttacks()
 }
 
 
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeKnightAttacks()
+constexpr ArrayBitboardsConst initialize_knight_attacks()
 {
-    std::array<uint64_t, 64> KNIGHT_ATTACKS {};
+    ArrayBitboards KNIGHT_ATTACKS {};
 
     const int dirs[8][2] = {{-2, -1}, {-2, 1}, {2, -1}, {2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}};
 
@@ -76,9 +188,9 @@ constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeKnightAttacks(
     return KNIGHT_ATTACKS;
 }
 
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeWhitePawnAttacks()
+constexpr ArrayBitboardsConst initialize_white_pawn_attacks()
 {
-    std::array<uint64_t, 64> WHITE_PAWN_ATTACKS {};
+    ArrayBitboards WHITE_PAWN_ATTACKS {};
 
     const int dirs[2][2] = {{1, 1}, {1, -1}};
 
@@ -104,9 +216,9 @@ constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeWhitePawnAttac
     return WHITE_PAWN_ATTACKS;
 }
 
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeBlackPawnAttacks()
+constexpr ArrayBitboardsConst initialize_black_pawn_attacks()
 {
-    std::array<uint64_t, 64> BLACK_PAWN_ATTACKS {};
+    ArrayBitboards BLACK_PAWN_ATTACKS {};
 
     const int dirs[2][2] = {{-1, -1}, {-1, +1}};
 
@@ -132,9 +244,9 @@ constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeBlackPawnAttac
     return BLACK_PAWN_ATTACKS;
 }
 
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeRookAttacks()
+constexpr ArrayBitboardsConst initialize_rook_attacks()
 {
-    std::array<uint64_t, 64> ROOK_ATTACKS {};
+    ArrayBitboards ROOK_ATTACKS {};
 
     for (Row row = ROW_1; is_valid_row(row); row++) {
         for (Col col = COL_A; is_valid_col(col); col++) {
@@ -145,9 +257,9 @@ constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeRookAttacks()
     }
     return ROOK_ATTACKS;
 }
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeBishopAttacks()
+constexpr ArrayBitboardsConst initialize_bishop_attacks()
 {
-    std::array<uint64_t, 64> BISHOP_ATTACKS {};
+    ArrayBitboards BISHOP_ATTACKS {};
 
     for (Row row = ROW_1; is_valid_row(row); row++) {
         for (Col col = COL_A; is_valid_col(col); col++) {
@@ -165,98 +277,61 @@ constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeBishopAttacks(
     }
     return BISHOP_ATTACKS;
 }
-constexpr std::array<uint64_t, 64> PrecomputedMoveData::initializeQueenAttacks()
+
+constexpr uint64_t calculate_rook_moves(Square square, uint64_t blockers)
 {
-    std::array<uint64_t, 64> QUEEN_ATTACKS {};
+    assert(square.is_valid());
 
-    for (Square sq = Square::SQ_A1; sq.is_valid(); sq++) {
-        QUEEN_ATTACKS[sq] = ROOK_ATTACKS[sq] | BISHOP_ATTACKS[sq];
-    }
-    return QUEEN_ATTACKS;
-}
+    uint64_t moves_mask = 0ULL;
 
-uint64_t PrecomputedMoveData::calculateLegalRookMoves(Square square, uint64_t blockerBB)
-{
-    uint64_t movesBitboard = 0;
+    const Direction dirs[4] = {NORTH, SOUTH, EAST, WEST};
 
-    int row = square.row();
-    int col = square.col();
+    for (const Direction dir : dirs) {
 
-    int rookDirections[4][2] = {
-        {1, 0},    // Up
-        {-1, 0},   // Down
-        {0, 1},    // Right
-        {0, -1}    // Left
-    };
+        Square aux_sq = square;
+        aux_sq.to_direction(dir);
 
-    for (int i = 0; i < 4; ++i) {
-        int dirRow = rookDirections[i][0];
-        int dirCol = rookDirections[i][1];
+        while (aux_sq.is_valid()) {
 
-        int auxRow = row + dirRow;
-        int auxCol = col + dirCol;
+            moves_mask |= aux_sq.mask();
 
-        Square auxSquare((Row)(auxRow), (Col)(auxCol));
-
-        while (auxSquare.is_valid()) {
-
-            // set the square to 1 in the bitboard
-            movesBitboard |= auxSquare.mask();
-
-            // if there is a blocker in the square we stop in this direction
-            if (blockerBB & auxSquare.mask()) {
-                break;
+            if (blockers & aux_sq.mask()) {
+                break;   // if there is a blocker in the square we stop in this direction
             }
-
-            auxRow += dirRow;
-            auxCol += dirCol;
-
-            auxSquare = Square((Row)(auxRow), (Col)(auxCol));
+            else {
+                aux_sq.to_direction(dir);
+            }
         }
     }
 
-    return movesBitboard;
+    return moves_mask;
 }
 
-uint64_t PrecomputedMoveData::calculateLegalBishopMoves(Square square, uint64_t blockerBB)
+constexpr uint64_t calculate_bishop_moves(Square square, uint64_t blockers)
 {
-    uint64_t movesBitboard = 0;
+    assert(square.is_valid());
 
-    int row = square.row();
-    int col = square.col();
+    uint64_t moves_mask = 0ULL;
 
-    int bishopDirections[4][2] = {
-        {1, 1},    // Up-right
-        {1, -1},   // Up-left
-        {-1, 1},   // Down-right
-        {-1, -1}   // Down-left
-    };
+    const Direction dirs[4] = {NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
 
-    for (int i = 0; i < 4; ++i) {
-        int dirRow = bishopDirections[i][0];
-        int dirCol = bishopDirections[i][1];
+    for (const Direction dir : dirs) {
 
-        int auxRow = row + dirRow;
-        int auxCol = col + dirCol;
+        Square aux_sq = square;
+        aux_sq.to_direction(dir);
 
-        Square auxSquare((Row)(auxRow), (Col)(auxCol));
+        while (aux_sq.is_valid()) {
 
-        while (auxSquare.is_valid()) {
+            moves_mask |= aux_sq.mask();
 
-            // set the square to 1 in the bitboard
-            movesBitboard |= auxSquare.mask();
-
-            // if there is a blocker in the square we stop in this direction
-            if (blockerBB & auxSquare.mask()) {
-                break;
+            if (blockers & aux_sq.mask()) {
+                break;   // if there is a blocker in the square we stop in this direction
             }
-
-            auxRow += dirRow;
-            auxCol += dirCol;
-
-            auxSquare = Square((Row)(auxRow), (Col)(auxCol));
+            else {
+                aux_sq.to_direction(dir);
+            }
         }
     }
 
-    return movesBitboard;
+    return moves_mask;
 }
