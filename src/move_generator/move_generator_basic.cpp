@@ -317,7 +317,7 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
 
     if (king_sq != origin_castle_king_square || moveGeneratorInfo.number_of_checkers > 0 ||
         board.get_piece(origin_castle_king_square) != king_piece) {
-        // castling not avaliable if in check
+        // castling not available if in check
         return;
     }
 
@@ -350,11 +350,11 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
         const uint64_t in_between_squares_mask =
             Square(king_sq.row(), COL_D).mask() | Square(king_sq.row(), COL_C).mask();
 
-        const bool avaliable =
+        const bool available =
             ((in_between_squares_mask & empty_mask & ~king_danger_mask) == in_between_squares_mask) &&
             board.is_empty(Square(king_sq.row(), COL_B));
 
-        if (avaliable) {
+        if (available) {
             moves.add(side_to_move == ChessColor::WHITE ? Move::castle_white_queen() : Move::castle_black_queen());
         }
     }

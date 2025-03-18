@@ -323,7 +323,7 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
 
     if (king_sq != origin_castle_king_square || moveGeneratorInfo.number_of_checkers > 0 ||
         board.get_piece(origin_castle_king_square) != king_piece) {
-        // castling not avaliable if in check
+        // castling not available if in check
         return;
     }
 
@@ -356,11 +356,11 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
         const uint64_t in_between_squares_mask =
             Square(king_sq.row(), COL_D).mask() | Square(king_sq.row(), COL_C).mask();
 
-        const bool avaliable =
+        const bool available =
             ((in_between_squares_mask & empty_mask & ~king_danger_mask) == in_between_squares_mask) &&
             board.is_empty(Square(king_sq.row(), COL_B));
 
-        if (avaliable) {
+        if (available) {
             moves.add(side_to_move == ChessColor::WHITE ? Move::castle_white_queen() : Move::castle_black_queen());
         }
     }
@@ -380,7 +380,7 @@ static void calculate_king_moves(Square king_sq, MoveGeneratorInfo& moveGenerato
 
     while (king_moves_mask) {
         // pop least significant bit until is zero
-        Square available_square = static_cast<Square>(pop_lsb(king_moves_mask));
+        const Square available_square = static_cast<Square>(pop_lsb(king_moves_mask));
 
         // each lsb is an square where the piece could move
         moves.add(Move(king_sq, available_square));
@@ -499,7 +499,7 @@ static void calculate_knight_moves(Square knight_sq, MoveGeneratorInfo& moveGene
 
     while (knight_moves_mask) {
         // pop least significant bit until is zero
-        Square available_square = static_cast<Square>(pop_lsb(knight_moves_mask));
+        const Square available_square = static_cast<Square>(pop_lsb(knight_moves_mask));
         moves.add(Move(knight_sq, available_square));
     }
 }
@@ -509,13 +509,9 @@ static void calculate_rook_moves(Square rook_sq, MoveGeneratorInfo& moveGenerato
 {
     assert(rook_sq.is_valid());
 
-    const uint64_t edges = ((ROW_1_MASK | ROW_8_MASK) & ~get_row_mask(rook_sq.row())) |
-        ((COL_A_MASK | COL_H_MASK) & ~get_col_mask(rook_sq.col()));
-
     const uint64_t capture_mask = moveGeneratorInfo.capture_squares_mask;
     const uint64_t push_mask = moveGeneratorInfo.push_squares_mask;
-    const uint64_t all_pieces_mask = moveGeneratorInfo.board.get_bitboard_all();
-    const uint64_t blockers = all_pieces_mask & PrecomputedMoveData::rookAttacks(rook_sq) & ~edges;
+    const uint64_t blockers = moveGeneratorInfo.board.get_bitboard_all();
     const uint64_t friendly_mask = moveGeneratorInfo.side_to_move_pieces_mask;
 
     uint64_t moves_mask = PrecomputedMoveData::rookMoves(rook_sq, blockers);
@@ -532,7 +528,7 @@ static void calculate_rook_moves(Square rook_sq, MoveGeneratorInfo& moveGenerato
 
     while (moves_mask) {
         // pop least significant bit until is zero
-        Square available_square = static_cast<Square>(pop_lsb(moves_mask));
+        const Square available_square = static_cast<Square>(pop_lsb(moves_mask));
         moveGeneratorInfo.moves.add(Move(rook_sq, available_square));
     }
 }
@@ -541,13 +537,9 @@ static void calculate_bishop_moves(Square bishop_sq, MoveGeneratorInfo& moveGene
 {
     assert(bishop_sq.is_valid());
 
-    const uint64_t edges = ((ROW_1_MASK | ROW_8_MASK) & ~get_row_mask(bishop_sq.row())) |
-        ((COL_A_MASK | COL_H_MASK) & ~get_col_mask(bishop_sq.col()));
-
     const uint64_t capture_mask = moveGeneratorInfo.capture_squares_mask;
     const uint64_t push_mask = moveGeneratorInfo.push_squares_mask;
-    const uint64_t all_pieces_mask = moveGeneratorInfo.board.get_bitboard_all();
-    const uint64_t blockers = all_pieces_mask & PrecomputedMoveData::bishopAttacks(bishop_sq) & ~edges;
+    const uint64_t blockers = moveGeneratorInfo.board.get_bitboard_all();
     const uint64_t friendly_mask = moveGeneratorInfo.side_to_move_pieces_mask;
 
     uint64_t moves_mask = PrecomputedMoveData::bishopMoves(bishop_sq, blockers);
@@ -564,7 +556,7 @@ static void calculate_bishop_moves(Square bishop_sq, MoveGeneratorInfo& moveGene
 
     while (moves_mask) {
         // pop least significant bit until is zero
-        Square available_square = static_cast<Square>(pop_lsb(moves_mask));
+        const Square available_square = static_cast<Square>(pop_lsb(moves_mask));
         moveGeneratorInfo.moves.add(Move(bishop_sq, available_square));
     }
 }
@@ -573,18 +565,12 @@ static void calculate_queen_moves(Square queen_sq, MoveGeneratorInfo& moveGenera
 {
     assert(queen_sq.is_valid());
 
-    const uint64_t edges = ((ROW_1_MASK | ROW_8_MASK) & ~get_row_mask(queen_sq.row())) |
-        ((COL_A_MASK | COL_H_MASK) & ~get_col_mask(queen_sq.col()));
-
     const uint64_t capture_mask = moveGeneratorInfo.capture_squares_mask;
     const uint64_t push_mask = moveGeneratorInfo.push_squares_mask;
-    const uint64_t all_pieces_mask = moveGeneratorInfo.board.get_bitboard_all();
-    const uint64_t orthogonal_blockers = all_pieces_mask & PrecomputedMoveData::rookAttacks(queen_sq) & ~edges;
-    const uint64_t diagonal_blockers = all_pieces_mask & PrecomputedMoveData::bishopAttacks(queen_sq) & ~edges;
-    const uint64_t blockers = orthogonal_blockers | diagonal_blockers;
+    const uint64_t blockers = moveGeneratorInfo.board.get_bitboard_all();
     const uint64_t friendly_mask = moveGeneratorInfo.side_to_move_pieces_mask;
 
-    uint64_t moves_mask = PrecomputedMoveData::queenMoves(queen_sq, orthogonal_blockers, diagonal_blockers);
+    uint64_t moves_mask = PrecomputedMoveData::queenMoves(queen_sq, blockers);
 
     moves_mask &= ~friendly_mask & (capture_mask | push_mask);
 
@@ -598,7 +584,7 @@ static void calculate_queen_moves(Square queen_sq, MoveGeneratorInfo& moveGenera
 
     while (moves_mask) {
         // pop least significant bit until is zero
-        Square available_square = static_cast<Square>(pop_lsb(moves_mask));
+        const Square available_square = static_cast<Square>(pop_lsb(moves_mask));
         moveGeneratorInfo.moves.add(Move(queen_sq, available_square));
     }
 }

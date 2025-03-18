@@ -4,15 +4,20 @@
  * @file precomputed_move_data.hpp
  * @brief precomputed move data services.
  *
- * precomputed move data
+ * precomputed move data with fancy magic bitboards
  * 
  */
 
 #include "square.hpp"
-#include "magic_numbers.hpp"
+#include "magic_bitboards.hpp"
 #include <array>
 #include <cassert>
-#include <unordered_map>
+
+static int constexpr ROOK_TABLE_SIZE = 4096;
+static int constexpr BISHOP_TABLE_SIZE = 512;
+
+typedef std::array<std::array<uint64_t, ROOK_TABLE_SIZE>, NUM_SQUARES> TableRookMoves;
+typedef std::array<std::array<uint64_t, BISHOP_TABLE_SIZE>, NUM_SQUARES> TableBishopMoves;
 
 /**
  * @brief PrecomputedMoveData
@@ -32,18 +37,18 @@ public:
      * 
      * calculates the 64 bit mask with 1 on the squares that the piece could move
      * 
-     * @note blockers bitboard cannot contain a piece outside the movement mask
+     * @note square must be valid
      * 
      * @param[in] square rook square
-     * @param[in] blockers bitboard of pieces that block the rook movement
+     * @param[in] blockers bitboard with all pieces on the board, they block the path of the piece
      * 
-     * @return ROOK_MOVES[square][blockers]
+     * @return ROOK_MOVES[square][index]
      */
     static inline uint64_t rookMoves(Square square, uint64_t blockers)
     {
         assert(square.is_valid());
-        assert((blockers & ~(ROOK_ATTACKS[square])) == 0ULL);
-        const uint64_t index = (blockers * rook_magic(square)) >> (64 - rook_occupancy_number(square));
+
+        const uint64_t index = magic_index_rook(blockers, square, rookAttacks(square));
         assert(index < 4096);
         return ROOK_MOVES[square][index];
     }
@@ -53,18 +58,18 @@ public:
      * 
      * calculates the 64 bit mask with 1 on the squares that the piece could move
      * 
-     * @note blockers bitboard cannot contain a piece outside the movement mask
+     * @note square must be valid
      * 
      * @param[in] square bishop square
-     * @param[in] blockers bitboard of pieces that block the bishop movement
+     * @param[in] blockers bitboard with all pieces on the board, they block the path of the piece
      * 
      * @return BISHOP_MOVES[square][blockers]
      */
     static inline uint64_t bishopMoves(Square square, uint64_t blockers)
     {
         assert(square.is_valid());
-        assert((blockers & ~(BISHOP_ATTACKS[square])) == 0ULL);
-        const uint64_t index = (blockers * bishop_magic(square)) >> (64 - bishop_occupancy_number(square));
+
+        const uint64_t index = magic_index_bishop(blockers, square, bishopAttacks(square));
         assert(index < 512);
         return BISHOP_MOVES[square][index];
     }
@@ -74,20 +79,17 @@ public:
      * 
      * calculates the 64 bit mask with 1 on the squares that the piece could move
      * 
-     * @note blockers bitboard cannot contain a piece outside the movement mask
+     * @note square must be valid
      * 
      * @param[in] square queen square
-     * @param[in] orthogonal_blockers bitboard of pieces that block the queen movement vertically and horizontlly
-     * @param[in] diagonal_blockers bitboard of pieces that block the queen movement in diagonal
+     * @param[in] blockers bitboard with all pieces on the board, they block the path of the piece
      * 
-     * @return rookMoves(square, ortogonal_blockers) | bishopMoves(square, diagonal_blockers)
+     * @return rookMoves(square, blockers) | bishopMoves(square, blockers)
      */
-    static inline uint64_t queenMoves(Square square, uint64_t orthogonal_blockers, uint64_t diagonal_blockers)
+    static inline uint64_t queenMoves(Square square, uint64_t blockers)
     {
         assert(square.is_valid());
-        assert((orthogonal_blockers & ~(ROOK_ATTACKS[square])) == 0ULL);
-        assert((diagonal_blockers & ~(BISHOP_ATTACKS[square])) == 0ULL);
-        return rookMoves(square, orthogonal_blockers) | bishopMoves(square, diagonal_blockers);
+        return rookMoves(square, blockers) | bishopMoves(square, blockers);
     }
 
     /**
@@ -218,19 +220,18 @@ private:
     static const std::array<uint64_t, 64> ROOK_ATTACKS;
 
     /**
-     * @brief ROOK_MOVES
+     * @brief BISHOP_MOVES[64][BISHOP_TABLE_SIZE]
      *     
      *  Lookup table for the bishop moves given
      *  the square of the bishop and the bitboard of blocker pieces.
      */
-    static const std::array<std::array<uint64_t, 512>, 64> BISHOP_MOVES;
-
+    static const TableRookMoves ROOK_MOVES;
 
     /**
-     * @brief BISHOP_MOVES
+     * @brief ROOK_MOVES[64][ROOK_TABLE_SIZE]
      *     
      *  Lookup table for the bishop moves given
      *  the square of the bishop and the bitboard of blocker pieces.
      */
-    static const std::array<std::array<uint64_t, 4096>, 64> ROOK_MOVES;
+    static const TableBishopMoves BISHOP_MOVES;
 };

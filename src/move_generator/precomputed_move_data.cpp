@@ -2,7 +2,7 @@
  * @file precomputed_move_data.cpp
  * @brief precomputed move data services.
  *
- * precomputed move data and magic bitboards
+ * precomputed move data with fancy magic bitboards
  * 
  * https://www.chessprogramming.org/Magic_Bitboards
  * 
@@ -23,9 +23,8 @@ static constexpr ArrayBitboardsConst initialize_bishop_attacks();
 static constexpr uint64_t calculate_rook_moves(Square square, uint64_t blockerBB);
 static constexpr uint64_t calculate_bishop_moves(Square square, uint64_t blockerBB);
 
-static const std::array<std::array<uint64_t, 4096>, 64> initialize_rook_legal_moves(ArrayBitboardsConst& ROOK_ATTACKS);
-static const std::array<std::array<uint64_t, 512>, 64>
-initialize_bishop_legal_moves(ArrayBitboardsConst& BISHOP_ATTACKS);
+static const TableRookMoves initialize_rook_legal_moves(ArrayBitboardsConst& ROOK_ATTACKS);
+static const TableBishopMoves initialize_bishop_legal_moves(ArrayBitboardsConst& BISHOP_ATTACKS);
 
 
 ArrayBitboardsConst PrecomputedMoveData::WHITE_PAWN_ATTACKS = initialize_white_pawn_attacks();
@@ -35,27 +34,23 @@ ArrayBitboardsConst PrecomputedMoveData::KNIGHT_ATTACKS = initialize_knight_atta
 ArrayBitboardsConst PrecomputedMoveData::BISHOP_ATTACKS = initialize_bishop_attacks();
 ArrayBitboardsConst PrecomputedMoveData::ROOK_ATTACKS = initialize_rook_attacks();
 
-const std::array<std::array<uint64_t, 4096>, 64> PrecomputedMoveData::ROOK_MOVES =
-    initialize_rook_legal_moves(ROOK_ATTACKS);
-const std::array<std::array<uint64_t, 512>, 64> PrecomputedMoveData::BISHOP_MOVES =
-    initialize_bishop_legal_moves(BISHOP_ATTACKS);
+const TableRookMoves PrecomputedMoveData::ROOK_MOVES = initialize_rook_legal_moves(ROOK_ATTACKS);
+const TableBishopMoves PrecomputedMoveData::BISHOP_MOVES = initialize_bishop_legal_moves(BISHOP_ATTACKS);
 
 
-static const std::array<std::array<uint64_t, 4096>, 64> initialize_rook_legal_moves(ArrayBitboardsConst& ROOK_ATTACKS)
+static const TableRookMoves initialize_rook_legal_moves(ArrayBitboardsConst& ROOK_ATTACKS)
 {
-    std::array<std::array<uint64_t, 4096>, 64> ROOK_MOVES;
+    TableRookMoves ROOK_MOVES;
 
     for (Square square = Square::SQ_A1; square.is_valid(); square++) {
-        const uint64_t moves = ROOK_ATTACKS[square];
-        const uint64_t edges = ((ROW_1_MASK | ROW_8_MASK) & ~get_row_mask(square.row())) |
-            ((COL_A_MASK | COL_H_MASK) & ~get_col_mask(square.col()));
+        const uint64_t attacks = ROOK_ATTACKS[square];
 
         int indicesInMoveMask[64] = {0};
         int numIndices = 0;
 
         // Create a list of the indices of the bits that are set to 1 in the movement mask
         for (int i = 0; i < 64; i++) {
-            if (moves & (1ULL << i)) {
+            if (attacks & (1ULL << i)) {
                 indicesInMoveMask[numIndices++] = i;
             }
         }
@@ -72,9 +67,7 @@ static const std::array<std::array<uint64_t, 4096>, 64> initialize_rook_legal_mo
                 blockers |= bit << indicesInMoveMask[bitIndex];
             }
 
-            blockers &= ~edges;   // blockers minus the board edges, because they dont matter in the calculation
-
-            const uint64_t index = (blockers * rook_magic(square)) >> (64 - rook_occupancy_number(square));
+            const uint64_t index = magic_index_rook(blockers, square, attacks);
             assert(index < 4096);
 
             // create entry in rook lookupTable
@@ -85,14 +78,13 @@ static const std::array<std::array<uint64_t, 4096>, 64> initialize_rook_legal_mo
     return ROOK_MOVES;
 }
 
-static const std::array<std::array<uint64_t, 512>, 64>
-initialize_bishop_legal_moves(ArrayBitboardsConst& BISHOP_ATTACKS)
+static const TableBishopMoves initialize_bishop_legal_moves(ArrayBitboardsConst& BISHOP_ATTACKS)
 {
-    std::array<std::array<uint64_t, 512>, 64> BISHOP_MOVES;
+    TableBishopMoves BISHOP_MOVES;
 
     for (Square square = Square::SQ_A1; square.is_valid(); square++) {
 
-        const uint64_t moves = BISHOP_ATTACKS[square];
+        const uint64_t attacks = BISHOP_ATTACKS[square];
         const uint64_t edges = ((ROW_1_MASK | ROW_8_MASK) & ~get_row_mask(square.row())) |
             ((COL_A_MASK | COL_H_MASK) & ~get_col_mask(square.col()));
 
@@ -101,7 +93,7 @@ initialize_bishop_legal_moves(ArrayBitboardsConst& BISHOP_ATTACKS)
 
         // Create a list of the indices of the bits that are set to 1 in the movement mask
         for (int i = 0; i < 64; i++) {
-            if (moves & (1ULL << i)) {
+            if (attacks & (1ULL << i)) {
                 indicesInMoveMask[numIndices++] = i;
             }
         }
@@ -119,7 +111,7 @@ initialize_bishop_legal_moves(ArrayBitboardsConst& BISHOP_ATTACKS)
             }
             blockers &= ~edges;   // blockers minus the board edges, because they dont matter in the calculation
 
-            const uint64_t index = (blockers * bishop_magic(square)) >> (64 - bishop_occupancy_number(square));
+            const uint64_t index = magic_index_bishop(blockers, square, attacks);
             assert(index < 512);
 
             // create entry in rook lookupTable

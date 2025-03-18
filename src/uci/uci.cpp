@@ -216,7 +216,7 @@ void Uci::go_command_action(const TokenArray& tokens)
                 std::unique_lock<std::mutex> lock(searchResults.mtx_data_available_cv);
 
                 if (is_search_running() && depthReaded >= searchResults.depthReached) {
-                    // thread goes to sleep until more data is avaliable or search stop
+                    // thread goes to sleep until more data is available or search stop
                     searchResults.data_available_cv.wait(lock);
                 }
             }
