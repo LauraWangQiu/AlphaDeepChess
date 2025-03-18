@@ -1,0 +1,160 @@
+%---------------------------------------------------------------------
+%
+%                         TeXiS_bib.tex
+%
+%---------------------------------------------------------------------
+%
+% TeXiS_bib.tex
+% Copyright 2009 Marco Antonio Gomez-Martin, Pedro Pablo Gomez-Martin
+%
+% This file belongs to TeXiS, a LaTeX template for writting
+% Thesis and other documents. The complete last TeXiS package can
+% be obtained from http://gaia.fdi.ucm.es/projects/texis/
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainers of this work are Marco Antonio Gomez-Martin
+% and Pedro Pablo Gomez-Martin
+%
+%---------------------------------------------------------------------
+%
+% Fichero que contiene la generación de la bibliografía. En principio,
+% no haría falta tenerlo en  un fichero separado, pero como permitimos
+% añadir una frase célebre antes  de la primera cita, la configuración
+% ya  no es  trivial.  Para  "ocultar" la  fontanería  de LaTeX,  está
+% separada  la  configuración  de  los  parámetros  de  la  generación
+% concreta de la bibliografía. La configuración está en el "directorio
+% del usuario" (Cascaras), mientras  que la generación se encuentra en
+% el directorio TeXiS (este fichero).
+%
+%---------------------------------------------------------------------
+
+%%%
+% Gestión de la configuración
+%%%
+
+% Ficheros .bib
+\def\ficherosBibliografia{}
+\newcommand{\setBibFiles}[1]{
+\def\ficherosBibliografia{#1}
+}
+
+% Frase célebre
+\def\citaBibliografia{}
+\newcommand{\setCitaBibliografia}[1]{
+\def\citaBibliografia{#1}
+}
+
+%%%
+% Configuración terminada
+%%%
+
+%%%
+%% COMANDO PARA CREAR LA BIBLIOGRAFÍA.
+%% CONTIENE TODO EL CÓDIGO LaTeX
+%%%
+\newcommand{\makeBib}{
+
+%
+% Queremos que  tras el título del  capítulo ("Bibliografía") aparezca
+% una frase célebre,  igual que en el resto  de capítulos. El problema
+% es que  aquí no ponemos  nosotros a mano  el \chapter{Bibliografía},
+% sino que lo mete él automáticamente.
+%
+% Afortunadamente,  la gente  de  bibtex  hace las  cosas  bien ;-)  y
+% después  de insertar  el título  de  la sección  ejecuta un  comando
+% denominado  \bibpreamble  que por  defecto  no  hace  nada. Pero  si
+% sobreescribimos  ese comando,  podremos  ejecutar código  arbitrario
+% justo  después de la  inserción del  título, y  antes de  la primera
+% referencia. Por  tanto, lo que hacemos es  sobreescribir ese comando
+% (normalmente  se conocen  como "hooks")  para añadir  la  cita justo
+% después del título.
+%
+% Desgraciadamente,  dependiendo  de la  versión  de  Natbib, hay  que
+% definir  o redefinir  el comando  (es decir,  utilizar  newcommand o
+% renewcommand)... como eso es un  lío, utilizamos let y def, pues def
+% no falla si ya estaba definido.
+
+\let\oldbibpreamble\bibpreamble
+
+\def\bibpreamble{%
+\oldbibpreamble
+% Añadimos a la tabla de contenidos la bibliografía. Si no lo hacemos
+% aquí, sale mal o el número de página (grave) o el enlace en el PDF
+% que te lleva a un sitio cercano (no tan grave)
+%\ifx\generatoc\undefined
+%\else
+%\addcontentsline{toc}{chapter}{Bibliografía}
+\addcontentsline{toc}{chapter}{\bibname}
+%\fi
+% Añadimos también una etiqueta, para poder referenciar el número
+% de página en el que comienza
+\label{bibliografia}
+% Frase célebre configurada por el usuario
+\citaBibliografia
+}
+% Fin definición "bibpreamble"
+
+
+%
+% Cambiamos  el estilo  de la  cabecera.  Hay que  hacerlo porque  por
+% defecto el paquete que  estamos usando (fancyhdr) pone en mayúsculas
+% el título completo del capítulo.  Con los capítulos normales esto se
+% pudo evitar  en el  preámbulo redefiniendo el  comando \chaptermark,
+% pero con la bibliografía no se puede hacer. Se define la cabera para
+% que aparezca la palabra "Bibliografía" en ambas páginas.
+%
+%
+%\cabeceraEspecial{Bibliografía}
+
+
+% Creamos la  bibliografía. Lo hacemos  dentro de un bloque  (entre la
+% pareja \begingroup  ... \endgroup) porque  dentro vamos a  anular la
+% semántica que da babel  a la tilde de la eñe (que  hace que un ~N se
+% convierta  automáticamente en una  Ñ). Esto  es debido  a que  en el
+% bibtex  aparecerán  ~ para  separar  iniciales  de  los nombres  con
+% espacios  no separables  en varias  lineas, y  aquellos  nombres que
+% tengan  una N  como  inicial serían  puestos  como Ñ.  Al anular  la
+% semántica     al    ~    que     da    babel,     deshacemos    este
+% comportamiento. Naturalmente,  para que esto  no tenga repercusiones
+% negativas,  en  ningún  .bib  deberíamos  utilizar ~N  (o  ~n)  para
+% representar una ñ ... tendremos  que utilizar o una Ñ/ñ directamente
+% (no  aconsejable porque asume  que hemos  usado inputenc)  o, mejor,
+% usamos la  versión larga  \~n o  \~N que no  falla nunca.   Para más
+% información,  consulta  el  TeXiS_pream.tex  en el  punto  donde  se
+% incluye natbib y babel.
+
+\begingroup
+\spanishdeactivate{~}
+% Según la documentación de los ficheros .bst que se puede encontrar en
+% http://osl.ugr.es/CTAN/info/bibtex/tamethebeast/ttb_en.pdf
+% hacer ficheros de estilo multilenguaje es complicado
+% Se opta por hacer dos estilos separados: uno para español y otro para
+% inglés. Descomentar el que se quiera utilizar
+
+% Descomentar para bibliografía en español
+\bibliographystyle{TeXiS/TeXiS}
+% Descomentar para bibliografía en inglés
+%\bibliographystyle{TeXiS/TeXiS_en}
+
+\bibliography{\ficherosBibliografia}
+\endgroup
+
+} %\newcommand{\makeBib}
+
+% Variable local para emacs, para  que encuentre el fichero maestro de
+% compilación y funcionen mejor algunas teclas rápidas de AucTeX
+
+%%%
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Tesis.tex"
+%%% End:

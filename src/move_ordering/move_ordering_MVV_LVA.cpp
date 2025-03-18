@@ -43,7 +43,6 @@ void order_moves(MoveList& moves, const Board& board)
     });
 }
 
-
 /**
  * @brief move_value
  * 

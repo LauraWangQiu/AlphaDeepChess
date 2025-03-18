@@ -1,0 +1,67 @@
+%---------------------------------------------------------------------
+%
+%                        TeXiS_indice.tex
+%
+%---------------------------------------------------------------------
+%
+% TeXiS_indice.tex
+% Copyright 2009 Marco Antonio Gomez-Martin, Pedro Pablo Gomez-Martin
+%
+% This file belongs to TeXiS, a LaTeX template for writting
+% Thesis and other documents. The complete last TeXiS package can
+% be obtained from http://gaia.fdi.ucm.es/projects/texis/
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+% 
+% The Current Maintainers of this work are Marco Antonio Gomez-Martin
+% and Pedro Pablo Gomez-Martin
+%
+%---------------------------------------------------------------------
+%
+% Contiene  los  comandos  para  generar  el índice  de  palabras  del
+% documento.
+%
+%---------------------------------------------------------------------
+%
+% NOTA IMPORTANTE: el  soporte en TeXiS para el  índice de palabras es
+% embrionario, y  de hecho  ni siquiera se  describe en el  manual. Se
+% proporciona  una infraestructura  básica (sin  terminar)  para ello,
+% pero  no ha  sido usada  "en producción".  De hecho,  a pesar  de la
+% existencia de  este fichero, *no* se incluye  en Tesis.tex. Consulta
+% la documentación en TeXiS_pream.tex para más información.
+%
+%---------------------------------------------------------------------
+
+
+% Si se  va a generar  la tabla de  contenidos (el índice  habitual) y
+% también vamos a  generar el índice de palabras  (ambas decisiones se
+% toman en  función de  la definición  o no de  un par  de constantes,
+% puedes consultar modo.tex para más información), entonces metemos en
+% la tabla de contenidos una  entrada para marcar la página donde está
+% el índice de palabras.
+
+\ifx\generatoc\undefined
+\else
+   \addcontentsline{toc}{chapter}{\indexname}
+\fi
+
+
+% Generamos el índice
+\printindex
+
+% Variable local para emacs, para  que encuentre el fichero maestro de
+% compilación y funcionen mejor algunas teclas rápidas de AucTeX
+
+%%%
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "./tesis.tex"
+%%% End:

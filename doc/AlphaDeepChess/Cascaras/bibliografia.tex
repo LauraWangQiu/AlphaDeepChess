@@ -1,0 +1,91 @@
+%---------------------------------------------------------------------
+%
+%                      configBibliografia.tex
+%
+%---------------------------------------------------------------------
+%
+% bibliografia.tex
+% Copyright 2009 Marco Antonio Gomez-Martin, Pedro Pablo Gomez-Martin
+%
+% This file belongs to the TeXiS manual, a LaTeX template for writting
+% Thesis and other documents. The complete last TeXiS package can
+% be obtained from http://gaia.fdi.ucm.es/projects/texis/
+%
+% Although the TeXiS template itself is distributed under the 
+% conditions of the LaTeX Project Public License
+% (http://www.latex-project.org/lppl.txt), the manual content
+% uses the CC-BY-SA license that stays that you are free:
+%
+%    - to share & to copy, distribute and transmit the work
+%    - to remix and to adapt the work
+%
+% under the following conditions:
+%
+%    - Attribution: you must attribute the work in the manner
+%      specified by the author or licensor (but not in any way that
+%      suggests that they endorse you or your use of the work).
+%    - Share Alike: if you alter, transform, or build upon this
+%      work, you may distribute the resulting work only under the
+%      same, similar or a compatible license.
+%
+% The complete license is available in
+% http://creativecommons.org/licenses/by-sa/3.0/legalcode
+%
+%---------------------------------------------------------------------
+%
+% Fichero  que  configura  los  parámetros  de  la  generación  de  la
+% bibliografía.  Existen dos  parámetros configurables:  los ficheros
+% .bib que se utilizan y la frase célebre que aparece justo antes de la
+% primera referencia.
+%
+%---------------------------------------------------------------------
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definición de los ficheros .bib utilizados:
+% \setBibFiles{<lista ficheros sin extension, separados por comas>}
+% Nota:
+% Es IMPORTANTE que los ficheros estén en la misma línea que
+% el comando \setBibFiles. Si se desea utilizar varias líneas,
+% terminarlas con una apertura de comentario.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setBibFiles{%
+biblio%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definición de la frase célebre para el capítulo de la
+% bibliografía. Dentro normalmente se querrá hacer uso del entorno
+% \begin{FraseCelebre}, que contendrá a su vez otros dos entornos,
+% un \begin{Frase} y un \begin{Fuente}.
+%
+% Nota:
+% Si no se quiere cita, se puede eliminar su definición (en la
+% macro setCitaBibliografia{} ).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setCitaBibliografia{
+\begin{FraseCelebre}
+\begin{Frase}
+  Y así, del mucho leer y del poco dormir, se le secó el celebro de
+  manera que vino a perder el juicio.\\ 
+  \textcolor{red}{(modificar en Cascaras$\backslash$bibliografia.tex)}
+\end{Frase}
+\begin{Fuente}
+  Miguel de Cervantes Saavedra
+\end{Fuente}
+\end{FraseCelebre}
+}
+
+%%
+%% Creamos la bibliografia
+%%
+\makeBib
+
+% Variable local para emacs, para  que encuentre el fichero maestro de
+% compilación y funcionen mejor algunas teclas rápidas de AucTeX
+
+%%%
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Tesis.tex"
+%%% End:
