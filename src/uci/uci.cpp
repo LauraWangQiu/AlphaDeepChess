@@ -517,31 +517,31 @@ void Uci::unknown_command_action() const
  */
 Move Uci::create_move_from_string(const std::string& move_string, const Board& board) const
 {
-    uint32_t string_lenght = move_string.length();
+    const uint32_t string_lenght = move_string.length();
     // move string should have 4 or 5 characters
     if (string_lenght < 4 || string_lenght > 5) {
         return Move::null();
     }
 
-    Square sq_origin(move_string.substr(0, 2));
-    Square sq_end(move_string.substr(2, 2));
+    const Square sq_origin(move_string.substr(0, 2));
+    const Square sq_end(move_string.substr(2, 2));
 
     if (sq_origin == Square::SQ_INVALID || sq_end == Square::SQ_INVALID) {
         return Move::null();
     }
-
+    
     // check for castling move
     if (piece_to_pieceType(board.get_piece(sq_origin)) == PieceType::KING) {
-        if (sq_end == Square::SQ_G1) {
+        if (sq_origin == Square::SQ_E1 && sq_end == Square::SQ_G1) {
             return Move::castle_white_king();
         }
-        else if (sq_end == Square::SQ_G8) {
+        else if (sq_origin == Square::SQ_E8 && sq_end == Square::SQ_G8) {
             return Move::castle_black_king();
         }
-        else if (sq_end == Square::SQ_C1) {
+        else if (sq_origin == Square::SQ_E1 && sq_end == Square::SQ_C1) {
             return Move::castle_white_queen();
         }
-        else if (sq_end == Square::SQ_C8) {
+        else if (sq_origin == Square::SQ_E8 && sq_end == Square::SQ_C8) {
             return Move::castle_black_queen();
         }
     }
