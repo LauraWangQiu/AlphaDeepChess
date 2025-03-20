@@ -28,7 +28,7 @@ class Uci:
         
         self.latest_info = (0, 0, None)
         self.searching = False
-        self.info_pattern = re.compile(r"info depth (\d+) score (-?\d+) bestMove (\S+)")
+        self.info_pattern = re.compile(r"info depth (\d+) score cp (-?\d+) bestMove (\S+)")
         
         self.uci_start()
 
