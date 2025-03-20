@@ -125,7 +125,12 @@ void Uci::loop()
  * respond with "uciok"
  * 
  */
-void Uci::uci_command_action() const { std::cout << "uciok" << std::endl; }
+void Uci::uci_command_action() const
+{
+    std::cout << "id name AlphaDeepChess" << "\n";
+    std::cout << "id author Juan Giron and Laura Wang" << "\n";
+    std::cout << "uciok" << std::endl;
+}
 
 /**
  * @brief is_ready_command_action
@@ -166,7 +171,15 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
             try {
                 movetime = std::stoul(std::string(tokens[++i]));
             } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command : go movetime\n";
+                std::cout << "Invalid argument for command : go " << tokens[2] << "\n";
+                return;
+            }
+        }
+        else if (tokens[i] == "wtime" || tokens[i] == "btime") {
+            try {
+                movetime = std::stoul(std::string(tokens[++i]));
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command : go " << tokens[2] << "\n";
                 return;
             }
         }
@@ -174,7 +187,7 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
             try {
                 depth = std::stoul(std::string(tokens[++i]));
             } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command : go depth\n";
+                std::cout << "Invalid argument for command : go " << tokens[2] << "\n";
                 return;
             }
         }
@@ -185,14 +198,18 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
             try {
                 depth = std::stoul(std::string(tokens[++i]));
             } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command : go perft\n";
+                std::cout << "Invalid argument for command : go " << tokens[2] << "\n";
             }
             perft_command_action(depth);
             return;
         }
+        else if (tokens[i] == "winc" || tokens[i] == "binc" || tokens[i] == "movestogo" || tokens[i] == "nodes" ||
+                 tokens[i] == "mate") {
+            std::cout << "Ignored argument for go: " << tokens[i] << tokens[i++] << "\n";
+        }
         else {
-            std::cout << "Invalid argument for command : go ( " << tokens[i]
-                      << " ). Continued using rest of the arguments\n";
+            std::cout << "Invalid argument for command : go " << tokens[i] << "\n";
+            return;
         }
     }
 
