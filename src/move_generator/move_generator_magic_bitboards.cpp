@@ -21,16 +21,14 @@
 
 static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo);
 
-static void update_danger_in_direction(Square piece_sq, Direction d, MoveGeneratorInfo& moveGeneratorInfo);
-
 static void update_king_danger(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
 static void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo);
 static void update_knight_danger(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo);
 static void update_rook_danger(Square rook_sq, MoveGeneratorInfo& moveGeneratorInfo);
 static void update_bishop_danger(Square bishop_sq, MoveGeneratorInfo& moveGeneratorInfo);
 static void update_queen_danger(Square queen_sq, MoveGeneratorInfo& moveGeneratorInfo);
-
-static void calculate_moves_in_direction(Square piece_sq, Direction d, MoveGeneratorInfo& moveGeneratorInfo);
+static void update_pin_in_dir(Square king_sq, Direction d, MoveGeneratorInfo& moveGeneratorInfo);
+static void update_pins_and_checks(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
 
 static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
 static void calculate_king_moves(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
@@ -59,7 +57,7 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* isMate, boo
 
     update_move_generator_info(moveGeneratorInfo);
 
-    const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
+    const ChessColor side_to_move = board.state().side_to_move();
     const uint8_t num_checkers = moveGeneratorInfo.number_of_checkers;
 
     if (num_checkers >= 2) {
@@ -69,15 +67,17 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* isMate, boo
         if (isStaleMate) *isStaleMate = false;
         return;
     }
+    uint64_t side_to_move_pieces = moveGeneratorInfo.side_to_move_pieces_mask;
 
-    for (Square square = Square::SQ_A1; square <= Square::SQ_H8; square++) {
-
+    while (side_to_move_pieces) {
+        const Square square(pop_lsb(side_to_move_pieces));
         const Piece piece = board.get_piece(square);
-        const ChessColor piece_color = get_color(piece);
+        const PieceType piece_type = piece_to_pieceType(piece);
 
-        if (board.is_empty(square) || piece_color != side_to_move) continue;
+        assert(!board.is_empty(square));
+        assert(get_color(piece) == side_to_move);
 
-        switch (piece_to_pieceType(piece)) {
+        switch (piece_type) {
         case PieceType::PAWN: calculate_pawn_moves(square, moveGeneratorInfo); break;
         case PieceType::KNIGHT: calculate_knight_moves(square, moveGeneratorInfo); break;
         case PieceType::KING: calculate_king_moves(square, moveGeneratorInfo); break;
@@ -95,16 +95,22 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* isMate, boo
 static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
 {
     const Board& board = moveGeneratorInfo.board;
-    const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
+    const ChessColor side_waiting = moveGeneratorInfo.side_waiting;
 
-    for (Square square = Square::SQ_A1; square <= Square::SQ_H8; square++) {
+    update_pins_and_checks(moveGeneratorInfo.side_to_move_king_square, moveGeneratorInfo);
 
+    uint64_t side_waiting_pieces = moveGeneratorInfo.side_waiting_pieces_mask;
+
+    while (side_waiting_pieces) {
+
+        const Square square(pop_lsb(side_waiting_pieces));
         const Piece piece = board.get_piece(square);
-        const ChessColor piece_color = get_color(piece);
+        const PieceType piece_type = piece_to_pieceType(piece);
 
-        if (board.is_empty(square) || piece_color == side_to_move) continue;
+        assert(!board.is_empty(square));
+        assert(get_color(piece) == side_waiting);
 
-        switch (piece_to_pieceType(piece)) {
+        switch (piece_type) {
         case PieceType::PAWN: update_pawn_danger(square, moveGeneratorInfo); break;
         case PieceType::KNIGHT: update_knight_danger(square, moveGeneratorInfo); break;
         case PieceType::KING: update_king_danger(square, moveGeneratorInfo); break;
@@ -116,74 +122,79 @@ static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
     }
 }
 
-static void update_danger_in_direction(Square piece_sq, Direction d, MoveGeneratorInfo& moveGeneratorInfo)
+static void update_pins_and_checks(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
-    assert(piece_sq.is_valid());
+    assert(king_sq.is_valid());
+    const Direction directions[8] {Direction::NORTH, Direction::NORTH_EAST, Direction::EAST, Direction::SOUTH_EAST,
+                                   Direction::SOUTH, Direction::SOUTH_WEST, Direction::WEST, Direction::NORTH_WEST};
+
+    for (const Direction dir : directions) {
+        update_pin_in_dir(king_sq, dir, moveGeneratorInfo);
+    }
+}
+
+static void update_pin_in_dir(Square king_sq, Direction d, MoveGeneratorInfo& moveGeneratorInfo)
+{
+    assert(king_sq.is_valid());
 
     const Board& board = moveGeneratorInfo.board;
+    const uint64_t side_to_move_pieces = moveGeneratorInfo.side_to_move_pieces_mask;
+    const ChessColor side_waiting_color = moveGeneratorInfo.side_waiting;
+    const uint64_t blockers = board.get_bitboard_all();
+    const Piece enemy_rook_piece = create_piece(PieceType::ROOK, side_waiting_color);
+    const Piece enemy_bishop_piece = create_piece(PieceType::BISHOP, side_waiting_color);
+    const Piece enemy_queen_piece = create_piece(PieceType::QUEEN, side_waiting_color);
 
-    const uint64_t side_to_move_pieces_mask = moveGeneratorInfo.side_to_move_pieces_mask;
-    const Square side_to_move_king_sq = moveGeneratorInfo.side_to_move_king_square;
+    const uint64_t possible_checkers_pieces = is_diagonal_direction(d)
+        ? board.get_bitboard_piece(enemy_bishop_piece) | board.get_bitboard_piece(enemy_queen_piece)
+        : board.get_bitboard_piece(enemy_rook_piece) | board.get_bitboard_piece(enemy_queen_piece);
 
-    uint64_t piece_atacks = 0ULL;
+    uint64_t push_mask = 0ULL;
 
-    Square attack_sq = piece_sq;
-    attack_sq.to_direction(d);
+    Square possible_pinned_piece_sq = Square::SQ_INVALID;
+    Square sq = king_sq;
+    sq.to_direction(d);
 
-    // first calculate attack squares
-    while (attack_sq.is_valid()) {
+    while (sq.is_valid()) {
 
-        piece_atacks |= attack_sq.mask();
-
-        if (board.is_empty(attack_sq)) {
-            attack_sq.to_direction(d);
+        if (sq.mask() & possible_checkers_pieces) {
+            moveGeneratorInfo.new_checker_found(sq, push_mask);   // checker found
+            // the king cannot move to the squares behind him in the same dir of the check
+            // we put all the direction minus the checker sq as danger as a sufficient approximation
+            moveGeneratorInfo.king_danger_squares_mask |= get_direction_mask(sq, king_sq) & ~sq.mask();
+            break;
+        }
+        else if (sq.mask() & side_to_move_pieces) {
+            possible_pinned_piece_sq = sq;   // possible pinned piece found
+            break;
+        }
+        else if (sq.mask() & blockers) {
+            break;   // piece that is not a checker or po pinned piece blocks path
         }
         else {
-            break;   // collision detected
+            push_mask |= sq.mask();
+            sq.to_direction(d);
         }
     }
 
-    //second king is in check procedure
-    if (attack_sq.is_valid() && (attack_sq == side_to_move_king_sq)) {
-
-        moveGeneratorInfo.new_checker_found(piece_sq, piece_atacks);
-
-        // now continue calculating the king dangers
-        attack_sq.to_direction(d);
-
-        while (attack_sq.is_valid()) {
-
-            piece_atacks |= attack_sq.mask();
-
-            if (board.is_empty(attack_sq)) {
-                attack_sq.to_direction(d);
-            }
-            else {
-                break;   // collision detected
-            }
-        }
-    }
-    // third, calculate pinned pieces
-    else if (attack_sq.is_valid() && (attack_sq.mask() & side_to_move_pieces_mask)) {
-        const Square pseudo_pinned_piece_sq = attack_sq;
-
-        attack_sq.to_direction(d);
-        while (attack_sq.is_valid()) {
-            // if we found the enemy king, then the pin is real
-            if (attack_sq == side_to_move_king_sq) {
-                moveGeneratorInfo.pinned_squares_mask |= pseudo_pinned_piece_sq.mask();
-            }
-
-            if (board.is_empty(attack_sq)) {
-                attack_sq.to_direction(d);
-            }
-            else {
-                break;   // collision detected
-            }
-        }
+    if (!possible_pinned_piece_sq.is_valid()) {
+        return;
     }
 
-    moveGeneratorInfo.king_danger_squares_mask |= piece_atacks;
+    sq.to_direction(d);
+    while (sq.is_valid()) {
+        if (sq.mask() & possible_checkers_pieces) {
+            // pinned piece found
+            moveGeneratorInfo.pinned_squares_mask |= possible_pinned_piece_sq.mask();
+            break;
+        }
+        else if (sq.mask() & blockers) {
+            break;   // piece that is not a checker blocks path
+        }
+        else {
+            sq.to_direction(d);
+        }
+    }
 }
 
 static void update_king_danger(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo)
@@ -235,77 +246,33 @@ static void update_rook_danger(Square rook_sq, MoveGeneratorInfo& moveGeneratorI
 {
     assert(rook_sq.is_valid());
 
-    const Direction dirs[4] = {NORTH, SOUTH, EAST, WEST};
+    const uint64_t blockers = moveGeneratorInfo.board.get_bitboard_all();
 
-    for (Direction dir : dirs) {
-        update_danger_in_direction(rook_sq, dir, moveGeneratorInfo);
-    }
+    const uint64_t moves_mask = PrecomputedMoveData::rookMoves(rook_sq, blockers);
+
+    moveGeneratorInfo.king_danger_squares_mask |= moves_mask;
 }
 
 static void update_bishop_danger(Square bishop_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(bishop_sq.is_valid());
 
-    const Direction dirs[4] = {NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
+    const uint64_t blockers = moveGeneratorInfo.board.get_bitboard_all();
 
-    for (Direction dir : dirs) {
-        update_danger_in_direction(bishop_sq, dir, moveGeneratorInfo);
-    }
+    const uint64_t moves_mask = PrecomputedMoveData::bishopMoves(bishop_sq, blockers);
+
+    moveGeneratorInfo.king_danger_squares_mask |= moves_mask;
 }
 
 static void update_queen_danger(Square queen_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(queen_sq.is_valid());
 
-    const Direction dirs[8] = {NORTH, SOUTH, EAST, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
+    const uint64_t blockers = moveGeneratorInfo.board.get_bitboard_all();
 
-    for (Direction dir : dirs) {
-        update_danger_in_direction(queen_sq, dir, moveGeneratorInfo);
-    }
-}
+    const uint64_t moves_mask = PrecomputedMoveData::queenMoves(queen_sq, blockers);
 
-static void calculate_moves_in_direction(Square piece_sq, Direction d, MoveGeneratorInfo& moveGeneratorInfo)
-{
-    assert(piece_sq.is_valid());
-
-    const Board& board = moveGeneratorInfo.board;
-    MoveList& moves = moveGeneratorInfo.moves;
-
-    const uint64_t side_to_move_pieces_mask = moveGeneratorInfo.side_to_move_pieces_mask;
-    const uint64_t capture_mask = moveGeneratorInfo.capture_squares_mask;
-    const uint64_t push_mask = moveGeneratorInfo.push_squares_mask;
-    uint64_t attacks = 0ULL;
-
-    Square attack_sq = piece_sq;
-    attack_sq.to_direction(d);
-
-    while (attack_sq.is_valid()) {
-        // move is valid if square is not friendly piece
-        attacks |= (side_to_move_pieces_mask & attack_sq.mask()) ? 0ULL : attack_sq.mask();
-
-        if (board.is_empty(attack_sq)) {
-            attack_sq.to_direction(d);
-        }
-        else {
-            break;   // collision detected
-        }
-    }
-
-    uint64_t legal_moves_mask = attacks & (capture_mask | push_mask);
-
-    // if piece is pinned pawn can only moved in the direction of the pin
-    if (moveGeneratorInfo.pinned_squares_mask & piece_sq.mask()) {
-        const Square side_to_move_king_square = moveGeneratorInfo.side_to_move_king_square;
-        const uint64_t pin_direction_mask = get_direction_mask(piece_sq, side_to_move_king_square);
-
-        legal_moves_mask &= pin_direction_mask;
-    }
-
-    while (legal_moves_mask) {
-        // pop least significant bit until is zero
-        Square available_square = static_cast<Square>(pop_lsb(legal_moves_mask));
-        moves.add(Move(piece_sq, available_square));
-    }
+    moveGeneratorInfo.king_danger_squares_mask |= moves_mask;
 }
 
 static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo)
