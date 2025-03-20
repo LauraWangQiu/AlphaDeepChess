@@ -146,7 +146,7 @@ static inline void store_nodes_in_tt(uint64_t zobrist_key, uint8_t depth, int no
         return;
     }
 
-    TranspositionTable::store_entry(zobrist_key, nodes, Move(2U), TranspositionTable::NodeType::EXACT, depth);
+    TranspositionTable::store_entry(zobrist_key, nodes, Move(2U), TranspositionTable::NodeType::PERFT, depth);
 }
 
 // return false if no entry in transposition table
@@ -156,5 +156,7 @@ static inline bool get_nodes_in_tt(uint64_t zobrist_key, uint8_t depth, int& nod
 
     nodes = entry.evaluation;   // we store the nodes in the evaluation field
 
-    return entry.is_valid() && entry.key == zobrist_key && entry.depth == depth;
+    const bool entry_is_valid = entry.is_valid() && entry.node_type == TranspositionTable::NodeType::PERFT;
+
+    return entry_is_valid && entry.key == zobrist_key && entry.depth == depth;
 }

@@ -17,7 +17,6 @@
 #include "transposition_table.hpp"
 #include <cassert>
 #include <iostream>
-#include <sstream>
 
 constexpr auto StartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -31,7 +30,6 @@ void Uci::loop()
 {
     static TokenArray tokens;
 
-    std::string command;
     std::string line;
 
     bool exit = false;
@@ -45,21 +43,25 @@ void Uci::loop()
             continue;
         }
 
-        std::istringstream iss(line);
-
-        std::string token;
-
-        int num_tokens = 0;
-
-        while ((num_tokens < TOKEN_ARRAY_SIZE) && (iss >> token)) {
-            tokens[num_tokens++] = token;
+        size_t num_tokens = 0;
+        size_t pos = 0;
+        while (pos < line.length() && num_tokens < TOKEN_ARRAY_SIZE) {
+            size_t start = pos;
+            while (pos < line.length() && line[pos] != ' ')
+                ++pos;
+            if (pos > start) {
+                tokens[num_tokens++] = std::string_view(line.data() + start, pos - start);
+            }
+            while (pos < line.length() && line[pos] == ' ')
+                ++pos;
         }
+        if (num_tokens == 0) continue;
 
         if (tokens.empty()) {
             continue;
         }
 
-        command = tokens[0];
+        std::string_view command = tokens[0];
 
         if (command == "uci") {
             uci_command_action();
@@ -71,7 +73,7 @@ void Uci::loop()
             new_game_command_action();
         }
         else if (command == "g" || command == "go") {
-            go_command_action(tokens);
+            go_command_action(tokens, num_tokens);
         }
         else if (command == "s" || command == "stop") {
             stop_command_action();
@@ -81,7 +83,7 @@ void Uci::loop()
         }
         else if (command == "perft") {
             try {
-                uint64_t depth = stoull(tokens[1]);
+                uint64_t depth = stoull(std::string(tokens[1]));
                 perft_command_action(depth);
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command : perft depth\n";
@@ -110,8 +112,7 @@ void Uci::loop()
         else {
             unknown_command_action();
         }
-        // Clear the tokens array
-        tokens.fill("");
+
     } while (!exit);
 }
 
@@ -151,19 +152,19 @@ void Uci::new_game_command_action() { board.load_fen(StartFEN); }
  * Starts the search in the searchThread.
  * 
  */
-void Uci::go_command_action(const TokenArray& tokens)
+void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
 {
     uint32_t depth = INFINITE_DEPTH;
     uint32_t movetime = 0;
 
     // Parse the command line arguments
-    for (uint32_t i = 1; i < tokens.size(); ++i) {
+    for (uint32_t i = 1; i < num_tokens; ++i) {
         if (tokens[i].empty()) {
             continue;
         }
         else if (tokens[i] == "movetime") {
             try {
-                movetime = std::stoul(tokens[++i]);
+                movetime = std::stoul(std::string(tokens[++i]));
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command : go movetime\n";
                 return;
@@ -171,7 +172,7 @@ void Uci::go_command_action(const TokenArray& tokens)
         }
         else if (tokens[i] == "depth") {
             try {
-                depth = std::stoul(tokens[++i]);
+                depth = std::stoul(std::string(tokens[++i]));
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command : go depth\n";
                 return;
@@ -182,7 +183,7 @@ void Uci::go_command_action(const TokenArray& tokens)
         }
         else if (tokens[i] == "perft") {
             try {
-                depth = std::stoul(tokens[++i]);
+                depth = std::stoul(std::string(tokens[++i]));
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command : go perft\n";
             }
@@ -190,7 +191,8 @@ void Uci::go_command_action(const TokenArray& tokens)
             return;
         }
         else {
-            std::cout << "Invalid argument for command : go ( " << tokens[i] << " ). Continued using rest of the arguments\n";
+            std::cout << "Invalid argument for command : go ( " << tokens[i]
+                      << " ). Continued using rest of the arguments\n";
         }
     }
 
@@ -229,7 +231,9 @@ void Uci::go_command_action(const TokenArray& tokens)
         timerThread = std::thread([this, movetime]() {
             // TODO: use sleep and signals or mutex and condition variables to kill threads
             std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
-            while (is_search_running() && std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start_time).count() < movetime) {
+            while (is_search_running() &&
+                   std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start_time)
+                           .count() < movetime) {
             }
             search_stop();
         });
@@ -307,10 +311,11 @@ bool Uci::position_command_action(const TokenArray& tokens, uint32_t num_tokens)
             return false;
         }
         // parse the fen
-        std::string fen = "";
+        std::string fen;
+        fen.reserve(100);   // 100 characters for a fen is enough
 
         while (token_i < num_tokens && tokens[token_i] != "moves") {
-            fen += tokens[token_i++] + " ";
+            fen += std::string(tokens[token_i++]) + " ";
         }
         if (fen.empty()) {
             return false;
@@ -452,7 +457,7 @@ bool Uci::setoption_command_action(const TokenArray& tokens, uint32_t num_tokens
 
     if (tokens[token_i++] == "hash") {
         try {
-            uint32_t size_mb = stoul(tokens[token_i++]);
+            uint32_t size_mb = stoul(std::string(tokens[token_i++]));
             TranspositionTable::SIZE size_tt = TranspositionTable::int_to_tt_size(size_mb);
 
             if (size_tt != TranspositionTable::SIZE::INVALID) {
@@ -504,7 +509,7 @@ void Uci::unknown_command_action() const
  *      - Move valid if success.
  *      - Move::null() if error detected, bad string move representation.
  */
-Move Uci::create_move_from_string(const std::string& move_string, const Board& board) const
+Move Uci::create_move_from_string(std::string_view move_string, const Board& board) const
 {
     const uint32_t string_lenght = move_string.length();
     // move string should have 4 or 5 characters
@@ -512,13 +517,13 @@ Move Uci::create_move_from_string(const std::string& move_string, const Board& b
         return Move::null();
     }
 
-    const Square sq_origin(move_string.substr(0, 2));
-    const Square sq_end(move_string.substr(2, 2));
+    const Square sq_origin(move_string[0], move_string[1]);
+    const Square sq_end(move_string[2], move_string[3]);
 
     if (sq_origin == Square::SQ_INVALID || sq_end == Square::SQ_INVALID) {
         return Move::null();
     }
-    
+
     // check for castling move
     if (piece_to_pieceType(board.get_piece(sq_origin)) == PieceType::KING) {
         if (sq_origin == Square::SQ_E1 && sq_end == Square::SQ_G1) {

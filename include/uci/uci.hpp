@@ -27,7 +27,7 @@
  */
 constexpr int TOKEN_ARRAY_SIZE = 1024;
 
-typedef std::array<std::string, TOKEN_ARRAY_SIZE> TokenArray;
+typedef std::array<std::string_view, TOKEN_ARRAY_SIZE> TokenArray;
 
 /**
  * @brief Uci
@@ -59,6 +59,7 @@ public:
         search_stop();
         if (searchThread.joinable()) searchThread.join();
         if (readerThread.joinable()) readerThread.join();
+        if (timerThread.joinable()) readerThread.join();
     }
 
     /**
@@ -163,7 +164,7 @@ private:
      * Starts the search in the searchThread.
      * 
      */
-    void go_command_action(const TokenArray& tokens);
+    void go_command_action(const TokenArray& tokens, uint32_t num_tokens);
 
     /**
      * @brief stop_command_action
@@ -278,5 +279,5 @@ private:
      *      - Move valid if success.
      *      - Move::null() if error detected, bad string move representation.
      */
-    Move create_move_from_string(const std::string& move_string, const Board& board) const;
+    Move create_move_from_string(std::string_view move_string, const Board& board) const;
 };

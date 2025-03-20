@@ -93,10 +93,7 @@ public:
      * @param[in] square square uint8_t value
      * 
      */
-    constexpr Square(uint8_t square) : sq_value(square)
-    {
-        sq_value = is_valid() ? sq_value : (uint8_t)SQ_INVALID;
-    }
+    constexpr Square(uint8_t square) : sq_value(square) { sq_value = is_valid() ? sq_value : (uint8_t)SQ_INVALID; }
 
     /**
      * @brief Square(Row row, Col col)
@@ -111,9 +108,7 @@ public:
      */
     constexpr Square(Row row, Col col)
         : sq_value(is_valid_row(row) && is_valid_col(col) ? (row << 3U) + col : SQ_INVALID)
-    {
-
-    }
+    { }
 
     /**
      * @brief Square(Square::Name square)
@@ -139,16 +134,26 @@ public:
     constexpr Square(const std::string& square_string);
 
     /**
+     * @brief Square(char col, char row)
+     * 
+     * Constructor that initializes the square from a character representation.
+     * E.g "e2" is the square number 12.
+     * 
+     * @note If invalid character representation of square, square is set to SQ_INVALID.
+     * 
+     * @param[in] square_string Square represented in string format (e.g., "e2"). 
+     *                          
+     */
+    constexpr Square(char col, char row);
+
+    /**
      * @brief row
      * 
      * calculates the row of the square
      * 
      * @return (sq_value / 8)
      */
-    constexpr inline Row row() const
-    {
-        return is_valid() ? static_cast<Row>(sq_value >> 3U) : ROW_INVALID;
-    }
+    constexpr inline Row row() const { return is_valid() ? static_cast<Row>(sq_value >> 3U) : ROW_INVALID; }
 
     /**
      * @brief col
@@ -157,10 +162,7 @@ public:
      * 
      * @return (sq_value % 8)
      */
-    constexpr inline Col col() const
-    {
-        return is_valid() ? static_cast<Col>(sq_value & 7U) : COL_INVALID;
-    }
+    constexpr inline Col col() const { return is_valid() ? static_cast<Col>(sq_value & 7U) : COL_INVALID; }
 
     /**
      * @brief diagonal
@@ -171,9 +173,8 @@ public:
      */
     constexpr inline Diagonal diagonal() const
     {
-        return is_valid()
-            ? static_cast<Diagonal>(static_cast<int>(row()) - static_cast<int>(col()) + 7)
-            : DIAGONAL_INVALID;
+        return is_valid() ? static_cast<Diagonal>(static_cast<int>(row()) - static_cast<int>(col()) + 7)
+                          : DIAGONAL_INVALID;
     }
 
     /**
@@ -185,9 +186,8 @@ public:
      */
     constexpr inline AntiDiagonal antidiagonal() const
     {
-        return is_valid()
-            ? static_cast<AntiDiagonal>(static_cast<int>(row()) + static_cast<int>(col()))
-            : ANTIDIAGONAL_INVALID;
+        return is_valid() ? static_cast<AntiDiagonal>(static_cast<int>(row()) + static_cast<int>(col()))
+                          : ANTIDIAGONAL_INVALID;
     }
 
     /**
@@ -422,10 +422,7 @@ public:
      *  (SQ_INVALID) if row() >= ROW_8 || col() >= COL_H
      * 
      */
-    constexpr Square northEast() const
-    {
-        return row() < ROW_8 && col() < COL_H ? sq_value + NORTH_EAST : SQ_INVALID;
-    }
+    constexpr Square northEast() const { return row() < ROW_8 && col() < COL_H ? sq_value + NORTH_EAST : SQ_INVALID; }
 
     /**
      * @brief northWest
@@ -440,10 +437,7 @@ public:
      *  (SQ_INVALID) if row() >= ROW_8 || col() <= COL_A
      * 
      */
-    constexpr Square northWest() const
-    {
-        return row() < ROW_8 && col() > COL_A ? sq_value + NORTH_WEST : SQ_INVALID;
-    }
+    constexpr Square northWest() const { return row() < ROW_8 && col() > COL_A ? sq_value + NORTH_WEST : SQ_INVALID; }
 
     /**
      * @brief southEast
@@ -458,10 +452,7 @@ public:
      *  (SQ_INVALID) if row() <= ROW_1 || col() >= COL_H
      * 
      */
-    constexpr Square southEast() const
-    {
-        return row() > ROW_1 && col() < COL_H ? sq_value + SOUTH_EAST : SQ_INVALID;
-    }
+    constexpr Square southEast() const { return row() > ROW_1 && col() < COL_H ? sq_value + SOUTH_EAST : SQ_INVALID; }
 
     /**
      * @brief southWest
@@ -476,10 +467,7 @@ public:
      *  (SQ_INVALID) if row() <= ROW_1 || col() <= COL_A
      * 
      */
-    constexpr Square southWest() const
-    {
-        return row() > ROW_1 && col() > COL_A ? sq_value + SOUTH_WEST : SQ_INVALID;
-    }
+    constexpr Square southWest() const { return row() > ROW_1 && col() > COL_A ? sq_value + SOUTH_WEST : SQ_INVALID; }
 
     /**
      * @brief to_direction
@@ -531,5 +519,27 @@ constexpr Square::Square(const std::string& square_string) : sq_value(SQ_INVALID
         if (col >= 'a' && col <= 'h' && row >= '1' && row <= '8') {
             sq_value = (col - 'a') + 8 * (row - '1');
         }
+    }
+}
+
+/**
+ * @brief Square(char col, char row)
+ * 
+ * Constructor that initializes the square from a character representation.
+ * E.g "e2" is the square number 12.
+ * 
+ * @note If invalid character representation of square, square is set to SQ_INVALID.
+ * 
+ * @param[in] square_string Square represented in string format (e.g., "e2"). 
+ *                          
+ */
+constexpr Square::Square(char col, char row) : sq_value(SQ_INVALID)
+{
+
+    col = tolower(col);
+    row = tolower(row);
+
+    if (col >= 'a' && col <= 'h' && row >= '1' && row <= '8') {
+        sq_value = (col - 'a') + 8 * (row - '1');
     }
 }

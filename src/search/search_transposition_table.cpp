@@ -106,7 +106,7 @@ void iterative_deepening(SearchResults& searchResults, Board& board, int max_dep
 
         bestMoveFound = bestMoveInIteration;
         bestEvalFound = bestEvalInIteration;
-        
+
         assert(bestMoveFound.is_valid());
 
         insert_new_result(searchResults, depth, bestEvalFound, bestMoveFound);
@@ -457,7 +457,7 @@ static bool get_entry_in_transposition_table(uint64_t zobrist, int depth, int al
     eval = entry.evaluation;
     move = entry.move;
 
-    if (!entry.is_valid()) {
+    if (!entry.is_valid() || entry.node_type == TranspositionTable::NodeType::PERFT) {
         return false;
     }
     else if (entry.depth < depth) {
