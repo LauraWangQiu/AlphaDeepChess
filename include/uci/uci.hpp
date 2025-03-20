@@ -96,6 +96,30 @@ private:
     std::thread readerThread;
 
     /**
+     * @brief timerThread
+     * 
+     * thread in charge of stopping the search when time is up.
+     * 
+     */
+    std::thread timerThread;
+
+    // /**
+    //  * @brief timerMutex
+    //  * 
+    //  * mutex to protect the timer.
+    //  * 
+    //  */
+    // std::mutex timerMutex;
+
+    // /**
+    //  * @brief timerConditionVar
+    //  * 
+    //  * condition variable to signal the timer.
+    //  * 
+    //  */
+    // std::condition_variable timerConditionVar;
+
+    /**
      * @brief searchResults
      * 
      * array to store the search results.

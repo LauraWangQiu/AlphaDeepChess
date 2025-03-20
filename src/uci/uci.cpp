@@ -154,36 +154,18 @@ void Uci::new_game_command_action() { board.load_fen(StartFEN); }
 void Uci::go_command_action(const TokenArray& tokens)
 {
     uint32_t depth = INFINITE_DEPTH;
-    uint32_t wtime = INFINITE_WTIME;
-    uint32_t btime = INFINITE_BTIME;
-    uint32_t movestogo = INFINITE_MOVES_TO_GO;
+    uint32_t movetime = 0;
 
     // Parse the command line arguments
     for (uint32_t i = 1; i < tokens.size(); ++i) {
         if (tokens[i].empty()) {
             continue;
         }
-        else if (tokens[i] == "wtime") {
+        else if (tokens[i] == "movetime") {
             try {
-                wtime = std::stoul(tokens[++i]);
+                movetime = std::stoul(tokens[++i]);
             } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command : go wtime\n";
-                return;
-            }
-        }
-        else if (tokens[i] == "btime") {
-            try {
-                btime = std::stoul(tokens[++i]);
-            } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command : go btime\n";
-                return;
-            }
-        }
-        else if (tokens[i] == "movestogo") {
-            try {
-                movestogo = std::stoul(tokens[++i]);
-            } catch (const std::exception& e) {
-                std::cout << "Invalid argument for command : go movestogo\n";
+                std::cout << "Invalid argument for command : go movetime\n";
                 return;
             }
         }
@@ -213,17 +195,10 @@ void Uci::go_command_action(const TokenArray& tokens)
     }
 
     // stop and wait for previous search to end
-    search_stop();
-
-    if (searchThread.joinable()) {
-        searchThread.join();
-    }
-    if (readerThread.joinable()) {
-        readerThread.join();
-    }
+    stop_command_action();
 
     // Launch a new thread to search for the best move
-    searchThread = std::thread([this, depth, wtime, btime, movestogo]() { search_best_move(searchResults, board, depth, wtime, btime, movestogo); });
+    searchThread = std::thread([this, depth]() { search_best_move(searchResults, board, depth); });
 
     readerThread = std::thread([this]() {
         int depthReaded = 0;
@@ -249,6 +224,16 @@ void Uci::go_command_action(const TokenArray& tokens)
 
         std::cout << "bestmove " << Move(searchResults.results[depthReaded - 1].bestMove_data).to_string() << std::endl;
     });
+
+    if (movetime != 0) {
+        timerThread = std::thread([this, movetime]() {
+            // TODO: use sleep and signals or mutex and condition variables to kill threads
+            std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+            while (is_search_running() && std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start_time).count() < movetime) {
+            }
+            search_stop();
+        });
+    }
 }
 
 /**
@@ -267,6 +252,10 @@ void Uci::stop_command_action()
 
     if (readerThread.joinable()) {
         readerThread.join();
+    }
+
+    if (timerThread.joinable()) {
+        timerThread.join();
     }
 }
 

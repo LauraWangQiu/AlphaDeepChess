@@ -5,7 +5,7 @@ import json
 import argparse
 import re
 
-def main(build_type, games, tc, st, depth, concurrency):
+def main(build_type, games, tc, st, timemargin, depth, concurrency):
     os_name = platform.system()
     is_windows = os_name == "Windows"
     is_linux = os_name == "Linux"
@@ -49,22 +49,30 @@ def main(build_type, games, tc, st, depth, concurrency):
         os.path.join(cutechess_dir, "cutechess-cli"),
         "-engine", "conf=AlphaDeepChess",
         "-engine", "conf=Stockfish",
-        "-each", f"tc={tc}",
-        "-games", str(games),
-        "-repeat",
-        "-pgnout", results_path,
-        "-epdout", edp_path,
-        "-debug"
+        "-each"
     ]
 
     if depth is not None:
         cutechess_cmd.append(f"depth={depth}")
 
+    if tc is not None:
+        cutechess_cmd.append(f"tc={tc}")
+
     if st is not None:
         cutechess_cmd.append(f"st={st}")
 
+    if timemargin is not None:
+        cutechess_cmd.append(f"timemargin={timemargin}")
+
     if concurrency is not None:
         cutechess_cmd.append(f"concurrency={concurrency}")
+
+    cutechess_cmd.extend([
+        "-games", str(games),
+        "-pgnout", results_path,
+        "-epdout", edp_path,
+        "-debug"
+    ])
 
     with open(log_path, 'w') as log_file:
         process = subprocess.Popen(cutechess_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
@@ -87,10 +95,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compare chess engines.")
     parser.add_argument("-buildType", type=str, default="Release", help="Build type")
     parser.add_argument("-games", type=int, default=10, help="Number of games")
-    parser.add_argument("-tc", type=str, default="40/60", help="Time control")
-    parser.add_argument("-st", type=str, help="Search time")
+    parser.add_argument("-tc", type=str, help="Time control")
+    parser.add_argument("-st", type=int, help="Search time")
+    parser.add_argument("-timemargin", default=500, type=int, help="Time margin")
     parser.add_argument("-depth", type=int, help="Search depth")
     parser.add_argument("-concurrency", type=int, help="Concurrency level")
     args = parser.parse_args()
 
-    main(args.buildType, args.games, args.tc, args.st, args.depth, args.concurrency)
+    main(args.buildType, args.games, args.tc, args.st, args.timemargin, args.depth, args.concurrency)

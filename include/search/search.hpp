@@ -24,30 +24,6 @@
  */
 constexpr int32_t INFINITE_DEPTH = 1024;
 
-
-/**
- * @brief INFINITE_WTIME_VALUE
- * 
- * Value that represents an infinite search wtime.
- * 
- */
-constexpr uint32_t INFINITE_WTIME = std::numeric_limits<uint32_t>::max();
-
-/**
- * @brief INFINITE_BTIME_VALUE
- * 
- * Value that represents an infinite search btime.
- * 
- */
-constexpr uint32_t INFINITE_BTIME = std::numeric_limits<uint32_t>::max();
-
-/**
- * @brief INFINITE_MOVES_TO_GO_VALUE
- * 
- * Value that represents an infinite search movestogo.
- * 
- */
-constexpr uint32_t INFINITE_MOVES_TO_GO = std::numeric_limits<uint32_t>::max();
 struct SearchResult
 {
     std::atomic<int> depth;
@@ -79,7 +55,7 @@ struct SearchResults
  * @return best move found in the position.
  * 
  */
-void search_best_move(SearchResults& searchResults, Board board, int32_t max_depth = INFINITE_DEPTH, uint32_t wtime = INFINITE_WTIME, uint32_t btime = INFINITE_BTIME, uint32_t movestogo = INFINITE_MOVES_TO_GO);
+void search_best_move(SearchResults& searchResults, Board board, int32_t max_depth = INFINITE_DEPTH);
 
 /**
  * @brief search_stop
