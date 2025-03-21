@@ -206,7 +206,7 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
         else if (tokens[i] == "winc" || tokens[i] == "binc" || tokens[i] == "movestogo" || tokens[i] == "nodes" ||
                  tokens[i] == "mate") {
             std::cout << "Ignored argument for go: " << tokens[i] << " " << tokens[i] << "\n";
-            i+=1;
+            i += 1;
         }
         else {
             std::cout << "Invalid argument for command : go " << tokens[i] << "\n";
@@ -247,13 +247,13 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
 
     if (movetime != 0) {
         timerThread = std::thread([this, movetime]() {
-            // TODO: use sleep and signals or mutex and condition variables to kill threads
-            std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
-            while (is_search_running() &&
-                   std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start_time)
-                           .count() < movetime) {
+            std::unique_lock<std::mutex> lock(timerMutex);
+            // Wait for n milliseconds or until search_stopped becomes true
+            if (!timerCv.wait_for(lock, std::chrono::milliseconds(movetime), [] { return !is_search_running(); })) {
+                // Timeout occurred and search_stopped is still false
+                lock.unlock();   // Unlock before calling stop_search()
+                search_stop();
             }
-            search_stop();
         });
     }
 }
@@ -267,6 +267,8 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
 void Uci::stop_command_action()
 {
     search_stop();
+
+    timerCv.notify_one();
 
     if (searchThread.joinable()) {
         searchThread.join();

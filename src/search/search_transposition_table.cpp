@@ -482,10 +482,7 @@ static inline void insert_new_result(SearchResults& searchResults, int depth, in
     searchResults.results[searchResults.depthReached].bestMove_data = move.raw_data();
     searchResults.depthReached++;
 
-    {
-        std::lock_guard<std::mutex> lock(searchResults.mtx_data_available_cv);
-        searchResults.data_available_cv.notify_one();
-    }
+    searchResults.data_available_cv.notify_one();
 }
 
 static bool get_entry_in_transposition_table(uint64_t zobrist, int depth, int alpha, int beta, int& eval, Move& move)

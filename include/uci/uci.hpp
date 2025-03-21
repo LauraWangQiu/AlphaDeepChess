@@ -38,7 +38,6 @@ typedef std::array<std::string_view, TOKEN_ARRAY_SIZE> TokenArray;
 class Uci
 {
 public:
-
     /**
      * @brief Uci
      * 
@@ -46,7 +45,7 @@ public:
      * 
      */
 
-    Uci() {}
+    Uci() { }
 
     /**
      * @brief ~Uci
@@ -54,7 +53,7 @@ public:
      * Uci destructor.
      * 
      */
-    ~Uci() 
+    ~Uci()
     {
         search_stop();
         if (searchThread.joinable()) searchThread.join();
@@ -71,7 +70,6 @@ public:
     void loop();
 
 private:
-
     /**
      * @brief board
      * 
@@ -104,21 +102,21 @@ private:
      */
     std::thread timerThread;
 
-    // /**
-    //  * @brief timerMutex
-    //  * 
-    //  * mutex to protect the timer.
-    //  * 
-    //  */
-    // std::mutex timerMutex;
+    /**
+     * @brief timerMutex
+     * 
+     * mutex to protect the timerCv.
+     * 
+     */
+    std::mutex timerMutex;
 
-    // /**
-    //  * @brief timerConditionVar
-    //  * 
-    //  * condition variable to signal the timer.
-    //  * 
-    //  */
-    // std::condition_variable timerConditionVar;
+    /**
+     * @brief timerCv
+     * 
+     * condition variable to signal the timer.
+     * 
+     */
+    std::condition_variable timerCv;
 
     /**
      * @brief searchResults
