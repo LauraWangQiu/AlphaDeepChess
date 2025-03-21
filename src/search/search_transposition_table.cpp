@@ -16,6 +16,7 @@
 #include "move_ordering.hpp"
 #include "move_list.hpp"
 #include "transposition_table.hpp"
+#include "history.hpp"
 
 const int INF = std::numeric_limits<int>::max();
 const int INMEDIATE_MATE_SCORE = 32000;
@@ -93,6 +94,8 @@ void iterative_deepening(SearchResults& searchResults, Board& board, int max_dep
 {
     const ChessColor side_to_move = board.state().side_to_move();
 
+    History::clear();
+
     for (int depth = 1; depth <= max_depth; depth++) {
 
         bestMoveInIteration = Move::null();
@@ -136,6 +139,8 @@ int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int b
 {
     const uint64_t zobrist_key = board.state().get_zobrist_key();
 
+    History::insert_position(zobrist_key);
+
     // check transposition table
     if (ply == 0) {
         int eval_tt;
@@ -156,6 +161,9 @@ int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int b
         return -(MATE_IN_ONE_SCORE - ply);   // white is in checkmate
     }
     else if (isStaleMate) {
+        return 0;
+    }
+    else if (History::threefold_repetition_detected(zobrist_key)) {
         return 0;
     }
     else if (depth == 0) {
@@ -180,6 +188,7 @@ int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int b
         board.make_move(moves[i]);
         int evaluation = alpha_beta_minimize_black(board, depth - 1, ply + 1, alpha, beta);
         board.unmake_move(moves[i], game_state);
+        History::remove_last_position();
 
         if (evaluation > best_eval_in_pos_for_tt) {
             // this statement is to store the best move of the position in the transposition table
@@ -226,6 +235,8 @@ int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int b
 {
     const uint64_t zobrist_key = board.state().get_zobrist_key();
 
+    History::insert_position(zobrist_key);
+
     // check transposition table
     if (ply == 0) {
         int eval_tt;
@@ -246,6 +257,9 @@ int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int b
         return MATE_IN_ONE_SCORE - ply;   // black is in checkmate
     }
     else if (isStaleMate) {
+        return 0;
+    }
+    else if (History::threefold_repetition_detected(zobrist_key)) {
         return 0;
     }
     else if (depth == 0) {
@@ -270,6 +284,7 @@ int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int b
         board.make_move(moves[i]);
         int evaluation = alpha_beta_maximize_white(board, depth - 1, ply + 1, alpha, beta);
         board.unmake_move(moves[i], game_state);
+        History::remove_last_position();
 
         if (evaluation < best_eval_in_pos_for_tt) {
             // this statement is to store the best move of the position in the transposition table
@@ -318,6 +333,10 @@ int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int b
   */
 int quiescence_maximize_white(Board& board, int ply, int alpha, int beta)
 {
+    const uint64_t zobrist_key = board.state().get_zobrist_key();
+
+    History::insert_position(zobrist_key);
+
     MoveList moves;
     bool isCheckMate, isStaleMate = false;
     generate_legal_moves(moves, board, &isCheckMate, &isStaleMate);
@@ -326,6 +345,9 @@ int quiescence_maximize_white(Board& board, int ply, int alpha, int beta)
         return -(MATE_IN_ONE_SCORE - ply);
     }
     else if (isStaleMate) {
+        return 0;
+    }
+    else if (History::threefold_repetition_detected(zobrist_key)) {
         return 0;
     }
     else if (ply >= MAX_PLY) {
@@ -364,6 +386,7 @@ int quiescence_maximize_white(Board& board, int ply, int alpha, int beta)
         board.make_move(capture_moves[i]);
         int eval = quiescence_minimize_black(board, ply + 1, alpha, beta);
         board.unmake_move(capture_moves[i], game_state);
+        History::remove_last_position();
 
         max_evaluation = std::max(max_evaluation, eval);
         alpha = std::max(alpha, eval);
@@ -396,6 +419,10 @@ int quiescence_maximize_white(Board& board, int ply, int alpha, int beta)
   */
 int quiescence_minimize_black(Board& board, int ply, int alpha, int beta)
 {
+    const uint64_t zobrist_key = board.state().get_zobrist_key();
+
+    History::insert_position(zobrist_key);
+
     MoveList moves;
     bool isCheckMate, isStaleMate = false;
     generate_legal_moves(moves, board, &isCheckMate, &isStaleMate);
@@ -404,6 +431,9 @@ int quiescence_minimize_black(Board& board, int ply, int alpha, int beta)
         return MATE_IN_ONE_SCORE - ply;
     }
     else if (isStaleMate) {
+        return 0;
+    }
+    else if (History::threefold_repetition_detected(zobrist_key)) {
         return 0;
     }
     else if (ply >= MAX_PLY) {
@@ -441,6 +471,7 @@ int quiescence_minimize_black(Board& board, int ply, int alpha, int beta)
         board.make_move(capture_moves[i]);
         int eval = quiescence_maximize_white(board, ply + 1, alpha, beta);
         board.unmake_move(capture_moves[i], game_state);
+        History::remove_last_position();
 
         min_evaluation = std::min(min_evaluation, eval);
         beta = std::min(beta, eval);
