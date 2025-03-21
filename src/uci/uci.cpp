@@ -205,7 +205,8 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
         }
         else if (tokens[i] == "winc" || tokens[i] == "binc" || tokens[i] == "movestogo" || tokens[i] == "nodes" ||
                  tokens[i] == "mate") {
-            std::cout << "Ignored argument for go: " << tokens[i] << tokens[i++] << "\n";
+            std::cout << "Ignored argument for go: " << tokens[i] << " " << tokens[i] << "\n";
+            i+=1;
         }
         else {
             std::cout << "Invalid argument for command : go " << tokens[i] << "\n";

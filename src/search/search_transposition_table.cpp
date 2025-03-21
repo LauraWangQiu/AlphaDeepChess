@@ -20,6 +20,7 @@
 const int INF = std::numeric_limits<int>::max();
 const int INMEDIATE_MATE_SCORE = 32000;
 const int MATE_THRESHOLD = INMEDIATE_MATE_SCORE - 1000U;
+constexpr int MAX_PLY = 32;
 
 static std::atomic<bool> stop;
 static Move bestMoveFound;
@@ -327,6 +328,9 @@ int quiescence_maximize_white(Board& board, int ply, int alpha, int beta)
     else if (isStaleMate) {
         return 0;
     }
+    else if (ply >= MAX_PLY) {
+        return 0;
+    }
 
     int static_evaluation = evaluate_position(board);
 
@@ -352,6 +356,11 @@ int quiescence_maximize_white(Board& board, int ply, int alpha, int beta)
     int max_evaluation = static_evaluation;
 
     for (int i = 0; i < capture_moves.size(); i++) {
+
+        if (stop) {
+            return 0;
+        }
+
         board.make_move(capture_moves[i]);
         int eval = quiescence_minimize_black(board, ply + 1, alpha, beta);
         board.unmake_move(capture_moves[i], game_state);
@@ -397,6 +406,9 @@ int quiescence_minimize_black(Board& board, int ply, int alpha, int beta)
     else if (isStaleMate) {
         return 0;
     }
+    else if (ply >= MAX_PLY) {
+        return 0;
+    }
 
     int static_evaluation = evaluate_position(board);
     if (static_evaluation <= alpha) {
@@ -421,6 +433,11 @@ int quiescence_minimize_black(Board& board, int ply, int alpha, int beta)
     int min_evaluation = static_evaluation;
 
     for (int i = 0; i < capture_moves.size(); i++) {
+
+        if (stop) {
+            return 0;
+        }
+
         board.make_move(capture_moves[i]);
         int eval = quiescence_maximize_white(board, ply + 1, alpha, beta);
         board.unmake_move(capture_moves[i], game_state);
