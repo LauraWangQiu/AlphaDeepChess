@@ -83,11 +83,11 @@ int evaluate_position(const Board& board)
     ChessColor opponent = (side_to_move == ChessColor::WHITE) ? ChessColor::BLACK : ChessColor::WHITE;
     int sign = (side_to_move == ChessColor::WHITE) ? 1 : -1;
     int sign_opponent = -sign;
-    Board board_copy = board;
-    board_copy.set_side_to_move(opponent);
+    //Board board_copy = board;
+    //board_copy.set_side_to_move(opponent);
 
-    evaluation += evaluate_legal_moves(board) * sign;
-    evaluation += evaluate_legal_moves(board_copy) * sign_opponent;
+    //evaluation += evaluate_legal_moves(board) * sign;
+    //evaluation += evaluate_legal_moves(board_copy) * sign_opponent;
 
     // Evaluate game phase
     GamePhase game_phase = determine_game_phase(board);
@@ -126,9 +126,11 @@ int evaluate_position(const Board& board)
  */
 int evaluate_legal_moves(const Board& board)
 {
-    MoveList legal_moves;
-    bool isMate, isStaleMate;
-    generate_legal_moves(legal_moves, board, &isMate, &isStaleMate);
+    // TODO , right know is not worth it calling generate_legal_moves again to calculate mobility
+
+    /*MoveList legal_moves;
+    bool incheck, isMate, isStaleMate;
+    generate_legal_moves<ALL_MOVES>(legal_moves, board, &isMate, &isStaleMate);
     if (isMate || isStaleMate) {
         return (isMate) ? MATE_VALUE : 0;
     }
@@ -141,7 +143,8 @@ int evaluate_legal_moves(const Board& board)
         }
     }
 
-    return evaluation;
+    return evaluation;*/
+    return 0;
 }
 
 /** 
@@ -170,9 +173,11 @@ GamePhase determine_game_phase(const Board& board)
 
     if (total_material > OPENING_MATERIAL) {
         return GamePhase::OPENING;
-    } else if (total_material > MIDDLEGAME_MATERIAL || queens > 0) {
+    }
+    else if (total_material > MIDDLEGAME_MATERIAL || queens > 0) {
         return GamePhase::MIDDLEGAME;
-    } else {
+    }
+    else {
         return GamePhase::ENDGAME;
     }
 }
@@ -204,13 +209,13 @@ int evaluate_piece(const Board& board, const GamePhase& game_phase, Piece piece,
     // Further evaluation based on piece type
     // https://www.chessprogramming.org/Evaluation_of_Pieces
     switch (type) {
-        case PieceType::PAWN:   evaluation += evaluate_pawn(board, piece, row, col, color);     break;
-        case PieceType::ROOK:   evaluation += evaluate_rook(piece, row, col, color);                   break;
-        case PieceType::KNIGHT: evaluation += evaluate_knight(piece, row, col, color);                 break;
-        case PieceType::BISHOP: evaluation += evaluate_bishop(piece, row, col, color);                 break;
-        case PieceType::QUEEN:  evaluation += evaluate_queen(piece, row, col, color);                  break;
-        case PieceType::KING:   evaluation += evaluate_king(game_phase, board, row, col, color);break;
-        default: break;
+    case PieceType::PAWN: evaluation += evaluate_pawn(board, piece, row, col, color); break;
+    case PieceType::ROOK: evaluation += evaluate_rook(piece, row, col, color); break;
+    case PieceType::KNIGHT: evaluation += evaluate_knight(piece, row, col, color); break;
+    case PieceType::BISHOP: evaluation += evaluate_bishop(piece, row, col, color); break;
+    case PieceType::QUEEN: evaluation += evaluate_queen(piece, row, col, color); break;
+    case PieceType::KING: evaluation += evaluate_king(game_phase, board, row, col, color); break;
+    default: break;
     }
 
     return evaluation * sign;
@@ -252,7 +257,8 @@ int evaluate_pawn(const Board& board, Piece piece, int pawn_row, int pawn_col, C
             if (front_piece != Piece::EMPTY) {
                 if (front_piece == piece) {
                     evaluation += DOUBLED_PAWNS_PENALTY_VALUE;
-                } else if (get_color(front_piece) != color) {
+                }
+                else if (get_color(front_piece) != color) {
                     evaluation += BLOCKED_PAWNS_PENALTY_VALUE;
                 }
             }
@@ -404,13 +410,9 @@ int evaluate_king(const GamePhase& game_phase, const Board& board, int row, int 
     int evaluation = 0;
 
     switch (game_phase) {
-        case GamePhase::OPENING:
-        case GamePhase::MIDDLEGAME:
-            evaluation += evaluate_king_safety_middle_game(board, row, col, color);
-            break;
-        case GamePhase::ENDGAME:
-            evaluation += evaluate_king_activity_end_game(row, col, color);
-            break;
+    case GamePhase::OPENING:
+    case GamePhase::MIDDLEGAME: evaluation += evaluate_king_safety_middle_game(board, row, col, color); break;
+    case GamePhase::ENDGAME: evaluation += evaluate_king_activity_end_game(row, col, color); break;
     }
 
     return evaluation;
@@ -481,7 +483,8 @@ int evaluate_king_safety_middle_game(const Board& board, int king_row, int king_
     // https://www.chessprogramming.org/King_Safety
 
     // If king has castled
-    if ((color == ChessColor::WHITE && board.state().has_castled_white()) || (color == ChessColor::BLACK && board.state().has_castled_black())) {
+    if ((color == ChessColor::WHITE && board.state().has_castled_white()) ||
+        (color == ChessColor::BLACK && board.state().has_castled_black())) {
         for (int i = 0; i < 3; i++) {
             if (Square(Row(king_row + sign), Col(king_col - 1 + i)).is_valid()) {
                 Piece possiblePawn = board.get_piece(Square(Row(king_row + sign), Col(king_col - 1 + i)));
@@ -491,20 +494,24 @@ int evaluate_king_safety_middle_game(const Board& board, int king_row, int king_
                 // (NOT taking into consideration of long castle)
                 // If there is no piece or the piece is not the same color
                 // or the piece is not a pawn, give penalty
-                if (possiblePawn == Piece::EMPTY || get_color(possiblePawn) != color || piece_to_pieceType(possiblePawn) != PieceType::PAWN) {
+                if (possiblePawn == Piece::EMPTY || get_color(possiblePawn) != color ||
+                    piece_to_pieceType(possiblePawn) != PieceType::PAWN) {
                     evaluation += PAWN_SHIELD_FOR_KING_SAFETY_PENALTY_VALUE;
                 }
-                
+
                 // Pawn storm
-                // If the enemy pawns are near to the king, there might be a threat of 
+                // If the enemy pawns are near to the king, there might be a threat of
                 // opening a file, even if the pawn shield is intact
                 // Iterate columns
                 for (int j = 1; j < 7; j++) {
                     if (Square(Row(king_row + j * sign), Col(king_col - 1 + i)).is_valid()) {
-                        Piece possiblePawn = board.get_piece(Square(Row(king_row + j  * sign), Col(king_col - 1 + i)));
-                        if (possiblePawn != Piece::EMPTY && get_color(possiblePawn) != color && piece_to_pieceType(possiblePawn) == PieceType::PAWN) {
+                        Piece possiblePawn = board.get_piece(Square(Row(king_row + j * sign), Col(king_col - 1 + i)));
+                        if (possiblePawn != Piece::EMPTY && get_color(possiblePawn) != color &&
+                            piece_to_pieceType(possiblePawn) == PieceType::PAWN) {
                             // Smaller the distance, bigger the penalty
-                            float distance = PrecomputedData::get_distance_chebyshev(Square(Row(king_row), Col(king_col)), Square(Row(king_row + j * sign), Col(king_col - 1 + i)));
+                            float distance = PrecomputedData::get_distance_chebyshev(
+                                Square(Row(king_row), Col(king_col)),
+                                Square(Row(king_row + j * sign), Col(king_col - 1 + i)));
                             evaluation += PAWN_STORM_FOR_KING_SAFETY_PENALTY_VALUE * 1 / distance;
                         }
                     }
@@ -523,7 +530,7 @@ int evaluate_king_safety_middle_game(const Board& board, int king_row, int king_
 
     // For each piece on the board, check if it attacks the king zone
     // considering if the piece is an enemy piece and counting the
-    // number of squares that are attacked in the king zone. Then, 
+    // number of squares that are attacked in the king zone. Then,
     // multiply it by X_CONSTANT_ATTACKING_KING_ZONE_PENALTY_VALUE.
     // Also, check the distance of the piece to the king. In case of
     // a rook or queen in a open row or open column, give a penalty

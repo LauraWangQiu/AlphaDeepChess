@@ -5,9 +5,8 @@
 
 *.data*
 *.pgn 
-config.*
 
-# User-specific files
+# User-specific filess
 *.rsuser
 *.suo
 *.user

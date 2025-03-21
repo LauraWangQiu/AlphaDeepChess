@@ -200,7 +200,7 @@ public:
      * @return True if move is En Passant or end square is not empty
      * 
      */
-    constexpr bool move_is_capture(Move move)
+    constexpr bool move_is_capture(Move move) const
     {
         assert(move.is_valid());
         return move.type() == MoveType::EN_PASSANT || (!is_empty(move.square_to()));

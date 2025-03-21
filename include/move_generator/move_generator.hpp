@@ -11,6 +11,11 @@
 #include "board.hpp"
 #include "move_list.hpp"
 
+enum MoveGeneratorType {
+    ALL_MOVES,      // Generate all legal moves
+    ONLY_CAPTURES   // Generate only capture moves
+};
+
 /**
  * @brief generate_legal_moves
  * 
@@ -18,8 +23,9 @@
  * 
  * @param[out] moves move list.
  * @param[in] board chess position.
- * @param[out] isMate (optional) return true if the position is check mate.
- * @param[out] isStaleMate (optional) return true if the position is stalemate.
+ * @param[out] inCheck (optional) return true if the king is in check.
  * 
  */
-void generate_legal_moves(MoveList& moves, const Board& board, bool* isMate = nullptr, bool* isStaleMate = nullptr);
+template <MoveGeneratorType genType>
+void generate_legal_moves(MoveList& moves, const Board& board, bool* inCheck = nullptr);
+

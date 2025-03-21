@@ -13,7 +13,7 @@
 #include <string>
 #include <cstdint>
 #include <vector>
-#include "move.hpp"
+#include "move_generator.hpp"
 
 typedef std::vector<std::pair<Move, uint64_t>> MoveNodesList;
 

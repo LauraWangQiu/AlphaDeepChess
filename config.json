@@ -1,1 +1,0 @@
-../fastchess/fastchess -engine cmd=/usr/games/stockfish name=stockfish -engine cmd=./build/release/AlphaDeepChess name=AlphaDeepChess -each st=2 timemargin=250 -rounds 1 -repeat -concurrency 2 -pgnout file=out.pgn

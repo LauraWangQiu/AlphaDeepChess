@@ -43,11 +43,11 @@ static bool en_passant_move_doesnt_allow_king_capture(Move enPassant_move, MoveG
  * 
  * @param[out] moves move list.
  * @param[in] board chess position.
- * @param[out] isMate (optional) return true if the position is check mate.
- * @param[out] isStaleMate (optional) return true if the position is stalemate.
+ * @param[out] inCheck (optional) return true if the king is in check.
  * 
  */
-void generate_legal_moves(MoveList& moves, const Board& board, bool* isMate, bool* isStaleMate)
+template<MoveGeneratorType genType>
+void generate_legal_moves(MoveList& moves, const Board& board, bool* inCheck)
 {
     MoveGeneratorInfo moveGeneratorInfo(board, moves);
 
@@ -59,8 +59,7 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* isMate, boo
     if (num_checkers >= 2) {
         // when double check only king moves allowed
         calculate_king_moves(moveGeneratorInfo.side_to_move_king_square, moveGeneratorInfo);
-        if (isMate) *isMate = (moves.size() == 0);
-        if (isStaleMate) *isStaleMate = false;
+        if (inCheck) *inCheck = true;
         return;
     }
 
@@ -81,10 +80,22 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* isMate, boo
         default: break;
         }
     }
+    if (inCheck) *inCheck = (num_checkers > 0);
 
-    if (isMate) *isMate = (moves.size() == 0) && (num_checkers > 0);
-    if (isStaleMate) *isStaleMate = (moves.size() == 0) && (num_checkers == 0);
+    if constexpr (genType == ONLY_CAPTURES) {
+        MoveList capture_moves;
+        for (int i = 0; i < moves.size(); i++) {
+            if (board.move_is_capture(moves[i])) {
+                capture_moves.add(moves[i]);
+            }
+        }
+        moves = capture_moves;
+    }
 }
+
+// Explicit template instantiations
+template void generate_legal_moves<ALL_MOVES>(MoveList& moves, const Board& board, bool* inCheck);
+template void generate_legal_moves<ONLY_CAPTURES>(MoveList& moves, const Board& board, bool* inCheck);
 
 static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
 {

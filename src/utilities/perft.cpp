@@ -11,7 +11,6 @@
 #include "perft.hpp"
 #include "board.hpp"
 #include "transposition_table.hpp"
-#include "move_generator.hpp"
 #include "zobrist.hpp"
 #include <chrono>
 
@@ -63,7 +62,7 @@ void perft(const std::string& FEN, uint64_t depth, MoveNodesList& moveNodeList, 
     MoveList moves;
     moveNodeList.reserve(moves.size());
 
-    generate_legal_moves(moves, board);
+    generate_legal_moves<ALL_MOVES>(moves, board);
 
     for (int i = 0; i < moves.size(); i++) {
         moveNodeList.emplace_back(moves[i], 0ULL);
@@ -121,7 +120,7 @@ static uint64_t perft_recursive(Board& board, uint8_t depth, bool use_tt)
 
     uint64_t nodes = 0ULL;
     MoveList moves;
-    generate_legal_moves(moves, board);
+    generate_legal_moves<ALL_MOVES>(moves, board);
 
 
     for (int i = 0; i < moves.size(); i++) {

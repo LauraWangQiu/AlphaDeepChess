@@ -31,11 +31,17 @@ static void update_pin_in_dir(Square king_sq, Direction d, MoveGeneratorInfo& mo
 static void update_pins_and_checks(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
 
 static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
+template<MoveGeneratorType genType>
 static void calculate_king_moves(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
+template<MoveGeneratorType genType>
 static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo);
+template<MoveGeneratorType genType>
 static void calculate_knight_moves(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo);
+template<MoveGeneratorType genType>
 static void calculate_rook_moves(Square rook_sq, MoveGeneratorInfo& moveGeneratorInfo);
+template<MoveGeneratorType genType>
 static void calculate_bishop_moves(Square bishop_sq, MoveGeneratorInfo& moveGeneratorInfo);
+template<MoveGeneratorType genType>
 static void calculate_queen_moves(Square queen_sq, MoveGeneratorInfo& moveGeneratorInfo);
 
 static bool en_passant_move_doesnt_allow_king_capture(Move enPassant_move, MoveGeneratorInfo& moveGeneratorInfo);
@@ -47,11 +53,12 @@ static bool en_passant_move_doesnt_allow_king_capture(Move enPassant_move, MoveG
  * 
  * @param[out] moves move list.
  * @param[in] board chess position.
- * @param[out] isMate (optional) return true if the position is check mate.
- * @param[out] isStaleMate (optional) return true if the position is stalemate.
+ * @param[out] inCheck (optional) return true if the king is in check.
+
  * 
  */
-void generate_legal_moves(MoveList& moves, const Board& board, bool* isMate, bool* isStaleMate)
+template<MoveGeneratorType genType>
+void generate_legal_moves(MoveList& moves, const Board& board, bool* inCheck)
 {
     MoveGeneratorInfo moveGeneratorInfo(board, moves);
 
@@ -62,9 +69,8 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* isMate, boo
 
     if (num_checkers >= 2) {
         // when double check only king moves allowed
-        calculate_king_moves(moveGeneratorInfo.side_to_move_king_square, moveGeneratorInfo);
-        if (isMate) *isMate = (moves.size() == 0);
-        if (isStaleMate) *isStaleMate = false;
+        calculate_king_moves<genType>(moveGeneratorInfo.side_to_move_king_square, moveGeneratorInfo);
+        if (inCheck) *inCheck = true;
         return;
     }
     uint64_t side_to_move_pieces = moveGeneratorInfo.side_to_move_pieces_mask;
@@ -78,19 +84,21 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* isMate, boo
         assert(get_color(piece) == side_to_move);
 
         switch (piece_type) {
-        case PieceType::PAWN: calculate_pawn_moves(square, moveGeneratorInfo); break;
-        case PieceType::KNIGHT: calculate_knight_moves(square, moveGeneratorInfo); break;
-        case PieceType::KING: calculate_king_moves(square, moveGeneratorInfo); break;
-        case PieceType::QUEEN: calculate_queen_moves(square, moveGeneratorInfo); break;
-        case PieceType::ROOK: calculate_rook_moves(square, moveGeneratorInfo); break;
-        case PieceType::BISHOP: calculate_bishop_moves(square, moveGeneratorInfo); break;
+        case PieceType::PAWN: calculate_pawn_moves<genType>(square, moveGeneratorInfo); break;
+        case PieceType::KNIGHT: calculate_knight_moves<genType>(square, moveGeneratorInfo); break;
+        case PieceType::KING: calculate_king_moves<genType>(square, moveGeneratorInfo); break;
+        case PieceType::QUEEN: calculate_queen_moves<genType>(square, moveGeneratorInfo); break;
+        case PieceType::ROOK: calculate_rook_moves<genType>(square, moveGeneratorInfo); break;
+        case PieceType::BISHOP: calculate_bishop_moves<genType>(square, moveGeneratorInfo); break;
         default: break;
         }
     }
-
-    if (isMate) *isMate = (moves.size() == 0) && (num_checkers > 0);
-    if (isStaleMate) *isStaleMate = (moves.size() == 0) && (num_checkers == 0);
+    if (inCheck) *inCheck = (num_checkers > 0);
 }
+
+// Explicit template instantiations
+template void generate_legal_moves<ALL_MOVES>(MoveList& moves, const Board& board, bool* inCheck);
+template void generate_legal_moves<ONLY_CAPTURES>(MoveList& moves, const Board& board, bool* inCheck);
 
 static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
 {
@@ -333,6 +341,7 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
     }
 }
 
+template<MoveGeneratorType genType>
 static void calculate_king_moves(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(king_sq.is_valid());
@@ -345,6 +354,11 @@ static void calculate_king_moves(Square king_sq, MoveGeneratorInfo& moveGenerato
 
     uint64_t king_moves_mask = king_attacks & ~king_danger_mask & ~blockers_mask;
 
+    if constexpr (genType == ONLY_CAPTURES) {
+        const uint64_t enemy_mask = moveGeneratorInfo.side_waiting_pieces_mask;
+        king_moves_mask &= enemy_mask;
+    }
+
     while (king_moves_mask) {
         // pop least significant bit until is zero
         const Square available_square = static_cast<Square>(pop_lsb(king_moves_mask));
@@ -353,9 +367,12 @@ static void calculate_king_moves(Square king_sq, MoveGeneratorInfo& moveGenerato
         moves.add(Move(king_sq, available_square));
     }
 
-    calculate_castling_moves(king_sq, moveGeneratorInfo);
+    if constexpr (genType == ALL_MOVES) {
+        calculate_castling_moves(king_sq, moveGeneratorInfo);
+    }
 }
 
+template<MoveGeneratorType genType>
 static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(pawn_sq.is_valid());
@@ -381,17 +398,21 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
     pawn_moves_mask |= pawn_attacks & en_passant_square.mask();
 
     // pawn push
-    const Square pawn_push_sq = side_to_move == ChessColor::WHITE ? pawn_sq.north() : pawn_sq.south();
+    if constexpr (genType == ALL_MOVES) {
 
-    const Square pawn_double_push_sq = side_to_move == ChessColor::WHITE ? pawn_push_sq.north() : pawn_push_sq.south();
+        const Square pawn_push_sq = side_to_move == ChessColor::WHITE ? pawn_sq.north() : pawn_sq.south();
 
-    const bool double_push_available = pawn_sq.row() == moveGeneratorInfo.row_where_double_push_is_available;
+        const Square pawn_double_push_sq =
+            side_to_move == ChessColor::WHITE ? pawn_push_sq.north() : pawn_push_sq.south();
 
-    if (board.is_empty(pawn_push_sq)) {
-        pawn_moves_mask |= pawn_push_sq.mask();
+        const bool double_push_available = pawn_sq.row() == moveGeneratorInfo.row_where_double_push_is_available;
 
-        if (double_push_available && board.is_empty(pawn_double_push_sq)) {
-            pawn_moves_mask |= pawn_double_push_sq.mask();
+        if (board.is_empty(pawn_push_sq)) {
+            pawn_moves_mask |= pawn_push_sq.mask();
+
+            if (double_push_available && board.is_empty(pawn_double_push_sq)) {
+                pawn_moves_mask |= pawn_double_push_sq.mask();
+            }
         }
     }
 
@@ -446,6 +467,7 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
     }
 }
 
+template<MoveGeneratorType genType>
 static void calculate_knight_moves(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(knight_sq.is_valid());
@@ -464,6 +486,11 @@ static void calculate_knight_moves(Square knight_sq, MoveGeneratorInfo& moveGene
 
     uint64_t knight_moves_mask = knight_attacks & ~blockers_mask & (capture_mask | push_mask);
 
+    if constexpr (genType == ONLY_CAPTURES) {
+        const uint64_t enemy_mask = moveGeneratorInfo.side_waiting_pieces_mask;
+        knight_moves_mask &= enemy_mask;
+    }
+
     while (knight_moves_mask) {
         // pop least significant bit until is zero
         const Square available_square = static_cast<Square>(pop_lsb(knight_moves_mask));
@@ -471,7 +498,7 @@ static void calculate_knight_moves(Square knight_sq, MoveGeneratorInfo& moveGene
     }
 }
 
-
+template<MoveGeneratorType genType>
 static void calculate_rook_moves(Square rook_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(rook_sq.is_valid());
@@ -484,6 +511,11 @@ static void calculate_rook_moves(Square rook_sq, MoveGeneratorInfo& moveGenerato
     uint64_t moves_mask = PrecomputedMoveData::rookMoves(rook_sq, blockers);
 
     moves_mask &= ~friendly_mask & (capture_mask | push_mask);
+
+    if constexpr (genType == ONLY_CAPTURES) {
+        const uint64_t enemy_mask = moveGeneratorInfo.side_waiting_pieces_mask;
+        moves_mask &= enemy_mask;
+    }
 
     // if piece is pinned, it can only moved in the direction of the pin
     if (moveGeneratorInfo.pinned_squares_mask & rook_sq.mask()) {
@@ -500,6 +532,7 @@ static void calculate_rook_moves(Square rook_sq, MoveGeneratorInfo& moveGenerato
     }
 }
 
+template<MoveGeneratorType genType>
 static void calculate_bishop_moves(Square bishop_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(bishop_sq.is_valid());
@@ -512,6 +545,11 @@ static void calculate_bishop_moves(Square bishop_sq, MoveGeneratorInfo& moveGene
     uint64_t moves_mask = PrecomputedMoveData::bishopMoves(bishop_sq, blockers);
 
     moves_mask &= ~friendly_mask & (capture_mask | push_mask);
+
+    if constexpr (genType == ONLY_CAPTURES) {
+        const uint64_t enemy_mask = moveGeneratorInfo.side_waiting_pieces_mask;
+        moves_mask &= enemy_mask;
+    }
 
     // if piece is pinned, it can only moved in the direction of the pin
     if (moveGeneratorInfo.pinned_squares_mask & bishop_sq.mask()) {
@@ -528,6 +566,7 @@ static void calculate_bishop_moves(Square bishop_sq, MoveGeneratorInfo& moveGene
     }
 }
 
+template<MoveGeneratorType genType>
 static void calculate_queen_moves(Square queen_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
     assert(queen_sq.is_valid());
@@ -540,6 +579,11 @@ static void calculate_queen_moves(Square queen_sq, MoveGeneratorInfo& moveGenera
     uint64_t moves_mask = PrecomputedMoveData::queenMoves(queen_sq, blockers);
 
     moves_mask &= ~friendly_mask & (capture_mask | push_mask);
+
+    if constexpr (genType == ONLY_CAPTURES) {
+        const uint64_t enemy_mask = moveGeneratorInfo.side_waiting_pieces_mask;
+        moves_mask &= enemy_mask;
+    }
 
     // if piece is pinned, it can only moved in the direction of the pin
     if (moveGeneratorInfo.pinned_squares_mask & queen_sq.mask()) {

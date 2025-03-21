@@ -20,6 +20,7 @@
 const int INF = std::numeric_limits<int>::max();
 const int INMEDIATE_MATE_SCORE = 32000;
 const int MATE_THRESHOLD = INMEDIATE_MATE_SCORE - 1000U;
+constexpr int MAX_PLY = 32;
 
 static std::atomic<bool> stop;
 static Move bestMoveFound;
@@ -78,6 +79,16 @@ void search_best_move(SearchResults& searchResults, Board board, int32_t max_dep
 
     iterative_deepening(searchResults, board, max_depth);
 
+    if (!bestMoveFound.is_valid()) {
+        // if none move found choose one
+        MoveList moves;
+        generate_legal_moves<ALL_MOVES>(moves, board);
+        bestMoveFound = moves[0];
+        bestEvalFound = 0;
+        const int depth = 1;
+        insert_new_result(searchResults, depth, bestEvalFound, bestMoveFound);
+    }
+
     stop = true;
 
     {
@@ -134,8 +145,10 @@ void iterative_deepening(SearchResults& searchResults, Board& board, int max_dep
 int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int beta)
 {
     MoveList moves;
-    bool isCheckMate, isStaleMate = false;
-    generate_legal_moves(moves, board, &isCheckMate, &isStaleMate);
+    bool isCheck;
+    generate_legal_moves<ALL_MOVES>(moves, board, &isCheck);
+    const bool isCheckMate = isCheck && moves.size() == 0;
+    const bool isStaleMate = !isCheck && moves.size() == 0;
 
     if (isCheckMate) {
         // we substract ply so checkMate in less moves has a higher score
@@ -197,8 +210,10 @@ int alpha_beta_maximize_white(Board& board, int depth, int ply, int alpha, int b
 int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int beta)
 {
     MoveList moves;
-    bool isCheckMate, isStaleMate = false;
-    generate_legal_moves(moves, board, &isCheckMate, &isStaleMate);
+    bool isCheck;
+    generate_legal_moves<ALL_MOVES>(moves, board, &isCheck);
+    const bool isCheckMate = isCheck && moves.size() == 0;
+    const bool isStaleMate = !isCheck && moves.size() == 0;
 
     if (isCheckMate) {
         // we substract ply so checkMate in less moves has a higher score
@@ -263,14 +278,7 @@ int alpha_beta_minimize_black(Board& board, int depth, int ply, int alpha, int b
  */
 int quiescence_maximize_white(Board& board, int ply, int alpha, int beta)
 {
-    MoveList moves;
-    bool isCheckMate, isStaleMate = false;
-    generate_legal_moves(moves, board, &isCheckMate, &isStaleMate);
-
-    if (isCheckMate) {
-        return -(MATE_IN_ONE_SCORE - ply);
-    }
-    else if (isStaleMate) {
+    if (ply >= MAX_PLY) {
         return 0;
     }
 
@@ -282,10 +290,10 @@ int quiescence_maximize_white(Board& board, int ply, int alpha, int beta)
     alpha = std::max(alpha, static_evaluation);
 
     MoveList capture_moves;
-    for (int i = 0; i < moves.size(); i++) {
-        if (board.move_is_capture(moves[i])) {
-            capture_moves.add(moves[i]);
-        }
+    generate_legal_moves<ONLY_CAPTURES>(capture_moves, board);
+
+    if (capture_moves.size() == 0) {
+        return static_evaluation;   // No captures: return static evaluation
     }
 
     if (capture_moves.size() == 0) {
@@ -333,14 +341,7 @@ int quiescence_maximize_white(Board& board, int ply, int alpha, int beta)
  */
 int quiescence_minimize_black(Board& board, int ply, int alpha, int beta)
 {
-    MoveList moves;
-    bool isCheckMate, isStaleMate = false;
-    generate_legal_moves(moves, board, &isCheckMate, &isStaleMate);
-
-    if (isCheckMate) {
-        return MATE_IN_ONE_SCORE - ply;
-    }
-    else if (isStaleMate) {
+    if (ply >= MAX_PLY) {
         return 0;
     }
 
@@ -351,10 +352,10 @@ int quiescence_minimize_black(Board& board, int ply, int alpha, int beta)
     beta = std::min(beta, static_evaluation);
 
     MoveList capture_moves;
-    for (int i = 0; i < moves.size(); i++) {
-        if (board.move_is_capture(moves[i])) {
-            capture_moves.add(moves[i]);
-        }
+    generate_legal_moves<ONLY_CAPTURES>(capture_moves, board);
+
+    if (capture_moves.size() == 0) {
+        return static_evaluation;   // No captures: return static evaluation
     }
 
     if (capture_moves.size() == 0) {

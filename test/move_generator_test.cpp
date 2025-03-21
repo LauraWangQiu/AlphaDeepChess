@@ -8,6 +8,7 @@
 #include <mutex>
 #include "perft.hpp"
 #include "transposition_table.hpp"
+#include "test_utils.hpp"
 
 static constexpr auto RESET_COLOR = "\033[0m";
 static constexpr auto RED_COLOR = "\033[31m";
@@ -24,27 +25,8 @@ struct PerftEntry
     std::vector<uint64_t> perftResults;
 };
 
-static const std::unordered_map<std::string, PerftEntry> perftResults = {
-    {"FEN_START_POS",
-     {"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", {1, 20, 400, 8902, 197281, 4865609, 119060324}}},
-    {"FEN_KIWIPETE",
-     {"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
-      {1, 48, 2039, 97862, 4085603, 193690690, 8031647685}}},
-    {"FEN_TALKCHESS",
-     {"rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
-      {1, 44, 1486, 62379, 2103487, 89941194, 3048196529}}},
-    {"FEN_EDWARDS2",
-     {"r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
-      {1, 46, 2079, 89890, 3894594, 164075551, 6923051137}}},
-    {"FEN_TEST4",
-     {"r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
-      {1, 6, 264, 9467, 422333, 15833292, 706045033}}},
-    {"FEN_TEST4_MIRROR",
-     {"r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1",
-      {1, 6, 264, 9467, 422333, 15833292, 706045033}}},
-    {"FEN_STRANGEMOVES",
-     {"r3k2r/p1pppp1p/N3Q3/qpP2N2/5Kp1/8/Pp2p1pP/R6R b kq - 1 2",
-      {1, 48, 2100, 86876, 3423970, 140410357, 5160619771}}}};
+static void move_generator_all_moves_test();
+static void move_generator_only_captures_test();
 
 void move_generator_test()
 {
@@ -52,11 +34,41 @@ void move_generator_test()
 
     TranspositionTable::resize(TranspositionTable::SIZE::MB_256);
 
+    move_generator_only_captures_test();
+    move_generator_all_moves_test();
+}
+
+static void move_generator_all_moves_test()
+{
+    const std::string test_name = "move_generator_all_moves_test";
+
+    static const std::unordered_map<std::string, PerftEntry> perftAllMovesResults = {
+        {"FEN_START_POS",
+         {"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", {1, 20, 400, 8902, 197281, 4865609, 119060324}}},
+        {"FEN_KIWIPETE",
+         {"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+          {1, 48, 2039, 97862, 4085603, 193690690, 8031647685}}},
+        {"FEN_TALKCHESS",
+         {"rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
+          {1, 44, 1486, 62379, 2103487, 89941194, 3048196529}}},
+        {"FEN_EDWARDS2",
+         {"r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+          {1, 46, 2079, 89890, 3894594, 164075551, 6923051137}}},
+        {"FEN_TEST4",
+         {"r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
+          {1, 6, 264, 9467, 422333, 15833292, 706045033}}},
+        {"FEN_TEST4_MIRROR",
+         {"r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1",
+          {1, 6, 264, 9467, 422333, 15833292, 706045033}}},
+        {"FEN_STRANGEMOVES",
+         {"r3k2r/p1pppp1p/N3Q3/qpP2N2/5Kp1/8/Pp2p1pP/R6R b kq - 1 2",
+          {1, 48, 2100, 86876, 3423970, 140410357, 5160619771}}}};
+
     const int MAX_DEPTH = 5;
 
     // Collect keys in a vector to assign to threads
     std::vector<std::string> keys;
-    for (const auto& pair : perftResults) {
+    for (const auto& pair : perftAllMovesResults) {
         keys.push_back(pair.first);
     }
 
@@ -70,7 +82,7 @@ void move_generator_test()
 
         threads.emplace_back([i, &keys, &cout_mutex, &threads_finished]() {
             const auto& key = keys[i];
-            const auto& entry = perftResults.at(key);
+            const auto& entry = perftAllMovesResults.at(key);
             std::ostringstream oss;
             oss << "\n\n" << key;
 
@@ -116,5 +128,47 @@ void move_generator_test()
     // Wait for all threads to finish
     for (auto& t : threads) {
         t.join();
+    }
+}
+
+static void move_generator_only_captures_test()
+{
+    const std::string test_name = "move_generator_only_captures_test";
+
+    MoveList moves;
+    Board board;
+    board.load_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    generate_legal_moves<ONLY_CAPTURES>(moves, board);
+    if (moves.size() != 0) {
+        PRINT_TEST_FAILED(test_name, "moves.size() != 0");
+        std::cout << moves.to_string() << std::endl;
+    }
+
+    board.load_fen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+    generate_legal_moves<ONLY_CAPTURES>(moves, board);
+    if (moves.size() != 8) {
+        PRINT_TEST_FAILED(test_name, "moves.size() != 8");
+        std::cout << moves.to_string() << std::endl;
+    }
+
+    board.load_fen("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1");
+    generate_legal_moves<ONLY_CAPTURES>(moves, board);
+    if (moves.size() != 1) {
+        PRINT_TEST_FAILED(test_name, "moves.size() != 1");
+        std::cout << moves.to_string() << std::endl;
+    }
+
+    board.load_fen("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
+    generate_legal_moves<ONLY_CAPTURES>(moves, board);
+    if (moves.size() != 0) {
+        PRINT_TEST_FAILED(test_name, "moves.size() != 0");
+        std::cout << moves.to_string() << std::endl;
+    }
+
+    board.load_fen("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1");
+    generate_legal_moves<ONLY_CAPTURES>(moves, board);
+    if (moves.size() != 0) {
+        PRINT_TEST_FAILED(test_name, "moves.size() != 0");
+        std::cout << moves.to_string() << std::endl;
     }
 }
