@@ -14,7 +14,6 @@
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
-#include <limits>
 
 /**
  * @brief INFINITE_SEARCH_DEPTH_VALUE
@@ -58,21 +57,21 @@ struct SearchResults
 void search_best_move(SearchResults& searchResults, Board board, int32_t max_depth = INFINITE_DEPTH);
 
 /**
- * @brief search_stop
- * 
- * @note this method is thread safe
- * 
- * stop the search process
- * 
- */
+  * @brief search_stop
+  * 
+  * @note this method is thread safe
+  * 
+  * stop the search process
+  * 
+  */
 void search_stop();
 
 /**
- * @brief is_search_running
- * 
- * @note this method is thread safe
- * 
- * @return True if the search is running (stop is false)
- * 
- */
+   * @brief is_search_running
+   * 
+   * @note this method is thread safe
+   * 
+   * @return True if the search is running (stop is false)
+   * 
+   */
 bool is_search_running();
