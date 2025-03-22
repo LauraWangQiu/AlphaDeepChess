@@ -140,6 +140,7 @@ static int alpha_beta_search(Board& board, int depth, int ply, int alpha, int be
     generate_legal_moves<ALL_MOVES>(moves, board, &isCheck);
     const bool isCheckMate = isCheck && moves.size() == 0;
     const bool isStaleMate = !isCheck && moves.size() == 0;
+    const bool fify_move_rule_draw = board.state().fifty_move_rule_counter() >= 50;
 
     if (isCheckMate) {
         // we substract ply so checkMate in less moves has a higher score
@@ -150,7 +151,7 @@ static int alpha_beta_search(Board& board, int depth, int ply, int alpha, int be
             return MATE_IN_ONE_SCORE - ply;
         }
     }
-    else if (isStaleMate || History::threefold_repetition_detected(zobrist_key)) {
+    else if (isStaleMate || History::threefold_repetition_detected(zobrist_key) || fify_move_rule_draw) {
         return 0;
     }
     else if (depth == 0) {
@@ -236,7 +237,9 @@ static int quiescence_search(Board& board, int ply, int alpha, int beta)
 
     const uint64_t zobrist_key = board.state().get_zobrist_key();
 
-    if (History::threefold_repetition_detected(zobrist_key)) {
+    const bool fify_move_rule_draw = board.state().fifty_move_rule_counter() >= 50;
+
+    if (History::threefold_repetition_detected(zobrist_key) || fify_move_rule_draw) {
         return 0;
     }
 
