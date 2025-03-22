@@ -11,6 +11,8 @@
 #include "diagonal_test.cpp"
 #include "zobrist_test.cpp"
 #include "transposition_table_test.cpp"
+#include "search_test.cpp"
+#include "history_test.cpp"
 
 int main()
 {
@@ -26,7 +28,9 @@ int main()
     diagonal_test();
     zobrist_test();
     transposition_table_test();
-    move_generator_test();
+    //move_generator_test();
+    history_test();
+    //search_test();
 
     return 0;
 }

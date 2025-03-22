@@ -20,6 +20,7 @@ add_executable(testsAlphaDeepChess
     ../src/uci/uci.cpp
     ../src/utilities/perft.cpp
     ../src/utilities/transposition_table.cpp
+    ../src/search/history.cpp
     ../src/move_generator/precomputed_move_data.cpp
 )
 

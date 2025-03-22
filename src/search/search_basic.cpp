@@ -16,6 +16,7 @@
 #include "move_ordering.hpp"
 #include "move_list.hpp"
 #include "search_utils.hpp"
+#include "history.hpp"
 
 /**
  * @brief search_stop
@@ -82,6 +83,8 @@ void iterative_deepening(SearchResults& searchResults, Board& board, int max_dep
 
     const ChessColor side_to_move = board.state().side_to_move();
 
+    History::clear();
+
     for (int depth = 1; depth <= max_depth; depth++) {
 
         context.bestMoveInIteration = Move::null();
@@ -130,6 +133,8 @@ static int alpha_beta_search(Board& board, int depth, int ply, int alpha, int be
     constexpr bool MAXIMIZING_WHITE = searchType == MAXIMIZE_WHITE;
     constexpr bool MINIMIZING_BLACK = searchType == MINIMIZE_BLACK;
 
+    const uint64_t zobrist_key = board.state().get_zobrist_key();
+
     MoveList moves;
     bool isCheck;
     generate_legal_moves<ALL_MOVES>(moves, board, &isCheck);
@@ -145,7 +150,7 @@ static int alpha_beta_search(Board& board, int depth, int ply, int alpha, int be
             return MATE_IN_ONE_SCORE - ply;
         }
     }
-    else if (isStaleMate) {
+    else if (isStaleMate || History::threefold_repetition_detected(zobrist_key)) {
         return 0;
     }
     else if (depth == 0) {
@@ -164,9 +169,11 @@ static int alpha_beta_search(Board& board, int depth, int ply, int alpha, int be
         }
         constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
 
+        History::push_position(zobrist_key);
         board.make_move(moves[i]);
         int eval = alpha_beta_search<nextSearchType>(board, depth - 1, ply + 1, alpha, beta, context);
         board.unmake_move(moves[i], game_state);
+        History::pop_position();
 
         if constexpr (MAXIMIZING_WHITE) {
             if (ply == 0 && eval > context.bestEvalInIteration) {
@@ -227,6 +234,12 @@ static int quiescence_search(Board& board, int ply, int alpha, int beta)
     constexpr bool MAXIMIZING_WHITE = searchType == MAXIMIZE_WHITE;
     constexpr bool MINIMIZING_BLACK = searchType == MINIMIZE_BLACK;
 
+    const uint64_t zobrist_key = board.state().get_zobrist_key();
+
+    if (History::threefold_repetition_detected(zobrist_key)) {
+        return 0;
+    }
+
     int static_evaluation = evaluate_position(board);
 
     if (ply >= MAX_PLY) {
@@ -266,9 +279,11 @@ static int quiescence_search(Board& board, int ply, int alpha, int beta)
 
         constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
 
+        History::push_position(zobrist_key);
         board.make_move(capture_moves[i]);
         int eval = quiescence_search<nextSearchType>(board, ply + 1, alpha, beta);
         board.unmake_move(capture_moves[i], game_state);
+        History::pop_position();
 
         if constexpr (MAXIMIZING_WHITE) {
             final_node_evaluation = std::max(final_node_evaluation, eval);
@@ -299,9 +314,9 @@ static int quiescence_search(Board& board, int ply, int alpha, int beta)
   * stop the search process
   * 
   */
- void search_stop() { searchStop.store(true); }
+void search_stop() { searchStop.store(true); }
 
- /**
+/**
     * @brief is_search_running
     * 
     * @note this method is thread safe
@@ -309,4 +324,4 @@ static int quiescence_search(Board& board, int ply, int alpha, int beta)
     * @return True if the search is running (stop is false)
     * 
     */
- bool is_search_running() { return !searchStop.load(); }
+bool is_search_running() { return !searchStop.load(); }

@@ -47,7 +47,7 @@
 #define OPENING_MATERIAL 40
 #define MIDDLEGAME_MATERIAL 20
 
-int evaluate_legal_moves(const Board& board);
+//int evaluate_legal_moves(const Board& board);
 GamePhase determine_game_phase(const Board& board);
 int evaluate_piece(const Board& board, const GamePhase& game_phase, Piece piece, int row, int col);
 int evaluate_pawn(const Board& board, Piece piece, int pawn_row, int pawn_col, ChessColor color);
@@ -79,10 +79,10 @@ int evaluate_position(const Board& board)
     int evaluation = 0;
 
     // Evaluate legal moves for each side
-    ChessColor side_to_move = board.state().side_to_move();
-    ChessColor opponent = (side_to_move == ChessColor::WHITE) ? ChessColor::BLACK : ChessColor::WHITE;
-    int sign = (side_to_move == ChessColor::WHITE) ? 1 : -1;
-    int sign_opponent = -sign;
+    //ChessColor side_to_move = board.state().side_to_move();
+    //ChessColor opponent = (side_to_move == ChessColor::WHITE) ? ChessColor::BLACK : ChessColor::WHITE;
+    //int sign = (side_to_move == ChessColor::WHITE) ? 1 : -1;
+    //int sign_opponent = -sign;
     //Board board_copy = board;
     //board_copy.set_side_to_move(opponent);
 
@@ -124,11 +124,11 @@ int evaluate_position(const Board& board)
  *  - (+) if position is evaluated as white is better.
  *  - (-) if position is evaluated as black is better.
  */
-int evaluate_legal_moves(const Board& board)
+/*int evaluate_legal_moves(const Board& board)
 {
     // TODO , right know is not worth it calling generate_legal_moves again to calculate mobility
 
-    /*MoveList legal_moves;
+    MoveList legal_moves;
     bool incheck, isMate, isStaleMate;
     generate_legal_moves<ALL_MOVES>(legal_moves, board, &isMate, &isStaleMate);
     if (isMate || isStaleMate) {
@@ -143,10 +143,9 @@ int evaluate_legal_moves(const Board& board)
         }
     }
 
-    return evaluation;*/
-    return 0;
+    return evaluation;
 }
-
+*/
 /** 
  * @brief determine_game_phase
  *

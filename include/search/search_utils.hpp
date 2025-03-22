@@ -49,7 +49,7 @@ constexpr int INMEDIATE_MATE_SCORE = 32000;
 constexpr int MATE_THRESHOLD = INMEDIATE_MATE_SCORE - 1000U;
 
 // max ply to be reached
-constexpr int MAX_PLY = 32;
+constexpr int MAX_PLY = 16;
 
 /**
  * @brief insert_new_result(SearchResults&,int,int,Move)

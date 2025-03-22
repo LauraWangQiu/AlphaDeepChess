@@ -137,8 +137,6 @@ static int alpha_beta_search(Board& board, int depth, int ply, int alpha, int be
 
     const uint64_t zobrist_key = board.state().get_zobrist_key();
 
-    History::insert_position(zobrist_key);
-
     // check transposition table
     if (ply == 0) {
         int eval_tt;
@@ -165,10 +163,7 @@ static int alpha_beta_search(Board& board, int depth, int ply, int alpha, int be
             return MATE_IN_ONE_SCORE - ply;
         }
     }
-    else if (isStaleMate) {
-        return 0;
-    }
-    else if (History::threefold_repetition_detected(zobrist_key)) {
+    else if (isStaleMate || History::threefold_repetition_detected(zobrist_key)) {
         return 0;
     }
     else if (depth == 0) {
@@ -193,10 +188,11 @@ static int alpha_beta_search(Board& board, int depth, int ply, int alpha, int be
 
         constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
 
+        History::push_position(zobrist_key);
         board.make_move(moves[i]);
         int eval = alpha_beta_search<nextSearchType>(board, depth - 1, ply + 1, alpha, beta, context);
         board.unmake_move(moves[i], game_state);
-        History::remove_last_position();
+        History::pop_position();
 
         if constexpr (MAXIMIZING_WHITE) {
 
@@ -243,6 +239,7 @@ static int alpha_beta_search(Board& board, int depth, int ply, int alpha, int be
     if (best_move_for_tt.is_valid()) {
         TranspositionTable::store_entry(zobrist_key, best_eval_for_tt, best_move_for_tt, node_tt, depth);
     }
+
     return final_node_evaluation;
 }
 
@@ -273,8 +270,6 @@ static int quiescence_search(Board& board, int ply, int alpha, int beta)
     constexpr bool MINIMIZING_BLACK = searchType == MINIMIZE_BLACK;
 
     const uint64_t zobrist_key = board.state().get_zobrist_key();
-
-    History::insert_position(zobrist_key);
 
     if (History::threefold_repetition_detected(zobrist_key)) {
         return 0;
@@ -319,11 +314,11 @@ static int quiescence_search(Board& board, int ply, int alpha, int beta)
 
         constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
 
+        History::push_position(zobrist_key);
         board.make_move(capture_moves[i]);
         int eval = quiescence_search<nextSearchType>(board, ply + 1, alpha, beta);
         board.unmake_move(capture_moves[i], game_state);
-
-        History::remove_last_position();
+        History::pop_position();
 
         if constexpr (MAXIMIZING_WHITE) {
             final_node_evaluation = std::max(final_node_evaluation, eval);

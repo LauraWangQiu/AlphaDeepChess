@@ -17,52 +17,58 @@
 class History
 {
 public:
-    static inline void insert_position(uint64_t position_hash)
-    {
-        last_positions[next_position_index] = position_hash;
-        next_position_index = next_position_index < LAST_POSITIONS_SIZE - 1 ? next_position_index + 1 : 0;
-    }
+    /**
+     * @brief push_position(uint64_t)
+     * 
+     * Insert new position in the game history 
+     * 
+     * @param[in] position_hash zobrist hash of the position
+     *   
+     */
+    static void push_position(uint64_t position_hash);
 
-    static inline void remove_last_position()
-    {
-        next_position_index = next_position_index > 0 ? next_position_index - 1 : LAST_POSITIONS_SIZE - 1;
+    /**
+     * @brief pop_position()
+     * 
+     * Remove last inserted position in the game history 
+     *       
+     */
+    static void pop_position();
 
-        last_positions[next_position_index] = 0ULL;
-    }
+    /**
+     * @brief threefold_repetition_detected(uint64_t)
+     * 
+     * @return True if lthe position is repeated three times in the history
+     *       
+     */
+    static bool threefold_repetition_detected(uint64_t position_hash);
 
-    static inline bool threefold_repetition_detected(uint64_t position_hash)
-    {
-        int repetitions = 0;
-        for (uint64_t position : last_positions) {
-            if (position == position_hash) {
-                repetitions++;
-            }
-        }
+    /**
+     * @brief clear()
+     * 
+     * remove all position in the history
+     *       
+     */
+    static void clear();
 
-        return repetitions >= 3;
-    }
-
-    static inline void clear()
-    {
-        for (int i = 0; i < LAST_POSITIONS_SIZE; i++) {
-            last_positions[i] = 0ULL;
-        }
-        next_position_index = 0;
-    }
+    /**
+     * @brief MAX_SIZE()
+     * 
+     * @return HISTORY_MAX_SIZE
+     *       
+     */
+    static constexpr int MAX_SIZE() { return HISTORY_MAX_SIZE; }
 
     History() = delete;
     ~History() = delete;
 
 private:
-    // max number of positions in the array
-    static constexpr int LAST_POSITIONS_SIZE = 10;
+    // max number of positions in the array (must be power of two)
+    static constexpr int HISTORY_MAX_SIZE = 8;
 
     // position array circular index
     static int next_position_index;
 
     // circular array with the hash of the last positions
-    static uint64_t last_positions[LAST_POSITIONS_SIZE];
+    static uint64_t last_positions[HISTORY_MAX_SIZE];
 };
-
-int History::next_position_index = 0;
-uint64_t History::last_positions[History::LAST_POSITIONS_SIZE] = {0};
