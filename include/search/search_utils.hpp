@@ -37,6 +37,11 @@ struct SearchContext
     int bestEvalInIteration;
     Move bestMoveFound;
     Move bestMoveInIteration;
+    Board& board;
+
+    SearchContext(Board& board)
+        : bestEvalFound(0), bestEvalInIteration(0), bestMoveFound(), bestMoveInIteration(), board(board)
+    { }
 };
 
 // infinite evaluation score
@@ -49,7 +54,7 @@ constexpr int INMEDIATE_MATE_SCORE = 32000;
 constexpr int MATE_THRESHOLD = INMEDIATE_MATE_SCORE - 1000U;
 
 // max ply to be reached
-constexpr int MAX_PLY = 16;
+constexpr int MAX_PLY = 32;
 
 /**
  * @brief insert_new_result(SearchResults&,int,int,Move)
@@ -64,13 +69,13 @@ constexpr int MAX_PLY = 16;
  * @param[in] move best move result
  * 
  */
-inline void insert_new_result(SearchResults& searchResults, int depth, int evaluation, Move move)
+inline void insert_new_result(SearchResults& results, int depth, int evaluation, Move move)
 {
-    assert(searchResults.depthReached < INFINITE_DEPTH);
-    searchResults.results[searchResults.depthReached].depth = depth;
-    searchResults.results[searchResults.depthReached].evaluation = evaluation;
-    searchResults.results[searchResults.depthReached].bestMove_data = move.raw_data();
-    searchResults.depthReached++;
+    assert(results.depthReached < INF_DEPTH);
+    results.results[results.depthReached].depth = depth;
+    results.results[results.depthReached].evaluation = evaluation;
+    results.results[results.depthReached].bestMove_data = move.raw_data();
+    results.depthReached++;
 
-    searchResults.data_available_cv.notify_one();
+    results.data_available_cv.notify_one();
 }

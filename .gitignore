@@ -5,6 +5,7 @@
 
 *.data*
 *.pgn 
+config.json
 
 # User-specific filess
 *.rsuser

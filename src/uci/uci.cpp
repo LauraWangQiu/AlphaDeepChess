@@ -159,7 +159,7 @@ void Uci::new_game_command_action() { board.load_fen(StartFEN); }
  */
 void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
 {
-    uint32_t depth = INFINITE_DEPTH;
+    uint32_t depth = INF_DEPTH;
     uint32_t movetime = 0;
 
     // Parse the command line arguments
@@ -192,7 +192,7 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
             }
         }
         else if (tokens[i] == "infinite") {
-            depth = INFINITE_DEPTH;
+            depth = INF_DEPTH;
         }
         else if (tokens[i] == "perft") {
             try {
@@ -217,13 +217,14 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
     // stop and wait for previous search to end
     stop_command_action();
 
+
     // Launch a new thread to search for the best move
-    searchThread = std::thread([this, depth]() { search_best_move(searchResults, board, depth); });
+    searchThread = std::thread([this, depth]() { search(stop_signal, searchResults, board, depth); });
 
     readerThread = std::thread([this]() {
         int depthReaded = 0;
 
-        while (is_search_running() || (depthReaded < searchResults.depthReached)) {
+        while (!stop_signal || (depthReaded < searchResults.depthReached)) {
 
             while (depthReaded < searchResults.depthReached) {
                 const SearchResult& result = searchResults.results[depthReaded++];
@@ -235,7 +236,7 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
             {
                 std::unique_lock<std::mutex> lock(searchResults.mtx_data_available_cv);
 
-                if (is_search_running() && depthReaded >= searchResults.depthReached) {
+                if (!stop_signal && depthReaded >= searchResults.depthReached) {
                     // thread goes to sleep until more data is available or search stop
                     searchResults.data_available_cv.wait(lock);
                 }
@@ -243,16 +244,18 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
         }
 
         std::cout << "bestmove " << Move(searchResults.results[depthReaded - 1].bestMove_data).to_string() << std::endl;
+        searchResults.depthReached = 0;   // reset depthReached when we consume all data
     });
 
     if (movetime != 0) {
         timerThread = std::thread([this, movetime]() {
             std::unique_lock<std::mutex> lock(timerMutex);
             // Wait for n milliseconds or until search_stopped becomes true
-            if (!timerCv.wait_for(lock, std::chrono::milliseconds(movetime), [] { return !is_search_running(); })) {
+            if (!timerCv.wait_for(lock, std::chrono::milliseconds(movetime),
+                                  [this] { return this->stop_signal.load(); })) {
                 // Timeout occurred and search_stopped is still false
                 lock.unlock();   // Unlock before calling stop_search()
-                search_stop();
+                stop_signal.store(true);
             }
         });
     }
@@ -266,7 +269,7 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
  */
 void Uci::stop_command_action()
 {
-    search_stop();
+    stop_signal.store(true);
 
     timerCv.notify_one();
 
@@ -281,6 +284,7 @@ void Uci::stop_command_action()
     if (timerThread.joinable()) {
         timerThread.join();
     }
+    stop_signal.store(false);
 }
 
 /**
@@ -402,6 +406,8 @@ void Uci::help_command_action() const
                  "\t\tExamples:  e2e4, e7e5, e1g1 (white short castling), e7e8q (for promotion)\n\n"
 
                  "go [depth <depth> | infinite | perft <perft_depth>]\n"
+                 "[wtime <ms>] [btime <ms>] [winc <ms>] [binc <ms>] [movetime <ms>]\n"
+                 "[nodes <x>] [mate <x>] [movestogo <x>]\n"
                  "\tStart calculating the best move until the specified depth.\n"
                  "\tIn order to finish search use stop command, \n\n"
 

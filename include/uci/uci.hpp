@@ -14,7 +14,7 @@
 
 #include "board.hpp"
 #include "search.hpp"
-
+#include <atomic>
 #include <array>
 #include <string>
 #include <thread>
@@ -55,10 +55,10 @@ public:
      */
     ~Uci()
     {
-        search_stop();
+        stop_signal.store(true);
         if (searchThread.joinable()) searchThread.join();
         if (readerThread.joinable()) readerThread.join();
-        if (timerThread.joinable()) readerThread.join();
+        if (timerThread.joinable()) timerThread.join();
     }
 
     /**
@@ -71,7 +71,17 @@ public:
 
 private:
     /**
-     * @brief board
+     * @brief stop_signal
+     * 
+     * @note thread safe
+     * 
+     * stop search signal
+     * 
+     */
+    std::atomic<bool> stop_signal;
+
+    /**
+     * @brief board 
      * 
      * board with the chess position.
      * 
