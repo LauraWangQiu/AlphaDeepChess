@@ -5,6 +5,8 @@ import requests
 import tarfile
 import zipfile
 
+default_comparator_dir = "enginesComparator"
+
 def download_file(url, dest):
     response = requests.get(url, stream=True)
     with open(dest, 'wb') as file:
@@ -31,11 +33,11 @@ def main():
         cutechess_file = "cutechess-cli-1.3.1-linux64.tar.gz"
     elif is_macos:
         subprocess.run(["brew", "install", "qt"])
-        os.makedirs("enginesComparator/cutechess", exist_ok=True)
-        subprocess.run(["git", "clone", "https://github.com/cutechess/cutechess.git", "enginesComparator/cutechess"])
-        os.makedirs("enginesComparator/cutechess/build", exist_ok=True)
-        subprocess.run(["cmake", ".."], cwd="enginesComparator/cutechess/build")
-        subprocess.run(["make"], cwd="enginesComparator/cutechess/build")
+        os.makedirs(f"{default_comparator_dir}/cutechess", exist_ok=True)
+        subprocess.run(["git", "clone", "https://github.com/cutechess/cutechess.git", f"{default_comparator_dir}/cutechess"])
+        os.makedirs(f"{default_comparator_dir}/cutechess/build", exist_ok=True)
+        subprocess.run(["cmake", ".."], cwd=f"{default_comparator_dir}/cutechess/build")
+        subprocess.run(["make"], cwd=f"{default_comparator_dir}/cutechess/build")
     else:
         print("Unsupported OS.")
         return
@@ -46,9 +48,9 @@ def main():
         download_file(cutechess_url, cutechess_file)
 
         if cutechess_file.endswith(".zip"):
-            extract_zip(cutechess_file, "enginesComparator/cutechess")
+            extract_zip(cutechess_file, f"{default_comparator_dir}/cutechess")
         elif cutechess_file.endswith(".tar.gz"):
-            extract_tar(cutechess_file, "enginesComparator/cutechess")
+            extract_tar(cutechess_file, f"{default_comparator_dir}/cutechess")
 
         os.remove(cutechess_file)
         print("CuteChess 1.3.1 is ready to use.")
@@ -65,10 +67,11 @@ def main():
     download_file(stockfish_url, stockfish_file)
 
     if stockfish_file.endswith(".zip"):
-        extract_zip(stockfish_file, "enginesComparator/stockfish")
+        extract_zip(stockfish_file, f"{default_comparator_dir}/stockfish")
     elif stockfish_file.endswith(".tar"):
-        subprocess.run(["tar", "--use-compress-program=unzstd", "-xf", stockfish_file, "-C", "enginesComparator/stockfish"])
-
+        os.makedirs(f"{default_comparator_dir}/stockfish", exist_ok=True)
+        subprocess.run(["tar", "-xf", stockfish_file, "-C", f"{default_comparator_dir}/stockfish"])
+        
     os.remove(stockfish_file)
     print("Stockfish 17 is ready to use.")
 

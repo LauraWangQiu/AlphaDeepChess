@@ -1,0 +1,34 @@
+name: Manual Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Run setup script
+      run: |
+        chmod +x setup_linux.sh
+        ./setup_linux.sh
+
+    - name: Run setupComparator.py
+      run: python setupComparator.py
+
+    - name: Run tests
+      run: python tests.py
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: engines-comparator-artifacts
+        path: enginesComparator/test*.*
