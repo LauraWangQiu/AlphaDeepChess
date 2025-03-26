@@ -125,7 +125,7 @@ There should be a new directory called `enginesComparator` with the `cutechess` 
 To compare the engines, we will use the `cutechess-cli` tool. We will run a match between `stockfish` and our engine. To do so, we will use the `compareEngines.py`.
 
 ```bash
-python .\compareEngines.py -buildType [Debug (default=Release)] -games [num_games (default=10)] -tc [time_control (default=INF)] -st [search_time (default=INF)] -timemargin [time_margin (default=500ms)] -depth [depth (default=INF)] -concurrency [concurrency (default=0)]
+python .\compareEngines.py -buildType [debug (default=release)] -games [num_games (default=10)] -tc [time_control (default=INF)] -st [search_time (default=INF)] -timemargin [time_margin (default=500ms)] -depth [depth (default=INF)] -concurrency [concurrency (default=0)]
 ```
 
 ### Tests

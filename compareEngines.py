@@ -107,7 +107,7 @@ if __name__ == "__main__":
     parser.add_argument("-pgn", type=str, default="results.pgn", help="PGN file path")
     parser.add_argument("-epd", type=str, default="results.epd", help="EPD file path")
     parser.add_argument("-log", type=str, default="results.log", help="Log file")
-    parser.add_argument("-buildType", type=str, default="Release", help="Build type")
+    parser.add_argument("-buildType", type=str, default="release", help="Build type")
     parser.add_argument("-games", type=int, default=10, help="Number of games")
     parser.add_argument("-tc", type=str, help="Time control")
     parser.add_argument("-st", type=int, help="Search time")
