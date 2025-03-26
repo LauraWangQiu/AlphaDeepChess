@@ -11,6 +11,7 @@
 #include "move_list.hpp"
 #include "move_generator.hpp"
 #include "precomputed_data.hpp"
+#include "bit_utilities.hpp"
 
 #define MATE_VALUE -10000
 
@@ -92,14 +93,13 @@ int evaluate_position(const Board& board)
     // Evaluate game phase
     GamePhase game_phase = determine_game_phase(board);
 
-    // Evaluate pieces
-    for (int i = 0; i < 64; i++) {
-        int row = i / 8;
-        int col = i % 8;
-        Piece piece = board.get_piece(i);
-        if (piece != Piece::EMPTY) {
-            evaluation += evaluate_piece(board, game_phase, piece, row, col);
-        }
+    uint64_t pieces = board.get_bitboard_all();
+    while (pieces) {
+
+        const Square square(pop_lsb(pieces));
+        const Piece piece = board.get_piece(square);
+
+        evaluation += evaluate_piece(board, game_phase, piece, int(square.row()), int(square.col()));
     }
 
     // TODO: Draw Evaluation (Insufficient material)
@@ -203,7 +203,6 @@ int evaluate_piece(const Board& board, const GamePhase& game_phase, Piece piece,
     int evaluation = 0;
     PieceType type = piece_to_pieceType(piece);
     ChessColor color = get_color(piece);
-    int sign = (color == ChessColor::WHITE) ? 1 : -1;
 
     // Further evaluation based on piece type
     // https://www.chessprogramming.org/Evaluation_of_Pieces
@@ -217,7 +216,7 @@ int evaluate_piece(const Board& board, const GamePhase& game_phase, Piece piece,
     default: break;
     }
 
-    return evaluation * sign;
+    return color == ChessColor::WHITE ? evaluation : -evaluation;
 }
 
 /** 
