@@ -28,7 +28,7 @@ jobs:
       run: python tests.py
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: engines-comparator-artifacts
         path: enginesComparator/test*.*
