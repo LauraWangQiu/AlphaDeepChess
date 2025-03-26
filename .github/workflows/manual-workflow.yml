@@ -30,6 +30,12 @@ jobs:
       run: |
         chmod +x setup_linux.sh
         ./setup_linux.sh
+      
+    - name: Build project in release mode
+      run: |
+        cd build/release
+        make
+        cd ../..
 
     - name: Run setupComparator.py
       run: python setupComparator.py
@@ -40,10 +46,5 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: all-project-artifacts
-        path: |
-          build/
-          enginesComparator/
-          **
-        # name: engines-comparator-artifacts
-        # path: enginesComparator/test*.*
+        name: engines-comparator-artifacts
+        path: enginesComparator/test*.*
