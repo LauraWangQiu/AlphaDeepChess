@@ -162,10 +162,10 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
 
     if (isCheckMate) {
         // we substract ply so checkMate in less moves has a higher score
-        if constexpr (MAXIMIZE_WHITE) {
+        if constexpr (MAXIMIZING_WHITE) {
             return -(MATE_IN_ONE_SCORE - ply);
         }
-        else if constexpr (MINIMIZE_BLACK) {
+        else if constexpr (MINIMIZING_BLACK) {
             return MATE_IN_ONE_SCORE - ply;
         }
     }
