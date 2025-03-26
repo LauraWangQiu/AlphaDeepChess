@@ -1,31 +1,79 @@
-\chapter{Descripción del Trabajo}
+\chapter{Work description}
 \label{cap:descripcionTrabajo}
 
-Aquí comienza la descripción del trabajo realizado. Se deben incluir tantos capítulos como sea necesario para describir de la manera más completa posible el trabajo que se ha llevado a cabo. Como muestra la figura \ref{fig:sampleImage}, está todo por hacer.
+%Aquí comienza la descripción del trabajo realizado. Se deben incluir tantos capítulos como sea necesario para describir de la manera más completa posible el trabajo que se ha llevado a cabo. Como muestra la figura \ref{fig:sampleImage}, está todo por hacer.
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[width = 0.5\textwidth]{Imagenes/Vectorial/Todo.pdf}
-	\caption{Ejemplo de imagen}
-	\label{fig:sampleImage}
-\end{figure}
+%\begin{figure}[h]
+%	\centering
+%	\includegraphics[width = 0.5\textwidth]{Imagenes/Vectorial/Todo.pdf}
+%	\caption{Ejemplo de imagen}
+%	\label{fig:sampleImage}
+%\end{figure}
 
-Si te sirve de utilidad,  puedes incluir tablas para mostrar resultados, tal como se ve en la tabla \ref{tab:sampleTable}.
+%Si te sirve de utilidad,  puedes incluir tablas para mostrar resultados, tal como se ve en la tabla \ref{tab:sampleTable}.
 
 
-\begin{table}
-	\centering
-	\begin{tabular}{c|c|c}
-		\textbf{Col 1} & \textbf{Col 2} & \textbf{Col 3} \\
-		\hline\hline
-		3 & 3.01 & 3.50\\
-		6 & 2.12 & 4.40\\
-		1 & 3.79 & 5.00\\
-		2 & 4.88 & 5.30\\
-		4 & 3.50 & 2.90\\
-		5 & 7.40 & 4.70\\
-		\hline
-	\end{tabular}
-	\caption{Tabla de ejemplo}
-	\label{tab:sampleTable}
-\end{table}
+%\begin{table}
+%	\centering
+%	\begin{tabular}{c|c|c}
+%		\textbf{Col 1} & \textbf{Col 2} & \textbf{Col 3} \\
+%		\hline\hline
+%		3 & 3.01 & 3.50\\
+%		6 & 2.12 & 4.40\\
+%		1 & 3.79 & 5.00\\
+%		2 & 4.88 & 5.30\\
+%		4 & 3.50 & 2.90\\
+%		5 & 7.40 & 4.70\\
+%		\hline
+%	\end{tabular}
+%	\caption{Tabla de ejemplo}
+%	\label{tab:sampleTable}
+%\end{table}
+
+\section{Where to begin?}
+
+Explain how is organised the different modules of the code and what is UCI in order to help the current reader to recreate a mental map of how to use it.
+
+\section{Basic concepts}
+
+Introduction to the basic concepts of chess.
+
+\subsection{Chess board}
+
+\subsection{Chess pieces}
+
+\subsection{Movement of the pieces}
+
+\subsection{Rules}
+
+White starts first, possible results (win, draw or lose), 30 moves rule, zugzwang?, check, checkmate, ...
+
+\section{Modules}
+
+\subsection{Board}
+
+\subsection{Move generator}
+
+\subsection{Move ordering}
+
+\subsection{Evaluation}
+
+\subsection{Search}
+
+\section{Code implementation}
+
+\subsection{Data representation}
+
+Use of uint64\_t as bitboards to store the board information and other code structures and classes justifying why is efficient.
+
+\subsection{Initialized memory}
+
+Some tables are memory initialized instead of computed, explain it.
+
+\section{Other}
+
+\subsection{Board visualizer using Python}
+
+\subsection{Comparation using Cutechess and Stockfish engine}
+
+\subsection{Profiling}
