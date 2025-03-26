@@ -40,5 +40,10 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: engines-comparator-artifacts
-        path: enginesComparator/test*.*
+        name: all-project-artifacts
+        path: |
+          build/
+          enginesComparator/
+          **
+        # name: engines-comparator-artifacts
+        # path: enginesComparator/test*.*
