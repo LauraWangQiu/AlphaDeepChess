@@ -1,8 +1,8 @@
 /**
- * @file search_basic.cpp
+ * @file search_transposition_table.cpp
  * @brief search services.
  *
- * chess search basic implementation. 
+ * chess search with transposition table implementation. 
  * 
  * https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
  * https://www.chessprogramming.org/Alpha-Beta
