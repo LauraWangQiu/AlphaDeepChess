@@ -107,7 +107,7 @@ To compare engines, we will use the `cutechess` tool. This tool allows us to run
 In an automated way, we created a script to download `cutechess` and `stockfish` portable version. To run it:
 
 ```bash
-py .\setupComparator.py
+python .\setupComparator.py
 ```
 
 There should be a new directory called `enginesComparator` with the `cutechess` and `stockfish` portable version.
@@ -118,14 +118,22 @@ There should be a new directory called `enginesComparator` with the `cutechess` 
 |   |-- cutechess-cli
 |   |-- ...
 |-- /stockfish
-|   |-- stockfish_X_x86_64
-|   |-- ...
-```
+|   |-- /stockfish
+|       |-- stockfish_X_x86_64
+|       |-- ...```
 
 To compare the engines, we will use the `cutechess-cli` tool. We will run a match between `stockfish` and our engine. To do so, we will use the `compareEngines.py`.
 
 ```bash
-py .\compareEngines.py -buildType [Debug (default=Release)] -games [num_games (default=10)] -tc [time_control (default=INF)] -st [search_time (default=INF)] -timemargin [time_margin (default=500ms)] -depth [depth (default=INF)] -concurrency [concurrency (default=0)]
+python .\compareEngines.py -buildType [debug (default=release)] -games [num_games (default=10)] -tc [time_control (default=INF)] -st [search_time (default=INF)] -timemargin [time_margin (default=500ms)] -depth [depth (default=INF)] -concurrency [concurrency (default=0)]
+```
+
+### Tests
+
+To run the tests, we will use the `cutechess-cli` tool. We will run a match between `stockfish` and our engine. To do so, we will use the `tests.py`.
+
+```bash
+python .\tests.py
 ```
 
 ## Doxygen Commenting Guidelines

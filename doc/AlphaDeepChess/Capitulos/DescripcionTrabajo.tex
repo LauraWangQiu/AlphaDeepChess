@@ -32,23 +32,83 @@
 
 \section{Where to begin?}
 
-Explain how is organised the different modules of the code and what is UCI in order to help the current reader to recreate a mental map of how to use it.
+Let's start from the beginning. What is chess? Chess is a board game where two players who take white pieces and black pieces respectively compete to first checkmate\footnote{\url{https://en.wikipedia.org/wiki/Checkmate}} the opponent.
+
+What about a chess engine? A chess engine consists of a software program that analyzes chess positions and returns optimal moves depending on its configuration. In order to help users to use these engines, chess community agreed on creating an open communication protocol called \textbf{Universal Chess Interface} or commonly referred to as UCI, that provides the interaction with chess engines through user interfaces.
+
+In the following section \ref{sec:basicConcepts}, we will talk about the basic concepts of chess, but if you already have the knowledge we recommend you to advance directly to the section \ref{sec:modules}.
 
 \section{Basic concepts}
+\label{sec:basicConcepts}
 
-Introduction to the basic concepts of chess.
+Chess is a game of strategy that takes place on a chessboard with specific rules governing the movement and interaction of the pieces. This section introduces the fundamental concepts necessary to understand how chess is played.
 
-\subsection{Chess board}
+\subsection{Chessboard}
+
+A chessboard is a game board of 64 squares, 8 rows by 8 columns. To refer to each of the squares we mostly use \textbf{algebraic notation\footnote{\url{https://en.wikipedia.org/wiki/Algebraic_notation_(chess)}}} using the numbers from 1 to 8 and the letters from ``a'' to ``h''. There are also other notations like descriptive notation\footnote{\url{https://en.wikipedia.org/wiki/Descriptive_notation}} which is obsolete or ICCF numeric notation\footnote{\url{https://en.wikipedia.org/wiki/ICCF_numeric_notation}} due to chess pieces have different abbreviations depending on language.
+
+\begin{figure}[H] % H para que la figura se coloque exactamente en la posición donde esté definida (del paquete float)
+    \centering
+    \newchessgame
+    \chessboard[setpieces={},showmover=false]
+    \caption{Empty chessboard.}
+    \label{fig:chessboard}
+\end{figure}
+
+For example, \textbf{g5} refers to the following square:
+
+\begin{figure}[H]
+    \centering
+    \newchessgame % Crear un nuevo tablero vacío
+    \chessboard[
+      setpieces={}, % No piezas en el tablero
+      showmover=false,
+      markstyle=circle, color=red, markfield=g5, % Marcar g5 con un círculo rojo
+      pgfstyle=straightmove, color=blue, % Estilo de flechas rectas y azules
+      markmoves={g1-g5, a5-g5}, % Flechas desde g1 → g5 y a5 → g5
+      arrow=to % Flechas con punta
+    ]
+    \caption{Example: square \textbf{g5} highlighted and arrows pointing to it.}
+\end{figure}
+
+It is important to know that when placing a chessboard in the correct orientation, there should always be a \textbf{white square in the bottom-right corner} or a \textbf{black square in the bottom-left corner}.
 
 \subsection{Chess pieces}
 
+There are 6 types of chess pieces: king, queen, rook, bishop, knight and pawn, and each side has 16 pieces:
+
+\begin{itemize}
+  \item 1 king \WhiteKingOnWhite \BlackKingOnWhite
+  \item 1 queen \WhiteQueenOnWhite \BlackQueenOnWhite
+  \item 2 rooks  \WhiteRookOnWhite \WhiteRookOnWhite \BlackRookOnWhite \BlackRookOnWhite
+  \item 2 bishops \WhiteBishopOnWhite \WhiteBishopOnWhite \BlackBishopOnWhite \BlackBishopOnWhite
+  \item 2 knights \WhiteKnightOnWhite \WhiteKnightOnWhite \BlackKnightOnWhite \BlackKnightOnWhite
+  \item 8 pawns \WhitePawnOnWhite \WhitePawnOnWhite \WhitePawnOnWhite \WhitePawnOnWhite  \WhitePawnOnWhite \WhitePawnOnWhite \WhitePawnOnWhite \WhitePawnOnWhite  \BlackPawnOnWhite \BlackPawnOnWhite \BlackPawnOnWhite \BlackPawnOnWhite \BlackPawnOnWhite \BlackPawnOnWhite \BlackPawnOnWhite \BlackPawnOnWhite
+\end{itemize}
+
+The starting position of the chess pieces on a chessboard is the following:
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[showmover=false]
+    \caption{Starting position.}
+    \label{fig:start-pos}
+\end{figure}
+
+If we take a closer look to the order of positioning of each piece, we should consider that queen and king are placed in the center columns. The queen must be placed on a square of their color and the king is placed on the remaining central column. The rest of the pieces are placed symmetrically as seen in Figure \ref{fig:start-pos}.
+
 \subsection{Movement of the pieces}
+\label{sec:movement-pieces}
+
+\subsection{Notation}
 
 \subsection{Rules}
 
 White starts first, possible results (win, draw or lose), 30 moves rule, zugzwang?, check, checkmate, ...
 
 \section{Modules}
+\label{sec:modules}
 
 \subsection{Board}
 
