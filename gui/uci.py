@@ -45,18 +45,18 @@ class Uci:
         self.send_command("uci")
         self.wait_for("uciok")
 
-    def set_fen(self, fen: str) -> None:
-        """Sets a board position from a FEN string."""
-        self.send_command(f"position fen {fen}")
+    def set_position(self, fen_and_moves: str) -> None:
+        """Sets a board position from an string with this format : fen moves move1 move2 ..."""
+        self.send_command(f"position fen {fen_and_moves}")
         self.send_command("isready")
         self.wait_for("readyok")
 
-    def start_search(self, fen: str) -> None:
+    def start_search(self, fen_and_moves: str) -> None:
         """Starts the infinite search."""
         if self.searching:
             self.stop_search()
         self.latest_info = (0, 0, None)
-        self.set_fen(fen)
+        self.set_position(fen_and_moves)
         self.send_command("go")
         self.searching = True
 

@@ -10,7 +10,7 @@
  */
 
 #include "uci.hpp"
-
+#include "history.hpp"
 #include "evaluation.hpp"
 #include "move_generator.hpp"
 #include "perft.hpp"
@@ -149,7 +149,12 @@ void Uci::is_ready_command_action() const { std::cout << "readyok" << std::endl;
  * Uci main loop.
  * 
  */
-void Uci::new_game_command_action() { board.load_fen(StartFEN); }
+void Uci::new_game_command_action()
+{
+    board.load_fen(StartFEN);
+    History::clear();
+    History::push_position(board.state().get_zobrist_key());
+}
 
 /**
  * @brief go_command_action
@@ -324,6 +329,8 @@ bool Uci::position_command_action(const TokenArray& tokens, uint32_t num_tokens)
 
     if (tokens[token_i] == "startpos") {
         board.load_fen(StartFEN);
+        History::clear();
+        History::push_position(board.state().get_zobrist_key());
         token_i++;
     }
     else if (tokens[token_i] == "actualpos") {
@@ -348,6 +355,8 @@ bool Uci::position_command_action(const TokenArray& tokens, uint32_t num_tokens)
         fen.pop_back();   // remove last " "
 
         board.load_fen(fen);
+        History::clear();
+        History::push_position(board.state().get_zobrist_key());
     }
     else {
         return false;
@@ -363,6 +372,7 @@ bool Uci::position_command_action(const TokenArray& tokens, uint32_t num_tokens)
                 return false;
             }
             board.make_move(move);
+            History::push_position(board.state().get_zobrist_key());
         }
     }
 

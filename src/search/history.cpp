@@ -11,7 +11,36 @@
 int History::next_position_index = 0;
 
 // circular array with the hash of the last positions
-uint64_t History::last_positions[HISTORY_MAX_SIZE] = {0ULL};
+uint64_t History::positions[HISTORY_MAX_SIZE] = {0ULL};
+
+/**
+  * @brief move index forward
+  * 
+  * @param[in] index index to increment
+  * @param[in] increment number of times to move forward the index
+  * @param[in] MAX_INDEX max index value, must be power of two
+  * 
+  * @return (index + increment) % MAX_INDEX
+  */
+static inline int index_forward(int index, int increment, int MAX_INDEX)
+{
+    assert((MAX_INDEX & (MAX_INDEX - 1)) == 0);   // MAX_INDEX must be power of two
+    return (index + increment) & (MAX_INDEX - 1);
+}
+
+/**
+  * @brief move index backwards
+  * 
+  * @param[in] index index to decrement
+  * @param[in] decrement number of times to move backwards the index
+  * @param[in] MAX_INDEX max index value, must be power of two
+  * 
+  * @return (index - increment) % MAX_INDEX
+  */
+static inline int index_backwards(int index, int decrement, int MAX_INDEX)
+{
+    return (index - decrement) & (MAX_INDEX - 1);
+}
 
 /**
   * @brief push_position(uint64_t)
@@ -23,9 +52,8 @@ uint64_t History::last_positions[HISTORY_MAX_SIZE] = {0ULL};
   */
 void History::push_position(uint64_t position_hash)
 {
-    last_positions[next_position_index] = position_hash;
-    // update index : (next_position_index + 1) % HISTORY_MAX_SIZE
-    next_position_index = (next_position_index + 1) & (HISTORY_MAX_SIZE - 1);
+    positions[next_position_index] = position_hash;
+    next_position_index = index_forward(next_position_index, 1, HISTORY_MAX_SIZE);
 }
 
 /**
@@ -36,29 +64,40 @@ void History::push_position(uint64_t position_hash)
  */
 void History::pop_position()
 {
-    // update index : (next_position_index - 1) % HISTORY_MAX_SIZE
-    next_position_index = (next_position_index + HISTORY_MAX_SIZE - 1) & (HISTORY_MAX_SIZE - 1);
-    last_positions[next_position_index] = 0ULL;
+    next_position_index = index_backwards(next_position_index, 1, HISTORY_MAX_SIZE);
+    positions[next_position_index] = 0ULL;
 }
 
 /**
- * @brief threefold_repetition_detected(uint64_t)
+ * @brief calculate if threefold repetition has happened in the history of positions
  * 
- * @note we consider repetition with 2 instead of 3 reps for performance reasons
- * @return True if the position is repeated two times in the history
- *       
+ * 
+ * @param[in] fify_move_rule_counter also called halfmove clock, it indicates The number of
+ *   irreversible moves made before the current position. Serves both in the early return condition
+ *   and limits how far up the stack one must look for a potential match.
+ * 
+ * @return bool
+ * @retval True if repetition found
+ * @retval False if repetition not found
+ * 
  */
-bool History::threefold_repetition_detected(uint64_t position_hash)
+bool History::threefold_repetition_detected(uint8_t fify_move_rule_counter)
 {
-    assert(position_hash != 0ULL);
+    if (fify_move_rule_counter < 4) {
+        return false;   // imposible to have triple repetition if halfmove clock < 4
+    }
+    const int last_index = index_backwards(next_position_index, 1, HISTORY_MAX_SIZE);
 
-    int repetitions = 0;
-    for (uint64_t position : last_positions) {
-        if (position == position_hash) {
-            if (++repetitions >= 2) return true;
+    uint64_t last_pos_hash = positions[last_index];
+
+    assert(last_pos_hash != 0ULL);
+
+    for (int decrement = 4; decrement <= fify_move_rule_counter; decrement += 2) {
+        int index = index_backwards(last_index, decrement, HISTORY_MAX_SIZE);
+        if (last_pos_hash == positions[index]) {
+            return true;   // we found a repetition
         }
     }
-
     return false;
 }
 
@@ -71,7 +110,7 @@ bool History::threefold_repetition_detected(uint64_t position_hash)
 void History::clear()
 {
     for (int i = 0; i < HISTORY_MAX_SIZE; i++) {
-        last_positions[i] = 0ULL;
+        positions[i] = 0ULL;
     }
     next_position_index = 0;
 }

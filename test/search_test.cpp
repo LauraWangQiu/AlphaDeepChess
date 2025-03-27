@@ -72,6 +72,8 @@ static int minimax(Board& board, int depth, int ply, Move& best_global_move, int
     generate_legal_moves<ALL_MOVES>(moves, board, &isCheck);
     const bool isCheckMate = isCheck && moves.size() == 0;
     const bool isStaleMate = !isCheck && moves.size() == 0;
+    const uint8_t fifty_move_rule_counter = board.state().fifty_move_rule_counter();
+    const bool fify_move_rule_draw = fifty_move_rule_counter >= 100U;
 
     if (isCheckMate) {
         // we substract ply so checkMate in less moves has a higher score
@@ -82,7 +84,7 @@ static int minimax(Board& board, int depth, int ply, Move& best_global_move, int
             return MATE_IN_ONE_SCORE - ply;
         }
     }
-    else if (isStaleMate || History::threefold_repetition_detected(zobrist_key)) {
+    else if (isStaleMate || History::threefold_repetition_detected(fifty_move_rule_counter) || fify_move_rule_draw) {
         return 0;
     }
 
@@ -134,7 +136,10 @@ static int quiescence_minimax(Board& board, int ply, Move& best_global_move, int
 
     const uint64_t zobrist_key = board.state().get_zobrist_key();
 
-    if (History::threefold_repetition_detected(zobrist_key)) {
+    const uint8_t fifty_move_rule_counter = board.state().fifty_move_rule_counter();
+    const bool fify_move_rule_draw = fifty_move_rule_counter >= 100U;
+
+    if (History::threefold_repetition_detected(fifty_move_rule_counter) || fify_move_rule_draw) {
         return 0;
     }
 

@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 import chess
 from enum import Enum, auto
 from collections import defaultdict
+from gui.history import History
 
 class ChessBoard:
     class State(Enum):
@@ -22,6 +23,7 @@ class ChessBoard:
     ENGINE_MOVE_SQUARE_COLOR = "#ADD8E6"
     PROMOTION_SELECTOR_SQUARE_COLOR = "#808080"
 
+    history:History = History()
 
     def __init__(self, window, size : int):
         
@@ -102,7 +104,11 @@ class ChessBoard:
     
     def get_fen(self) -> str:
         return self.board.fen()
-
+    
+    def get_fen_and_moves(self) -> str:
+        '''Return a string with the format: first_pos moves move1 move2 move3 ...'''
+        return self.history.get_fen_and_moves()
+    
     def set_fen(self, fen: str) -> bool:
         '''set fen if fen is valid return true if fen is valid'''
 
@@ -114,6 +120,7 @@ class ChessBoard:
             self.promotion_rook_selector_square = None
             self.promotion_bishop_selector_square = None
             self.board = chess.Board(fen)
+            self.history.new_position(fen)
             self.update_legal_moves()
             self.draw()
             return True
@@ -193,6 +200,7 @@ class ChessBoard:
             self.last_move = move
             self.engine_move = None
             self.draw()
+            self.history.push_move(move.uci())
             self.eventManager.chessBoardMakeMove(self.get_fen())
         
             

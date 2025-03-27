@@ -22,7 +22,7 @@ static void history_repetition_test()
     History::push_position(1ULL);
     History::push_position(1ULL);
 
-    if (History::threefold_repetition_detected(1ULL) == false) {
+    if (History::threefold_repetition_detected(40U) == false) {
         PRINT_TEST_FAILED(test_name, "History::threefold_repetition_detected(1ULL) == false");
     }
 
@@ -30,19 +30,19 @@ static void history_repetition_test()
         History::push_position(2ULL);
     }
 
-    if (History::threefold_repetition_detected(1ULL) == true) {
+    if (History::threefold_repetition_detected(40U) == true) {
         PRINT_TEST_FAILED(test_name, "History::threefold_repetition_detected(1ULL) == true");
     }
 
     History::push_position(2ULL);
 
-    if (History::threefold_repetition_detected(2ULL) == false) {
+    if (History::threefold_repetition_detected(40U) == false) {
         PRINT_TEST_FAILED(test_name, "History::threefold_repetition_detected(1ULL) == false");
     }
 
     History::clear();
 
-    if (History::threefold_repetition_detected(2ULL) == true) {
+    if (History::threefold_repetition_detected(40U) == true) {
         PRINT_TEST_FAILED(test_name, "History::threefold_repetition_detected(2ULL) == true");
     }
 }

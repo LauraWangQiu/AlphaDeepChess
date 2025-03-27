@@ -13,7 +13,6 @@
 
 static constexpr uint64_t SHIFT_HAS_CASTLED_WHITE = 44ULL;
 static constexpr uint64_t SHIFT_HAS_CASTLED_BLACK = 43ULL;
-static constexpr uint64_t SHIFT_TRIPLE_REPETITION_RULE = 41ULL;
 static constexpr uint64_t SHIFT_FIFTY_MOVE_RULE = 35ULL;
 static constexpr uint64_t SHIFT_LAST_CAPTURED_PIECE = 32ULL;
 static constexpr uint64_t SHIFT_SIDE_TO_MOVE = 31ULL;
@@ -26,8 +25,7 @@ static constexpr uint64_t SHIFT_MOVE_NUMBER = 0ULL;
 
 static constexpr uint64_t MASK_HAS_CASTLED_WHITE = (1ULL << SHIFT_HAS_CASTLED_WHITE);
 static constexpr uint64_t MASK_HAS_CASTLED_BLACK = (1ULL << SHIFT_HAS_CASTLED_BLACK);
-static constexpr uint64_t MASK_TRIPLE_REPETITION_RULE = (3ULL << SHIFT_TRIPLE_REPETITION_RULE);
-static constexpr uint64_t MASK_FIFTY_MOVE_RULE = (0x3fULL << SHIFT_FIFTY_MOVE_RULE);
+static constexpr uint64_t MASK_FIFTY_MOVE_RULE = (0xffULL << SHIFT_FIFTY_MOVE_RULE);
 static constexpr uint64_t MASK_LAST_CAPTURED_PIECE = (7ULL << SHIFT_LAST_CAPTURED_PIECE);
 static constexpr uint64_t MASK_SIDE_TO_MOVE = (1ULL << SHIFT_SIDE_TO_MOVE);
 static constexpr uint64_t MASK_CASTLE_KING_WHITE = (1ULL << SHIFT_CASTLE_KING_WHITE);
@@ -46,8 +44,7 @@ static constexpr uint64_t MASK_MOVE_NUMBER = (0xfffffULL << SHIFT_MOVE_NUMBER);
  * @note game state is stored as a 64-bit number :
  * 44 : has_castled_white : 1 if white has castled, 0 if not.
  * 43 : has_castled_black : 1 if black has castled, 0 if not.
- * 41-42 : triple_repetition_counter : if counter gets to 3 then game is a draw.
- * 35-40 : fifty_move_rule_counter : if counter gets to 50 then game is a draw.
+ * 35-42 : fifty_move_rule_counter : if counter gets to 100 then game is a draw.
  * 32-34 : last_captured_piece : PieceType::Empty if last move was not a capture.
  * 31 : side_to_move : 0 if white, 1 if black.
  * 30 : castle_king_white : 1 if available, 0 if not.
@@ -89,24 +86,12 @@ public:
     constexpr inline bool has_castled_black() const;
 
     /**
-     * @brief triple_repetition_counter
-     * 
-     * Counter of the times the position has been repeated,
-     * if this counter gets to 3 then game is a draw.
-     * 
-     * @note if this counter gets to 3 the game is a draw.
-     * 
-     * @return triple repetition counter.
-     */
-    constexpr inline uint8_t triple_repetition_counter() const;
-
-    /**
      * @brief fifty_move_rule_counter
      * 
-     * Counter for the fifty move rule, if 50 moves passed without 
+     * Counter for the fifty move rule, if 100 moves passed without 
      * a pawn move or a capture then game is a draw.
      * 
-     * @note if this counter gets to 50 the game is a draw.
+     * @note if this counter gets to 100 the game is a draw.
      * 
      * @return 50 move rule counter.
      * 
@@ -237,23 +222,11 @@ public:
     constexpr inline void set_castled_black(bool castled);
 
     /**
-     * @brief set_triple_repetition_counter
-     * 
-     * set number of times the position has been repeated.
-     * 
-     * @note counter must be <=3, otherwise state will be corrupted.
-     * 
-     * @param[in] counter triple repetition counter.
-     * 
-     */
-    constexpr inline void set_triple_repetition_counter(uint8_t counter);
-
-    /**
      * @brief set_fifty_move_rule_counter
      * 
      * set the moves that have passed since the last pawn move or capture.
      * 
-     * @note counter must be <=50, otherwise state will be corrupted.
+     * @note counter must be <=100, otherwise state will be corrupted.
      * 
      * @param[in] counter fifty rule counter counter.
      * 
@@ -515,21 +488,6 @@ constexpr inline bool GameState::has_castled_black() const
 }
 
 /**
- * @brief triple_repetition_counter
- * 
- * Counter of the times the position has been repeated,
- * if this counter gets to 3 then game is a draw.
- * 
- * @note if this counter gets to 3 the game is a draw.
- * 
- * @return triple repetition counter.
- */
-constexpr inline uint8_t GameState::triple_repetition_counter() const
-{
-    return (state_register & MASK_TRIPLE_REPETITION_RULE) >> SHIFT_TRIPLE_REPETITION_RULE;
-}
-
-/**
  * @brief fifty_move_rule_counter
  * 
  * Counter for the fifty move rule, if 50 moves passed without 
@@ -680,22 +638,6 @@ constexpr inline void GameState::set_castled_black(bool castled)
 }
 
 /**
- * @brief set_triple_repetition_counterset_triple_repetition_counter
- * 
- * set number of times the position has been repeated.
- * 
- * @note counter must be <=3, otherwise state will be corrupted.
- * 
- * @param[in] counter triple repetition counter.
- * 
- */
-constexpr inline void GameState::set_triple_repetition_counter(uint8_t counter)
-{
-    assert(counter <= 3);
-    state_register &= ~MASK_TRIPLE_REPETITION_RULE;
-    state_register |= static_cast<uint64_t>(counter) << SHIFT_TRIPLE_REPETITION_RULE;
-}
-/**
  * @brief set_fifty_move_rule_counter
  * 
  * set the moves that have passed since the last pawn move or capture.
@@ -707,7 +649,7 @@ constexpr inline void GameState::set_triple_repetition_counter(uint8_t counter)
  */
 constexpr inline void GameState::set_fifty_move_rule_counter(uint8_t counter)
 {
-    assert(counter <= 50);
+    assert(counter <= 100);
     state_register &= ~MASK_FIFTY_MOVE_RULE;
     state_register |= static_cast<uint64_t>(counter) << SHIFT_FIFTY_MOVE_RULE;
 }

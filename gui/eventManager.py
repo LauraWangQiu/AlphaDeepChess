@@ -30,7 +30,7 @@ class EventManager:
         self.rightPanel.position_changed()
 
     def start_search(self) -> None:
-        self.uci.start_search(self.chessBoard.get_fen())
+        self.uci.start_search(self.chessBoard.get_fen_and_moves())
 
     def stop_search(self) -> None:
         self.uci.stop_search()

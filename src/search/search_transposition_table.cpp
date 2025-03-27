@@ -88,8 +88,6 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
     Board& board = context.board;
     const ChessColor side_to_move = board.state().side_to_move();
 
-    History::clear();
-
     for (int depth = 1; depth <= max_depth; depth++) {
 
         context.bestMoveInIteration = Move::null();
@@ -142,6 +140,8 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
     Board& board = context.board;
     const uint64_t zobrist_key = board.state().get_zobrist_key();
 
+    if (ply > 0) History::push_position(zobrist_key);
+
     // check transposition table
     if (ply == 0) {
         int eval_tt;
@@ -158,7 +158,8 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
     generate_legal_moves<ALL_MOVES>(moves, board, &isCheck);
     const bool isCheckMate = isCheck && moves.size() == 0;
     const bool isStaleMate = !isCheck && moves.size() == 0;
-    const bool fify_move_rule_draw = board.state().fifty_move_rule_counter() >= 50;
+    const uint8_t fifty_move_rule_counter = board.state().fifty_move_rule_counter();
+    const bool fify_move_rule_draw = fifty_move_rule_counter >= 100U;
 
     if (isCheckMate) {
         // we substract ply so checkMate in less moves has a higher score
@@ -169,7 +170,10 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
             return MATE_IN_ONE_SCORE - ply;
         }
     }
-    else if (isStaleMate || History::threefold_repetition_detected(zobrist_key) || fify_move_rule_draw) {
+    else if (isStaleMate) {
+        return 0;
+    }
+    else if (ply > 0 && (fify_move_rule_draw || History::threefold_repetition_detected(fifty_move_rule_counter))) {
         return 0;
     }
     else if (depth == 0) {
@@ -194,7 +198,6 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
 
         constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
 
-        History::push_position(zobrist_key);
         board.make_move(moves[i]);
         int eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, context);
         board.unmake_move(moves[i], game_state);
@@ -279,9 +282,10 @@ static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int be
     Board& board = context.board;
     const uint64_t zobrist_key = board.state().get_zobrist_key();
 
-    const bool fify_move_rule_draw = board.state().fifty_move_rule_counter() >= 50;
+    const uint8_t fifty_move_rule_counter = board.state().fifty_move_rule_counter();
+    const bool fify_move_rule_draw = fifty_move_rule_counter >= 100U;
 
-    if (History::threefold_repetition_detected(zobrist_key) || fify_move_rule_draw) {
+    if (History::threefold_repetition_detected(fifty_move_rule_counter) || fify_move_rule_draw) {
         return 0;
     }
 
