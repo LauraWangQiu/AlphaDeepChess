@@ -364,7 +364,7 @@ std::string Board::fen() const
  * 
  *  Constructor of Board class.
  */
-Board::Board() : bitboard_all(0ULL), bitboard_white(0ULL), bitboard_black(0ULL), game_state() { clean(); }
+Board::Board() : game_state(), bitboard_all(0ULL), bitboard_white(0ULL), bitboard_black(0ULL) { clean(); }
 
 /**
  * @brief ~Board

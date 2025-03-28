@@ -11,14 +11,12 @@
 #include "board.hpp"
 
 /**
- * @brief order_moves
+ * @brief order the move list by priority from best to worst
+ *  
+ * @note the first move in the list is the move with the best prospects of being the best move in the position.
  * 
- * Order the move list.
- * 
- * @note the first move in the list is the move with the best prospects of being the best move.
- * 
+ * @param[in,out] moves move list.
  * @param[in] board chess position.
- * @param[out] moves move list.
- * 
+ * @param[in] ply actual search depth ply.
  */
-void order_moves(MoveList& moves, const Board &board);
+void order_moves(MoveList& moves, const Board& board, uint32_t ply);

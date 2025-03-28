@@ -48,7 +48,7 @@ static constexpr uint16_t MASK_END_SQUARE = (0b111111U << SHIFT_END_SQUARE);
  * 
  * Move is valid if origin_square != destination_square.
  * 
- * @note move is stored as a 16-bit number :
+ * @note Don't modify the bitfields they are used in other functions. move is stored as a 16-bit number:
  * 
  * 14-15: special move flag: NORMAL(0), PROMOTION(1), EN_PASSANT(2), CASTLING(3).
  * 12-13: promotion piece : KNIGHT(0), BISHOP(1), ROOK(2), QUEEN(3).
@@ -241,6 +241,24 @@ public:
      * 
      */
     static constexpr Move castle_black_queen() { return Move(Square::SQ_E8, Square::SQ_C8, MoveType::CASTLING); }
+
+    /**
+     * @brief unique identifier 14 bits (0-16383)
+     * 
+     * id is the move data removing the move_type bitfield
+     * 
+     * @return data & ~MASK_MOVE_TYPE
+     * 
+     */
+    inline constexpr uint16_t id() const { return data & ~MASK_MOVE_TYPE; }
+
+    /**
+     * @brief maximum id possible
+     *       
+     * @return 0xFFFF & ~MASK_MOVE_TYPE
+     * 
+     */
+    static constexpr uint16_t MAX_ID() { return 0xFFFF & ~MASK_MOVE_TYPE; }
 
     /**
      * @brief operator==(const Move& sq)

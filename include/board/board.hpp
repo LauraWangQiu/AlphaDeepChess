@@ -269,6 +269,22 @@ public:
 
 private:
     /**
+     * @brief game_state
+     * 
+     *  Contains all necessary information about the state of the game.
+     * 
+     * - side_to_move.
+     * - castle_king_white.
+     * - castle_queen_white.
+     * - castle_king_black.
+     * - castle_queen_black.
+     * - en_passant_square.
+     * - move_number.
+     * - half_move.
+     */
+    GameState game_state;
+
+    /**
      * @brief bitboard_all
      * 
      *  Bitboard containing all pieces on the board.
@@ -308,23 +324,6 @@ private:
      * 
      */
     Piece array_piece[NUM_SQUARES];
-
-    /**
-     * @brief game_state
-     * 
-     *  Contains all necessary information about the state of the game.
-     * 
-     * - side_to_move.
-     * - castle_king_white.
-     * - castle_queen_white.
-     * - castle_king_black.
-     * - castle_queen_black.
-     * - en_passant_square.
-     * - move_number.
-     * - half_move.
-     */
-    GameState game_state;
-
 
     void make_normal_move(Move normal_move);
     void unmake_normal_move(Move normal_move);

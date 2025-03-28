@@ -227,7 +227,7 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
     searchThread = std::thread([this, depth]() { search(stop_signal, searchResults, board, depth); });
 
     readerThread = std::thread([this]() {
-        int depthReaded = 0;
+        uint32_t depthReaded = 0;
 
         while (!stop_signal || (depthReaded < searchResults.depthReached)) {
 

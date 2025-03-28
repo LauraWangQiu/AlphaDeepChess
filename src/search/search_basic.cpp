@@ -15,8 +15,8 @@
 #include "evaluation.hpp"
 #include "move_ordering.hpp"
 #include "move_list.hpp"
-#include "search_utils.hpp"
 #include "history.hpp"
+#include "killer_moves.hpp"
 
 static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results, int max_depth, SearchContext& context);
 
@@ -37,7 +37,7 @@ static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int be
  * @param[in] max_depth maximum depth of search, default value is INFINITE_DEPTH
  * 
  */
-void search(std::atomic<bool>& stop, SearchResults& results, Board& board, int32_t max_depth)
+void search(std::atomic<bool>& stop, SearchResults& results, Board& board, uint32_t max_depth)
 {
     assert(stop.load() == false);
     assert(results.depthReached == 0);
@@ -84,6 +84,8 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
 {
     Board& board = context.board;
     const ChessColor side_to_move = board.state().side_to_move();
+
+    KillerMoves::clear();
 
     for (int depth = 1; depth <= max_depth; depth++) {
 
@@ -169,7 +171,7 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
     int final_node_evaluation = MAXIMIZING_WHITE ? -INF_EVAL : +INF_EVAL;
     const GameState game_state = board.state();
 
-    order_moves(moves, board);
+    order_moves(moves, board, ply);
 
     for (int i = 0; i < moves.size(); i++) {
 
@@ -194,6 +196,9 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
             alpha = std::max(alpha, eval);
 
             if (final_node_evaluation >= beta) {
+                if (!board.move_is_capture(moves[i])) {
+                    KillerMoves::store_killer(ply, moves[i]);   // killer move must be quiet and produce a cut off
+                }
                 break;   // beta cutoff
             }
         }
@@ -208,6 +213,9 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
             beta = std::min(beta, eval);
 
             if (final_node_evaluation <= alpha) {
+                if (!board.move_is_capture(moves[i])) {
+                    KillerMoves::store_killer(ply, moves[i]);   // killer move must be quiet and produce a cut off
+                }
                 break;   // alpha cutoff
             }
         }
@@ -279,7 +287,7 @@ static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int be
         return static_evaluation;   // No captures: return static evaluation
     }
 
-    order_moves(capture_moves, board);
+    order_moves(capture_moves, board, ply);
 
     const GameState game_state = board.state();
     int final_node_evaluation = static_evaluation;

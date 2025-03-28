@@ -6,9 +6,28 @@
  * 
  */
 
-#include "search.hpp"
+#include "board.hpp"
 #include "move.hpp"
+#include <cstdint>
 #include <limits>
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+
+// value that represents an infinite search depth.
+constexpr uint32_t INF_DEPTH = 1024;
+
+// infinite evaluation score
+constexpr int INF_EVAL = std::numeric_limits<int>::max();
+
+// score for mate in one
+constexpr int INMEDIATE_MATE_SCORE = 32000;
+
+// score from which it is consider mate evaluation
+constexpr int MATE_THRESHOLD = INMEDIATE_MATE_SCORE - 1000U;
+
+// max ply to be reached
+constexpr int MAX_PLY = 32;
 
 /**
  * @brief SearchType
@@ -44,17 +63,20 @@ struct SearchContext
     { }
 };
 
-// infinite evaluation score
-constexpr int INF_EVAL = std::numeric_limits<int>::max();
+struct SearchResult
+{
+    std::atomic<uint32_t> depth;
+    std::atomic<int> evaluation;
+    std::atomic<uint16_t> bestMove_data;
+};
 
-// score for mate in one
-constexpr int INMEDIATE_MATE_SCORE = 32000;
-
-// score from which it is consider mate evaluation
-constexpr int MATE_THRESHOLD = INMEDIATE_MATE_SCORE - 1000U;
-
-// max ply to be reached
-constexpr int MAX_PLY = 32;
+struct SearchResults
+{
+    std::mutex mtx_data_available_cv;
+    std::condition_variable data_available_cv;
+    std::atomic<uint32_t> depthReached;
+    SearchResult results[INF_DEPTH];
+};
 
 /**
  * @brief insert_new_result(SearchResults&,int,int,Move)
