@@ -62,6 +62,7 @@ enum class Piece : int
  * 
  * @note Do not change the assigned values, they are used in other functions.
  * 
+ *  PAWN = 0,
  *  KNIGHT = 1,
  *  BISHOP = 2,
  *  ROOK = 3,
@@ -79,16 +80,25 @@ enum class PieceType : int
     ROOK = 3,
     QUEEN = 4,
     KING = 5,
-    EMPTY = 6
+    EMPTY = 6,
+    NUM_PIECES = 7
 };
 
 /**
  * @brief NUM_CHESS_PIECES (13)
  * 
- * Number of piece types in chess, including the empty piece.
+ * Number of different pieces in chess, including the empty piece.
  * 
  */
 constexpr const int NUM_CHESS_PIECES = static_cast<int>(Piece::NUM_PIECES);
+
+/**
+ * @brief NUM_CHESS_PIECE_TYPES (7)
+ * 
+ * Number of different piece types in chess, including the empty piece.
+ * 
+ */
+constexpr const int NUM_CHESS_PIECE_TYPES = static_cast<int>(PieceType::NUM_PIECES);
 
 /**
  * @brief pieceRepresentation[NUM_CHESS_PIECES]
@@ -133,8 +143,8 @@ static constexpr char pieceRepresentation[NUM_CHESS_PIECES] = {'P', 'N', 'B', 'R
  *   EMPTY(12) = 0,
  * 
  */
-static constexpr uint32_t pieceRawValue[NUM_CHESS_PIECES] = {
-    100U, 320U, 330U, 500U, 900U, 500U, 100U, 320U, 330U, 500U, 900U, 500U, 0U};
+static constexpr uint32_t pieceRawValue[NUM_CHESS_PIECES] = {100U, 320U, 330U, 500U, 900U, 500U, 100U,
+                                                             320U, 330U, 500U, 900U, 500U, 0U};
 
 
 /**
@@ -149,10 +159,7 @@ static constexpr uint32_t pieceRawValue[NUM_CHESS_PIECES] = {
  * - FALSE if piece is invalid.
  * 
  */
-constexpr inline bool is_valid_piece(Piece piece)
-{
-    return piece >= Piece::W_PAWN && piece < Piece::NUM_PIECES;
-}
+constexpr inline bool is_valid_piece(Piece piece) { return piece >= Piece::W_PAWN && piece < Piece::NUM_PIECES; }
 
 /**
  * @brief is_valid_pieceType 
@@ -203,7 +210,7 @@ constexpr inline bool is_valid_color(ChessColor color)
 constexpr inline ChessColor opposite_color(ChessColor color)
 {
     assert(is_valid_color(color));
-    
+
     return static_cast<ChessColor>(static_cast<int>(color) ^ 1);
 }
 
@@ -374,9 +381,8 @@ constexpr inline Piece create_piece(PieceType type, ChessColor color)
 
     // the white and black pieces have a difference of +6 int value
     // E.g  WKnight = 1, BKnight = 7
-    return type == PieceType::EMPTY
-        ? Piece::EMPTY
-        : static_cast<Piece>(static_cast<int>(type) + (6 * static_cast<int>(color)));
+    return type == PieceType::EMPTY ? Piece::EMPTY
+                                    : static_cast<Piece>(static_cast<int>(type) + (6 * static_cast<int>(color)));
 }
 
 /**

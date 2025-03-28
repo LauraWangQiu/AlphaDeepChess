@@ -58,47 +58,27 @@ static uint32_t move_value(const Move& move, const Board& board)
 {
     assert(move.is_valid());
 
+    // precomputed move value MVV_LVA_table[victim_piece][attacker_piece]
+    static constexpr int MVV_LVA_table[NUM_CHESS_PIECE_TYPES][NUM_CHESS_PIECE_TYPES] = {
+        {15, 14, 13, 12, 11, 10, 0},   // victim P, attacker P, N, B, R, Q, K, EMPTY
+        {25, 24, 23, 22, 21, 20, 0},   // victim N, attacker P, N, B, R, Q, K, EMPTY
+        {35, 34, 33, 32, 31, 30, 0},   // victim B, attacker P, N, B, R, Q, K, EMPTY
+        {45, 44, 43, 42, 41, 40, 0},   // victim R, attacker P, N, B, R, Q, K, EMPTY
+        {55, 54, 53, 52, 51, 50, 0},   // victim Q, attacker P, N, B, R, Q, K, EMPTY
+        {0, 0, 0, 0, 0, 0, 0},         // victim K, attacker P, N, B, R, Q, K, EMPTY
+        {0, 0, 0, 0, 0, 0, 0},         // victim EMPTY, attacker P, N, B, R, Q, K, EMPTY
+    };
+
     const Piece origin_piece = board.get_piece(move.square_from());
-    const uint32_t origin_value = raw_value(origin_piece);
-    const PieceType promotion_piece = move.promotion_piece();
-    const bool is_promotion = move.type() == MoveType::PROMOTION;
+    const Piece end_piece = board.get_piece(move.square_to());
 
-    uint32_t score = 0;
-    bool is_capture = false;
-    Piece victim_piece;
+    const PieceType attacker = piece_to_pieceType(origin_piece);
+    const PieceType victim = move.type() != MoveType::EN_PASSANT ? piece_to_pieceType(end_piece) : PieceType::PAWN;
 
-    // Determine if the move is a capture and get the victim piece
-    if (move.type() == MoveType::EN_PASSANT) {
-        is_capture = true;
-        // Calculate victim square for en passant
-        Square victim_square(move.square_from().row(), move.square_to().col());
-        victim_piece = board.get_piece(victim_square);
-    }
-    else {
-        victim_piece = board.get_piece(move.square_to());
-        is_capture = (victim_piece != Piece::EMPTY) || (move.type() == MoveType::EN_PASSANT);
-    }
+    uint32_t score = MVV_LVA_table[static_cast<int>(victim)][static_cast<int>(attacker)];
 
-    if (is_capture) {
-        const uint32_t victim_value = raw_value(victim_piece);
-        const uint32_t aggressor_value = origin_value;
-        const uint32_t mvv_lva = victim_value * 1000 + (1000 - aggressor_value);
-        score = mvv_lva * 10000;   // Ensure captures are prioritized first
-
-        // Add promotion bonus
-        if (is_promotion) {
-            const uint32_t promotion_value = raw_value(promotion_piece);
-            score += promotion_value * 100;
-        }
-    }
-    else if (is_promotion) {
-        // Promotion without capture
-        const uint32_t promotion_value = raw_value(promotion_piece);
-        score = 9000 + promotion_value * 100;
-    }
-    else {
-        // Non-capture, non-promotion moves ordered by origin piece value
-        score = origin_value;
+    if (move.type() == MoveType::PROMOTION) {
+        score += raw_value(move.promotion_piece());
     }
 
     return score;
