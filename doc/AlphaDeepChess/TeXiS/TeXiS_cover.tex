@@ -45,10 +45,10 @@
 }
 
 % Título de la portada en ingles
-%\def\tituloPortadaEngVal{\titulo}
-%\newcommand{\tituloPortadaEng}[1]{
-%	\def\tituloPortadaEngVal{#1}
-%}
+\def\tituloPortadaEngVal{\titulo}
+\newcommand{\tituloPortadaEng}[1]{
+	\def\tituloPortadaEngVal{#1}
+}
 
 % Autor
 \def\autorPortadaVal{\autor}
@@ -304,7 +304,7 @@
 \rule{\longTitulo}{.5mm}\\
 \vskip 1cm
 \textbf{\tituloPortadaVal}\\
-%\textbf{\tituloPortadaEngVal}
+\textbf{\tituloPortadaEngVal}
 \vskip 0.7cm
 \rule{\longTitulo}{.5mm}\\
 \end{center}
@@ -324,17 +324,19 @@
 
 \begin{center}
   {\Large \textbf{\tipoDocumentoVal}}\\
-  {\Large \textbf{Course \thelastyear--\the\year}}
-  %{\Large \textbf{Curso \thelastyear--\the\year}}
+  %{\Large \textbf{Course \thelastyear--\the\year}}
+  {\Large \textbf{Curso \thelastyear--\the\year}}
 \end{center}
 
 \vfill
 
 \begin{large}
 \begin{center}
-{\Large \bfseries Authors}\\
+%{\Large \bfseries Authors}\\
+{\Large \bfseries Autores}\\
 \textbf{\autorPortadaVal}\\[0.5cm]
-{\Large \bfseries Directors}\\
+%{\Large \bfseries Directors}\\
+{\Large \bfseries Directores}\\
 \textbf{\directorPortadaVal}\\[0.5cm]
 %{\Large \bfseries Colaborador}\\
 %\textbf{\colaboradorPortadaVal}\\[0.5cm]
@@ -389,7 +391,7 @@
 \begin{Huge}
 \begin{center}
 \tituloPortadaVal \\
-%\tituloPortadaEngVal
+\tituloPortadaEngVal
 \end{center}
 \end{Huge}
 
@@ -399,9 +401,9 @@
 \begin{center}
 \textoPrimerSubtituloPortadaVal
 \mbox{ } \\ \mbox{ } \\ 
-{\Large \bfseries Authors}\\
+{\Large \bfseries Autores}\\
 \textbf{\autorPortadaVal}\\[1.0cm]
-{\Large \bfseries Directors}\\
+{\Large \bfseries Directores}\\
 \textbf{\directorPortadaVal}\\[0.3cm]
 %{\Large \bfseries Colaborador}\\
 %\textbf{\colaboradorPortadaVal}\\[0.3cm]

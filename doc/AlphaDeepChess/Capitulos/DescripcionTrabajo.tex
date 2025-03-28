@@ -1,5 +1,6 @@
 \chapter{Work description}
 \label{cap:descripcionTrabajo}
+\renewcommand{\figurename}{Figure}
 
 %Aquí comienza la descripción del trabajo realizado. Se deben incluir tantos capítulos como sea necesario para describir de la manera más completa posible el trabajo que se ha llevado a cabo. Como muestra la figura \ref{fig:sampleImage}, está todo por hacer.
 
@@ -44,6 +45,7 @@ In the following section \ref{sec:basicConcepts}, we will talk about the basic c
 Chess is a game of strategy that takes place on a chessboard with specific rules governing the movement and interaction of the pieces. This section introduces the fundamental concepts necessary to understand how chess is played.
 
 \subsection{Chessboard}
+\label{sec:chessboard}
 
 A chessboard is a game board of 64 squares, 8 rows by 8 columns. To refer to each of the squares we mostly use \textbf{algebraic notation\footnote{\url{https://en.wikipedia.org/wiki/Algebraic_notation_(chess)}}} using the numbers from 1 to 8 and the letters from ``a'' to ``h''. There are also other notations like descriptive notation\footnote{\url{https://en.wikipedia.org/wiki/Descriptive_notation}} which is obsolete or ICCF numeric notation\footnote{\url{https://en.wikipedia.org/wiki/ICCF_numeric_notation}} due to chess pieces have different abbreviations depending on language.
 
@@ -96,16 +98,339 @@ The starting position of the chess pieces on a chessboard is the following:
     \label{fig:start-pos}
 \end{figure}
 
-If we take a closer look to the order of positioning of each piece, we should consider that queen and king are placed in the center columns. The queen must be placed on a square of their color and the king is placed on the remaining central column. The rest of the pieces are placed symmetrically as seen in Figure \ref{fig:start-pos}.
+If we take a closer look at the positioning of each piece, we can see that the queen and king are placed in the center columns. The queen is placed on a square of its color, while the king is placed on the remaining central column. The rest of the pieces are positioned symmetrically, as shown in Figure \ref{fig:start-pos}.
+
+This means that the chessboard is divided into two sides relative to the positions of the king and queen at the start of the game:
+
+\begin{figure}[H]
+  \centering
+  \newchessgame
+  \chessboard[
+    showmover=false,
+    setpieces={},
+    pgfstyle=color, opacity=0.2,
+    color=red,
+    markfields={a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,b6,b7,b8,c1,c2,c3,c4,c5,c6,c7,c8,d1,d2,d3,d4,d5,d6,d7,d8},
+    color=blue!50,
+    markfields={e1,e2,e3,e4,e5,e6,e7,e8,f1,f2,f3,f4,f5,f6,f7,f8,g1,g2,g3,g4,g5,g6,g7,g8,h1,h2,h3,h4,h5,h6,h7,h8}
+  ]
+  \caption{King's side (blue) and Queen's side (red).}
+  \label{fig:kings-queens-side}
+\end{figure}
 
 \subsection{Movement of the pieces}
 \label{sec:movement-pieces}
 
-\subsection{Notation}
+\subsection{Pawn}
+
+The pawn can move one square forward, but it can only capture pieces diagonally. On its first move, the pawn has the option to move two squares forward. If a pawn reaches the last row of the opponent's side, it can be promoted\footnote{\url{https://en.wikipedia.org/wiki/Promotion_(chess)}} to any other piece (except for a king).
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            setpieces={Pe2, Pc4, pc5, Pg3, pf6},
+            showmover=false,
+            pgfstyle=straightmove, color=blue,
+            markmoves={e2-e3,e2-e4,g3-g4,f6-f5},
+            arrow=to
+        ]
+        \caption{Pawn's movement.}
+        \label{fig:pawn-movement}
+    \end{minipage}
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+           setpieces={Pe2, Pc4, pc5, Pg3, pf6},
+           showmover=false,
+           pgfstyle=straightmove, color=red,
+           markmoves={e2-d3,e2-f3,c4-b5,c4-d5,g3-f4,g3-h4,f6-e5,f6-g5,c5-b4,c5-d4},
+           arrow=to
+       ]
+       \caption{Pawn attack.}
+       \label{fig:pawn-attack}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            setpieces={Pe7},
+            showmover=false,
+            pgfstyle=straightmove, color=blue,
+            markmoves={e7-e8},
+            arrow=to
+        ]
+        \caption{Promotion.}
+        \label{fig:pawn-promotion}
+    \end{minipage}
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            setpieces={Qe8},
+            showmover=false
+        ]
+        \caption{Pawn promotes to queen.}
+        \label{fig:pawn-promotion-2}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Rook}
+
+The rook can move any number of squares horizontally or vertically. It can also capture pieces in the same way.
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[
+        setpieces={Rd4},
+        showmover=false,
+        pgfstyle=straightmove, color=blue,
+        markmoves={d4-a4,d4-h4,d4-d1,d4-d8},
+        arrow=to
+    ]
+    \caption{Rook's movement.}
+    \label{fig:rook-movement}
+\end{figure}
+
+\subsubsection{Knight}
+
+The knight moves in an L-shape: two squares in one direction and then one square perpendicular to that direction. The knight can jump over other pieces, making it a unique piece in terms of movement. It can also capture pieces in the same way.
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[
+        setpieces={Nf3},
+        showmover=false,
+        pgfstyle=straightmove, color=blue,
+        markmoves={f3-e5,f3-e1,f3-g5,f3-g1,f3-d2,f3-d4,f3-h2,f3-h4},
+        arrow=to
+    ]
+    \caption{Knight's movement.}
+    \label{fig:knight-movement}
+\end{figure}
+
+\subsubsection{Bishop}
+
+The bishop can move any number of squares diagonally. It can also capture pieces in the same way. Considering that each side has two bishops, one bishop moves on light squares and the other on dark squares.
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[
+        setpieces={Bc4,Bf6},
+        showmover=false,
+        pgfstyle=straightmove, color=blue,
+        markmoves={c4-a2,c4-g8,c4-f1,c4-a6,f6-h4,f6-h8,f6-d8,f6-a1},
+        arrow=to
+    ]
+    \caption{Bishop's movement.}
+    \label{fig:bishop-movement}
+\end{figure}
+
+\subsubsection{King}
+
+The king can move one square in any direction: horizontally, vertically, or diagonally. However, the king cannot move to a square that is under attack by an opponent's piece. The king can also capture pieces in the same way. The king is a crucial piece in chess, as the game ends when one player checkmates the opponent's king.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+       \centering
+       \newchessgame
+       \chessboard[
+           setpieces={Ke4},
+           showmover=false,
+           pgfstyle=straightmove, color=blue,
+           markmoves={e4-e5,e4-e3,e4-d4,e4-f4,e4-d5,e4-f5,e4-d3,e4-f3},
+           arrow=to
+       ]
+       \caption{King's movement.}
+       \label{fig:king-movement}
+   \end{minipage}
+   \begin{minipage}{0.45\textwidth}
+       \centering
+       \newchessgame
+       \fenboard{8/8/1p6/p1pBk1p1/P1P2p1p/1P1K1P1P/1b4P1/8 w - - 0 1}
+       \chessboard[
+           markstyle=circle, color=red, markfields={d4,c3,e4,e3},
+           pgfstyle=straightmove, color=blue,
+           markmoves={d3-c2,d3-d2,d3-e2},
+           arrow=to
+       ]
+       \caption{White King's movement in a game.}
+       \label{fig:white-king-movement-game}
+   \end{minipage}
+\end{figure}
+
+In Figure \ref{fig:white-king-movement-game}, the white king cannot move to \textbf{e4} because the black king is attacking that square. When two kings are positioned close to each other, neither can move to a square adjacent to the other.
+
+\vspace{1em} % Añade espacio
+
+Additionally, the king can perform a special move called \textbf{castling}, which involves moving the king two squares towards a rook and moving the rook to the square next to the king. Castling has specific conditions which are:
+
+\begin{itemize}
+    \item Neither the king nor the rook involved in castling must have moved previously.
+    \item There must be no pieces between the king and the rook.
+    \item The king cannot be in check, move through a square under attack, or end up in check.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[
+        setpieces={Ke1,Ra1,Rh1,ke8,rb8,rh8,bf8},
+        showmover=false,
+        pgfstyle=straightmove, color=blue,
+        markmoves={e1-c1, e1-g1},
+        arrow=to
+    ]
+    \caption{Castling}
+    \label{fig:castling}
+\end{figure}
+
+In this case, the white king can castle on either the king's side or the queen's side as long as the rooks have not been moved from their starting position, but the black king cannot castle because there is a bishop on \textbf{f8} interfering with the movement and the rook on the queen's side has been moved to \textbf{b8}.
+
+\subsubsection{Queen}
+
+The queen can move any number of squares in any direction: horizontally, vertically, or diagonally. It can also capture pieces in the same way.
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[
+        setpieces={Qd4},
+        showmover=false,
+        pgfstyle=straightmove, color=blue,
+        markmoves={d4-a4,d4-h4,d4-d1,d4-d8,d4-a1,d4-h1,d4-h8,d4-a8},
+        arrow=to
+    ]
+    \caption{Queen's movement.}
+    \label{fig:queen-movement}
+\end{figure}
 
 \subsection{Rules}
 
-White starts first, possible results (win, draw or lose), 30 moves rule, zugzwang?, check, checkmate, ...
+In every game, white starts first and the possible results of each game can be win for white, win for black or draw.
+
+\dots
+
+\subsection{Notation}
+
+In addition to the \textbf{algebraic notation} of the squares in section \ref{sec:chessboard}, each piece is identified by an uppercase letter, which may vary across different languages:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Piece} & \textbf{English Notation} & \textbf{Spanish Notation} \\ \hline
+        Pawn           & \textit{P}               & \textit{P} (peón)         \\ \hline
+        Rook           & \textit{R}               & \textit{T} (torre)        \\ \hline
+        Knight         & \textit{K}               & \textit{C} (caballo)      \\ \hline
+        Bishop         & \textit{B}               & \textit{A} (alfil)        \\ \hline
+        Queen          & \textit{Q}               & \textit{D} (dama)         \\ \hline
+        King           & \textit{K}               & \textit{R} (rey)          \\ \hline
+    \end{tabular}
+    \caption{Chess piece notation in English and Spanish.}
+    \label{tab:chess-notation}
+\end{table}
+
+For the normal moves (not captures nor promoting), it is written using the piece uppercase letter plus the coordinate of destination:
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[
+        setfen={r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 0 1},
+        pgfstyle=straightmove, color=blue,
+        markmoves={a7-a6},
+        arrow=to
+    ]
+    \caption{Pawn goes to a6.}
+    \label{fig:pawn-a6}
+\end{figure}
+
+In Figure \ref{fig:pawn-a6}, the pawn's movement is written as \textbf{Pa6} or directly \textbf{a6}.
+
+\vspace{1em}
+
+Captures are written with an \textbf{"x"} between the piece uppercase letter and coordinate of destination/the captured piece coordinate:
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[
+        setfen={r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 1},
+        pgfstyle=straightmove, color=red,
+        markmoves={b5-c6},
+        arrow=to
+    ]
+    \caption{Bishop captures knight.}
+    \label{fig:bishop-captures-knight}
+\end{figure}
+
+In Figure \ref{fig:bishop-captures-knight}, the white bishop capturing the black knight is written as \textbf{Bxc6}. If it were black's turn, the pawn on \textbf{a6} could capture the white bishop, and it would be written as \textbf{Pxb5} or simply \textbf{axb5}, indicating the pawn's column.
+
+\vspace{1em}
+
+Pawn promotion is written as the pawn's movement to the last row, followed by the piece to which it is promoted:
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[
+        setfen={r7/1Pp5/2P3p1/8/6pb/4p1kB/4P1p1/6K1 w - - 0 1},
+        pgfstyle=straightmove, color=blue,
+        markmoves={b7-a8},
+        arrow=to
+    ]
+    \caption{Pawn captures rook.}
+    \label{fig:pawn-captures-rook}
+\end{figure}
+
+In Figure \ref{fig:pawn-captures-rook}, white pawn capturing and promoting in \textbf{a8} to a queen is written as \textbf{bxa8Q} or \textbf{bxa8=Q}.
+
+\vspace{1em}
+
+When castling, depending on whether it is on the king's side or the queen's side, it is written as \textbf{0-0} and \textbf{0-0-0}, respectively.
+
+\vspace{1em}
+
+Moves that check and checkmates opponent's king are written by adding a \textbf{+} sign for check or \textbf{++} for checkmate, respectively.
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[
+        setfen={rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 0 1},
+        pgfstyle=straightmove, color=blue,
+        markmoves={d8-h4},
+        arrow=to
+    ]
+    \caption{Black queen checkmates.}
+    \label{fig:black-queen-checkmates}
+\end{figure}
+
+In Figure \ref{fig:black-queen-checkmates}, black queen movement checkmates and it is written as \textbf{Dh4++}.
+
+\vspace{1em}
+
+The end of game notation indicates the result of the game. It is typically written as:
+
+\begin{itemize}
+    \item \textbf{1-0}: White wins.
+    \item \textbf{0-1}: Black wins.
+    \item \textbf{1/2-1/2}: The game ends in a draw.
+\end{itemize}
+
+For more information about notation, refer to the Wikipedia page: \url{https://en.wikipedia.org/wiki/Algebraic_notation_(chess)}.
 
 \section{Modules}
 \label{sec:modules}
