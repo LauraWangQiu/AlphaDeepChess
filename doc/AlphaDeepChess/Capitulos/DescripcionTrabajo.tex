@@ -98,7 +98,7 @@ The starting position of the chess pieces on a chessboard is the following:
     \label{fig:start-pos}
 \end{figure}
 
-If we take a closer look at the positioning of each piece, we can see that the queen and king are placed in the center columns. The queen is placed on a square of its color, while the king is placed on the remaining central column. The rest of the pieces are positioned symmetrically, as shown in Figure \ref{fig:start-pos}.
+Notice that the queen and king are placed in the center columns. The queen is placed on a square of its color, while the king is placed on the remaining central column. The rest of the pieces are positioned symmetrically, as shown in Figure \ref{fig:start-pos}.
 
 This means that the chessboard is divided into two sides relative to the positions of the king and queen at the start of the game:
 
@@ -123,7 +123,7 @@ This means that the chessboard is divided into two sides relative to the positio
 
 \subsection{Pawn}
 
-The pawn can move one square forward, but it can only capture pieces diagonally. On its first move, the pawn has the option to move two squares forward. If a pawn reaches the last row of the opponent's side, it can be promoted\footnote{\url{https://en.wikipedia.org/wiki/Promotion_(chess)}} to any other piece (except for a king).
+The pawn can move one square forward, but it can only capture pieces one square diagonally. On its first move, the pawn has the option to move two squares forward. If a pawn reaches the last row of the opponent's side, it can be promoted\footnote{\url{https://en.wikipedia.org/wiki/Promotion_(chess)}} to any other piece (except for a king).
 
 \begin{figure}[H]
     \centering
@@ -179,6 +179,53 @@ The pawn can move one square forward, but it can only capture pieces diagonally.
         ]
         \caption{Pawn promotes to queen.}
         \label{fig:pawn-promotion-2}
+    \end{minipage}
+\end{figure}
+
+There is a specific capture movement which is \textbf{en passant \footnote{\url{https://en.wikipedia.org/wiki/En_passant}}}. This move allows a pawn that has moved two squares forward from its starting position to be captured by an opponent's pawn as if it had only moved one square. The capturing pawn must be on an adjacent file and can only capture the en passant pawn immediately after it moves.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}[H]{0.3\textwidth}
+        \centering
+        \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
+        \newchessgame[black]
+        \chessboard[
+            setpieces={ke8,Ke1,pd7,Pe5},
+            showmover=false,
+            pgfstyle=straightmove, color=blue,
+            markmoves={d7-d5},
+            arrow=to
+        ]
+        \caption{\centering En passant (1).}
+        \label{fig:en-passant-1}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[H]{0.3\textwidth}
+        \centering
+        \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
+        \newchessgame
+        \chessboard[
+            setpieces={ke8,Ke1,pd5,Pe5},
+            showmover=false,
+            pgfstyle=straightmove, color=red,
+            markmoves={e5-d6},
+            arrow=to
+        ]
+        \caption{\centering En passant (2).}
+        \label{fig:en-passant-2}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[H]{0.3\textwidth}
+        \centering
+        \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
+        \newchessgame
+        \chessboard[
+            setpieces={ke8,Ke1,Pd6},
+            showmover=false
+        ]
+        \caption{\centering En passant (3).}
+        \label{fig:en-passant-3}
     \end{minipage}
 \end{figure}
 
@@ -318,11 +365,70 @@ The queen can move any number of squares in any direction: horizontally, vertica
 
 \subsection{Rules}
 
-In every game, white starts first and the possible results of each game can be win for white, win for black or draw.
+Each player aims to checkmate the opponent's king, which means that the king is under attack and cannot escape.
 
-\dots
+In every game, \textbf{white starts first} and the possible results of each game can be win for white, win for black or draw\footnote{\url{https://en.wikipedia.org/wiki/Draw_(chess)}}. A tie could be caused by different conditions:
+
+\begin{enumerate}
+    \item Stalemate: the player whose turn it is to move has no legal moves, and their king is not in check.
+    \item Insufficient material: neither player has enough pieces to checkmate. Those cases are king vs king, king and bishop vs king, king and knight vs king, and king and bishop vs king and bishop with the bishops on the same color.
+    \item Threefold repetition: it occurs when same position happens three times during the game, with the same player to move and the same possible moves (including castling and en passant).
+    \item Fifty-move rule: if 50 consecutive moves are made by both players without a pawn move or a capture, the game can be declared a draw.
+    \item Mutual agreement: both players can agree to a draw at any point during the game.
+    \item Dead position: a position where no legal moves can be made, and the game cannot continue. This includes cases like king vs king, king and knight vs king, or king and bishop vs king.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}[H]{0.3\textwidth}
+        \centering
+        \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
+        \newchessgame
+        \chessboard[
+            setfen={2k5/8/8/3QB3/8/4K3/8/8 b - - 0 1},
+            markstyle=circle, color=red, markfields={b8,b7,c7,d7,d8},
+            pgfstyle=straightmove, color=blue,
+            markmoves={d5-d8,d5-a8,e5-b8},
+            arrow=to
+        ]
+        \caption{\centering Stalemate.\newline}
+        \label{fig:stalemate}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[H]{0.3\textwidth}
+        \centering
+        \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
+        \newchessgame
+        \chessboard[
+            setfen={8/8/8/4k3/4B3/4K3/8/8 w - - 0 1}
+        ]
+        \caption{\centering Insufficient material.}
+        \label{fig:insufficient-material}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[H]{0.3\textwidth}
+        \centering
+        \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
+        \newchessgame
+        \chessboard[
+            setfen={8/2b1k3/7p/p1p1p1pP/PpP1P1P1/1P1BK3/8/8 w - - 0 1}
+        ]
+        \caption{\centering Dead position.}
+        \label{fig:dead-position}
+   \end{minipage}
+\end{figure}
+
+Players can also resign at any time, conceding victory to the opponent. Also, if a player runs out of time in a timed game, they lose unless the opponent does not have enough material to checkmate, in which case the game is drawn.
+
+\vspace{1em}
+
+For more information about chess rules, refer to the Wikipedia page: \url{https://en.wikipedia.org/wiki/Rules_of_chess}.
 
 \subsection{Notation}
+
+Notation is important in chess to record moves and analyze games.
+
+\vspace{1em}
 
 In addition to the \textbf{algebraic notation} of the squares in section \ref{sec:chessboard}, each piece is identified by an uppercase letter, which may vary across different languages:
 
@@ -342,7 +448,8 @@ In addition to the \textbf{algebraic notation} of the squares in section \ref{se
     \label{tab:chess-notation}
 \end{table}
 
-For the normal moves (not captures nor promoting), it is written using the piece uppercase letter plus the coordinate of destination:
+\paragraph{Normal moves (not captures nor promoting)}
+It is written using the piece uppercase letter plus the coordinate of destination:
 
 \begin{figure}[H]
     \centering
@@ -357,11 +464,10 @@ For the normal moves (not captures nor promoting), it is written using the piece
     \label{fig:pawn-a6}
 \end{figure}
 
-In Figure \ref{fig:pawn-a6}, the pawn's movement is written as \textbf{Pa6} or directly \textbf{a6}.
+In Figure \ref{fig:pawn-a6}, the pawn's movement is written as \textbf{Pa6} or directly as \textbf{a6}.
 
-\vspace{1em}
-
-Captures are written with an \textbf{"x"} between the piece uppercase letter and coordinate of destination/the captured piece coordinate:
+\paragraph{Captures}
+They are written with an \textbf{"x"} between the piece uppercase letter and coordinate of destination/the captured piece coordinate:
 
 \begin{figure}[H]
     \centering
@@ -378,9 +484,8 @@ Captures are written with an \textbf{"x"} between the piece uppercase letter and
 
 In Figure \ref{fig:bishop-captures-knight}, the white bishop capturing the black knight is written as \textbf{Bxc6}. If it were black's turn, the pawn on \textbf{a6} could capture the white bishop, and it would be written as \textbf{Pxb5} or simply \textbf{axb5}, indicating the pawn's column.
 
-\vspace{1em}
-
-Pawn promotion is written as the pawn's movement to the last row, followed by the piece to which it is promoted:
+\paragraph{Pawn promotion}
+It is written as the pawn's movement to the last row, followed by the piece to which it is promoted:
 
 \begin{figure}[H]
     \centering
@@ -397,13 +502,11 @@ Pawn promotion is written as the pawn's movement to the last row, followed by th
 
 In Figure \ref{fig:pawn-captures-rook}, white pawn capturing and promoting in \textbf{a8} to a queen is written as \textbf{bxa8Q} or \textbf{bxa8=Q}.
 
-\vspace{1em}
+\paragraph{Castling}
+Depending on whether it is on the king's side or the queen's side, it is written as \textbf{0-0} and \textbf{0-0-0}, respectively.
 
-When castling, depending on whether it is on the king's side or the queen's side, it is written as \textbf{0-0} and \textbf{0-0-0}, respectively.
-
-\vspace{1em}
-
-Moves that check and checkmates opponent's king are written by adding a \textbf{+} sign for check or \textbf{++} for checkmate, respectively.
+\paragraph{Check and checkmate}
+They are written by adding a \textbf{+} sign for check or \textbf{++} for checkmate, respectively.
 
 \begin{figure}[H]
     \centering
@@ -420,9 +523,8 @@ Moves that check and checkmates opponent's king are written by adding a \textbf{
 
 In Figure \ref{fig:black-queen-checkmates}, black queen movement checkmates and it is written as \textbf{Dh4++}.
 
-\vspace{1em}
-
-The end of game notation indicates the result of the game. It is typically written as:
+\paragraph{The end of game notation}
+It indicates the result of the game. It is typically written as:
 
 \begin{itemize}
     \item \textbf{1-0}: White wins.
