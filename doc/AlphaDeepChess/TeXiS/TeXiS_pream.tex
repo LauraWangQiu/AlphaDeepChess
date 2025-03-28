@@ -207,8 +207,8 @@
 % tener que escribir  \'a ... aunque eso en teoría  lo hace el paquete
 % inputenc :-m
 
-% \usepackage[english,activeacute,spanish]{babel}
-\usepackage[spanish,activeacute,english]{babel}
+\usepackage[english,activeacute,spanish]{babel}
+%\usepackage[spanish,activeacute,english]{babel}
 
 
 % El paquete url sirve para poder  poner direcciones Web y no morir en
@@ -601,11 +601,16 @@
 % Definimos  los  nombres para  las  tablas  y  el índice  de  tablas,
 % sobreescribiendo los de babel, que los llama 'cuadros'.
 \addto\captionsspanish{%
-  \def\tablename{Tabla}%
-  \def\contentsname{Índice}%
-  \def\listfigurename{Índice de figuras}%
-  \def\listtablename{Índice de tablas}%
-  \def\chaptername{Cap\'itulo}%
+  %\def\tablename{Tabla}%
+  \def\tablename{Table}%
+  %\def\contentsname{Índice}%
+  \def\contentsname{Contents}%
+  %\def\listfigurename{Índice de figuras}%
+  \def\listfigurename{List of figures}%
+  %\def\listtablename{Índice de tablas}%
+  \def\listtablename{List of tables}
+  %\def\chaptername{Cap\'itulo}%
+  \def\chaptername{Chapter}%
 }
 
 % Definimos los nombres en inglés para que ponga figures y tables
@@ -628,7 +633,7 @@
 % Hacemos que los  párrafos se separen con algo más  de espacio que lo
 % habitual.
 %\usepackage{parskip}
-\setlength{\parskip}{1ex}
+\setlength{\parskip}{0.2ex}
 
 % El paquete  psboxit permite poner  una imagen Post Script  dentro de
 % una  caja de  TeX. La  imagen se  parametriza con  la posición  y el
