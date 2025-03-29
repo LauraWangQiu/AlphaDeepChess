@@ -206,9 +206,7 @@ static void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorI
 
     const ChessColor side_waiting = moveGeneratorInfo.side_waiting;
 
-    const uint64_t pawn_attacks_mask = side_waiting == ChessColor::WHITE
-        ? PrecomputedMoveData::whitePawnAttacks(pawn_sq)
-        : PrecomputedMoveData::blackPawnAttacks(pawn_sq);
+    const uint64_t pawn_attacks_mask = PrecomputedMoveData::pawnAttacks(pawn_sq, side_waiting);
 
     moveGeneratorInfo.king_danger_squares_mask |= pawn_attacks_mask;
 
@@ -405,8 +403,7 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
 
     const Square en_passant_square = board.state().en_passant_square();
 
-    const uint64_t pawn_attacks = side_to_move == ChessColor::WHITE ? PrecomputedMoveData::whitePawnAttacks(pawn_sq)
-                                                                    : PrecomputedMoveData::blackPawnAttacks(pawn_sq);
+    const uint64_t pawn_attacks = PrecomputedMoveData::pawnAttacks(pawn_sq, side_to_move);
 
     const uint64_t enemy_mask = moveGeneratorInfo.side_waiting_pieces_mask;
     const uint64_t capture_mask = moveGeneratorInfo.capture_squares_mask;

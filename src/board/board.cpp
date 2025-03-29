@@ -165,8 +165,6 @@ void Board::load_fen(const std::string& fen)
     game_state.set_castle_queen_white(false);
     game_state.set_castle_king_black(false);
     game_state.set_castle_queen_black(false);
-    game_state.set_castled_white(false);
-    game_state.set_castled_black(false);
 
     while ((ss >> token) && !isspace(token)) {
         if (token == 'K') {
@@ -184,15 +182,6 @@ void Board::load_fen(const std::string& fen)
     }
 
     check_and_modify_castle_rights();
-
-    // No possibility of castling, means that the player "has castled" or
-    // that the player has lost the right to castle. In both cases, we set the castled flag
-    if (!game_state.castle_king_white() && !game_state.castle_queen_white()) {
-        game_state.set_castled_white(true);
-    }
-    if (!game_state.castle_king_black() && !game_state.castle_queen_black()) {
-        game_state.set_castled_black(true);
-    }
 
     // 4. En passant square.
 
@@ -469,8 +458,6 @@ void Board::make_castling_move(Move castling_move)
         put_piece(Piece::W_ROOK, Square::F1);
         remove_piece(Square::E1);
         remove_piece(Square::H1);
-
-        game_state.set_castled_white(true);
     }
     else if (castling_move == Move::castle_black_king()) {
 
@@ -489,8 +476,6 @@ void Board::make_castling_move(Move castling_move)
         put_piece(Piece::B_ROOK, Square::F8);
         remove_piece(Square::E8);
         remove_piece(Square::H8);
-
-        game_state.set_castled_black(true);
     }
     else if (castling_move == Move::castle_white_queen()) {
 
@@ -509,8 +494,6 @@ void Board::make_castling_move(Move castling_move)
         put_piece(Piece::W_ROOK, Square::D1);
         remove_piece(Square::E1);
         remove_piece(Square::A1);
-
-        game_state.set_castled_white(true);
     }
     else if (castling_move == Move::castle_black_queen()) {
 
@@ -529,8 +512,6 @@ void Board::make_castling_move(Move castling_move)
         put_piece(Piece::B_ROOK, Square::D8);
         remove_piece(Square::E8);
         remove_piece(Square::A8);
-
-        game_state.set_castled_black(true);
     }
 
     game_state.set_last_captured_piece(PieceType::EMPTY);
@@ -630,8 +611,7 @@ void Board::unmake_enPassant_move(Move enPassant_move)
     const Square captured_pawn_square(origin_square.row(), end_square.col());
 
     const Piece attacker_pawn_piece(get_piece(end_square));
-    const ChessColor captured_pawn_color =
-        get_color(attacker_pawn_piece) == ChessColor::WHITE ? ChessColor::BLACK : ChessColor::WHITE;
+    const ChessColor captured_pawn_color = opposite_color(get_color(attacker_pawn_piece));
 
     const Piece captured_pawn_piece = create_piece(PieceType::PAWN, captured_pawn_color);
 

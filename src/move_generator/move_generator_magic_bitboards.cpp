@@ -220,9 +220,7 @@ static void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorI
 
     const ChessColor side_waiting = moveGeneratorInfo.side_waiting;
 
-    const uint64_t pawn_attacks_mask = side_waiting == ChessColor::WHITE
-        ? PrecomputedMoveData::whitePawnAttacks(pawn_sq)
-        : PrecomputedMoveData::blackPawnAttacks(pawn_sq);
+    const uint64_t pawn_attacks_mask = PrecomputedMoveData::pawnAttacks(pawn_sq, side_waiting);
 
     moveGeneratorInfo.king_danger_squares_mask |= pawn_attacks_mask;
 
@@ -291,10 +289,10 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
     MoveList& moves = moveGeneratorInfo.moves;
     const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
 
-    const Square origin_castle_king_square = side_to_move == ChessColor::WHITE ? Square ::E1 : Square::E8;
+    const Square origin_castle_king_square = is_white(side_to_move) ? Square ::E1 : Square::E8;
 
-    const Piece king_piece = side_to_move == ChessColor::WHITE ? Piece::W_KING : Piece::B_KING;
-    const Piece rook_piece = side_to_move == ChessColor::WHITE ? Piece::W_ROOK : Piece::B_ROOK;
+    const Piece king_piece = is_white(side_to_move) ? Piece::W_KING : Piece::B_KING;
+    const Piece rook_piece = is_white(side_to_move) ? Piece::W_ROOK : Piece::B_ROOK;
 
     if (king_sq != origin_castle_king_square || moveGeneratorInfo.number_of_checkers > 0 ||
         board.get_piece(origin_castle_king_square) != king_piece) {
@@ -309,10 +307,10 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
     const uint64_t empty_mask = ~board.get_bitboard_all();
 
     const bool king_side_castle_available =
-        side_to_move == ChessColor::WHITE ? board.state().castle_king_white() : board.state().castle_king_black();
+        is_white(side_to_move) ? board.state().castle_king_white() : board.state().castle_king_black();
 
     const bool queen_side_castle_available =
-        side_to_move == ChessColor::WHITE ? board.state().castle_queen_white() : board.state().castle_queen_black();
+        is_white(side_to_move) ? board.state().castle_queen_white() : board.state().castle_queen_black();
 
     if (king_side_castle_available && board.get_piece(king_side_rook_sq) == rook_piece) {
 
@@ -322,7 +320,7 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
         const bool available = (in_between_squares_mask & empty_mask & ~king_danger_mask) == in_between_squares_mask;
 
         if (available) {
-            moves.add(side_to_move == ChessColor::WHITE ? Move::castle_white_king() : Move::castle_black_king());
+            moves.add(is_white(side_to_move) ? Move::castle_white_king() : Move::castle_black_king());
         }
     }
 
@@ -336,7 +334,7 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
             board.is_empty(Square(king_sq.row(), COL_B));
 
         if (available) {
-            moves.add(side_to_move == ChessColor::WHITE ? Move::castle_white_queen() : Move::castle_black_queen());
+            moves.add(is_white(side_to_move) ? Move::castle_white_queen() : Move::castle_black_queen());
         }
     }
 }
@@ -384,8 +382,7 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
 
     const Square en_passant_square = board.state().en_passant_square();
 
-    const uint64_t pawn_attacks = side_to_move == ChessColor::WHITE ? PrecomputedMoveData::whitePawnAttacks(pawn_sq)
-                                                                    : PrecomputedMoveData::blackPawnAttacks(pawn_sq);
+    const uint64_t pawn_attacks = PrecomputedMoveData::pawnAttacks(pawn_sq, side_to_move);
 
     const uint64_t enemy_mask = moveGeneratorInfo.side_waiting_pieces_mask;
     const uint64_t capture_mask = moveGeneratorInfo.capture_squares_mask;
@@ -400,10 +397,9 @@ static void calculate_pawn_moves(Square pawn_sq, MoveGeneratorInfo& moveGenerato
     // pawn push
     if constexpr (genType == ALL_MOVES) {
 
-        const Square pawn_push_sq = side_to_move == ChessColor::WHITE ? pawn_sq.north() : pawn_sq.south();
+        const Square pawn_push_sq = is_white(side_to_move) ? pawn_sq.north() : pawn_sq.south();
 
-        const Square pawn_double_push_sq =
-            side_to_move == ChessColor::WHITE ? pawn_push_sq.north() : pawn_push_sq.south();
+        const Square pawn_double_push_sq = is_white(side_to_move) ? pawn_push_sq.north() : pawn_push_sq.south();
 
         const bool double_push_available = pawn_sq.row() == moveGeneratorInfo.row_where_double_push_is_available;
 

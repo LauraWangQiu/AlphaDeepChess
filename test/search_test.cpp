@@ -40,12 +40,12 @@ static void search_compare_with_minimax_test(const std::string& fen, const int d
     search_best_move(searchResults, board, depth);
 
     Move best_minimax_move = Move::null();
-    int best_minimax_eval = side_to_move == ChessColor::WHITE ? -INF_EVAL : +INF_EVAL;
+    int best_minimax_eval = is_white(side_to_move) ? -INF_EVAL : +INF_EVAL;
 
     History::clear();
 
-    side_to_move == ChessColor::WHITE ? minimax<MAXIMIZE_WHITE>(board, depth, 0, best_minimax_move, best_minimax_eval)
-                                      : minimax<MINIMIZE_BLACK>(board, depth, 0, best_minimax_move, best_minimax_eval);
+    is_white(side_to_move) ? minimax<MAXIMIZE_WHITE>(board, depth, 0, best_minimax_move, best_minimax_eval)
+                           : minimax<MINIMIZE_BLACK>(board, depth, 0, best_minimax_move, best_minimax_eval);
 
     Move best_search_move(searchResults.results[depth - 1].bestMove_data);
     int best_search_eval = searchResults.results[depth - 1].evaluation;

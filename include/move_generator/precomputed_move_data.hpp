@@ -127,37 +127,24 @@ public:
     }
 
     /**
-     * @brief whitePawnAttacks
+     * @brief pawnAttacks
      * 
      * calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board
      * 
-     * @note square must be valid
+     * @note square and color must be valid
      * 
      * @param[in] square The selected square
+     * @param[in] color The selected color
      * 
-     * @return WHITE_PAWN_ATTACKS[square]
+     * @return PAWN_ATTACKS[color][square]
      */
-    static inline uint64_t whitePawnAttacks(Square square)
+    static inline uint64_t pawnAttacks(Square square, ChessColor color)
     {
         assert(square.is_valid());
-        return WHITE_PAWN_ATTACKS[square];
-    }
+        assert(is_valid_color(color));
+        static constexpr const uint64_t* PAWN_ATTACK[2] = {BLACK_PAWN_ATTACKS.data(), WHITE_PAWN_ATTACKS.data()};
 
-    /**
-     * @brief blackPawnAttacks
-     * 
-     * calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board
-     * 
-     * @note square must be valid
-     * 
-     * @param[in] square The selected square
-     * 
-     * @return BLACK_PAWN_ATTACKS[square]
-     */
-    static inline uint64_t blackPawnAttacks(Square square)
-    {
-        assert(square.is_valid());
-        return BLACK_PAWN_ATTACKS[square];
+        return PAWN_ATTACK[static_cast<int>(color)][square];
     }
 
     /**

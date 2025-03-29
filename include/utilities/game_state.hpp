@@ -11,8 +11,6 @@
  * 
  */
 
-static constexpr uint64_t SHIFT_HAS_CASTLED_WHITE = 44ULL;
-static constexpr uint64_t SHIFT_HAS_CASTLED_BLACK = 43ULL;
 static constexpr uint64_t SHIFT_FIFTY_MOVE_RULE = 35ULL;
 static constexpr uint64_t SHIFT_LAST_CAPTURED_PIECE = 32ULL;
 static constexpr uint64_t SHIFT_SIDE_TO_MOVE = 31ULL;
@@ -23,8 +21,6 @@ static constexpr uint64_t SHIFT_CASTLE_QUEEN_BLACK = 27ULL;
 static constexpr uint64_t SHIFT_EN_PASSANT_SQUARE = 20ULL;
 static constexpr uint64_t SHIFT_MOVE_NUMBER = 0ULL;
 
-static constexpr uint64_t MASK_HAS_CASTLED_WHITE = (1ULL << SHIFT_HAS_CASTLED_WHITE);
-static constexpr uint64_t MASK_HAS_CASTLED_BLACK = (1ULL << SHIFT_HAS_CASTLED_BLACK);
 static constexpr uint64_t MASK_FIFTY_MOVE_RULE = (0xffULL << SHIFT_FIFTY_MOVE_RULE);
 static constexpr uint64_t MASK_LAST_CAPTURED_PIECE = (7ULL << SHIFT_LAST_CAPTURED_PIECE);
 static constexpr uint64_t MASK_SIDE_TO_MOVE = (1ULL << SHIFT_SIDE_TO_MOVE);
@@ -42,8 +38,6 @@ static constexpr uint64_t MASK_MOVE_NUMBER = (0xfffffULL << SHIFT_MOVE_NUMBER);
  * Represents the sate of the chess game.
  * 
  * @note game state is stored as a 64-bit number :
- * 44 : has_castled_white : 1 if white has castled, 0 if not.
- * 43 : has_castled_black : 1 if black has castled, 0 if not.
  * 35-42 : fifty_move_rule_counter : if counter gets to 100 then game is a draw.
  * 32-34 : last_captured_piece : PieceType::Empty if last move was not a capture.
  * 31 : side_to_move : 0 if white, 1 if black.
@@ -196,30 +190,6 @@ public:
      * 
      */
     constexpr inline uint64_t get_zobrist_key() const { return zobrist_key; };
-
-    /**
-     * @brief set_castled_white
-     * 
-     * set if white has castled.
-     * 
-     * @note None.
-     * 
-     * @param[in] castled TRUE if white has castled, FALSE if not.
-     * 
-     */
-    constexpr inline void set_castled_white(bool castled);
-
-    /**
-     * @brief set_castled_black
-     * 
-     * set if black has castled.
-     * 
-     * @note None.
-     * 
-     * @param[in] castled TRUE if black has castled, FALSE if not.
-     * 
-     */
-    constexpr inline void set_castled_black(bool castled);
 
     /**
      * @brief set_fifty_move_rule_counter
@@ -456,38 +426,6 @@ private:
 };
 
 /**
- * @brief has_castled_white
- * 
- * get if white has castled.
- * 
- * @note None.
- * 
- * @return
- * - TRUE if white has castled.
- * - FALSE if white has not castled.
- */
-constexpr inline bool GameState::has_castled_white() const
-{
-    return (state_register & MASK_HAS_CASTLED_WHITE) >> SHIFT_HAS_CASTLED_WHITE;
-}
-
-/**
- * @brief has_castled_black
- * 
- * get if black has castled.
- * 
- * @note None.
- * 
- * @return
- * - TRUE if black has castled.
- * - FALSE if black has not castled.
- */
-constexpr inline bool GameState::has_castled_black() const
-{
-    return (state_register & MASK_HAS_CASTLED_BLACK) >> SHIFT_HAS_CASTLED_BLACK;
-}
-
-/**
  * @brief fifty_move_rule_counter
  * 
  * Counter for the fifty move rule, if 50 moves passed without 
@@ -603,38 +541,6 @@ constexpr inline Square GameState::en_passant_square() const
 constexpr inline uint64_t GameState::move_number() const
 {
     return (state_register & MASK_MOVE_NUMBER) >> SHIFT_MOVE_NUMBER;
-}
-
-/**
- * @brief set_castled_white
- * 
- * set if white has castled.
- * 
- * @note None.
- * 
- * @param[in] castled TRUE if white has castled, FALSE if not.
- * 
- */
-constexpr inline void GameState::set_castled_white(bool castled)
-{
-    state_register &= ~MASK_HAS_CASTLED_WHITE;
-    state_register |= static_cast<uint64_t>(castled) << SHIFT_HAS_CASTLED_WHITE;
-}
-
-/**
- * @brief set_castled_black
- * 
- * set if black has castled.
- * 
- * @note None.
- * 
- * @param[in] castled TRUE if black has castled, FALSE if not.
- * 
- */
-constexpr inline void GameState::set_castled_black(bool castled)
-{
-    state_register &= ~MASK_HAS_CASTLED_BLACK;
-    state_register |= static_cast<uint64_t>(castled) << SHIFT_HAS_CASTLED_BLACK;
 }
 
 /**

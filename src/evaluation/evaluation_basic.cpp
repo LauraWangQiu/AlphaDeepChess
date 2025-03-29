@@ -92,7 +92,7 @@ int evaluate_position(const Board& board)
         const ChessColor piece_color = get_color(piece);
         const int piece_bonus_square = PrecomputedEvalData::get_piece_square_table(piece, square, in_endgame);
         const int piece_value = raw_value(piece) + piece_bonus_square;
-        evaluation += piece_color == ChessColor::WHITE ? piece_value : -piece_value;
+        evaluation += is_white(piece_color) ? piece_value : -piece_value;
     }
 
     return evaluation;

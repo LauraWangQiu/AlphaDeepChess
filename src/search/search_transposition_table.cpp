@@ -49,7 +49,7 @@ void search(std::atomic<bool>& stop, SearchResults& results, Board& board, uint3
 
     const ChessColor side_to_move = board.state().side_to_move();
 
-    context.bestEvalFound = side_to_move == ChessColor::WHITE ? -INF_EVAL : +INF_EVAL;
+    context.bestEvalFound = is_white(side_to_move) ? -INF_EVAL : +INF_EVAL;
     context.bestMoveFound = Move::null();
 
     iterative_deepening(stop, results, max_depth, context);
@@ -93,11 +93,10 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
     for (int depth = 1; depth <= max_depth; depth++) {
 
         context.bestMoveInIteration = Move::null();
-        context.bestEvalInIteration = side_to_move == ChessColor::WHITE ? -INF_EVAL : +INF_EVAL;
+        context.bestEvalInIteration = is_white(side_to_move) ? -INF_EVAL : +INF_EVAL;
 
-        side_to_move == ChessColor::WHITE
-            ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, -INF_EVAL, +INF_EVAL, context)
-            : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, -INF_EVAL, +INF_EVAL, context);
+        is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, -INF_EVAL, +INF_EVAL, context)
+                               : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, -INF_EVAL, +INF_EVAL, context);
 
         if (stop) {
             break;
