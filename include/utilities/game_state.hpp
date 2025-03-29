@@ -173,7 +173,7 @@ public:
      * 
      * @return
      * - 0<=square<=63 if en passant is available.
-     * - SQ_INVALID if en en passant is no available.
+     * - INVALID if en en passant is no available.
      */
     constexpr inline Square en_passant_square() const;
 
@@ -298,7 +298,7 @@ public:
      * 
      * set the square where en passant is available.
      * 
-     * @note SQ_INVALID means that en passant is not available.
+     * @note INVALID means that en passant is not available.
      * 
      * @param[in] square nen passant square.
      * 
@@ -344,7 +344,7 @@ public:
      *  Cleans the game state to 0 (initial value)
      *  set_move_number(1ULL);
         set_side_to_move(ChessColor::WHITE);
-     *  set_en_passant_square(Square::SQ_INVALID);
+     *  set_en_passant_square(Square::INVALID);
      *  set_last_captured_piece(PieceType::EMPTY);
      */
     constexpr inline void clean()
@@ -353,7 +353,7 @@ public:
         zobrist_key = 0ULL;
         set_move_number(1ULL);
         set_side_to_move(ChessColor::WHITE);
-        set_en_passant_square(Square::SQ_INVALID);
+        set_en_passant_square(Square::INVALID);
         set_last_captured_piece(PieceType::EMPTY);
     }
 
@@ -367,7 +367,7 @@ public:
      * set_move_number(1ULL);
      * set_side_to_move(ChessColor::WHITE);
      * state_register = 0ULL;
-     * set_en_passant_square(Square::SQ_INVALID);
+     * set_en_passant_square(Square::INVALID);
      * set_last_captured_piece(PieceType::EMPTY);
      * 
      */
@@ -585,7 +585,7 @@ constexpr inline bool GameState::castle_queen_black() const { return state_regis
  * 
  * @return
  * - 0<=square<=63 if en passant is available.
- * - SQ_INVALID if en en passant is no available.
+ * - INVALID if en en passant is no available.
  */
 constexpr inline Square GameState::en_passant_square() const
 {
@@ -748,7 +748,7 @@ constexpr inline void GameState::set_castle_queen_black(bool available)
  * 
  * set the square where en passant is available.
  * 
- * @note SQ_INVALID means that en passant is not available.
+ * @note INVALID means that en passant is not available.
  * 
  * @param[in] square nen passant square.
  * 

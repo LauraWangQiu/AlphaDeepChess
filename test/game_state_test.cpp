@@ -10,7 +10,7 @@ void game_state_test()
     GameState game_state;
 
     game_state.clean();
-    game_state.set_en_passant_square(Square::SQ_B7);
+    game_state.set_en_passant_square(Square::B7);
     game_state.set_castle_king_black(true);
     game_state.set_castle_queen_black(true);
     game_state.set_castle_king_white(true);
@@ -20,8 +20,8 @@ void game_state_test()
     game_state.set_move_number(511);
     game_state.set_side_to_move(ChessColor::BLACK);
 
-    if (game_state.en_passant_square() != Square::SQ_B7) {
-        PRINT_TEST_FAILED(test_name, "game_state.en_passant_square() != Square::SQ_B7");
+    if (game_state.en_passant_square() != Square::B7) {
+        PRINT_TEST_FAILED(test_name, "game_state.en_passant_square() != Square::B7");
     }
     if (game_state.castle_king_black() != true) {
         PRINT_TEST_FAILED(test_name, "game_state.castle_king_black() != true");
@@ -49,7 +49,7 @@ void game_state_test()
     }
 
 
-    game_state.set_en_passant_square(Square::SQ_INVALID);
+    game_state.set_en_passant_square(Square::INVALID);
     game_state.set_castle_king_black(false);
     game_state.set_castle_queen_black(false);
     game_state.set_castle_king_white(false);
@@ -59,8 +59,8 @@ void game_state_test()
     game_state.set_move_number(1);
     game_state.set_side_to_move(ChessColor::WHITE);
 
-    if (game_state.en_passant_square() != Square::SQ_INVALID) {
-        PRINT_TEST_FAILED(test_name, "game_state.en_passant_square() != Square::SQ_INVALID");
+    if (game_state.en_passant_square() != Square::INVALID) {
+        PRINT_TEST_FAILED(test_name, "game_state.en_passant_square() != Square::INVALID");
     }
     if (game_state.castle_king_black() != false) {
         PRINT_TEST_FAILED(test_name, "game_state.castle_king_black() != false");

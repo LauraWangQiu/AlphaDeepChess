@@ -42,7 +42,7 @@ static const TableRookMoves initialize_rook_legal_moves(ArrayBitboardsConst& ROO
 {
     TableRookMoves ROOK_MOVES;
 
-    for (Square square = Square::SQ_A1; square.is_valid(); square++) {
+    for (Square square = Square::A1; square.is_valid(); square++) {
         const uint64_t attacks = ROOK_ATTACKS[square];
 
         int indicesInMoveMask[64] = {0};
@@ -82,7 +82,7 @@ static const TableBishopMoves initialize_bishop_legal_moves(ArrayBitboardsConst&
 {
     TableBishopMoves BISHOP_MOVES;
 
-    for (Square square = Square::SQ_A1; square.is_valid(); square++) {
+    for (Square square = Square::A1; square.is_valid(); square++) {
 
         const uint64_t attacks = BISHOP_ATTACKS[square];
         const uint64_t edges = ((ROW_1_MASK | ROW_8_MASK) & ~get_row_mask(square.row())) |

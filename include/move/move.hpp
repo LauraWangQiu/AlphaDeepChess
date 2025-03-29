@@ -207,40 +207,40 @@ public:
      * 
      * white king side castle move.
      * 
-     * @return Move(Square::SQ_E1, Square::SQ_G1, MoveType::CASTLING).
+     * @return Move(Square::E1, Square::G1, MoveType::CASTLING).
      * 
      */
-    static constexpr Move castle_white_king() { return Move(Square::SQ_E1, Square::SQ_G1, MoveType::CASTLING); }
+    static constexpr Move castle_white_king() { return Move(Square::E1, Square::G1, MoveType::CASTLING); }
 
     /**
      * @brief castle_white_queen
      * 
      * white queen side castle move.
      * 
-     * @return Move(Square::SQ_E1, Square::SQ_C1, MoveType::CASTLING).
+     * @return Move(Square::E1, Square::C1, MoveType::CASTLING).
      * 
      */
-    static constexpr Move castle_white_queen() { return Move(Square::SQ_E1, Square::SQ_C1, MoveType::CASTLING); }
+    static constexpr Move castle_white_queen() { return Move(Square::E1, Square::C1, MoveType::CASTLING); }
 
     /**
      * @brief castle_black_king
      * 
      * black king side castle move.
      * 
-     * @return Move(Square::SQ_E8, Square::SQ_G8, MoveType::CASTLING).
+     * @return Move(Square::E8, Square::G8, MoveType::CASTLING).
      * 
      */
-    static constexpr Move castle_black_king() { return Move(Square::SQ_E8, Square::SQ_G8, MoveType::CASTLING); }
+    static constexpr Move castle_black_king() { return Move(Square::E8, Square::G8, MoveType::CASTLING); }
 
     /**
      * @brief castle_black_queen
      * 
      * black queen side castle move.
      * 
-     * @return Move(Square::SQ_E8, Square::SQ_C8, MoveType::CASTLING).
+     * @return Move(Square::E8, Square::C8, MoveType::CASTLING).
      * 
      */
-    static constexpr Move castle_black_queen() { return Move(Square::SQ_E8, Square::SQ_C8, MoveType::CASTLING); }
+    static constexpr Move castle_black_queen() { return Move(Square::E8, Square::C8, MoveType::CASTLING); }
 
     /**
      * @brief unique identifier 14 bits (0-16383)

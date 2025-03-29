@@ -63,7 +63,7 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* inCheck)
         return;
     }
 
-    for (Square square = Square::SQ_A1; square <= Square::SQ_H8; square++) {
+    for (Square square = Square::A1; square <= Square::H8; square++) {
 
         const Piece piece = board.get_piece(square);
         const ChessColor piece_color = get_color(piece);
@@ -102,7 +102,7 @@ static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
     const Board& board = moveGeneratorInfo.board;
     const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
 
-    for (Square square = Square::SQ_A1; square <= Square::SQ_H8; square++) {
+    for (Square square = Square::A1; square <= Square::H8; square++) {
 
         const Piece piece = board.get_piece(square);
         const ChessColor piece_color = get_color(piece);
@@ -321,7 +321,7 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
     MoveList& moves = moveGeneratorInfo.moves;
     const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
 
-    const Square origin_castle_king_square = side_to_move == ChessColor::WHITE ? Square ::SQ_E1 : Square::SQ_E8;
+    const Square origin_castle_king_square = side_to_move == ChessColor::WHITE ? Square ::E1 : Square::E8;
 
     const Piece king_piece = side_to_move == ChessColor::WHITE ? Piece::W_KING : Piece::B_KING;
     const Piece rook_piece = side_to_move == ChessColor::WHITE ? Piece::W_ROOK : Piece::B_ROOK;

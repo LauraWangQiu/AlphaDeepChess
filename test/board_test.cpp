@@ -53,29 +53,29 @@ static void board_get_piece_test()
     Board board;
     board.load_fen(StartFEN);
 
-    if (board.get_piece(Square::SQ_A1) != Piece::W_ROOK) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A1)!=Piece::W_ROOK");
+    if (board.get_piece(Square::A1) != Piece::W_ROOK) {
+        PRINT_TEST_FAILED(test_name, "get_piece(A1)!=Piece::W_ROOK");
     }
-    if (board.get_piece(Square::SQ_A2) != Piece::W_PAWN) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A2)!=Piece::W_PAWN");
+    if (board.get_piece(Square::A2) != Piece::W_PAWN) {
+        PRINT_TEST_FAILED(test_name, "get_piece(A2)!=Piece::W_PAWN");
     }
-    if (board.get_piece(Square::SQ_A3) != Piece::EMPTY) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A3)!=Piece::EMPTY");
+    if (board.get_piece(Square::A3) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(A3)!=Piece::EMPTY");
     }
-    if (board.get_piece(Square::SQ_A4) != Piece::EMPTY) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A4)!=Piece::EMPTY");
+    if (board.get_piece(Square::A4) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(A4)!=Piece::EMPTY");
     }
-    if (board.get_piece(Square::SQ_A5) != Piece::EMPTY) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A5)!=Piece::EMPTY");
+    if (board.get_piece(Square::A5) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(A5)!=Piece::EMPTY");
     }
-    if (board.get_piece(Square::SQ_A6) != Piece::EMPTY) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A6)!=Piece::EMPTY");
+    if (board.get_piece(Square::A6) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(A6)!=Piece::EMPTY");
     }
-    if (board.get_piece(Square::SQ_A7) != Piece::B_PAWN) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A7)!=Piece::B_PAWN");
+    if (board.get_piece(Square::A7) != Piece::B_PAWN) {
+        PRINT_TEST_FAILED(test_name, "get_piece(A7)!=Piece::B_PAWN");
     }
-    if (board.get_piece(Square::SQ_A8) != Piece::B_ROOK) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A8)!=Piece::B_ROOK");
+    if (board.get_piece(Square::A8) != Piece::B_ROOK) {
+        PRINT_TEST_FAILED(test_name, "get_piece(A8)!=Piece::B_ROOK");
     }
 }
 
@@ -88,29 +88,29 @@ static void board_is_empty_test()
     Board board;
     board.load_fen(StartFEN);
 
-    if (board.is_empty(Square::SQ_A1) != false) {
-        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A1)!=false");
+    if (board.is_empty(Square::A1) != false) {
+        PRINT_TEST_FAILED(test_name, "is_empty(A1)!=false");
     }
-    if (board.is_empty(Square::SQ_A2) != false) {
-        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A2)!=false");
+    if (board.is_empty(Square::A2) != false) {
+        PRINT_TEST_FAILED(test_name, "is_empty(A2)!=false");
     }
-    if (board.is_empty(Square::SQ_A3) != true) {
-        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A3)!=true");
+    if (board.is_empty(Square::A3) != true) {
+        PRINT_TEST_FAILED(test_name, "is_empty(A3)!=true");
     }
-    if (board.is_empty(Square::SQ_A4) != true) {
-        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A4)!=true");
+    if (board.is_empty(Square::A4) != true) {
+        PRINT_TEST_FAILED(test_name, "is_empty(A4)!=true");
     }
-    if (board.is_empty(Square::SQ_A5) != true) {
-        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A5)!=true");
+    if (board.is_empty(Square::A5) != true) {
+        PRINT_TEST_FAILED(test_name, "is_empty(A5)!=true");
     }
-    if (board.is_empty(Square::SQ_A6) != true) {
-        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A6)!=true");
+    if (board.is_empty(Square::A6) != true) {
+        PRINT_TEST_FAILED(test_name, "is_empty(A6)!=true");
     }
-    if (board.is_empty(Square::SQ_A7) != false) {
-        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A7)!=false");
+    if (board.is_empty(Square::A7) != false) {
+        PRINT_TEST_FAILED(test_name, "is_empty(A7)!=false");
     }
-    if (board.is_empty(Square::SQ_A8) != false) {
-        PRINT_TEST_FAILED(test_name, "is_empty(SQ_A8)!=false");
+    if (board.is_empty(Square::A8) != false) {
+        PRINT_TEST_FAILED(test_name, "is_empty(A8)!=false");
     }
 }
 
@@ -219,32 +219,32 @@ static void board_put_piece_test()
 
     Board board;
 
-    board.put_piece(Piece::W_QUEEN, Square::SQ_A1);
-    board.put_piece(Piece::B_QUEEN, Square::SQ_H8);
-    board.put_piece(Piece::W_KNIGHT, Square::SQ_A8);
-    board.put_piece(Piece::B_PAWN, Square::SQ_H1);
-    board.put_piece(Piece::B_ROOK, Square::SQ_D4);
+    board.put_piece(Piece::W_QUEEN, Square::A1);
+    board.put_piece(Piece::B_QUEEN, Square::H8);
+    board.put_piece(Piece::W_KNIGHT, Square::A8);
+    board.put_piece(Piece::B_PAWN, Square::H1);
+    board.put_piece(Piece::B_ROOK, Square::D4);
 
-    if (board.get_piece(Square::SQ_A1) != Piece::W_QUEEN) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A1)!=Piece::W_QUEEN");
+    if (board.get_piece(Square::A1) != Piece::W_QUEEN) {
+        PRINT_TEST_FAILED(test_name, "get_piece(A1)!=Piece::W_QUEEN");
     }
-    if (board.get_piece(Square::SQ_H8) != Piece::B_QUEEN) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_H8)!=Piece::B_QUEEN");
+    if (board.get_piece(Square::H8) != Piece::B_QUEEN) {
+        PRINT_TEST_FAILED(test_name, "get_piece(H8)!=Piece::B_QUEEN");
     }
-    if (board.get_piece(Square::SQ_A8) != Piece::W_KNIGHT) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A8)!=Piece::W_KNIGHT");
+    if (board.get_piece(Square::A8) != Piece::W_KNIGHT) {
+        PRINT_TEST_FAILED(test_name, "get_piece(A8)!=Piece::W_KNIGHT");
     }
-    if (board.get_piece(Square::SQ_H1) != Piece::B_PAWN) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_H1)!=Piece::B_PAWN");
+    if (board.get_piece(Square::H1) != Piece::B_PAWN) {
+        PRINT_TEST_FAILED(test_name, "get_piece(H1)!=Piece::B_PAWN");
     }
-    if (board.get_piece(Square::SQ_D4) != Piece::B_ROOK) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_D4)!=Piece::B_ROOK");
+    if (board.get_piece(Square::D4) != Piece::B_ROOK) {
+        PRINT_TEST_FAILED(test_name, "get_piece(D4)!=Piece::B_ROOK");
     }
 
-    board.put_piece(Piece::EMPTY, Square::SQ_A1);
+    board.put_piece(Piece::EMPTY, Square::A1);
 
-    if (board.get_piece(Square::SQ_A1) != Piece::EMPTY) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A1)!=Piece::EMPTY");
+    if (board.get_piece(Square::A1) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(A1)!=Piece::EMPTY");
     }
 }
 
@@ -254,32 +254,32 @@ static void board_remove_piece_test()
 
     Board board;
 
-    board.put_piece(Piece::W_QUEEN, Square::SQ_A1);
-    board.put_piece(Piece::B_QUEEN, Square::SQ_H8);
-    board.put_piece(Piece::W_KNIGHT, Square::SQ_A8);
-    board.put_piece(Piece::B_PAWN, Square::SQ_H1);
-    board.put_piece(Piece::B_ROOK, Square::SQ_D4);
+    board.put_piece(Piece::W_QUEEN, Square::A1);
+    board.put_piece(Piece::B_QUEEN, Square::H8);
+    board.put_piece(Piece::W_KNIGHT, Square::A8);
+    board.put_piece(Piece::B_PAWN, Square::H1);
+    board.put_piece(Piece::B_ROOK, Square::D4);
 
-    board.remove_piece(Square::SQ_A1);
-    board.remove_piece(Square::SQ_H8);
-    board.remove_piece(Square::SQ_A8);
-    board.remove_piece(Square::SQ_H1);
-    board.remove_piece(Square::SQ_D4);
+    board.remove_piece(Square::A1);
+    board.remove_piece(Square::H8);
+    board.remove_piece(Square::A8);
+    board.remove_piece(Square::H1);
+    board.remove_piece(Square::D4);
 
-    if (board.get_piece(Square::SQ_A1) != Piece::EMPTY) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A1)!=Piece::EMPTY");
+    if (board.get_piece(Square::A1) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(A1)!=Piece::EMPTY");
     }
-    if (board.get_piece(Square::SQ_H8) != Piece::EMPTY) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_H8)!=Piece::EMPTY");
+    if (board.get_piece(Square::H8) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(H8)!=Piece::EMPTY");
     }
-    if (board.get_piece(Square::SQ_A8) != Piece::EMPTY) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_A8)!=Piece::EMPTY");
+    if (board.get_piece(Square::A8) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(A8)!=Piece::EMPTY");
     }
-    if (board.get_piece(Square::SQ_H1) != Piece::EMPTY) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_H1)!=Piece::EMPTY");
+    if (board.get_piece(Square::H1) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(H1)!=Piece::EMPTY");
     }
-    if (board.get_piece(Square::SQ_D4) != Piece::EMPTY) {
-        PRINT_TEST_FAILED(test_name, "get_piece(SQ_D4)!=Piece::EMPTY");
+    if (board.get_piece(Square::D4) != Piece::EMPTY) {
+        PRINT_TEST_FAILED(test_name, "get_piece(D4)!=Piece::EMPTY");
     }
 }
 
@@ -315,7 +315,7 @@ static void board_clean_test()
     board.load_fen(StartFEN);
     board.clean();
 
-    for (Square sq = Square::SQ_A1; sq.is_valid(); sq++) {
+    for (Square sq = Square::A1; sq.is_valid(); sq++) {
         if (board.is_empty(sq) != true) {
             PRINT_TEST_FAILED(test_name, "is_empty(sq)!=true");
         }
@@ -352,8 +352,8 @@ static void board_clean_test()
     if (board.state().last_captured_piece() != PieceType::EMPTY) {
         PRINT_TEST_FAILED(test_name, "state().last_captured_piece() != EMPTY");
     }
-    if (board.state().en_passant_square() != Square::SQ_INVALID) {
-        PRINT_TEST_FAILED(test_name, "state().en_passant_square() != SQ_INVALID");
+    if (board.state().en_passant_square() != Square::INVALID) {
+        PRINT_TEST_FAILED(test_name, "state().en_passant_square() != INVALID");
     }
     if (board.state().castle_king_black() != false) {
         PRINT_TEST_FAILED(test_name, "state().castle_king_black() != false");
@@ -380,40 +380,40 @@ static void board_make_unmake_move_test()
     std::stack<GameState> game_states;
 
     Move moves[num_moves] = {
-        Move(Square::SQ_D2, Square::SQ_D4),   // 1. d4
-        Move(Square::SQ_F7, Square::SQ_F5),   // 1... f5
-        Move(Square::SQ_E2, Square::SQ_E4),   // 2. e4
-        Move(Square::SQ_F5, Square::SQ_E4),   // 2... fxe4
-        Move(Square::SQ_B1, Square::SQ_C3),   // 3. Nc3
-        Move(Square::SQ_G8, Square::SQ_F6),   // 3... Nf6
-        Move(Square::SQ_C1, Square::SQ_G5),   // 4. Bg5
-        Move(Square::SQ_E7, Square::SQ_E6),   // 4... e6
-        Move(Square::SQ_C3, Square::SQ_E4),   // 5. Nxe4
-        Move(Square::SQ_F8, Square::SQ_E7),   // 5... Be7
-        Move(Square::SQ_G5, Square::SQ_F6),   // 6. Bxf6
-        Move(Square::SQ_E7, Square::SQ_F6),   // 6... Bxf6
-        Move(Square::SQ_G1, Square::SQ_F3),   // 7. Nf3
+        Move(Square::D2, Square::D4),   // 1. d4
+        Move(Square::F7, Square::F5),   // 1... f5
+        Move(Square::E2, Square::E4),   // 2. e4
+        Move(Square::F5, Square::E4),   // 2... fxe4
+        Move(Square::B1, Square::C3),   // 3. Nc3
+        Move(Square::G8, Square::F6),   // 3... Nf6
+        Move(Square::C1, Square::G5),   // 4. Bg5
+        Move(Square::E7, Square::E6),   // 4... e6
+        Move(Square::C3, Square::E4),   // 5. Nxe4
+        Move(Square::F8, Square::E7),   // 5... Be7
+        Move(Square::G5, Square::F6),   // 6. Bxf6
+        Move(Square::E7, Square::F6),   // 6... Bxf6
+        Move(Square::G1, Square::F3),   // 7. Nf3
         Move::castle_black_king(),            // 7... O-O
-        Move(Square::SQ_F1, Square::SQ_D3),   // 8. Bd3
-        Move(Square::SQ_B7, Square::SQ_B6),   // 8... b6
-        Move(Square::SQ_F3, Square::SQ_E5),   // 9. Ne5
-        Move(Square::SQ_C8, Square::SQ_B7),   // 9... Bb7
-        Move(Square::SQ_D1, Square::SQ_H5),   // 10. Qh5
-        Move(Square::SQ_D8, Square::SQ_E7),   // 10... Qe7
-        Move(Square::SQ_H5, Square::SQ_H7),   // 11. Qxh7+
-        Move(Square::SQ_G8, Square::SQ_H7),   // 11... Kxh7
-        Move(Square::SQ_E4, Square::SQ_F6),   // 12. Nxf6+
-        Move(Square::SQ_H7, Square::SQ_H6),   // 12... Kh6
-        Move(Square::SQ_E5, Square::SQ_G4),   // 13. Ng4+
-        Move(Square::SQ_H6, Square::SQ_G5),   // 13... Kg5
-        Move(Square::SQ_H2, Square::SQ_H4),   // 14. h4+
-        Move(Square::SQ_G5, Square::SQ_F4),   // 14... Kf4
-        Move(Square::SQ_G2, Square::SQ_G3),   // 15. g3+
-        Move(Square::SQ_F4, Square::SQ_F3),   // 15... Kf3
-        Move(Square::SQ_D3, Square::SQ_E2),   // 16. Be2+
-        Move(Square::SQ_F3, Square::SQ_G2),   // 16... Kg2
-        Move(Square::SQ_H1, Square::SQ_H2),   // 17. Rh2+
-        Move(Square::SQ_G2, Square::SQ_G1),   // 17... Kg1
+        Move(Square::F1, Square::D3),   // 8. Bd3
+        Move(Square::B7, Square::B6),   // 8... b6
+        Move(Square::F3, Square::E5),   // 9. Ne5
+        Move(Square::C8, Square::B7),   // 9... Bb7
+        Move(Square::D1, Square::H5),   // 10. Qh5
+        Move(Square::D8, Square::E7),   // 10... Qe7
+        Move(Square::H5, Square::H7),   // 11. Qxh7+
+        Move(Square::G8, Square::H7),   // 11... Kxh7
+        Move(Square::E4, Square::F6),   // 12. Nxf6+
+        Move(Square::H7, Square::H6),   // 12... Kh6
+        Move(Square::E5, Square::G4),   // 13. Ng4+
+        Move(Square::H6, Square::G5),   // 13... Kg5
+        Move(Square::H2, Square::H4),   // 14. h4+
+        Move(Square::G5, Square::F4),   // 14... Kf4
+        Move(Square::G2, Square::G3),   // 15. g3+
+        Move(Square::F4, Square::F3),   // 15... Kf3
+        Move(Square::D3, Square::E2),   // 16. Be2+
+        Move(Square::F3, Square::G2),   // 16... Kg2
+        Move(Square::H1, Square::H2),   // 17. Rh2+
+        Move(Square::G2, Square::G1),   // 17... Kg1
         Move::castle_white_queen()            // 18. O-O-O
     };
 
@@ -492,7 +492,7 @@ static void board_initialization_test()
     const std::string test_name = "board_initialization_test";
 
     Board board;
-    for (Square sq = Square::SQ_A1; sq < Square::SQ_INVALID; sq++) {
+    for (Square sq = Square::A1; sq < Square::INVALID; sq++) {
 
         if (board.is_empty(sq) != true) {
             PRINT_TEST_FAILED(test_name, "is_empty(sq) != true");
@@ -532,8 +532,8 @@ static void board_initialization_test()
     if (board.state().last_captured_piece() != PieceType::EMPTY) {
         PRINT_TEST_FAILED(test_name, "state().last_captured_piece() != EMPTY");
     }
-    if (board.state().en_passant_square() != Square::SQ_INVALID) {
-        PRINT_TEST_FAILED(test_name, "state().en_passant_square() != SQ_INVALID");
+    if (board.state().en_passant_square() != Square::INVALID) {
+        PRINT_TEST_FAILED(test_name, "state().en_passant_square() != INVALID");
     }
     if (board.state().castle_king_black() != false) {
         PRINT_TEST_FAILED(test_name, "state().castle_king_black() != false");
@@ -620,7 +620,7 @@ static void board_make_unmake_enPassant_move_test()
 
     board.load_fen(start_enPassant_white_fen);
     const GameState start_enPassant_white_fen_state = board.state();
-    const Move enPassant_white_move(Square::SQ_D5, Square::SQ_E6, MoveType::EN_PASSANT);
+    const Move enPassant_white_move(Square::D5, Square::E6, MoveType::EN_PASSANT);
 
     // enPassant white
     board.make_move(enPassant_white_move);
@@ -641,7 +641,7 @@ static void board_make_unmake_enPassant_move_test()
     board.load_fen(start_enPassant_black_fen);
 
     const GameState start_enPassant_black_fen_state = board.state();
-    const Move enPassant_black_move(Square::SQ_E4, Square::SQ_D3, MoveType::EN_PASSANT);
+    const Move enPassant_black_move(Square::E4, Square::D3, MoveType::EN_PASSANT);
 
     board.make_move(enPassant_black_move);
 
@@ -665,7 +665,7 @@ static void board_make_unmake_normal_move_test()
     //super normal move white
     board.load_fen(start_white_fen);
     const GameState start_white_fen_state = board.state();
-    const Move normal_move_white(Square::SQ_H1, Square::SQ_H7);
+    const Move normal_move_white(Square::H1, Square::H7);
     const auto end_normal_white_fen = "r3k2r/1p5R/8/3b1pP1/3B2p1/8/P4P2/R3K3 b Qkq - 1 2";
 
     board.make_move(normal_move_white);
@@ -680,7 +680,7 @@ static void board_make_unmake_normal_move_test()
     //super normal move black
     board.load_fen(start_black_fen);
     const GameState start_black_fen_state = board.state();
-    const Move normal_move_black(Square::SQ_H8, Square::SQ_H2);
+    const Move normal_move_black(Square::H8, Square::H2);
     const auto end_normal_black_fen = "r3k3/1p3p2/8/3b2P1/3B1Pp1/8/P6r/R3K2R w KQq - 1 2";
 
     board.make_move(normal_move_black);
@@ -694,7 +694,7 @@ static void board_make_unmake_normal_move_test()
 
     //move with capture white
     board.load_fen(start_white_fen);
-    const Move capture_move_white(Square::SQ_D4, Square::SQ_H8);
+    const Move capture_move_white(Square::D4, Square::H8);
     const auto end_capture_white_fen = "r3k2B/1p6/8/3b1pP1/6p1/8/P4P2/R3K2R b KQq - 0 2";
 
     board.make_move(capture_move_white);
@@ -708,7 +708,7 @@ static void board_make_unmake_normal_move_test()
 
     //move with capture black
     board.load_fen(start_black_fen);
-    const Move capture_move_black(Square::SQ_D5, Square::SQ_H1);
+    const Move capture_move_black(Square::D5, Square::H1);
     const auto end_capture_black_fen = "r3k2r/1p3p2/8/6P1/3B1Pp1/8/P7/R3K2b w Qkq - 0 2";
 
     board.make_move(capture_move_black);
@@ -722,7 +722,7 @@ static void board_make_unmake_normal_move_test()
 
     //double pawn push white
     board.load_fen(start_white_fen);
-    const Move double_push_move_white(Square::SQ_A2, Square::SQ_A4);
+    const Move double_push_move_white(Square::A2, Square::A4);
     const auto end_double_push_white_fen = "r3k2r/1p6/8/3b1pP1/P2B2p1/8/5P2/R3K2R b KQkq - 0 2";
 
     board.make_move(double_push_move_white);
@@ -736,7 +736,7 @@ static void board_make_unmake_normal_move_test()
 
     //double pawn push black
     board.load_fen(start_black_fen);
-    const Move double_push_move_black(Square::SQ_B7, Square::SQ_B5);
+    const Move double_push_move_black(Square::B7, Square::B5);
     const auto end_double_push_black_fen = "r3k2r/5p2/8/1p1b2P1/3B1Pp1/8/P7/R3K2R w KQkq - 0 2";
 
     board.make_move(double_push_move_black);
@@ -758,7 +758,7 @@ static void board_make_unmake_promotion_move_test()
     const auto start_promo_white_fen = "4n3/3P3k/8/Pp6/1p6/8/P2p3K/4N3 w - b6 0 2";
     const auto end_promo_knight_white_fen = "3Nn3/7k/8/Pp6/1p6/8/P2p3K/4N3 b - - 0 2";
 
-    const Move promo_move_knight_white(Square::SQ_D7, Square::SQ_D8, MoveType::PROMOTION,
+    const Move promo_move_knight_white(Square::D7, Square::D8, MoveType::PROMOTION,
                                        PieceType::KNIGHT);
 
     board.load_fen(start_promo_white_fen);
@@ -777,7 +777,7 @@ static void board_make_unmake_promotion_move_test()
     const auto start_promo_black_fen = "4n3/1p1P3k/8/P7/Pp6/8/3p3K/4N3 b - a3 0 1";
     const auto end_promo_queen_black_fen = "4n3/1p1P3k/8/P7/Pp6/8/7K/3qN3 w - - 0 2";
 
-    const Move promo_move_queen_black(Square::SQ_D2, Square::SQ_D1, MoveType::PROMOTION,
+    const Move promo_move_queen_black(Square::D2, Square::D1, MoveType::PROMOTION,
                                       PieceType::QUEEN);
 
     board.load_fen(start_promo_black_fen);
@@ -794,7 +794,7 @@ static void board_make_unmake_promotion_move_test()
 
     //promotion bishop with capture white
     const auto end_promo_bishop_white_fen = "4B3/7k/8/Pp6/1p6/8/P2p3K/4N3 b - - 0 2";
-    const Move promo_move_bishop_white(Square::SQ_D7, Square::SQ_E8, MoveType::PROMOTION,
+    const Move promo_move_bishop_white(Square::D7, Square::E8, MoveType::PROMOTION,
                                        PieceType::BISHOP);
 
     board.load_fen(start_promo_white_fen);
@@ -810,7 +810,7 @@ static void board_make_unmake_promotion_move_test()
 
     //promotion rook with capture
     const auto end_promo_rook_black_fen = "4n3/1p1P3k/8/P7/Pp6/8/7K/4r3 w - - 0 2";
-    const Move promo_move_rook_black(Square::SQ_D2, Square::SQ_E1, MoveType::PROMOTION,
+    const Move promo_move_rook_black(Square::D2, Square::E1, MoveType::PROMOTION,
                                      PieceType::ROOK);
 
     board.load_fen(start_promo_black_fen);

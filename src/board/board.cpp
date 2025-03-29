@@ -40,14 +40,8 @@ void Board::put_piece(Piece piece, Square square)
     bitboard_piece[static_cast<int>(piece)] |= mask;
     array_piece[square] = piece;
 
-    if (get_color(piece) == ChessColor::WHITE) {
-        bitboard_white |= mask;
-        bitboard_black &= ~mask;
-    }
-    else {
-        bitboard_black |= mask;
-        bitboard_white &= ~mask;
-    }
+    bitboard_white = (get_color(piece) == ChessColor::WHITE) ? bitboard_white | mask : bitboard_white & ~mask;
+    bitboard_black = (get_color(piece) == ChessColor::BLACK) ? bitboard_black | mask : bitboard_black & ~mask;
 
     bitboard_all |= mask;
 }
@@ -435,7 +429,7 @@ void Board::make_normal_move(Move normal_move)
     }
     else {
 
-        game_state.set_en_passant_square(Square::SQ_INVALID);
+        game_state.set_en_passant_square(Square::INVALID);
     }
 }
 
@@ -487,7 +481,7 @@ void Board::make_promotion_move(Move promotion_move)
     // captured piece will be Empty if move was not a capture
     game_state.set_last_captured_piece(piece_to_pieceType(end_piece));
     //en Passant will be invalid
-    game_state.set_en_passant_square(Square::SQ_INVALID);
+    game_state.set_en_passant_square(Square::INVALID);
 }
 
 void Board::unmake_promotion_move(Move promotion_move)
@@ -519,81 +513,81 @@ void Board::make_castling_move(Move castling_move)
     if (castling_move == Move::castle_white_king()) {
 
         assert(game_state.castle_king_white());
-        assert(get_piece(Square::SQ_E1) == Piece::W_KING);
-        assert(get_piece(Square::SQ_H1) == Piece::W_ROOK);
-        assert(is_empty(Square::SQ_F1) && is_empty(Square::SQ_G1));
+        assert(get_piece(Square::E1) == Piece::W_KING);
+        assert(get_piece(Square::H1) == Piece::W_ROOK);
+        assert(is_empty(Square::F1) && is_empty(Square::G1));
 
         // update zobrist hash with the movement of the pieces
-        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_E1, Piece::W_KING) ^
-                               Zobrist::get_seed(Square::SQ_G1, Piece::W_KING));
+        game_state.xor_zobrist(Zobrist::get_seed(Square::E1, Piece::W_KING) ^
+                               Zobrist::get_seed(Square::G1, Piece::W_KING));
 
-        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_H1, Piece::W_ROOK) ^
-                               Zobrist::get_seed(Square::SQ_F1, Piece::W_ROOK));
+        game_state.xor_zobrist(Zobrist::get_seed(Square::H1, Piece::W_ROOK) ^
+                               Zobrist::get_seed(Square::F1, Piece::W_ROOK));
 
-        put_piece(Piece::W_KING, Square::SQ_G1);
-        put_piece(Piece::W_ROOK, Square::SQ_F1);
-        remove_piece(Square::SQ_E1);
-        remove_piece(Square::SQ_H1);
+        put_piece(Piece::W_KING, Square::G1);
+        put_piece(Piece::W_ROOK, Square::F1);
+        remove_piece(Square::E1);
+        remove_piece(Square::H1);
 
         game_state.set_castled_white(true);
     }
     else if (castling_move == Move::castle_black_king()) {
 
         assert(game_state.castle_king_black());
-        assert(get_piece(Square::SQ_E8) == Piece::B_KING);
-        assert(get_piece(Square::SQ_H8) == Piece::B_ROOK);
-        assert(is_empty(Square::SQ_F8) && is_empty(Square::SQ_G8));
+        assert(get_piece(Square::E8) == Piece::B_KING);
+        assert(get_piece(Square::H8) == Piece::B_ROOK);
+        assert(is_empty(Square::F8) && is_empty(Square::G8));
 
         // update zobrist hash with the movement of the pieces
-        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_E8, Piece::B_KING) ^
-                               Zobrist::get_seed(Square::SQ_G8, Piece::B_KING));
-        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_H8, Piece::B_ROOK) ^
-                               Zobrist::get_seed(Square::SQ_F8, Piece::B_ROOK));
+        game_state.xor_zobrist(Zobrist::get_seed(Square::E8, Piece::B_KING) ^
+                               Zobrist::get_seed(Square::G8, Piece::B_KING));
+        game_state.xor_zobrist(Zobrist::get_seed(Square::H8, Piece::B_ROOK) ^
+                               Zobrist::get_seed(Square::F8, Piece::B_ROOK));
 
-        put_piece(Piece::B_KING, Square::SQ_G8);
-        put_piece(Piece::B_ROOK, Square::SQ_F8);
-        remove_piece(Square::SQ_E8);
-        remove_piece(Square::SQ_H8);
+        put_piece(Piece::B_KING, Square::G8);
+        put_piece(Piece::B_ROOK, Square::F8);
+        remove_piece(Square::E8);
+        remove_piece(Square::H8);
 
         game_state.set_castled_black(true);
     }
     else if (castling_move == Move::castle_white_queen()) {
 
         assert(game_state.castle_queen_white());
-        assert(get_piece(Square::SQ_E1) == Piece::W_KING);
-        assert(get_piece(Square::SQ_A1) == Piece::W_ROOK);
-        assert(is_empty(Square::SQ_D1) && is_empty(Square::SQ_C1) && is_empty(Square::SQ_B1));
+        assert(get_piece(Square::E1) == Piece::W_KING);
+        assert(get_piece(Square::A1) == Piece::W_ROOK);
+        assert(is_empty(Square::D1) && is_empty(Square::C1) && is_empty(Square::B1));
 
         // update zobrist hash with the movement of the pieces
-        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_E1, Piece::W_KING) ^
-                               Zobrist::get_seed(Square::SQ_C1, Piece::W_KING));
-        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_A1, Piece::W_ROOK) ^
-                               Zobrist::get_seed(Square::SQ_D1, Piece::W_ROOK));
+        game_state.xor_zobrist(Zobrist::get_seed(Square::E1, Piece::W_KING) ^
+                               Zobrist::get_seed(Square::C1, Piece::W_KING));
+        game_state.xor_zobrist(Zobrist::get_seed(Square::A1, Piece::W_ROOK) ^
+                               Zobrist::get_seed(Square::D1, Piece::W_ROOK));
 
-        put_piece(Piece::W_KING, Square::SQ_C1);
-        put_piece(Piece::W_ROOK, Square::SQ_D1);
-        remove_piece(Square::SQ_E1);
-        remove_piece(Square::SQ_A1);
+        put_piece(Piece::W_KING, Square::C1);
+        put_piece(Piece::W_ROOK, Square::D1);
+        remove_piece(Square::E1);
+        remove_piece(Square::A1);
 
         game_state.set_castled_white(true);
     }
     else if (castling_move == Move::castle_black_queen()) {
 
         assert(game_state.castle_queen_black());
-        assert(get_piece(Square::SQ_E8) == Piece::B_KING);
-        assert(get_piece(Square::SQ_A8) == Piece::B_ROOK);
-        assert(is_empty(Square::SQ_D8) && is_empty(Square::SQ_C8) && is_empty(Square::SQ_B8));
+        assert(get_piece(Square::E8) == Piece::B_KING);
+        assert(get_piece(Square::A8) == Piece::B_ROOK);
+        assert(is_empty(Square::D8) && is_empty(Square::C8) && is_empty(Square::B8));
 
         // update zobrist hash with the movement of the pieces
-        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_E8, Piece::B_KING) ^
-                               Zobrist::get_seed(Square::SQ_C8, Piece::B_KING));
-        game_state.xor_zobrist(Zobrist::get_seed(Square::SQ_A8, Piece::B_ROOK) ^
-                               Zobrist::get_seed(Square::SQ_D8, Piece::B_ROOK));
+        game_state.xor_zobrist(Zobrist::get_seed(Square::E8, Piece::B_KING) ^
+                               Zobrist::get_seed(Square::C8, Piece::B_KING));
+        game_state.xor_zobrist(Zobrist::get_seed(Square::A8, Piece::B_ROOK) ^
+                               Zobrist::get_seed(Square::D8, Piece::B_ROOK));
 
-        put_piece(Piece::B_KING, Square::SQ_C8);
-        put_piece(Piece::B_ROOK, Square::SQ_D8);
-        remove_piece(Square::SQ_E8);
-        remove_piece(Square::SQ_A8);
+        put_piece(Piece::B_KING, Square::C8);
+        put_piece(Piece::B_ROOK, Square::D8);
+        remove_piece(Square::E8);
+        remove_piece(Square::A8);
 
         game_state.set_castled_black(true);
     }
@@ -601,7 +595,7 @@ void Board::make_castling_move(Move castling_move)
     game_state.set_last_captured_piece(PieceType::EMPTY);
 
     //en Passant will be invalid
-    game_state.set_en_passant_square(Square::SQ_INVALID);
+    game_state.set_en_passant_square(Square::INVALID);
 }
 
 void Board::unmake_castling_move(Move castling_move)
@@ -611,43 +605,43 @@ void Board::unmake_castling_move(Move castling_move)
 
     if (castling_move == Move::castle_white_king()) {
 
-        assert(get_piece(Square::SQ_G1) == Piece::W_KING);
-        assert(get_piece(Square::SQ_F1) == Piece::W_ROOK);
+        assert(get_piece(Square::G1) == Piece::W_KING);
+        assert(get_piece(Square::F1) == Piece::W_ROOK);
 
-        put_piece(Piece::W_KING, Square::SQ_E1);
-        put_piece(Piece::W_ROOK, Square::SQ_H1);
-        remove_piece(Square::SQ_G1);
-        remove_piece(Square::SQ_F1);
+        put_piece(Piece::W_KING, Square::E1);
+        put_piece(Piece::W_ROOK, Square::H1);
+        remove_piece(Square::G1);
+        remove_piece(Square::F1);
     }
     else if (castling_move == Move::castle_black_king()) {
 
-        assert(get_piece(Square::SQ_G8) == Piece::B_KING);
-        assert(get_piece(Square::SQ_F8) == Piece::B_ROOK);
+        assert(get_piece(Square::G8) == Piece::B_KING);
+        assert(get_piece(Square::F8) == Piece::B_ROOK);
 
-        put_piece(Piece::B_KING, Square::SQ_E8);
-        put_piece(Piece::B_ROOK, Square::SQ_H8);
-        remove_piece(Square::SQ_G8);
-        remove_piece(Square::SQ_F8);
+        put_piece(Piece::B_KING, Square::E8);
+        put_piece(Piece::B_ROOK, Square::H8);
+        remove_piece(Square::G8);
+        remove_piece(Square::F8);
     }
     else if (castling_move == Move::castle_white_queen()) {
 
-        assert(get_piece(Square::SQ_C1) == Piece::W_KING);
-        assert(get_piece(Square::SQ_D1) == Piece::W_ROOK);
+        assert(get_piece(Square::C1) == Piece::W_KING);
+        assert(get_piece(Square::D1) == Piece::W_ROOK);
 
-        put_piece(Piece::W_KING, Square::SQ_E1);
-        put_piece(Piece::W_ROOK, Square::SQ_A1);
-        remove_piece(Square::SQ_C1);
-        remove_piece(Square::SQ_D1);
+        put_piece(Piece::W_KING, Square::E1);
+        put_piece(Piece::W_ROOK, Square::A1);
+        remove_piece(Square::C1);
+        remove_piece(Square::D1);
     }
     else if (castling_move == Move::castle_black_queen()) {
 
-        assert(get_piece(Square::SQ_C8) == Piece::B_KING);
-        assert(get_piece(Square::SQ_D8) == Piece::B_ROOK);
+        assert(get_piece(Square::C8) == Piece::B_KING);
+        assert(get_piece(Square::D8) == Piece::B_ROOK);
 
-        put_piece(Piece::B_KING, Square::SQ_E8);
-        put_piece(Piece::B_ROOK, Square::SQ_A8);
-        remove_piece(Square::SQ_C8);
-        remove_piece(Square::SQ_D8);
+        put_piece(Piece::B_KING, Square::E8);
+        put_piece(Piece::B_ROOK, Square::A8);
+        remove_piece(Square::C8);
+        remove_piece(Square::D8);
     }
 }
 
@@ -681,7 +675,7 @@ void Board::make_enPassant_move(Move enPassant_move)
     game_state.set_last_captured_piece(PieceType::PAWN);
 
     //en Passant will be invalid
-    game_state.set_en_passant_square(Square::SQ_INVALID);
+    game_state.set_en_passant_square(Square::INVALID);
 }
 
 void Board::unmake_enPassant_move(Move enPassant_move)
@@ -777,7 +771,7 @@ void Board::check_and_modify_en_passant_rule()
 
     // c) There is no piece on enPassantSquare or behind it
     if (!is_empty(eps) || !is_empty(pawn_pushed_origin_sq)) {
-        game_state.set_en_passant_square(Square::SQ_INVALID);
+        game_state.set_en_passant_square(Square::INVALID);
         return;
     }
 
@@ -786,7 +780,7 @@ void Board::check_and_modify_en_passant_rule()
 
     // b) There is an enemy pawn in front of enPassantSquare
     if (get_piece(pawn_pushed_sq) != capturable_pawn) {
-        game_state.set_en_passant_square(Square::SQ_INVALID);
+        game_state.set_en_passant_square(Square::INVALID);
         return;
     }
 
@@ -799,7 +793,7 @@ void Board::check_and_modify_en_passant_rule()
         has_pawn_attacker = true;
     }
 
-    game_state.set_en_passant_square(has_pawn_attacker ? eps : Square::SQ_INVALID);
+    game_state.set_en_passant_square(has_pawn_attacker ? eps : Square::INVALID);
 
     // update hash with new en passant col
     if (game_state.en_passant_square().is_valid()) {

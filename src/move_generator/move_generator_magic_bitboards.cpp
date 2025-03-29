@@ -159,7 +159,7 @@ static void update_pin_in_dir(Square king_sq, Direction d, MoveGeneratorInfo& mo
 
     uint64_t push_mask = 0ULL;
 
-    Square possible_pinned_piece_sq = Square::SQ_INVALID;
+    Square possible_pinned_piece_sq = Square::INVALID;
     Square sq = king_sq;
     sq.to_direction(d);
 
@@ -291,7 +291,7 @@ static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGene
     MoveList& moves = moveGeneratorInfo.moves;
     const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
 
-    const Square origin_castle_king_square = side_to_move == ChessColor::WHITE ? Square ::SQ_E1 : Square::SQ_E8;
+    const Square origin_castle_king_square = side_to_move == ChessColor::WHITE ? Square ::E1 : Square::E8;
 
     const Piece king_piece = side_to_move == ChessColor::WHITE ? Piece::W_KING : Piece::B_KING;
     const Piece rook_piece = side_to_move == ChessColor::WHITE ? Piece::W_ROOK : Piece::B_ROOK;

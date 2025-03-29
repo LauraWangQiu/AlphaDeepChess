@@ -114,8 +114,8 @@ private:
     {
         std::array<std::array<int, 64>, 64> distances;
 
-        for (Square sq1 = Square::SQ_A1; sq1.is_valid(); sq1++) {
-            for (Square sq2 = Square::SQ_A1; sq2.is_valid(); sq2++) {
+        for (Square sq1 = Square::A1; sq1.is_valid(); sq1++) {
+            for (Square sq2 = Square::A1; sq2.is_valid(); sq2++) {
                 distances[sq1][sq2] =
                     std::max(std::abs(int(sq1.row()) - int(sq2.row())), std::abs(int(sq1.col()) - int(sq2.col())));
             }
@@ -128,8 +128,8 @@ private:
     {
         std::array<std::array<int, 64>, 64> distances;
 
-        for (Square sq1 = Square::SQ_A1; sq1.is_valid(); sq1++) {
-            for (Square sq2 = Square::SQ_A1; sq2.is_valid(); sq2++) {
+        for (Square sq1 = Square::A1; sq1.is_valid(); sq1++) {
+            for (Square sq2 = Square::A1; sq2.is_valid(); sq2++) {
                 distances[sq1][sq2] =
                     std::abs(int(sq1.row()) - int(sq2.row())) + std::abs(int(sq1.col()) - int(sq2.col()));
             }
@@ -229,6 +229,7 @@ private:
 
     /**
      * @brief lookup table for each PST indexed by PieceType
+     * 
      * 0 : PAWN_PIECE_SQUARE_TABLE
      * 1 : KNIGHT_PIECE_SQUARE_TABLE
      * 2 : BISHOP_PIECE_SQUARE_TABLE

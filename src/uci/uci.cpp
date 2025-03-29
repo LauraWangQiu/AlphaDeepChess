@@ -562,22 +562,22 @@ Move Uci::create_move_from_string(std::string_view move_string, const Board& boa
     const Square sq_origin(move_string[0], move_string[1]);
     const Square sq_end(move_string[2], move_string[3]);
 
-    if (sq_origin == Square::SQ_INVALID || sq_end == Square::SQ_INVALID) {
+    if (sq_origin == Square::INVALID || sq_end == Square::INVALID) {
         return Move::null();
     }
 
     // check for castling move
     if (piece_to_pieceType(board.get_piece(sq_origin)) == PieceType::KING) {
-        if (sq_origin == Square::SQ_E1 && sq_end == Square::SQ_G1) {
+        if (sq_origin == Square::E1 && sq_end == Square::G1) {
             return Move::castle_white_king();
         }
-        else if (sq_origin == Square::SQ_E8 && sq_end == Square::SQ_G8) {
+        else if (sq_origin == Square::E8 && sq_end == Square::G8) {
             return Move::castle_black_king();
         }
-        else if (sq_origin == Square::SQ_E1 && sq_end == Square::SQ_C1) {
+        else if (sq_origin == Square::E1 && sq_end == Square::C1) {
             return Move::castle_white_queen();
         }
-        else if (sq_origin == Square::SQ_E8 && sq_end == Square::SQ_C8) {
+        else if (sq_origin == Square::E8 && sq_end == Square::C8) {
             return Move::castle_black_queen();
         }
     }

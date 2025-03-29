@@ -83,17 +83,17 @@ static void squares_in_same_diagonal_test()
 {
     const std::string test_name = "squares_in_same_diagonal_test";
 
-    if (!squares_in_same_diagonal(Square::SQ_D4, Square::SQ_A1)) {
-        PRINT_TEST_FAILED(test_name, "!squares_in_same_diagonal(Square::SQ_D4, Square::SQ_A1)");
+    if (!squares_in_same_diagonal(Square::D4, Square::A1)) {
+        PRINT_TEST_FAILED(test_name, "!squares_in_same_diagonal(Square::D4, Square::A1)");
     }
-    if (!squares_in_same_diagonal(Square::SQ_D4, Square::SQ_H8)) {
-        PRINT_TEST_FAILED(test_name, "!squares_in_same_diagonal(Square::SQ_D4, Square::SQ_H8)");
+    if (!squares_in_same_diagonal(Square::D4, Square::H8)) {
+        PRINT_TEST_FAILED(test_name, "!squares_in_same_diagonal(Square::D4, Square::H8)");
     }
-    if (squares_in_same_diagonal(Square::SQ_D4, Square::SQ_H1)) {
-        PRINT_TEST_FAILED(test_name, "squares_in_same_diagonal(Square::SQ_D4, Square::SQ_H1)");
+    if (squares_in_same_diagonal(Square::D4, Square::H1)) {
+        PRINT_TEST_FAILED(test_name, "squares_in_same_diagonal(Square::D4, Square::H1)");
     }
-    if (squares_in_same_diagonal(Square::SQ_D4, Square::SQ_A8)) {
-        PRINT_TEST_FAILED(test_name, "squares_in_same_diagonal(Square::SQ_D4, Square::SQ_A8)");
+    if (squares_in_same_diagonal(Square::D4, Square::A8)) {
+        PRINT_TEST_FAILED(test_name, "squares_in_same_diagonal(Square::D4, Square::A8)");
     }
 }
 
@@ -101,17 +101,17 @@ static void squares_in_same_antidiagonal_test()
 {
     const std::string test_name = "squares_in_same_antidiagonal_test";
 
-    if (!squares_in_same_antidiagonal(Square::SQ_D4, Square::SQ_G1)) {
-        PRINT_TEST_FAILED(test_name, "!squares_in_same_antidiagonal(Square::SQ_D4, Square::SQ_G1)");
+    if (!squares_in_same_antidiagonal(Square::D4, Square::G1)) {
+        PRINT_TEST_FAILED(test_name, "!squares_in_same_antidiagonal(Square::D4, Square::G1)");
     }
-    if (!squares_in_same_antidiagonal(Square::SQ_D4, Square::SQ_A7)) {
-        PRINT_TEST_FAILED(test_name, "!squares_in_same_antidiagonal(Square::SQ_D4, Square::SQ_A7)");
+    if (!squares_in_same_antidiagonal(Square::D4, Square::A7)) {
+        PRINT_TEST_FAILED(test_name, "!squares_in_same_antidiagonal(Square::D4, Square::A7)");
     }
-    if (squares_in_same_antidiagonal(Square::SQ_D4, Square::SQ_A1)) {
-        PRINT_TEST_FAILED(test_name, "squares_in_same_antidiagonal(Square::SQ_D4, Square::SQ_A1)");
+    if (squares_in_same_antidiagonal(Square::D4, Square::A1)) {
+        PRINT_TEST_FAILED(test_name, "squares_in_same_antidiagonal(Square::D4, Square::A1)");
     }
-    if (squares_in_same_antidiagonal(Square::SQ_D4, Square::SQ_H8)) {
-        PRINT_TEST_FAILED(test_name, "squares_in_same_antidiagonal(Square::SQ_D4, Square::SQ_H8)");
+    if (squares_in_same_antidiagonal(Square::D4, Square::H8)) {
+        PRINT_TEST_FAILED(test_name, "squares_in_same_antidiagonal(Square::D4, Square::H8)");
     }
 }
 
@@ -119,27 +119,27 @@ static void get_direction_mask_test()
 {
     const std::string test_name = "get_direction_mask_test";
 
-    if (get_direction_mask(Square::SQ_A8, Square::SQ_H8) != ROW_8_MASK) {
+    if (get_direction_mask(Square::A8, Square::H8) != ROW_8_MASK) {
         PRINT_TEST_FAILED(test_name,
-                          "get_direction_mask(Square::SQ_A8, Square::SQ_H8) != ROW_8_MASK");
+                          "get_direction_mask(Square::A8, Square::H8) != ROW_8_MASK");
     }
-    if (get_direction_mask(Square::SQ_D7, Square::SQ_D5) != COL_D_MASK) {
+    if (get_direction_mask(Square::D7, Square::D5) != COL_D_MASK) {
         PRINT_TEST_FAILED(test_name,
-                          "get_direction_mask(Square::SQ_D7, Square::SQ_D5) != COL_D_MASK");
+                          "get_direction_mask(Square::D7, Square::D5) != COL_D_MASK");
     }
-    if (get_direction_mask(Square::SQ_D4, Square::SQ_A1) != DIAGONAL_7_MASK) {
+    if (get_direction_mask(Square::D4, Square::A1) != DIAGONAL_7_MASK) {
         PRINT_TEST_FAILED(test_name,
-                          "get_direction_mask(Square::SQ_D4, Square::SQ_A1) != DIAGONAL_7_MASK");
+                          "get_direction_mask(Square::D4, Square::A1) != DIAGONAL_7_MASK");
     }
-    if (get_direction_mask(Square::SQ_D4, Square::SQ_A1) != DIAGONAL_7_MASK) {
+    if (get_direction_mask(Square::D4, Square::A1) != DIAGONAL_7_MASK) {
         PRINT_TEST_FAILED(test_name,
-                          "get_direction_mask(Square::SQ_D4, Square::SQ_A1) != DIAGONAL_7_MASK");
+                          "get_direction_mask(Square::D4, Square::A1) != DIAGONAL_7_MASK");
     }
-    if (get_direction_mask(Square::SQ_D4, Square::SQ_G1) != ANTIDIAGONAL_6_MASK) {
+    if (get_direction_mask(Square::D4, Square::G1) != ANTIDIAGONAL_6_MASK) {
         PRINT_TEST_FAILED(
-            test_name, "get_direction_mask(Square::SQ_D4, Square::SQ_G1) != ANTIDIAGONAL_6_MASK");
+            test_name, "get_direction_mask(Square::D4, Square::G1) != ANTIDIAGONAL_6_MASK");
     }
-    if (get_direction_mask(Square::SQ_A8, Square::SQ_G6) != 0ULL) {
-        PRINT_TEST_FAILED(test_name, "get_direction_mask(Square::SQ_A8, Square::SQ_G8) != 0ULL");
+    if (get_direction_mask(Square::A8, Square::G6) != 0ULL) {
+        PRINT_TEST_FAILED(test_name, "get_direction_mask(Square::A8, Square::G8) != 0ULL");
     }
 }

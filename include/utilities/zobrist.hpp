@@ -37,7 +37,7 @@ public:
 
         uint64_t hash = 0ULL;
 
-        for (Square square = Square::SQ_A1; square.is_valid(); square++) {
+        for (Square square = Square::A1; square.is_valid(); square++) {
             const Piece piece = position.get_piece(square);
             if (piece != Piece::EMPTY) {
                 hash ^= get_seed(square, piece);
@@ -165,7 +165,7 @@ private:
 
         std::uniform_int_distribution<uint64_t> dis;
 
-        for (Square sq = Square::SQ_A1; sq.is_valid(); sq++) {
+        for (Square sq = Square::A1; sq.is_valid(); sq++) {
             for (int p = 0; p < 12; p++) {
                 square_piece_seed[sq.value()][p] = dis(gen);
             }
