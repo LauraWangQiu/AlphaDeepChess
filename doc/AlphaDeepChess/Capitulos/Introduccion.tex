@@ -11,13 +11,15 @@ Since then, the development of chess engines has advanced rapidly, moving from r
 
 %\section{Motivation}
 
-\section{Objetives}
+\section{Objectives}
 
 \begin{itemize}
     \item Develop a functional chess engine using alpha-beta pruning as the core search algorithm.
     \item Optimize search efficiency by implementing move ordering, quiescence search, and iterative deepening to improve pruning effectiveness.
     \item Implement transposition tables using Zobrist hashing to store and retrieve previously evaluated board positions efficiently.
+    \item Implement multithreading to enable parallel search.
     \item Ensure modularity and efficiency so that the engine can be tested, improved, and integrated into chess-playing applications.
+    \item Profile the engine to identify performance bottlenecks and optimize critical sections of the code.
     \item Compare performance metrics against other classical engines to evaluate the impact of implemented optimizations.
 \end{itemize}
 
@@ -25,8 +27,12 @@ Since then, the development of chess engines has advanced rapidly, moving from r
 
 \begin{enumerate}
     \item Research phase and basic implementation: understand the fundamentals of alpha-beta pruning with minimax and position evaluation. Familiarize with the UCI (Universal Chess Interface) and implement the move generator with its specific exceptions and rules.
+    \item Optimization: implement quiescence search and iterative deepening to improve pruning effectiveness.
     \item Optimization: improve search efficiency using transposition tables and Zobrist hashing.
-    \item Comparation: use Stockfish to compare efficiency generating tournaments between chess engines and a profiler to detect possible bottlenecks.
+    \item Optimization: implement multithreading to enable parallel search.
+    \item Profiling: use a profiler to identify performance bottlenecks and optimize critical sections of the code.
+    \item Comparation: use Stockfish to compare efficiency generating tournaments between chess engines.
+    \item Analyze the results and write the final report.
 \end{enumerate}
 
 %\section{Explicaciones adicionales sobre el uso de esta plantilla}
