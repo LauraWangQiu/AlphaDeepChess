@@ -287,10 +287,8 @@ class ChessBoard:
             return self.ENGINE_MOVE_SQUARE_COLOR
         elif self.last_move and (square == self.last_move.from_square or square == self.last_move.to_square):
             return self.LAST_MOVE_SQUARE_COLOR
-        elif self.orientation == chess.WHITE:
-            return self.WHITE_SQUARES_COLOR if ((7 - row) + col) % 2 == 0 else self.BLACK_SQUARES_COLOR
         else:
-            return self.WHITE_SQUARES_COLOR if (row + col) % 2 == 0 else self.BLACK_SQUARES_COLOR
+            return self.WHITE_SQUARES_COLOR if ((7 - row) + col) % 2 == 0 else self.BLACK_SQUARES_COLOR
 
     def set_engine_move(self, move: str) -> None:
         '''Set the engine move in UCI format'''
