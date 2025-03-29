@@ -141,13 +141,13 @@ static void board_get_bitboard_white_test()
 
     Board board;
 
-    if (board.get_bitboard_white() != 0ULL) {
+    if (board.get_bitboard_color(ChessColor::WHITE) != 0ULL) {
         PRINT_TEST_FAILED(test_name, "get_bitboard_white()!=0ULL");
     }
 
     board.load_fen(StartFEN);
 
-    if (board.get_bitboard_white() != 0x000000000000ffff) {
+    if (board.get_bitboard_color(ChessColor::WHITE) != 0x000000000000ffff) {
         PRINT_TEST_FAILED(test_name, "get_bitboard_white()!=0x000000000000ffff");
     }
 }
@@ -160,13 +160,13 @@ static void board_get_bitboard_black_test()
 
     Board board;
 
-    if (board.get_bitboard_black() != 0ULL) {
+    if (board.get_bitboard_color(ChessColor::BLACK) != 0ULL) {
         PRINT_TEST_FAILED(test_name, "get_bitboard_black()!=0ULL");
     }
 
     board.load_fen(StartFEN);
 
-    if (board.get_bitboard_black() != 0xffff000000000000) {
+    if (board.get_bitboard_color(ChessColor::BLACK) != 0xffff000000000000) {
         PRINT_TEST_FAILED(test_name, "get_bitboard_black()!=0x000000000000ffff");
     }
 }
@@ -324,10 +324,10 @@ static void board_clean_test()
     if (board.get_bitboard_all() != 0ULL) {
         PRINT_TEST_FAILED(test_name, "get_bitboard_all() != 0ULL");
     }
-    if (board.get_bitboard_black() != 0ULL) {
+    if (board.get_bitboard_color(ChessColor::BLACK) != 0ULL) {
         PRINT_TEST_FAILED(test_name, "get_bitboard_black() != 0ULL");
     }
-    if (board.get_bitboard_white() != 0ULL) {
+    if (board.get_bitboard_color(ChessColor::WHITE) != 0ULL) {
         PRINT_TEST_FAILED(test_name, "get_bitboard_white() != 0ULL");
     }
 
@@ -504,10 +504,10 @@ static void board_initialization_test()
     if (board.get_bitboard_all() != 0ULL) {
         PRINT_TEST_FAILED(test_name, "get_bitboard_all() != 0ULL");
     }
-    if (board.get_bitboard_black() != 0ULL) {
+    if (board.get_bitboard_color(ChessColor::BLACK) != 0ULL) {
         PRINT_TEST_FAILED(test_name, "get_bitboard_black() != 0ULL");
     }
-    if (board.get_bitboard_white() != 0ULL) {
+    if (board.get_bitboard_color(ChessColor::WHITE) != 0ULL) {
         PRINT_TEST_FAILED(test_name, "get_bitboard_white() != 0ULL");
     }
 

@@ -9,7 +9,6 @@ static void pieceType_to_char_test();
 static void get_color_test();
 static void piece_to_pieceType_test();
 static void create_piece_test();
-static void raw_value_test();
 static void is_slider_test();
 static void piece_sum_test();
 static void piece_sub_test();
@@ -32,7 +31,6 @@ void piece_test()
     get_color_test();
     piece_to_pieceType_test();
     create_piece_test();
-    raw_value_test();
     is_slider_test();
     piece_sum_test();
     piece_sub_test();
@@ -350,73 +348,6 @@ static void create_piece_test()
     }
     if (create_piece(PieceType::EMPTY, ChessColor::BLACK) != Piece::EMPTY) {
         PRINT_TEST_FAILED(test_name, "create_piece(EMPTY, BLACK) != Piece::EMPTY");
-    }
-}
-
-static void raw_value_test()
-{
-    const std::string test_name = "raw_value_test";
-
-    if (raw_value(PieceType::PAWN) != 100) {
-        PRINT_TEST_FAILED(test_name, "raw_value(PieceType::PAWN) != 100");
-    }
-    if (raw_value(PieceType::KNIGHT) != 300) {
-        PRINT_TEST_FAILED(test_name, "raw_value(PieceType::KNIGHT) != 300");
-    }
-    if (raw_value(PieceType::BISHOP) != 310) {
-        PRINT_TEST_FAILED(test_name, "raw_value(PieceType::BISHOP) != 310");
-    }
-    if (raw_value(PieceType::ROOK) != 500) {
-        PRINT_TEST_FAILED(test_name, "raw_value(PieceType::ROOK) != 500");
-    }
-    if (raw_value(PieceType::QUEEN) != 900) {
-        PRINT_TEST_FAILED(test_name, "raw_value(PieceType::QUEEN) != 900");
-    }
-    if (raw_value(PieceType::KING) != 500) {
-        PRINT_TEST_FAILED(test_name, "raw_value(PieceType::KING) != 500");
-    }
-    if (raw_value(PieceType::EMPTY) != 0) {
-        PRINT_TEST_FAILED(test_name, "raw_value(PieceType::EMPTY) != 0");
-    }
-
-    if (raw_value(Piece::W_PAWN) != 100) {
-        PRINT_TEST_FAILED(test_name, "raw_value(Piece::W_PAWN) != 100");
-    }
-    if (raw_value(Piece::B_PAWN) != 100) {
-        PRINT_TEST_FAILED(test_name, "raw_value(Piece::B_PAWN) != 100");
-    }
-    if (raw_value(Piece::W_KNIGHT) != 300) {
-        PRINT_TEST_FAILED(test_name, "raw_value(Piece::W_KNIGHT) != 300");
-    }
-    if (raw_value(Piece::B_KNIGHT) != 300) {
-        PRINT_TEST_FAILED(test_name, "raw_value(Piece::B_KNIGHT) != 300");
-    }
-    if (raw_value(Piece::W_BISHOP) != 310) {
-        PRINT_TEST_FAILED(test_name, "raw_value(Piece::W_BISHOP) != 310");
-    }
-    if (raw_value(Piece::B_BISHOP) != 310) {
-        PRINT_TEST_FAILED(test_name, "raw_value(Piece::B_BISHOP) != 310");
-    }
-    if (raw_value(Piece::W_ROOK) != 500) {
-        PRINT_TEST_FAILED(test_name, "raw_value(Piece::W_ROOK) != 500");
-    }
-    if (raw_value(Piece::B_ROOK) != 500) {
-        PRINT_TEST_FAILED(test_name, "raw_value(Piece::B_ROOK) != 500");
-    }
-    if (raw_value(Piece::W_QUEEN) != 900) {
-        PRINT_TEST_FAILED(test_name, "raw_value(Piece::W_QUEEN) != 900");
-    }
-    if (raw_value(Piece::B_QUEEN) != 900) {
-        PRINT_TEST_FAILED(test_name, "raw_value(Piece::B_QUEEN) != 900");
-    }
-    if (raw_value(Piece::W_KING) != 500) {
-        PRINT_TEST_FAILED(test_name, "raw_value(Piece::W_KING) != 500");
-    }
-    if (raw_value(Piece::B_KING) != 500) {
-        PRINT_TEST_FAILED(test_name, "raw_value(Piece::B_KING) != 500");
-    }
-    if (raw_value(Piece::EMPTY) != 0) {
-        PRINT_TEST_FAILED(test_name, "raw_value(Piece::EMPTY) != 0");
     }
 }
 

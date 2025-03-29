@@ -142,7 +142,7 @@ public:
     {
         assert(square.is_valid());
         assert(is_valid_color(color));
-        static constexpr const uint64_t* PAWN_ATTACK[2] = {BLACK_PAWN_ATTACKS.data(), WHITE_PAWN_ATTACKS.data()};
+        static constexpr const uint64_t* PAWN_ATTACK[2] = {WHITE_PAWN_ATTACKS.data(), BLACK_PAWN_ATTACKS.data()};
 
         return PAWN_ATTACK[static_cast<int>(color)][square];
     }

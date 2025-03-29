@@ -1,5 +1,5 @@
 /**
- * @file search_transposition_table.cpp
+ * @file search_tt_extensions_reductions.cpp
  * @brief search services.
  *
  * chess search with transposition table implementation. 
@@ -7,8 +7,8 @@
  * https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
  * https://www.chessprogramming.org/Alpha-Beta
  * https://www.chessprogramming.org/Quiescence_Search
- * https://www.chessprogramming.org/Transposition_Table
- * 
+ * https://www.chessprogramming.org/Extensions
+ * https://www.chessprogramming.org/Late_Move_Reductions
  */
 
 #include "search.hpp"
@@ -30,17 +30,19 @@ static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int be
 
 static bool get_entry_in_transposition_table(uint64_t zobrist, int depth, int alpha, int beta, int& eval, Move& move);
 
+static int search_extension(const Board& board, Move move, bool in_check);
+
 /**
- * @brief search(std::atomic<bool>&, SearchResults&, Board&, int32_t)
- * 
- * Search the best legal move in the chess position.
- * 
- * @param[in] stop stop search signal.
- * @param[out] results struct where to store the results.
- * @param[in] board chess position.
- * @param[in] max_depth maximum depth of search, default value is INFINITE_DEPTH
- * 
- */
+  * @brief search(std::atomic<bool>&, SearchResults&, Board&, int32_t)
+  * 
+  * Search the best legal move in the chess position.
+  * 
+  * @param[in] stop stop search signal.
+  * @param[out] results struct where to store the results.
+  * @param[in] board chess position.
+  * @param[in] max_depth maximum depth of search, default value is INFINITE_DEPTH
+  * 
+  */
 void search(std::atomic<bool>& stop, SearchResults& results, Board& board, uint32_t max_depth)
 {
     assert(stop == false);
@@ -72,18 +74,18 @@ void search(std::atomic<bool>& stop, SearchResults& results, Board& board, uint3
 }
 
 /**
- * @brief iterative_deepening(SearchResults&,Board&,int,SearchContext)
- * 
- * Realize an iterative search, first at depth 1, then depth 2 ... until max_depth.
- * 
- * @note https://www.chessprogramming.org/Iterative_Deepening
- * 
- * @param[in] stop stop search signal
- * @param[out] results struct where to store the results.
- * @param[in] max_depth maximum depth of search, default value is INFINITE_DEPTH
- * @param[in, out] context  board and best moves so far in the search
- * 
- */
+  * @brief iterative_deepening(SearchResults&,Board&,int,SearchContext)
+  * 
+  * Realize an iterative search, first at depth 1, then depth 2 ... until max_depth.
+  * 
+  * @note https://www.chessprogramming.org/Iterative_Deepening
+  * 
+  * @param[in] stop stop search signal
+  * @param[out] results struct where to store the results.
+  * @param[in] max_depth maximum depth of search, default value is INFINITE_DEPTH
+  * @param[in, out] context  board and best moves so far in the search
+  * 
+  */
 static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results, int max_depth, SearchContext& context)
 {
     Board& board = context.board;
@@ -117,22 +119,22 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
 }
 
 /**
-  * @brief alpha_beta_search(Board&, int, int, int, int, SearchContext&)
-  * 
-  * Alpha beta search.
-  * 
-  * @tparam searchType [MAXIMIZE_WHITE, MINIMIZE_BLACK]
-  * 
-  * @param[in] stop  stop search signal.
-  * @param[in] depth current depth in the tree
-  * @param[in] ply   current ply in the tree
-  * @param[in] alpha minumum value that the maximizing player(white) can guarantee
-  * @param[in] beta  maximum value that the minimizing player(black) can guarantee
-  * @param[in, out] context  board and best moves so far in the search
-  * 
-  * @return best score possible for black (minimum score), for white (maximum score)
-  * 
-  */
+   * @brief alpha_beta_search(Board&, int, int, int, int, SearchContext&)
+   * 
+   * Alpha beta search.
+   * 
+   * @tparam searchType [MAXIMIZE_WHITE, MINIMIZE_BLACK]
+   * 
+   * @param[in] stop  stop search signal.
+   * @param[in] depth current depth in the tree
+   * @param[in] ply   current ply in the tree
+   * @param[in] alpha minumum value that the maximizing player(white) can guarantee
+   * @param[in] beta  maximum value that the minimizing player(black) can guarantee
+   * @param[in, out] context  board and best moves so far in the search
+   * 
+   * @return best score possible for black (minimum score), for white (maximum score)
+   * 
+   */
 template<SearchType searchType>
 static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context)
 {
@@ -200,8 +202,10 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
 
         constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
 
+        const int extension = search_extension(board, moves[i], isCheck);
+
         board.make_move(moves[i]);
-        int eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, context);
+        int eval = alpha_beta_search<nextSearchType>(stop, depth - 1 + extension, ply + 1, alpha, beta, context);
         board.unmake_move(moves[i], game_state);
         History::pop_position();
 
@@ -261,26 +265,26 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
 }
 
 /**
-  * @brief quiescence_search(Board&, int, int, int)
-  * 
-  * Alpha beta search only considering the capture moves, this is called when we reach the maximum depth
-  * and it is paramaunt in order to avoid the 'horizon effect', for example if we stop the search in the
-  * middle of a piece exchange the evaluation is corrupted.
-  * 
-  * The search continues until there are no more capture moves, to also implement cutoffs we first calculate
-  * the static evaluation of the position (stand_pat)
-  * 
-  * @tparam searchType [MAXIMIZE_WHITE, MINIMIZE_BLACK]
-  * 
-  * @param[in] stop  stop search signal
-  * @param[in] ply   current ply in the tree
-  * @param[in] alpha minimum value that the maximizing player(white) can guarantee
-  * @param[in] beta  maximum value that the minimizing player(black) can guarantee
-  * @param[in, out] context  board and best moves so far in the search
-  * 
-  * @return best score possible for black (minimum score possible), for white (maximum score possible)
-  * 
-  */
+   * @brief quiescence_search(Board&, int, int, int)
+   * 
+   * Alpha beta search only considering the capture moves, this is called when we reach the maximum depth
+   * and it is paramaunt in order to avoid the 'horizon effect', for example if we stop the search in the
+   * middle of a piece exchange the evaluation is corrupted.
+   * 
+   * The search continues until there are no more capture moves, to also implement cutoffs we first calculate
+   * the static evaluation of the position (stand_pat)
+   * 
+   * @tparam searchType [MAXIMIZE_WHITE, MINIMIZE_BLACK]
+   * 
+   * @param[in] stop  stop search signal
+   * @param[in] ply   current ply in the tree
+   * @param[in] alpha minimum value that the maximizing player(white) can guarantee
+   * @param[in] beta  maximum value that the minimizing player(black) can guarantee
+   * @param[in, out] context  board and best moves so far in the search
+   * 
+   * @return best score possible for black (minimum score possible), for white (maximum score possible)
+   * 
+   */
 template<SearchType searchType>
 static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int beta, SearchContext& context)
 {
@@ -364,20 +368,50 @@ static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int be
 }
 
 /**
- * @brief get_entry_in_transposition_table(uint64_t, int, int, int, int&, Move&)
- * 
- * Reads an entry in the transposition table
- * 
- * @param[in] zobrist hash key of the position
- * @param[in] depth actual depth
- * @param[in] alpha actual alpha value
- * @param[in] beta actual beta value
- * @param[out] eval position score stored in the transposition table
- * @param[out] move best move stored in the transposition table
- * 
- * @return True if Entry in the tt is valid
- * 
- */
+  * @brief extends the search by 1 move if position is interesting
+  *    
+  * @param[in] board chess position
+  * @param[in] move move to analyze
+  * @param[in] in_check if position is check
+  * 
+  * @return (int) extension number
+  * 
+  */
+static int search_extension(const Board& board, Move move, bool in_check)
+{
+    if (in_check) {
+        return 1;   // check extension
+    }
+
+    const Square sq_origin = move.square_from();
+    const Square sq_end = move.square_to();
+    const Piece moved_piece = board.get_piece(sq_origin);
+
+    // pre-promotion rank extension
+    const bool is_pawn_move = piece_to_pieceType(moved_piece) == PieceType::PAWN;
+    const bool move_to_prepromotion_row = sq_end.mask() & (ROW_2_MASK | ROW_7_MASK);
+    const bool is_prepromotion_pawn_move = is_pawn_move && move_to_prepromotion_row;
+
+    const int extension = is_prepromotion_pawn_move ? 1 : 0;
+
+    return extension;
+}
+
+/**
+  * @brief get_entry_in_transposition_table(uint64_t, int, int, int, int&, Move&)
+  * 
+  * Reads an entry in the transposition table
+  * 
+  * @param[in] zobrist hash key of the position
+  * @param[in] depth actual depth
+  * @param[in] alpha actual alpha value
+  * @param[in] beta actual beta value
+  * @param[out] eval position score stored in the transposition table
+  * @param[out] move best move stored in the transposition table
+  * 
+  * @return True if Entry in the tt is valid
+  * 
+  */
 static bool get_entry_in_transposition_table(uint64_t zobrist, int depth, int alpha, int beta, int& eval, Move& move)
 {
     const TranspositionTable::Entry entry = TranspositionTable::get_entry(zobrist);
