@@ -49,7 +49,7 @@
 #define MIDDLEGAME_MATERIAL 20
 
 //int evaluate_legal_moves(const Board& board);
-GamePhase determine_game_phase(const Board& board);
+/*GamePhase determine_game_phase(const Board& board);
 int evaluate_piece(const Board& board, const GamePhase& game_phase, Piece piece, int row, int col);
 int evaluate_pawn(const Board& board, Piece piece, int pawn_row, int pawn_col, ChessColor color);
 int evaluate_rook(Piece piece, int rook_row, int rook_col, ChessColor color);
@@ -57,7 +57,7 @@ int evaluate_knight(Piece piece, int knight_row, int knight_col, ChessColor colo
 int evaluate_bishop(Piece piece, int bishop_row, int bishop_col, ChessColor color);
 int evaluate_queen(Piece piece, int queen_row, int queen_col, ChessColor color);
 int evaluate_king(const GamePhase& game_phase, const Board& board, int row, int col, ChessColor color);
-uint64_t get_king_zone_mask(int king_row, int king_col, ChessColor color);
+uint64_t get_king_zone_mask(int king_row, int king_col, ChessColor color);*/
 //int evaluate_king_safety_middle_game(const Board& board, int king_row, int king_col, ChessColor color);
 //int evaluate_king_activity_end_game(int king_row, int king_col, ChessColor color);
 
@@ -79,33 +79,21 @@ int evaluate_position(const Board& board)
 {
     int evaluation = 0;
 
-    // Evaluate legal moves for each side
-    //ChessColor side_to_move = board.state().side_to_move();
-    //ChessColor opponent = (side_to_move == ChessColor::WHITE) ? ChessColor::BLACK : ChessColor::WHITE;
-    //int sign = (side_to_move == ChessColor::WHITE) ? 1 : -1;
-    //int sign_opponent = -sign;
-    //Board board_copy = board;
-    //board_copy.set_side_to_move(opponent);
-
-    //evaluation += evaluate_legal_moves(board) * sign;
-    //evaluation += evaluate_legal_moves(board_copy) * sign_opponent;
-
     // Evaluate game phase
-    GamePhase game_phase = determine_game_phase(board);
+    //GamePhase game_phase = determine_game_phase(board);
 
     uint64_t pieces = board.get_bitboard_all();
+    const GamePhase game_phase = number_of_1_bits(pieces) <= 10 ? GamePhase::ENDGAME : GamePhase::MIDDLEGAME;
+    const bool in_endgame = game_phase == GamePhase::ENDGAME;
     while (pieces) {
 
         const Square square(pop_lsb(pieces));
         const Piece piece = board.get_piece(square);
-
-        evaluation += evaluate_piece(board, game_phase, piece, int(square.row()), int(square.col()));
+        const ChessColor piece_color = get_color(piece);
+        const int piece_bonus_square = PrecomputedEvalData::get_piece_square_table(piece, square, in_endgame);
+        const int piece_value = raw_value(piece) + piece_bonus_square;
+        evaluation += piece_color == ChessColor::WHITE ? piece_value : -piece_value;
     }
-
-    // TODO: Draw Evaluation (Insufficient material)
-    // https://www.chessprogramming.org/Draw_Evaluation
-    // https://www.chessprogramming.org/Interior_Node_Recognizer
-    // Related to transposition table
 
     return evaluation;
 }
@@ -198,7 +186,7 @@ GamePhase determine_game_phase(const Board& board)
  *  - (+) if position is evaluated as white is better.
  *  - (-) if position is evaluated as black is better.
  */
-int evaluate_piece(const Board& board, const GamePhase& game_phase, Piece piece, int row, int col)
+/*int evaluate_piece(const Board& board, const GamePhase& game_phase, Piece piece, int row, int col)
 {
     int evaluation = 0;
     PieceType type = piece_to_pieceType(piece);
@@ -217,8 +205,7 @@ int evaluate_piece(const Board& board, const GamePhase& game_phase, Piece piece,
     }
 
     return color == ChessColor::WHITE ? evaluation : -evaluation;
-}
-
+}*/
 /** 
  * @brief evaluate_pawn
  *
@@ -234,7 +221,7 @@ int evaluate_piece(const Board& board, const GamePhase& game_phase, Piece piece,
  *
  * @returns evaluation of the pawn.
  */
-int evaluate_pawn(const Board& board, Piece piece, int pawn_row, int pawn_col, ChessColor color)
+/*int evaluate_pawn(const Board& board, Piece piece, int pawn_row, int pawn_col, ChessColor color)
 {
     // Pawn base material value
     int evaluation = raw_value(piece);
@@ -298,7 +285,7 @@ int evaluate_pawn(const Board& board, Piece piece, int pawn_row, int pawn_col, C
     evaluation += PrecomputedEvalData::get_pawn_piece_square_table(Square(Row(pawn_row), Col(pawn_col)), color);
 
     return evaluation;
-}
+}*/
 
 /** 
  * @brief evaluate_rook
@@ -312,7 +299,7 @@ int evaluate_pawn(const Board& board, Piece piece, int pawn_row, int pawn_col, C
  *
  * @returns evaluation of the rook.
  */
-int evaluate_rook(Piece piece, int rook_row, int rook_col, ChessColor color)
+/*int evaluate_rook(Piece piece, int rook_row, int rook_col, ChessColor color)
 {
     // Rook base material value
     int evaluation = raw_value(piece);
@@ -320,7 +307,7 @@ int evaluate_rook(Piece piece, int rook_row, int rook_col, ChessColor color)
     evaluation += PrecomputedEvalData::get_rook_piece_square_table(Square(Row(rook_row), Col(rook_col)), color);
 
     return evaluation;
-}
+}*/
 
 /** 
  * @brief evaluate_knight
@@ -334,7 +321,7 @@ int evaluate_rook(Piece piece, int rook_row, int rook_col, ChessColor color)
  *
  * @returns evaluation of the knight.
  */
-int evaluate_knight(Piece piece, int knight_row, int knight_col, ChessColor color)
+/*int evaluate_knight(Piece piece, int knight_row, int knight_col, ChessColor color)
 {
     // Knight base material value
     int evaluation = raw_value(piece);
@@ -342,7 +329,7 @@ int evaluate_knight(Piece piece, int knight_row, int knight_col, ChessColor colo
     evaluation += PrecomputedEvalData::get_knight_piece_square_table(Square(Row(knight_row), Col(knight_col)), color);
 
     return evaluation;
-}
+}*/
 
 /** 
  * @brief evaluate_bishop
@@ -356,7 +343,7 @@ int evaluate_knight(Piece piece, int knight_row, int knight_col, ChessColor colo
  *
  * @returns evaluation of the bishop.
  */
-int evaluate_bishop(Piece piece, int bishop_row, int bishop_col, ChessColor color)
+/*int evaluate_bishop(Piece piece, int bishop_row, int bishop_col, ChessColor color)
 {
     // Bishop base material value
     int evaluation = raw_value(piece);
@@ -364,7 +351,7 @@ int evaluate_bishop(Piece piece, int bishop_row, int bishop_col, ChessColor colo
     evaluation += PrecomputedEvalData::get_bishop_piece_square_table(Square(Row(bishop_row), Col(bishop_col)), color);
 
     return evaluation;
-}
+}*/
 
 /** 
  * @brief evaluate_queen
@@ -378,7 +365,7 @@ int evaluate_bishop(Piece piece, int bishop_row, int bishop_col, ChessColor colo
  *
  * @returns evaluation of the queen.
  */
-int evaluate_queen(Piece piece, int queen_row, int queen_col, ChessColor color)
+/*int evaluate_queen(Piece piece, int queen_row, int queen_col, ChessColor color)
 {
     // Queen base material value
     int evaluation = raw_value(piece);
@@ -386,7 +373,7 @@ int evaluate_queen(Piece piece, int queen_row, int queen_col, ChessColor color)
     evaluation += PrecomputedEvalData::get_queen_piece_square_table(Square(Row(queen_row), Col(queen_col)), color);
 
     return evaluation;
-}
+}*/
 
 /** 
  * @brief evaluate_king
@@ -403,7 +390,7 @@ int evaluate_queen(Piece piece, int queen_row, int queen_col, ChessColor color)
  *
  * @returns set of squares that are in the king zone.
  */
-int evaluate_king(const GamePhase& game_phase, const Board& board, int row, int col, ChessColor color)
+/*int evaluate_king(const GamePhase& game_phase, const Board& board, int row, int col, ChessColor color)
 {
     int evaluation = 0;
     const Square king_sq = Square(Row(row), Col(col));
@@ -419,7 +406,7 @@ int evaluate_king(const GamePhase& game_phase, const Board& board, int row, int 
     }
 
     return evaluation;
-}
+}*/
 
 /** 
  * @brief get_king_zone
@@ -434,7 +421,7 @@ int evaluate_king(const GamePhase& game_phase, const Board& board, int row, int 
  *
  * @returns set of squares that are in the king zone.
  */
-uint64_t get_king_zone_mask(int king_row, int king_col, ChessColor color)
+/*uint64_t get_king_zone_mask(int king_row, int king_col, ChessColor color)
 {
     uint64_t king_zone_mask = 0;
     int sign = (color == ChessColor::WHITE) ? 1 : -1;
@@ -461,7 +448,7 @@ uint64_t get_king_zone_mask(int king_row, int king_col, ChessColor color)
     }
 
     return king_zone_mask;
-}
+}*/
 
 /** 
  * @brief evaluate_king_safety_middle_game
@@ -571,7 +558,7 @@ uint64_t get_king_zone_mask(int king_row, int king_col, ChessColor color)
  *
  * @returns set of squares that are in the king zone.
  */
-int evaluate_king_activity_end_game(int king_row, int king_col, ChessColor color)
+/*int evaluate_king_activity_end_game(int king_row, int king_col, ChessColor color)
 {
     int evaluation = 0;
 
@@ -579,4 +566,4 @@ int evaluate_king_activity_end_game(int king_row, int king_col, ChessColor color
         PrecomputedEvalData::get_king_end_game_piece_square_table(Square(Row(king_row), Col(king_col)), color);
 
     return evaluation;
-}
+}*/

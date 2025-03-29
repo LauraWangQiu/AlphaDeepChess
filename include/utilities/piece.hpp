@@ -69,8 +69,6 @@ enum class Piece : int
  *  QUEEN = 4,
  *  KING = 5,
  *  EMPTY = 6
- *
- * 
  */
 enum class PieceType : int
 {

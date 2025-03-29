@@ -26,6 +26,35 @@ public:
     ~PrecomputedEvalData() = delete;
 
     /**
+     * @brief get piece value in the PST (piece square table)
+     * 
+     * @param[in] piece piece to get the value
+     * @param[in] square piece square
+     * @param[in] endgame (optional) get the endgame PST value (only available for king)
+     * 
+     * @return int PIECE_SQUARE_TABLE[piece][square]
+     */
+    static inline int get_piece_square_table(Piece piece, Square square, bool endgame = false)
+    {
+        assert(square.is_valid());
+        assert(is_valid_piece(piece));
+
+        const ChessColor color = get_color(piece);
+        const PieceType piece_type = piece_to_pieceType(piece);
+
+        assert(piece_type != PieceType::EMPTY);
+        assert(is_valid_color(color));
+
+        const bool get_endgame_king = piece_type == PieceType::KING && endgame;
+
+        constexpr int PST_endgame_king_index = 6;
+        const int PST_index = get_endgame_king ? PST_endgame_king_index : static_cast<int>(piece_type);
+        const int index_sq = (color == ChessColor::WHITE) ? 63 - square.value() : square.value();
+
+        return PIECE_SQUARE_TABLE[PST_index][index_sq];
+    }
+
+    /**
      * @brief get_distance_chebyshev
      * 
      * Get the distance between two squares using Chebyshev's Distance.
@@ -80,153 +109,6 @@ public:
         return SAFETY_TABLE[number_pieces];
     }
 
-    /**
-     * @brief get_pawn_piece_square_table 
-     * 
-     * Get the pawn piece-square table value from a square.
-     * 
-     * @note None.
-     * 
-     * @param[in] square square to get the value.
-     * @param[in] color color of the pawn.
-     * 
-     * @return PAWN_PIECE_SQUARE_TABLE(square)
-     */
-    static inline int get_pawn_piece_square_table(Square square, ChessColor color)
-    {
-        assert(square.is_valid());
-        assert(is_valid_color(color));
-
-        const int index_sq = (color == ChessColor::WHITE) ? 64 - square.value() : square.value();
-        return PAWN_PIECE_SQUARE_TABLE[index_sq];
-    }
-
-    /**
-     * @brief get_rook_piece_square_table 
-     * 
-     * Get the rook piece-square table value from a square.
-     * 
-     * @note None.
-     * 
-     * @param[in] square square to get the value.
-     * @param[in] color color of the rook.
-     * 
-     * @return ROOK_PIECE_SQUARE_TABLE(square)
-     */
-    static inline int get_rook_piece_square_table(Square square, ChessColor color)
-    {
-        assert(square.is_valid());
-        assert(is_valid_color(color));
-
-        const int index_sq = (color == ChessColor::WHITE) ? 64 - square.value() : square.value();
-        return ROOK_PIECE_SQUARE_TABLE[index_sq];
-    }
-
-    /**
-     * @brief get_knight_piece_square_table 
-     * 
-     * Get the knight piece-square table value from a square.
-     * 
-     * @note None.
-     * 
-     * @param[in] square square to get the value.
-     * @param[in] color color of the knight.
-     * 
-     * @return KNIGHT_PIECE_SQUARE_TABLE(square)
-     */
-    static inline int get_knight_piece_square_table(Square square, ChessColor color)
-    {
-        assert(square.is_valid());
-        assert(is_valid_color(color));
-
-        const int index_sq = (color == ChessColor::WHITE) ? 64 - square.value() : square.value();
-        return KNIGHT_PIECE_SQUARE_TABLE[index_sq];
-    }
-
-    /**
-     * @brief get_bishop_piece_square_table 
-     * 
-     * Get the bishop piece-square table value from a square.
-     * 
-     * @note None.
-     * 
-     * @param[in] square square to get the value.
-     * @param[in] color color of the bishop.
-     * 
-     * @return BISHOP_PIECE_SQUARE_TABLE(square)
-     */
-    static inline int get_bishop_piece_square_table(Square square, ChessColor color)
-    {
-        assert(square.is_valid());
-        assert(is_valid_color(color));
-
-        const int index_sq = (color == ChessColor::WHITE) ? 64 - square.value() : square.value();
-        return BISHOP_PIECE_SQUARE_TABLE[index_sq];
-    }
-
-    /**
-     * @brief get_queen_piece_square_table 
-     * 
-     * Get the queen piece-square table value from a square.
-     * 
-     * @note None.
-     * 
-     * @param[in] square square to get the value.
-     * @param[in] color color of the queen.
-     * 
-     * @return QUEEN_PIECE_SQUARE_TABLE(square)
-     */
-    static inline int get_queen_piece_square_table(Square square, ChessColor color)
-    {
-        assert(square.is_valid());
-        assert(is_valid_color(color));
-
-        const int index_sq = (color == ChessColor::WHITE) ? 64 - square.value() : square.value();
-        return QUEEN_PIECE_SQUARE_TABLE[index_sq];
-    }
-
-    /**
-     * @brief get_king_middle_game_piece_square_table 
-     * 
-     * Get the king middle game piece-square table value from a square.
-     * 
-     * @note None.
-     * 
-     * @param[in] square square to get the value.
-     * @param[in] color color of the king.
-     * 
-     * @return KING_MIDDLE_GAME_PIECE_SQUARE_TABLE(square)
-     */
-    static inline int get_king_middle_game_piece_square_table(Square square, ChessColor color)
-    {
-        assert(square.is_valid());
-        assert(is_valid_color(color));
-
-        const int index_sq = (color == ChessColor::WHITE) ? 64 - square.value() : square.value();
-        return KING_MIDDLE_GAME_PIECE_SQUARE_TABLE[index_sq];
-    }
-
-    /**
-     * @brief get_king_end_game_piece_square_table 
-     * 
-     * Get the king end game piece-square table value from a square.
-     * 
-     * @note None.
-     * 
-     * @param[in] square square to get the value.
-     * @param[in] color color of the king.
-     * 
-     * @return KING_END_GAME_PIECE_SQUARE_TABLE(square)
-     */
-    static inline int get_king_end_game_piece_square_table(Square square, ChessColor color)
-    {
-        assert(square.is_valid());
-        assert(is_valid_color(color));
-
-        const int index_sq = (color == ChessColor::WHITE) ? 64 - square.value() : square.value();
-        return KING_END_GAME_PIECE_SQUARE_TABLE[index_sq];
-    }
-
 private:
     static inline const std::array<std::array<int, 64>, 64> init_chebyshev_distance()
     {
@@ -235,7 +117,7 @@ private:
         for (Square sq1 = Square::SQ_A1; sq1.is_valid(); sq1++) {
             for (Square sq2 = Square::SQ_A1; sq2.is_valid(); sq2++) {
                 distances[sq1][sq2] =
-                    std::abs(int(sq1.row()) - int(sq2.row())) + std::abs(int(sq1.col()) - int(sq2.col()));
+                    std::max(std::abs(int(sq1.row()) - int(sq2.row())), std::abs(int(sq1.col()) - int(sq2.col())));
             }
         }
 
@@ -249,7 +131,7 @@ private:
         for (Square sq1 = Square::SQ_A1; sq1.is_valid(); sq1++) {
             for (Square sq2 = Square::SQ_A1; sq2.is_valid(); sq2++) {
                 distances[sq1][sq2] =
-                    std::max(std::abs(int(sq1.row()) - int(sq2.row())), std::abs(int(sq1.col()) - int(sq2.col())));
+                    std::abs(int(sq1.row()) - int(sq2.row())) + std::abs(int(sq1.col()) - int(sq2.col()));
             }
         }
 
@@ -345,5 +227,24 @@ private:
         -50, -30, -30, -30, -30, -30, -30, -50
     };
 
+    /**
+     * @brief lookup table for each PST indexed by PieceType
+     * 0 : PAWN_PIECE_SQUARE_TABLE
+     * 1 : KNIGHT_PIECE_SQUARE_TABLE
+     * 2 : BISHOP_PIECE_SQUARE_TABLE
+     * 3 : ROOK_PIECE_SQUARE_TABLE
+     * 4 : QUEEN_PIECE_SQUARE_TABLE
+     * 5 : KING_MIDDLE_GAME_PIECE_SQUARE_TABLE
+     * 6 : KING_END_GAME_PIECE_SQUARE_TABLE
+     */
+    static constexpr const int* PIECE_SQUARE_TABLE[NUM_CHESS_PIECE_TYPES] = {
+        PAWN_PIECE_SQUARE_TABLE,
+        KNIGHT_PIECE_SQUARE_TABLE,
+        BISHOP_PIECE_SQUARE_TABLE,
+        ROOK_PIECE_SQUARE_TABLE, 
+        QUEEN_PIECE_SQUARE_TABLE,
+        KING_MIDDLE_GAME_PIECE_SQUARE_TABLE,
+        KING_END_GAME_PIECE_SQUARE_TABLE
+    };
     // clang-format on
 };
