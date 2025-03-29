@@ -13,6 +13,11 @@
 #include <cassert>
 #include <algorithm>
 
+/**
+ * @brief look up table with moves and their scores
+ * 
+ * @note is accesed via move.id()
+ */
 thread_local uint8_t MOVE_SCORE_TABLE[Move::MAX_ID() + 1U];
 
 /**

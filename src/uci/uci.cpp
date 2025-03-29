@@ -325,6 +325,8 @@ bool Uci::position_command_action(const TokenArray& tokens, uint32_t num_tokens)
     if (num_tokens < 2) {
         return false;
     }
+    stop_command_action();
+
     uint32_t token_i = 1;
 
     if (tokens[token_i] == "startpos") {
@@ -445,7 +447,11 @@ void Uci::help_command_action() const
  * Exits program.
  * 
  */
-void Uci::quit_command_action() const { std::cout << "goodbye" << std::endl; }
+void Uci::quit_command_action()
+{
+    stop_command_action();
+    std::cout << "goodbye" << std::endl;
+}
 
 /**
  * @brief perft_command_action

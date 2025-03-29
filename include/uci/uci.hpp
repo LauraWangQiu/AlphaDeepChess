@@ -234,7 +234,7 @@ private:
      * Exits program.
      * 
      */
-    void quit_command_action() const;
+    void quit_command_action();
 
     /**
      * @brief perft_command_action

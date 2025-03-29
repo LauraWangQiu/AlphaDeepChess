@@ -50,7 +50,18 @@ class MainWindow:
         # Enable CTk's native scaling
         ctk.set_window_scaling(1.3)  # Improves high-DPI handling
 
+        # Set up window close handler
+        self.window.protocol("WM_DELETE_WINDOW", self.on_closing)
+
         self.window.mainloop()
+
+    def on_closing(self):
+        """Cleanup resources before closing the window"""
+        if self.UCI:
+            self.UCI.close()
+            del self.UCI
+
+        self.window.destroy()
 
 if __name__ == "__main__":
     MainWindow()

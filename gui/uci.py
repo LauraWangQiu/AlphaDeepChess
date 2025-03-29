@@ -103,8 +103,12 @@ class Uci:
             if expected in line:
                 return
 
-    def __del__(self):
-        """Stops the chess engine cleanly."""
+    def close(self):
+        self.send_command("quit")
         self.process.terminate()
         self.process.wait()
         self.process = None
+
+    def __del__(self):
+        """Stops the chess engine cleanly."""
+        self.close()
