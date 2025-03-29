@@ -55,7 +55,7 @@ public:
     {
         moves.clear();
         side_to_move = board.state().side_to_move();
-        side_waiting = side_to_move == ChessColor::WHITE ? ChessColor::BLACK : ChessColor::WHITE;
+        side_waiting = opposite_color(side_to_move);
         //attacked_squares_mask = 0U;
         pinned_squares_mask = 0U;
         king_danger_squares_mask = 0U;
@@ -65,18 +65,16 @@ public:
         king_white_square = lsb(board.get_bitboard_piece(Piece::W_KING));
         king_black_square = lsb(board.get_bitboard_piece(Piece::B_KING));
 
-        side_to_move_king_square = side_to_move == ChessColor::WHITE ? king_white_square : king_black_square;
+        side_to_move_king_square = is_white(side_to_move) ? king_white_square : king_black_square;
 
-        side_waiting_king_square = side_to_move == ChessColor::WHITE ? king_black_square : king_white_square;
+        side_waiting_king_square = is_white(side_to_move) ? king_black_square : king_white_square;
 
-        side_to_move_pieces_mask =
-            side_to_move == ChessColor::WHITE ? board.get_bitboard_white() : board.get_bitboard_black();
-        side_waiting_pieces_mask =
-            side_to_move == ChessColor::WHITE ? board.get_bitboard_black() : board.get_bitboard_white();
+        side_to_move_pieces_mask = board.get_bitboard_color(side_to_move);
+        side_waiting_pieces_mask = board.get_bitboard_color(opposite_color(side_to_move));
 
-        row_where_promotion_is_available = side_to_move == ChessColor::WHITE ? ROW_7 : ROW_2;
-        row_where_en_passant_is_available = side_to_move == ChessColor::WHITE ? ROW_5 : ROW_4;
-        row_where_double_push_is_available = side_to_move == ChessColor::WHITE ? ROW_2 : ROW_7;
+        row_where_promotion_is_available = is_white(side_to_move) ? ROW_7 : ROW_2;
+        row_where_en_passant_is_available = is_white(side_to_move) ? ROW_5 : ROW_4;
+        row_where_double_push_is_available = is_white(side_to_move) ? ROW_2 : ROW_7;
     }
     ~MoveGeneratorInfo() { }
 

@@ -41,7 +41,7 @@ public:
      * @return array_piece[square].
      * 
      */
-    inline Piece get_piece(Square square) const
+    constexpr inline Piece get_piece(Square square) const
     {
         assert(square.is_valid());
         return array_piece[square];
@@ -59,7 +59,7 @@ public:
      * - FALSE if there is a piece in the square.
      * 
      */
-    inline bool is_empty(Square square) const
+    constexpr inline bool is_empty(Square square) const
     {
         assert(square.is_valid());
         return array_piece[square] == Piece::EMPTY;
@@ -73,27 +73,23 @@ public:
      * @return bitboard_all
      * 
      */
-    inline uint64_t get_bitboard_all() const { return bitboard_all; }
+    constexpr inline uint64_t get_bitboard_all() const { return bitboard_all; }
 
     /**
-     * @brief bitboard_white_pieces 
+     * @brief get_bitboard_color 
      * 
-     * Get the bitboard that represents all white pieces on the board.
+     * Get bitboard for each piece color.
+     *      
+     * @note color must be valid 
      * 
-     * @return bitboard_white
-     * 
-     */
-    inline uint64_t get_bitboard_white() const { return bitboard_white; }
-
-    /**
-     * @brief bitboard_black_pieces 
-     * 
-     * Get the bitboard that represents all black pieces on the board.
-     * 
-     * @return bitboard_black
+     * @return bitboard_color[color]
      * 
      */
-    inline uint64_t get_bitboard_black() const { return bitboard_black; }
+    constexpr inline uint64_t get_bitboard_color(ChessColor color) const
+    {
+        assert(is_valid_color(color));
+        return bitboard_color[static_cast<int>(color)];
+    }
 
     /**
      * @brief get_bitboard_piece 
@@ -109,7 +105,7 @@ public:
      * @return bitboard_piece[piece]
      * 
      */
-    inline uint64_t get_bitboard_piece(Piece piece) const
+    constexpr inline uint64_t get_bitboard_piece(Piece piece) const
     {
         assert(is_valid_piece(piece));
         return bitboard_piece[static_cast<int>(piece)];
@@ -126,7 +122,7 @@ public:
      * @param[in] square
      * 
      */
-    void put_piece(Piece piece, Square square);
+    constexpr inline void put_piece(Piece piece, Square square);
 
     /**
      * @brief remove_piece
@@ -138,7 +134,7 @@ public:
      * @param[in] square
      * 
      */
-    void remove_piece(Square square);
+    constexpr inline void remove_piece(Square square);
 
     /**
      * @brief set_side_to_move
@@ -150,7 +146,7 @@ public:
      * @param[in] color side to move color
      * 
      */
-    inline void set_side_to_move(ChessColor color)
+    constexpr inline void set_side_to_move(ChessColor color)
     {
         assert(is_valid_color(color));
         game_state.set_side_to_move(color);
@@ -240,7 +236,7 @@ public:
      * @return game_state
      * 
      */
-    inline const GameState state() const { return game_state; }
+    constexpr inline const GameState state() const { return game_state; }
 
     /**
      * @brief operator<<
@@ -292,21 +288,17 @@ private:
     uint64_t bitboard_all;
 
     /**
-     * @brief bitboard_white
+     * @brief bitboard_piece[ChessColor]
      * 
-     *  Bitboard containing all white pieces.
+     *  Array of bitboards for each piece color.
+     * 
+     * @note Index must be 0 (White) or 1 (Black)
+     * 
      */
-    uint64_t bitboard_white;
+    uint64_t bitboard_color[2];
 
     /**
-     * @brief bitboard_black
-     * 
-     *  Bitboard containing all black pieces.
-     */
-    uint64_t bitboard_black;
-
-    /**
-     * @brief bitboard_piece
+     * @brief bitboard_piece[Piece]
      * 
      *  Array of bitboards for each piece type.
      * 
@@ -350,3 +342,65 @@ private:
      */
     void check_and_modify_en_passant_rule();
 };
+
+/**
+ * @brief put_piece
+ * 
+ * Add piece to the board
+ * 
+ * @note piece and square must be valid.
+ * 
+ * @param[in] piece
+ * @param[in] square
+ * 
+ */
+constexpr inline void Board::put_piece(Piece piece, Square square)
+{
+    assert(is_valid_piece(piece));
+    assert(square.is_valid());
+
+    if (piece == Piece::EMPTY) {
+        remove_piece(square);
+        return;
+    }
+
+    const ChessColor piece_color = get_color(piece);
+    const Piece previous_piece = array_piece[square];
+    const ChessColor previous_piece_color = get_color(previous_piece);
+
+    const uint64_t mask = square.mask();
+
+    // first remove the previous piece
+    bitboard_piece[static_cast<int>(previous_piece)] &= ~mask;
+    bitboard_color[static_cast<int>(previous_piece_color)] &= ~mask;
+
+    // place the new piece
+    bitboard_piece[static_cast<int>(piece)] |= mask;
+    array_piece[square] = piece;
+    bitboard_color[static_cast<int>(piece_color)] |= mask;
+
+    bitboard_all |= mask;
+}
+
+/**
+ * @brief remove_piece
+ * 
+ * Remove piece from the board
+ * 
+ * @note square must be valid.
+ * 
+ * @param[in] square
+ * 
+ */
+constexpr inline void Board::remove_piece(Square square)
+{
+    assert(square.is_valid());
+
+    const uint64_t mask = square.mask();
+
+    bitboard_piece[static_cast<int>(get_piece(square))] &= ~mask;
+    array_piece[square] = Piece::EMPTY;
+    bitboard_all &= ~mask;
+    bitboard_color[static_cast<int>(ChessColor::WHITE)] &= ~mask;
+    bitboard_color[static_cast<int>(ChessColor::BLACK)] &= ~mask;
+}

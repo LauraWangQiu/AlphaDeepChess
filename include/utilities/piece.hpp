@@ -13,7 +13,7 @@
  * @brief WHITE = 0  
  * @brief BLACK = 1
  */
-enum class ChessColor
+enum class ChessColor : int
 {
     WHITE = 0,
     BLACK = 1
@@ -194,6 +194,20 @@ constexpr inline bool is_valid_color(ChessColor color)
 }
 
 /**
+ * @brief calculates if the color is white 
+ * 
+ * Returns if color is valid.
+ * 
+ * @param[in] color The color
+ * 
+ * @return bool
+ * @retval TRUE if color == WHITE
+ * @retval False if color == BLACK
+ * 
+ */
+constexpr inline bool is_white(ChessColor color) { return !static_cast<bool>(color); }
+
+/**
  * @brief opposite_color 
  * 
  * Returns the opposite color.
@@ -336,7 +350,7 @@ constexpr inline ChessColor get_color(Piece piece)
     assert(is_valid_piece(piece));
 
     // depends on the int value of the Piece enum
-    return static_cast<int>(piece) <= 5 ? ChessColor::WHITE : ChessColor::BLACK;
+    return static_cast<ChessColor>(static_cast<int>(piece) > 5);
 }
 
 /**

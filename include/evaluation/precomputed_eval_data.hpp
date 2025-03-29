@@ -49,7 +49,7 @@ public:
 
         constexpr int PST_endgame_king_index = 6;
         const int PST_index = get_endgame_king ? PST_endgame_king_index : static_cast<int>(piece_type);
-        const int index_sq = (color == ChessColor::WHITE) ? 63 - square.value() : square.value();
+        const int index_sq = is_white(color) ? 63 - square.value() : square.value();
 
         return PIECE_SQUARE_TABLE[PST_index][index_sq];
     }

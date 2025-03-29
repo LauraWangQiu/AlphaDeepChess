@@ -165,7 +165,7 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
         return 0;
     }
     else if (depth == 0) {
-        return quiescence_search<searchType>(stop, ply, alpha, beta, context));
+        return quiescence_search<searchType>(stop, ply, alpha, beta, context);
     }
 
     int final_node_evaluation = MAXIMIZING_WHITE ? -INF_EVAL : +INF_EVAL;

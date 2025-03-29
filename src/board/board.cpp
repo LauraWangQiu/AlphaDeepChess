@@ -11,65 +11,6 @@
 #include <stdexcept>
 
 /**
- * @brief put_piece
- * 
- * Add piece to the board
- * 
- * @note piece and square must be valid.
- * 
- * @param[in] piece
- * @param[in] square
- * 
- */
-void Board::put_piece(Piece piece, Square square)
-{
-    assert(is_valid_piece(piece));
-    assert(square.is_valid());
-
-    if (piece == Piece::EMPTY) {
-        remove_piece(square);
-        return;
-    }
-
-    const uint64_t mask = square.mask();
-
-    // first remove the previous piece
-    bitboard_piece[static_cast<int>(get_piece(square))] &= ~mask;
-
-    // place the new piece
-    bitboard_piece[static_cast<int>(piece)] |= mask;
-    array_piece[square] = piece;
-
-    bitboard_white = (get_color(piece) == ChessColor::WHITE) ? bitboard_white | mask : bitboard_white & ~mask;
-    bitboard_black = (get_color(piece) == ChessColor::BLACK) ? bitboard_black | mask : bitboard_black & ~mask;
-
-    bitboard_all |= mask;
-}
-
-/**
- * @brief remove_piece
- * 
- * Remove piece from the board
- * 
- * @note square must be valid.
- * 
- * @param[in] square
- * 
- */
-void Board::remove_piece(Square square)
-{
-    assert(square.is_valid());
-
-    const uint64_t mask = square.mask();
-
-    bitboard_piece[static_cast<int>(get_piece(square))] &= ~mask;
-    array_piece[square] = Piece::EMPTY;
-    bitboard_all &= ~mask;
-    bitboard_white &= ~mask;
-    bitboard_black &= ~mask;
-}
-
-/**
  * @brief clean
  * 
  * Remove all pieces on the 
@@ -80,8 +21,8 @@ void Board::clean()
     game_state.clean();
 
     bitboard_all = 0ULL;
-    bitboard_black = 0ULL;
-    bitboard_white = 0ULL;
+    bitboard_color[static_cast<int>(ChessColor::WHITE)] = 0ULL;
+    bitboard_color[static_cast<int>(ChessColor::BLACK)] = 0ULL;
 
     for (int piece = 0; piece < NUM_CHESS_PIECES - 1; piece++) {
         bitboard_piece[piece] = 0ULL;
@@ -358,7 +299,7 @@ std::string Board::fen() const
  * 
  *  Constructor of Board class.
  */
-Board::Board() : game_state(), bitboard_all(0ULL), bitboard_white(0ULL), bitboard_black(0ULL) { clean(); }
+Board::Board() : game_state(), bitboard_all(0ULL) { clean(); }
 
 /**
  * @brief ~Board
