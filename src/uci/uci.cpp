@@ -165,7 +165,7 @@ void Uci::new_game_command_action()
 void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
 {
     uint32_t depth = INF_DEPTH;
-    uint32_t movetime = 0, wtime = 0, btime = 0;
+    uint32_t movetime = 0, wtime = 0, btime = 0, winc = 0, binc = 0;
 
     // Parse the command line arguments
     for (uint32_t i = 1; i < num_tokens; ++i) {
@@ -196,6 +196,22 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
                 return;
             }
         }
+        else if (tokens[i] == "winc") {
+            try {
+                winc = std::stoul(std::string(tokens[++i]));
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command : go " << tokens[2] << "\n";
+                return;
+            }
+        }
+        else if (tokens[i] == "binc") {
+            try {
+                binc = std::stoul(std::string(tokens[++i]));
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command : go " << tokens[2] << "\n";
+                return;
+            }
+        }
         else if (tokens[i] == "depth") {
             try {
                 depth = std::stoul(std::string(tokens[++i]));
@@ -216,8 +232,7 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
             perft_command_action(depth);
             return;
         }
-        else if (tokens[i] == "winc" || tokens[i] == "binc" || tokens[i] == "movestogo" || tokens[i] == "nodes" ||
-                 tokens[i] == "mate") {
+        else if (tokens[i] == "movestogo" || tokens[i] == "nodes" || tokens[i] == "mate") {
             std::cout << "Ignored argument for go: " << tokens[i] << " " << tokens[i] << "\n";
             i += 1;
         }
@@ -230,6 +245,7 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
     // stop and wait for previous search to end
     stop_command_action();
 
+    const ChessColor side_to_move = board.state().side_to_move();
 
     // Launch a new thread to search for the best move
     searchThread = std::thread([this, depth]() { search(stop_signal, searchResults, board, depth); });
@@ -261,45 +277,13 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
     });
 
     if (movetime != 0 || wtime != 0 || btime != 0) {
-        timerThread = std::thread([this, movetime, wtime, btime]() {
+        timerThread = std::thread([this, side_to_move, movetime, wtime, btime, winc, binc]() {
             std::unique_lock<std::mutex> lock(timerMutex);
 
-            uint32_t time = 0;
-
-            if (movetime != 0) {
-                time = movetime;
-            }
-            else {
-                if (wtime == 0) {
-                    time = btime;
-                }
-                else if (btime == 0) {
-                    time = wtime;
-                }
-                else {
-                    time = std::min(wtime, btime);
-                }
-
-                if (time >= 60000)   // time >= 1min
-                {
-                    time = 5000;   // think 5 seconds
-                }
-                else if (time >= 30000)   // time >= 30 seconds
-                {
-                    time = 2000;   // think 2 seconds
-                }
-                else if (time >= 10000)   // time >= 10 seconds
-                {
-                    time = 500;   // think 0.5 seconds
-                }
-                else {
-                    time = 100;   // think 0.1 seconds
-                }
-            }
+            const uint32_t time = think_time(side_to_move, movetime, wtime, btime, winc, binc);
 
             // Wait for n milliseconds or until search_stopped becomes true
-            if (!timerCv.wait_for(lock, std::chrono::milliseconds(time),
-                                  [this] { return this->stop_signal.load(); })) {
+            if (!timerCv.wait_for(lock, std::chrono::milliseconds(time), [this] { return this->stop_signal.load(); })) {
                 // Timeout occurred and search_stopped is still false
                 lock.unlock();   // Unlock before calling stop_search()
                 stop_signal.store(true);
@@ -644,4 +628,52 @@ Move Uci::create_move_from_string(std::string_view move_string, const Board& boa
     }
     // Create and return the Move object
     return Move(sq_origin, sq_end, move_type, promo_piece);
+}
+
+/**
+ * @brief calculate the time the bot has until stopping the search
+ * 
+ * @note pass 0 to not provide an argument
+ * 
+ * @param[in] us side to move
+ * @param[in] movetime explicit think time (if provided it will be the think time)
+ * @param[in] wtime white total time
+ * @param[in] btime black total time
+ * @param[in] winc white time increment per move
+ * @param[in] binc black time increment per move
+ * 
+ *  @return (uint32_t) time to think
+ * 
+ */
+uint32_t Uci::think_time(ChessColor us, uint32_t movetime, uint32_t wtime, uint32_t btime, uint32_t winc, uint32_t binc)
+{
+
+    if (movetime != 0) {
+        return movetime;   // think time is explicitly provided
+    }
+
+    const uint32_t remaining_time = (us == ChessColor::WHITE) ? wtime : btime;
+    const uint32_t increment = (us == ChessColor::WHITE) ? winc : binc;
+
+    if (remaining_time >= 60000)   // time >= 1min
+    {
+        return 5000;   // think 5 seconds
+    }
+    else if (remaining_time >= 10000)   // 1min > time >= 10 seconds
+    {
+        return increment && increment < remaining_time ? increment : 3000;   // think the increment time or 3 seconds
+    }
+    else if (remaining_time >= 1000)   // 10 seconds > time >= 1 second
+    {
+        return increment && increment < remaining_time ? increment : 1000;   // think the increment time or 1 seconds
+    }
+    else if (remaining_time >= 200)   // 1 seconds > time >= 0.2 second
+    {
+        return 100;   // think 0.1 seconds
+    }
+    else {
+        return 10;   // think 0.01 seconds
+    }
+
+    return 0;
 }

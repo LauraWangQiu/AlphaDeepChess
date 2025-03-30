@@ -288,4 +288,21 @@ private:
      *      - Move::null() if error detected, bad string move representation.
      */
     Move create_move_from_string(std::string_view move_string, const Board& board) const;
+
+    /**
+     * @brief calculate the time the bot has until stopping the search
+     * 
+     * @note pass 0 to not provide an argument
+     * 
+     * @param[in] us side to move
+     * @param[in] movetime explicit think time (if provided it will be the think time)
+     * @param[in] wtime white total time
+     * @param[in] btime black total time
+     * @param[in] winc white time increment per move
+     * @param[in] binc black time increment per move
+     * 
+     *  @return (uint32_t) time to think
+     * 
+     */
+    uint32_t think_time(ChessColor us, uint32_t movetime, uint32_t wtime, uint32_t btime, uint32_t winc, uint32_t binc);
 };
