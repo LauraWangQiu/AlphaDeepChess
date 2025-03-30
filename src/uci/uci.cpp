@@ -165,7 +165,7 @@ void Uci::new_game_command_action()
 void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
 {
     uint32_t depth = INF_DEPTH;
-    uint32_t movetime = 0;
+    uint32_t movetime = 0, wtime = 0, btime = 0;
 
     // Parse the command line arguments
     for (uint32_t i = 1; i < num_tokens; ++i) {
@@ -180,9 +180,17 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
                 return;
             }
         }
-        else if (tokens[i] == "wtime" || tokens[i] == "btime") {
+        else if (tokens[i] == "wtime") {
             try {
-                movetime = std::stoul(std::string(tokens[++i]));
+                wtime = std::stoul(std::string(tokens[++i]));
+            } catch (const std::exception& e) {
+                std::cout << "Invalid argument for command : go " << tokens[2] << "\n";
+                return;
+            }
+        }
+        else if (tokens[i] == "btime") {
+            try {
+                btime = std::stoul(std::string(tokens[++i]));
             } catch (const std::exception& e) {
                 std::cout << "Invalid argument for command : go " << tokens[2] << "\n";
                 return;
@@ -252,11 +260,45 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
         searchResults.depthReached = 0;   // reset depthReached when we consume all data
     });
 
-    if (movetime != 0) {
-        timerThread = std::thread([this, movetime]() {
+    if (movetime != 0 || wtime != 0 || btime != 0) {
+        timerThread = std::thread([this, movetime, wtime, btime]() {
             std::unique_lock<std::mutex> lock(timerMutex);
+
+            uint32_t time = 0;
+
+            if (movetime != 0) {
+                time = movetime;
+            }
+            else {
+                if (wtime == 0) {
+                    time = btime;
+                }
+                else if (btime == 0) {
+                    time = wtime;
+                }
+                else {
+                    time = std::min(wtime, btime);
+                }
+
+                if (time >= 60000)   // time >= 1min
+                {
+                    time = 5000;   // think 5 seconds
+                }
+                else if (time >= 30000)   // time >= 30 seconds
+                {
+                    time = 2000;   // think 2 seconds
+                }
+                else if (time >= 10000)   // time >= 10 seconds
+                {
+                    time = 500;   // think 0.5 seconds
+                }
+                else {
+                    time = 100;   // think 0.1 seconds
+                }
+            }
+
             // Wait for n milliseconds or until search_stopped becomes true
-            if (!timerCv.wait_for(lock, std::chrono::milliseconds(movetime),
+            if (!timerCv.wait_for(lock, std::chrono::milliseconds(time),
                                   [this] { return this->stop_signal.load(); })) {
                 // Timeout occurred and search_stopped is still false
                 lock.unlock();   // Unlock before calling stop_search()
