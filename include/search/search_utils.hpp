@@ -74,6 +74,7 @@ struct SearchResults
 {
     std::mutex mtx_data_available_cv;
     std::condition_variable data_available_cv;
+    std::atomic<uint16_t> ponderMove_data;
     std::atomic<uint32_t> depthReached;
     SearchResult results[INF_DEPTH];
 };
@@ -94,6 +95,7 @@ struct SearchResults
 inline void insert_new_result(SearchResults& results, int depth, int evaluation, Move move)
 {
     assert(results.depthReached < INF_DEPTH);
+
     results.results[results.depthReached].depth = depth;
     results.results[results.depthReached].evaluation = evaluation;
     results.results[results.depthReached].bestMove_data = move.raw_data();

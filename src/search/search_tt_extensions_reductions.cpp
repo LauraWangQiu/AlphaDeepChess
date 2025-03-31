@@ -69,6 +69,17 @@ void search(std::atomic<bool>& stop, SearchResults& results, Board& board, uint3
         insert_new_result(results, depth, context.bestEvalFound, context.bestMoveFound);
     }
 
+    // store ponder move
+    const GameState state = board.state();
+    board.make_move(context.bestMoveFound);
+    const Move ponder_move_tt = TranspositionTable::get_entry(board.state().get_zobrist_key()).move;
+
+    results.ponderMove_data = ponder_move_tt.raw_data();
+    assert(ponder_move_tt.is_valid());
+
+    board.unmake_move(context.bestMoveFound, state);
+
+    // stop signal
     stop = true;
 
     //notify the reader thread that search has stopped
@@ -415,7 +426,7 @@ static int search_extension(const Board& board, Move move, bool in_check, int de
 
 static inline int search_reduction(int num_move, bool in_check, int depth)
 {
-    return depth >= 3 && !in_check && num_move > 10;
+    return depth >= 3 && !in_check && num_move > 5;
 }
 
 /**

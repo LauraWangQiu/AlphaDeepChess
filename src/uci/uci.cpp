@@ -78,6 +78,9 @@ void Uci::loop()
         else if (command == "s" || command == "stop") {
             stop_command_action();
         }
+        else if (command == "ponderhit") {
+            ponderhit_command_action();
+        }
         else if (command == "e" || command == "eval") {
             eval_command_action();
         }
@@ -164,6 +167,9 @@ void Uci::new_game_command_action()
  */
 void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
 {
+    // stop and wait for previous search to end
+    stop_command_action();
+
     uint32_t depth = INF_DEPTH;
     uint32_t movetime = 0, wtime = 0, btime = 0, winc = 0, binc = 0;
 
@@ -223,6 +229,9 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
         else if (tokens[i] == "infinite") {
             depth = INF_DEPTH;
         }
+        else if (tokens[i] == "ponder") {
+            pondering.store(true);
+        }
         else if (tokens[i] == "perft") {
             try {
                 depth = std::stoul(std::string(tokens[++i]));
@@ -241,9 +250,6 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
             return;
         }
     }
-
-    // stop and wait for previous search to end
-    stop_command_action();
 
     const ChessColor side_to_move = board.state().side_to_move();
 
@@ -272,21 +278,37 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
             }
         }
 
-        std::cout << "bestmove " << Move(searchResults.results[depthReaded - 1].bestMove_data).to_string() << std::endl;
+        if (pondering.load()) {
+            std::unique_lock<std::mutex> lock(ponderhitMutex);
+
+            ponderhitCv.wait(lock);
+        }
+
+        std::cout << "bestmove " << Move(searchResults.results[depthReaded - 1].bestMove_data).to_string();
+        std::cout << " ponder " << Move(searchResults.ponderMove_data).to_string() << std::endl;
+
         searchResults.depthReached = 0;   // reset depthReached when we consume all data
     });
 
     if (movetime != 0 || wtime != 0 || btime != 0) {
         timerThread = std::thread([this, side_to_move, movetime, wtime, btime, winc, binc]() {
-            std::unique_lock<std::mutex> lock(timerMutex);
+            if (pondering.load()) {
+                std::unique_lock<std::mutex> lock(ponderhitMutex);
 
-            const uint32_t time = think_time(side_to_move, movetime, wtime, btime, winc, binc);
+                ponderhitCv.wait(lock);
+            }
+            {
+                std::unique_lock<std::mutex> lock(timerMutex);
 
-            // Wait for n milliseconds or until search_stopped becomes true
-            if (!timerCv.wait_for(lock, std::chrono::milliseconds(time), [this] { return this->stop_signal.load(); })) {
-                // Timeout occurred and search_stopped is still false
-                lock.unlock();   // Unlock before calling stop_search()
-                stop_signal.store(true);
+                const uint32_t time = think_time(side_to_move, movetime, wtime, btime, winc, binc);
+
+                // Wait for n milliseconds or until search_stopped becomes true
+                if (!timerCv.wait_for(lock, std::chrono::milliseconds(time),
+                                      [this] { return this->stop_signal.load(); })) {
+                    // Timeout occurred and search_stopped is still false
+                    lock.unlock();   // Unlock before calling stop_search()
+                    stop_signal.store(true);
+                }
             }
         });
     }
@@ -303,6 +325,9 @@ void Uci::stop_command_action()
     stop_signal.store(true);
 
     timerCv.notify_one();
+
+    pondering.store(false);
+    ponderhitCv.notify_all();
 
     if (searchThread.joinable()) {
         searchThread.join();
@@ -545,6 +570,18 @@ bool Uci::setoption_command_action(const TokenArray& tokens, uint32_t num_tokens
     }
 
     return true;
+}
+
+/**
+ * @brief ponderhit_command_action
+ * 
+ * ponderhit command detected.
+ * 
+ */
+void Uci::ponderhit_command_action()
+{
+    pondering.store(false);
+    ponderhitCv.notify_all();
 }
 
 /**

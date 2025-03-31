@@ -53,13 +53,7 @@ public:
      * Uci destructor.
      * 
      */
-    ~Uci()
-    {
-        stop_signal.store(true);
-        if (searchThread.joinable()) searchThread.join();
-        if (readerThread.joinable()) readerThread.join();
-        if (timerThread.joinable()) timerThread.join();
-    }
+    ~Uci() { stop_command_action(); }
 
     /**
      * @brief loop
@@ -127,6 +121,21 @@ private:
      * 
      */
     std::condition_variable timerCv;
+
+    /**
+     * @brief mutex to protect the ponderhitCv.
+     */
+    std::mutex ponderhitMutex;
+
+    /**
+     * @brief condition variable to signal ponderhit.
+     */
+    std::condition_variable ponderhitCv;
+
+    /**
+     * @brief pondering signal
+     */
+    std::atomic<bool> pondering;
 
     /**
      * @brief searchResults
@@ -259,6 +268,14 @@ private:
      *      - FALSE if error detected, probably error in user input.
      */
     bool setoption_command_action(const TokenArray& tokens, uint32_t num_tokens);
+
+    /**
+     * @brief ponderhit_command_action
+     * 
+     * ponderhit command detected.
+     * 
+     */
+    void ponderhit_command_action();
 
     /**
      * @brief unknown_command_action
