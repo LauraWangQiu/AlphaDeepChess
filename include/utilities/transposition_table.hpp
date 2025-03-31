@@ -21,7 +21,6 @@
 class TranspositionTable
 {
 public:
-
     enum class SIZE : int;
     enum class NodeType : uint8_t;
     class Entry;
@@ -55,7 +54,7 @@ public:
      * @param[in] depth depth 
      * 
      */
-    static inline constexpr void store_entry(uint64_t zobrist, int eval, Move move, NodeType node_type, uint8_t depth)
+    static inline constexpr void store_entry(uint64_t zobrist, int eval, Move move, NodeType node_type, int8_t depth)
     {
         entries[index_in_table(zobrist)] = Entry(zobrist, eval, move, node_type, depth);
         assert(entries[index_in_table(zobrist)].is_valid());
@@ -157,7 +156,6 @@ private:
     static std::vector<TranspositionTable::Entry> entries;
 
 public:
-
     /**
      * @brief TranspositionTable::SIZE
      *
@@ -219,7 +217,7 @@ public:
         int evaluation;       // score of the position
         Move move;            // best move found in position
         NodeType node_type;   // node type
-        uint8_t depth;        // depth where the calculation has been done
+        int8_t depth;         // depth where the calculation has been done
 
         constexpr Entry() : key(0ULL), evaluation(0), move(), node_type(NodeType::FAILED), depth(0U) { }
 

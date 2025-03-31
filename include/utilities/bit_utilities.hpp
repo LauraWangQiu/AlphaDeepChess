@@ -91,8 +91,8 @@ constexpr inline uint8_t pop_lsb(uint64_t& bits)
 {
     assert(bits);
 
-    uint8_t lsb = std::countr_zero(bits);   // Get index of LSB
-    bits &= bits - 1;                       // Clear the LSB
+    const uint8_t lsb = std::countr_zero(bits);   // Get index of LSB
+    bits &= bits - 1;                             // Clear the LSB
     return lsb;
 }
 
@@ -111,7 +111,7 @@ constexpr inline uint8_t pop_msb(uint64_t& bits)
 {
     assert(bits);
 
-    uint8_t msb_index = 63 - std::countl_zero(bits);
+    const uint8_t msb_index = 63 - std::countl_zero(bits);
     bits &= ~(1ULL << msb_index);   // Clears the MSB
     return msb_index;
 }

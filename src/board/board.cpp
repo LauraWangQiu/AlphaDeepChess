@@ -6,6 +6,7 @@
 
 #include "board.hpp"
 #include "zobrist.hpp"
+#include "bit_utilities.hpp"
 
 #include <sstream>
 #include <stdexcept>
@@ -87,6 +88,12 @@ void Board::make_move(Move move)
 
     // check if castling is still available
     check_and_modify_castle_rights();
+
+    if (is_move_capture) {
+        game_state.set_num_pieces(game_state.num_pieces() - 1);
+    }
+
+    assert(game_state.num_pieces() == number_of_1_bits(bitboard_all));
 }
 
 /**
@@ -113,6 +120,8 @@ void Board::unmake_move(Move move, GameState previous_state)
     }
 
     game_state = previous_state;
+
+    assert(game_state.num_pieces() == number_of_1_bits(bitboard_all));
 }
 
 /**
@@ -206,6 +215,8 @@ void Board::load_fen(const std::string& fen)
     game_state.set_move_number(moveNumber);
 
     game_state.set_zobrist_key(Zobrist::hash(*this));
+
+    game_state.set_num_pieces(number_of_1_bits(bitboard_all));
 }
 
 /**

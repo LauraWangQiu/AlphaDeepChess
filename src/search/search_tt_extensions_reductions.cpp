@@ -23,14 +23,16 @@
 static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results, int max_depth, SearchContext& context);
 
 template<SearchType searchType>
-static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context);
+static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, int extension,
+                             int reduction, SearchContext& context);
 
 template<SearchType searchType>
 static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int beta, SearchContext& context);
 
 static bool get_entry_in_transposition_table(uint64_t zobrist, int depth, int alpha, int beta, int& eval, Move& move);
 
-static int search_extension(const Board& board, Move move, bool in_check);
+static int search_extension(const Board& board, Move move, bool in_check, int depth);
+static inline int search_reduction(int num_move, bool in_check, int depth);
 
 /**
   * @brief search(std::atomic<bool>&, SearchResults&, Board&, int32_t)
@@ -98,8 +100,8 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
         context.bestMoveInIteration = Move::null();
         context.bestEvalInIteration = is_white(side_to_move) ? -INF_EVAL : +INF_EVAL;
 
-        is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, -INF_EVAL, +INF_EVAL, context)
-                               : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, -INF_EVAL, +INF_EVAL, context);
+        is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, -INF_EVAL, +INF_EVAL, 0, 0, context)
+                               : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, -INF_EVAL, +INF_EVAL, 0, 0, context);
 
         if (stop) {
             break;
@@ -136,7 +138,8 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
    * 
    */
 template<SearchType searchType>
-static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context)
+static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, int extension,
+                             int reduction, SearchContext& context)
 {
     constexpr bool MAXIMIZING_WHITE = searchType == MAXIMIZE_WHITE;
     constexpr bool MINIMIZING_BLACK = searchType == MINIMIZE_BLACK;
@@ -180,7 +183,7 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
     else if (ply > 0 && (fify_move_rule_draw || History::threefold_repetition_detected(fifty_move_rule_counter))) {
         return 0;
     }
-    else if (depth == 0) {
+    else if (depth + extension - reduction <= 0) {
         return quiescence_search<searchType>(stop, ply, alpha, beta, context);
     }
 
@@ -202,10 +205,20 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
 
         constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
 
-        const int extension = search_extension(board, moves[i], isCheck);
+        int extension = search_extension(board, moves[i], isCheck, depth);
+        int reduction = search_reduction(i, isCheck, depth);
 
         board.make_move(moves[i]);
-        int eval = alpha_beta_search<nextSearchType>(stop, depth - 1 + extension, ply + 1, alpha, beta, context);
+        int eval =
+            alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, extension, reduction, context);
+
+        if (reduction) {
+            const bool need_full_search = MAXIMIZING_WHITE ? eval > alpha : eval < beta;
+            if (need_full_search) {
+                eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, extension, 0, context);
+            }
+        }
+
         board.unmake_move(moves[i], game_state);
         History::pop_position();
 
@@ -377,9 +390,12 @@ static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int be
   * @return (int) extension number
   * 
   */
-static int search_extension(const Board& board, Move move, bool in_check)
+static int search_extension(const Board& board, Move move, bool in_check, int depth)
 {
-    if (in_check) {
+    if (depth > 2) {
+        return 0;   // only extend the search if we are in the last depth
+    }
+    else if (in_check) {
         return 1;   // check extension
     }
 
@@ -389,12 +405,17 @@ static int search_extension(const Board& board, Move move, bool in_check)
 
     // pre-promotion rank extension
     const bool is_pawn_move = piece_to_pieceType(moved_piece) == PieceType::PAWN;
-    const bool move_to_prepromotion_row = sq_end.mask() & (ROW_2_MASK | ROW_7_MASK);
+    const bool move_to_prepromotion_row = sq_end.mask() & (ROW_1_MASK | ROW_7_MASK);
     const bool is_prepromotion_pawn_move = is_pawn_move && move_to_prepromotion_row;
 
     const int extension = is_prepromotion_pawn_move ? 1 : 0;
 
     return extension;
+}
+
+static inline int search_reduction(int num_move, bool in_check, int depth)
+{
+    return depth >= 3 && !in_check && num_move > 10;
 }
 
 /**

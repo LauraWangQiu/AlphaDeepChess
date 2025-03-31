@@ -11,6 +11,7 @@
  * 
  */
 
+static constexpr uint64_t SHIFT_NUM_PIECES = 43ULL;
 static constexpr uint64_t SHIFT_FIFTY_MOVE_RULE = 35ULL;
 static constexpr uint64_t SHIFT_LAST_CAPTURED_PIECE = 32ULL;
 static constexpr uint64_t SHIFT_SIDE_TO_MOVE = 31ULL;
@@ -21,6 +22,7 @@ static constexpr uint64_t SHIFT_CASTLE_QUEEN_BLACK = 27ULL;
 static constexpr uint64_t SHIFT_EN_PASSANT_SQUARE = 20ULL;
 static constexpr uint64_t SHIFT_MOVE_NUMBER = 0ULL;
 
+static constexpr uint64_t MASK_NUM_PIECES = (0x7fULL << SHIFT_NUM_PIECES);
 static constexpr uint64_t MASK_FIFTY_MOVE_RULE = (0xffULL << SHIFT_FIFTY_MOVE_RULE);
 static constexpr uint64_t MASK_LAST_CAPTURED_PIECE = (7ULL << SHIFT_LAST_CAPTURED_PIECE);
 static constexpr uint64_t MASK_SIDE_TO_MOVE = (1ULL << SHIFT_SIDE_TO_MOVE);
@@ -38,6 +40,7 @@ static constexpr uint64_t MASK_MOVE_NUMBER = (0xfffffULL << SHIFT_MOVE_NUMBER);
  * Represents the sate of the chess game.
  * 
  * @note game state is stored as a 64-bit number :
+ * 43-48 : num_pieces : 0 to 64 pieces
  * 35-42 : fifty_move_rule_counter : if counter gets to 100 then game is a draw.
  * 32-34 : last_captured_piece : PieceType::Empty if last move was not a capture.
  * 31 : side_to_move : 0 if white, 1 if black.
@@ -192,6 +195,14 @@ public:
     constexpr inline uint64_t get_zobrist_key() const { return zobrist_key; };
 
     /**
+     * @brief get number of pieces
+     *       
+     * @return (int) num_pieces.
+     * 
+     */
+    constexpr inline int num_pieces() const;
+
+    /**
      * @brief set_fifty_move_rule_counter
      * 
      * set the moves that have passed since the last pawn move or capture.
@@ -287,6 +298,17 @@ public:
      * 
      */
     constexpr inline void set_move_number(uint64_t move_number);
+
+    /**
+     * @brief set the number of pieces in the board
+     * 
+     * 
+     * @note number must be between 0-64, otherwise state will be corrupted.
+     * 
+     * @param[in] num_pieces number of pieces in the board
+     * 
+     */
+    constexpr inline void set_num_pieces(int num_pieces);
 
     /**
      * @brief set_zobrist_key
@@ -544,6 +566,14 @@ constexpr inline uint64_t GameState::move_number() const
 }
 
 /**
+ * @brief get number of pieces
+ *       
+ * @return (int) 0 <= num_pieces <= 64.
+ * 
+ */
+constexpr inline int GameState::num_pieces() const { return (state_register & MASK_NUM_PIECES) >> SHIFT_NUM_PIECES; }
+
+/**
  * @brief set_fifty_move_rule_counter
  * 
  * set the moves that have passed since the last pawn move or capture.
@@ -682,4 +712,19 @@ constexpr inline void GameState::set_move_number(uint64_t move_number)
 
     state_register &= ~MASK_MOVE_NUMBER;
     state_register |= move_number << SHIFT_MOVE_NUMBER;
+}
+
+/**
+ * @brief set the number of pieces in the board
+ * 
+ * 
+ * @note number must be between 0-64, otherwise state will be corrupted.
+ * 
+ * @param[in] num_pieces number of pieces in the board
+ * 
+ */
+constexpr inline void GameState::set_num_pieces(int num_pieces)
+{
+    state_register &= ~MASK_NUM_PIECES;
+    state_register |= static_cast<uint64_t>(num_pieces) << SHIFT_NUM_PIECES;
 }

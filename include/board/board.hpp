@@ -112,6 +112,13 @@ public:
     }
 
     /**
+     * @brief get thenumber of pieces in the board
+     * 
+     * @return num_pieces
+     */
+    constexpr inline int get_num_pieces() const { return game_state.num_pieces(); }
+
+    /**
      * @brief put_piece
      * 
      * Add piece to the board
