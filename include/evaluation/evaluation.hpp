@@ -10,18 +10,7 @@
 
 #include "board.hpp"
 
-/**
- * @brief OPENING = 0  
- * @brief MIDDLEGAME = 1
- * @brief ENDGAME = 2
- */
-enum class GamePhase {
-    OPENING,
-    MIDDLEGAME,
-    ENDGAME
-};
-
-constexpr int32_t MATE_IN_ONE_SCORE = 32000U;
+constexpr int MATE_IN_ONE_SCORE = 32000U;
 
 /** 
  * @brief evaluate_position

@@ -26,7 +26,7 @@ add_executable(testsAlphaDeepChess
 
 # Add basic algorithm source files
 set(BASIC_SOURCES
-    ../src/evaluation/evaluation_basic.cpp
+    ../src/evaluation/evaluation_dynamic.cpp
     ../src/search/search_transposition_table.cpp
     ../src/move_ordering/move_ordering_MVV_LVA.cpp 
     ../src/move_generator/move_generator_magic_bitboards.cpp

@@ -12,6 +12,9 @@
 #include <array>
 #include <cassert>
 
+constexpr bool PST_TYPE_MIDDLEGAME = false;
+constexpr bool PST_TYPE_ENDGAME = true;
+
 /**
  * @brief PrecomputedEvalData
  *
@@ -28,14 +31,17 @@ public:
     /**
      * @brief get piece value in the PST (piece square table)
      * 
+     * @tparam searchType [PST_TYPE_MIDDLEGAME, PST_TYPE_ENDGAME]
      * @param[in] piece piece to get the value
      * @param[in] square piece square
-     * @param[in] endgame (optional) get the endgame PST value (only available for king)
      * 
      * @return int PIECE_SQUARE_TABLE[piece][square]
      */
-    static inline int get_piece_square_table(Piece piece, Square square, bool endgame = false)
+    template<bool PST_TYPE>
+    static inline int get_piece_square_table(Piece piece, Square square)
     {
+        assert(PST_TYPE == PST_TYPE_MIDDLEGAME || PST_TYPE == PST_TYPE_ENDGAME);
+
         assert(square.is_valid());
         assert(is_valid_piece(piece));
 
@@ -45,13 +51,14 @@ public:
         assert(piece_type != PieceType::EMPTY);
         assert(is_valid_color(color));
 
-        const bool get_endgame_king = piece_type == PieceType::KING && endgame;
-
-        constexpr int PST_endgame_king_index = 6;
-        const int PST_index = get_endgame_king ? PST_endgame_king_index : static_cast<int>(piece_type);
         const int index_sq = is_white(color) ? 63 - square.value() : square.value();
 
-        return PIECE_SQUARE_TABLE[PST_index][index_sq];
+        if constexpr (PST_TYPE == PST_TYPE_MIDDLEGAME) {
+            return PIECE_SQUARE_TABLE[static_cast<int>(piece_type)][index_sq];
+        }
+        else {
+            return PIECE_ENDGAME_SQUARE_TABLE[static_cast<int>(piece_type)][index_sq];
+        }
     }
 
     /**
@@ -206,7 +213,7 @@ private:
         -10, 0,   5,   0,   0,   0,   0,   -10, 
         -20, -10, -10, -5,  -5,  -10, -10, -20
     };
-    static constexpr int KING_MIDDLE_GAME_PIECE_SQUARE_TABLE[64] = {
+    static constexpr int KING_PIECE_SQUARE_TABLE[64] = {
         -30, -40, -40, -50, -50, -40, -40, -30,
         -30, -40, -40, -50, -50, -40, -40, -30,
         -30, -40, -40, -50, -50, -40, -40, -30,
@@ -216,7 +223,19 @@ private:
         20,  20,  0,   0,   0,   0,   20,  20,
         20,  30,  10,  0,   0,   10,  30,  20
     };
-    static constexpr int KING_END_GAME_PIECE_SQUARE_TABLE[64] = {
+
+    static constexpr int PAWN_ENDGAME_SQUARE_TABLE[64] = {
+        0,   0,   0,   0,   0,   0,   0,   0,
+        80,  80,  80,  80,  80,  80,  80,  80,
+        50,  50,  50,  50,  50,  50,  50,  50,
+        30,  30,  30,  30,  30,  30,  30,  30,
+        20,  20,  20,  20,  20,  20,  20,  20,
+        10,  10,  10,  10,  10,  10,  10,  10,
+        10,  10,  10,  10,  10,  10,  10,  10,
+        0,   0,   0,   0,   0,   0,   0,   0
+   };
+
+    static constexpr int KING_ENDGAME_SQUARE_TABLE[64] = {
         -50, -40, -30, -20, -20, -30, -40, -50,
         -30, -20, -10, 0,   0,   -10, -20, -30,
         -30, -10, 20,  30,  30,  20,  -10, -30,
@@ -228,24 +247,41 @@ private:
     };
 
     /**
-     * @brief lookup table for each PST indexed by PieceType
+     * @brief lookup table for each middlegame PST indexed by PieceType
      * 
      * 0 : PAWN_PIECE_SQUARE_TABLE
      * 1 : KNIGHT_PIECE_SQUARE_TABLE
      * 2 : BISHOP_PIECE_SQUARE_TABLE
      * 3 : ROOK_PIECE_SQUARE_TABLE
      * 4 : QUEEN_PIECE_SQUARE_TABLE
-     * 5 : KING_MIDDLE_GAME_PIECE_SQUARE_TABLE
-     * 6 : KING_END_GAME_PIECE_SQUARE_TABLE
+     * 5 : KING_PIECE_SQUARE_TABLE
      */
-    static constexpr const int* PIECE_SQUARE_TABLE[NUM_CHESS_PIECE_TYPES] = {
+    static constexpr const int* PIECE_SQUARE_TABLE[NUM_CHESS_PIECE_TYPES - 1] = {
         PAWN_PIECE_SQUARE_TABLE,
         KNIGHT_PIECE_SQUARE_TABLE,
         BISHOP_PIECE_SQUARE_TABLE,
         ROOK_PIECE_SQUARE_TABLE, 
         QUEEN_PIECE_SQUARE_TABLE,
-        KING_MIDDLE_GAME_PIECE_SQUARE_TABLE,
-        KING_END_GAME_PIECE_SQUARE_TABLE
+        KING_PIECE_SQUARE_TABLE
+    };
+
+    /**
+     * @brief lookup table for each endgame PST indexed by PieceType
+     * 
+     * 0 : PAWN_PIECE_SQUARE_TABLE
+     * 1 : KNIGHT_PIECE_SQUARE_TABLE
+     * 2 : BISHOP_PIECE_SQUARE_TABLE
+     * 3 : ROOK_PIECE_SQUARE_TABLE
+     * 4 : QUEEN_PIECE_SQUARE_TABLE
+     * 5 : KING_ENDGAME_SQUARE_TABLE
+     */
+    static constexpr const int* PIECE_ENDGAME_SQUARE_TABLE[NUM_CHESS_PIECE_TYPES - 1] = {
+        PAWN_ENDGAME_SQUARE_TABLE,
+        KNIGHT_PIECE_SQUARE_TABLE,
+        BISHOP_PIECE_SQUARE_TABLE,
+        ROOK_PIECE_SQUARE_TABLE, 
+        QUEEN_PIECE_SQUARE_TABLE,
+        KING_ENDGAME_SQUARE_TABLE
     };
     // clang-format on
 };
