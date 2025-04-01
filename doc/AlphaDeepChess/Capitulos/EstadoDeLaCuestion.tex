@@ -3,6 +3,24 @@
 
 \section{Board representation}
 
+In order to store a position setting with its pieces and its piece colors and other additional information like the side to move\footnote{Corresponds to the colour that has the turn of movement.}, the castling rights\footnote{Refers to the possibilities for each side to castle both short and long. Castling is explained in \ref{sec:castling}.} or the fifty-move rule counter\footnote{This rule is explained in \ref{itm:fifty-move-rule}.}, we can encounter different types of representations: piece centric, square centric and hybrid solutions. We chose to use bitboards as the primary representation, complemented by a piece list to store the piece on each square (piece centric representation). Additionally, the game state is stored in a bit field.
+
+\vspace{1em}
+
+A \textbf{bitboard\footnote{\url{https://www.chessprogramming.org/Board_Representation}}}, also known as a bitset or bitmap, is a 64-bit word structure that efficiently represents a  chessboard because it matches with the number of squares: every bit corresponds to a square of the chessboard. The \textbf{less significant bit (LSB)} represents the square \textbf{a1} and the \textbf{most significant bit (MSB)} the square \textbf{h8}.
+
+\vspace{1em}
+
+A \textbf{bit field}, in constrast to a bitboard, uses a fixed number of bits within an integer to store multiple small values or flags.
+
+\vspace{1em}
+
+For example, using a 64-bit bitfield, we can allocate 6 bits to store the number of pieces on the board, as $2^6 = 64$ possibilities. This means the bits would occupy an interval from $X$ included to $X+5$.
+
+\vspace{1em}
+
+For more information about board representation, refer to the Wikipedia page: \url{https://www.chessprogramming.org/Board_Representation}
+
 \section{Search algorithms}
 
 \subsection{Minimax algorithm}
