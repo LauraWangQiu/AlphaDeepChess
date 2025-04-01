@@ -353,7 +353,7 @@ In every game, \textbf{white starts first} and the possible results of each game
     \item Stalemate: the player whose turn it is to move has no legal moves, and their king is not in check.
     \item Insufficient material: neither player has enough pieces to checkmate. Those cases are king vs king, king and bishop vs king, king and knight vs king, and king and bishop vs king and bishop with the bishops on the same color.
     \item Threefold repetition: it occurs when same position happens three times during the game, with the same player to move and the same possible moves (including castling and en passant).
-    \item Fifty-move rule: if 50 consecutive moves are made by both players without a pawn move or a capture, the game can be declared a draw.
+    \item Fifty-move rule: if 50 consecutive moves are made by both players without a pawn move or a capture, the game can be declared a draw. \label{itm:fifty-move-rule}
     \item Mutual agreement: both players can agree to a draw at any point during the game.
     \item Dead position: a position where no legal moves can be made, and the game cannot continue. This includes cases like king vs king, king and knight vs king, or king and bishop vs king.
 \end{enumerate}
@@ -483,6 +483,8 @@ It is written as the pawn's movement to the last row, followed by the piece to w
 In Figure \ref{fig:pawn-captures-rook}, white pawn capturing and promoting in \textbf{a8} to a queen is written as \textbf{bxa8Q} or \textbf{bxa8=Q}.
 
 \paragraph{Castling}
+\label{sec:castling}
+
 Depending on whether it is on the king's side or the queen's side, it is written as \textbf{0-0} and \textbf{0-0-0}, respectively.
 
 \paragraph{Check and checkmate}
