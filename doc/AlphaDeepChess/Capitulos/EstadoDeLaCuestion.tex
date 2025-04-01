@@ -3,11 +3,15 @@
 
 \section{Board representation}
 
+Let's introduce the battlefield where the game takes place: the chessboard, which serves as the foundation for all operations.
+
+\vspace{1em}
+
 In order to store a position setting with its pieces and its piece colors and other additional information like the side to move\footnote{Corresponds to the colour that has the turn of movement.}, the castling rights\footnote{Refers to the possibilities for each side to castle both short and long. Castling is explained in \ref{sec:castling}.} or the fifty-move rule counter\footnote{This rule is explained in \ref{itm:fifty-move-rule}.}, we can encounter different types of representations: piece centric, square centric and hybrid solutions. We chose to use bitboards as the primary representation, complemented by a piece list to store the piece on each square (piece centric representation). Additionally, the game state is stored in a bit field.
 
 \vspace{1em}
 
-A \textbf{bitboard\footnote{\url{https://www.chessprogramming.org/Board_Representation}}}, also known as a bitset or bitmap, is a 64-bit word structure that efficiently represents a  chessboard because it matches with the number of squares: every bit corresponds to a square of the chessboard. The \textbf{less significant bit (LSB)} represents the square \textbf{a1} and the \textbf{most significant bit (MSB)} the square \textbf{h8}.
+A \textbf{bitboard\footnote{\url{https://www.chessprogramming.org/Board_Representation}}}, also known as a bitset or bitmap, is a 64-bit word structure that efficiently represents a  chessboard because it matches with the number of squares: every bit corresponds to a square of the chessboard.
 
 \vspace{1em}
 
@@ -20,6 +24,18 @@ For example, using a 64-bit bitfield, we can allocate 6 bits to store the number
 \vspace{1em}
 
 For more information about board representation, refer to the Wikipedia page: \url{https://www.chessprogramming.org/Board_Representation}
+
+\section{Game trees}
+
+Sequential games, such as chess or tic-tac-toe, where players take turns alternately, unlike simultaneous games, can be represented in a game tree or graph. In this representation, each node is a possible option or game state, and child nodes branch out to represent subsequent states, forming a tree-like structure. This tree has a height or depth that refers to the number of levels or layers in the tree, starting from the root node (the initial game state) and extending to the leaf nodes.
+
+\vspace{1em}
+
+The depth of a chess game tree is important because it determines the extent to which it will be analysed and evaluated. A depth of 1 represents all possible moves for the current player or side to move, while a depth of 2 includes the opponent's responses to those moves. As the depth increases, the tree grows exponentially, making it computationally expensive to explore all possible states.
+
+\vspace{1em}
+
+The search algorithms in these game trees will be discussed below.
 
 \section{Search algorithms}
 
