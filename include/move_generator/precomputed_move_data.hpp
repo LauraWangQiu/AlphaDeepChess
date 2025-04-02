@@ -9,6 +9,7 @@
  */
 
 #include "square.hpp"
+#include "piece.hpp"
 #include "magic_bitboards.hpp"
 #include <array>
 #include <cassert>
@@ -198,13 +199,83 @@ public:
         return ROOK_ATTACKS[square] | BISHOP_ATTACKS[square];
     }
 
+    /**
+     * @brief pieceAttacks
+     * 
+     * calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board
+     * 
+     * @note square must be valid, piece must be valid and not EMPTY
+     * 
+     * @param[in] square The selected square
+     * @param[in] square The selected piece
+     * 
+     * @return PIECE_ATTACKS[piece][square]
+     */
+    static inline uint64_t pieceAttacks(Square square, Piece piece)
+    {
+        assert(square.is_valid());
+        assert(is_valid_piece(piece) && piece != Piece::EMPTY);
+
+        return PIECE_ATTACKS[static_cast<int>(piece)][square];
+    }
+
+    /**
+     * @brief calculates the bitboard of the squares in between, (sq1 and sq2 are excluded)
+     * 
+     * @note sq1 and sq2 must be valid
+     * 
+     * @param[in] sq1 First square
+     * @param[in] sq2 Second square
+
+     * @return (uint64_t) between bitboard
+     */
+    static inline uint64_t in_between_bitboard(Square sq1, Square sq2)
+    {
+        assert(sq1.is_valid());
+        assert(sq2.is_valid());
+
+        return BETWEEN_BITBOARDS[sq1][sq2];
+    }
+
 private:
+    static constexpr const std::array<std::array<uint64_t, 64>, 64> init_between_bitboards();
+
+    /**
+     * @brief arrays with precomputed attacks for each [square]
+     */
     static const std::array<uint64_t, 64> WHITE_PAWN_ATTACKS;
     static const std::array<uint64_t, 64> BLACK_PAWN_ATTACKS;
     static const std::array<uint64_t, 64> KING_ATTACKS;
     static const std::array<uint64_t, 64> KNIGHT_ATTACKS;
     static const std::array<uint64_t, 64> BISHOP_ATTACKS;
     static const std::array<uint64_t, 64> ROOK_ATTACKS;
+    static const std::array<uint64_t, 64> QUEEN_ATTACKS;
+
+    /*
+    * 0 = WHITE_PAWN_ATTACKS
+    * 1 = KNIGHT_ATTACKS
+    * 2 = BISHOP_ATTACKS
+    * 3 = ROOK_ATTACKS
+    * 4 = QUEEN_ATTACKS
+    * 5 = KING_ATTACKS
+    * 6 = BLACK_PAWN_ATTACKS
+    * 7 = KNIGHT_ATTACKS
+    * 8 = BISHOP_ATTACKS
+    * 9 = ROOK_ATTACKS
+    * 10 = QUEEN_ATTACKS 
+    * 11 = KING_ATTACKS 
+    */
+    static constexpr const uint64_t* PIECE_ATTACKS[NUM_CHESS_PIECES - 1] = {
+        WHITE_PAWN_ATTACKS.data(), KNIGHT_ATTACKS.data(), BISHOP_ATTACKS.data(),     ROOK_ATTACKS.data(),
+        QUEEN_ATTACKS.data(),      KING_ATTACKS.data(),   BLACK_PAWN_ATTACKS.data(), KNIGHT_ATTACKS.data(),
+        BISHOP_ATTACKS.data(),     ROOK_ATTACKS.data(),   QUEEN_ATTACKS.data(),      KING_ATTACKS.data()};
+
+    /**
+     * @brief BETWEEN_BITBOARDS[64][64]
+     *     
+     *  Lookup table for the in between bitboard of two squares
+     */
+    static const std::array<std::array<uint64_t, 64>, 64> BETWEEN_BITBOARDS;
 
     /**
      * @brief BISHOP_MOVES[64][BISHOP_TABLE_SIZE]

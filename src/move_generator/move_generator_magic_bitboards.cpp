@@ -132,76 +132,58 @@ static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
 
 static void update_pins_and_checks(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {
-    assert(king_sq.is_valid());
-    const Direction directions[8] {Direction::NORTH, Direction::NORTH_EAST, Direction::EAST, Direction::SOUTH_EAST,
-                                   Direction::SOUTH, Direction::SOUTH_WEST, Direction::WEST, Direction::NORTH_WEST};
-
-    for (const Direction dir : directions) {
-        update_pin_in_dir(king_sq, dir, moveGeneratorInfo);
-    }
-}
-
-static void update_pin_in_dir(Square king_sq, Direction d, MoveGeneratorInfo& moveGeneratorInfo)
-{
-    assert(king_sq.is_valid());
-
     const Board& board = moveGeneratorInfo.board;
-    const uint64_t side_to_move_pieces = moveGeneratorInfo.side_to_move_pieces_mask;
+    const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
     const ChessColor side_waiting_color = moveGeneratorInfo.side_waiting;
+    const uint64_t side_waiting_bb = moveGeneratorInfo.side_waiting_pieces_mask;
+    const uint64_t side_to_move_bb = moveGeneratorInfo.side_to_move_pieces_mask;
+    const uint64_t enemy_rooks = board.get_bitboard_piece(create_piece(PieceType::ROOK, side_waiting_color));
+    const uint64_t enemy_bishops = board.get_bitboard_piece(create_piece(PieceType::BISHOP, side_waiting_color));
+    const uint64_t enemy_queens = board.get_bitboard_piece(create_piece(PieceType::QUEEN, side_waiting_color));
+    const uint64_t enemy_knights = board.get_bitboard_piece(create_piece(PieceType::KNIGHT, side_waiting_color));
+    const uint64_t enemy_pawns = board.get_bitboard_piece(create_piece(PieceType::PAWN, side_waiting_color));
+
     const uint64_t blockers = board.get_bitboard_all();
-    const Piece enemy_rook_piece = create_piece(PieceType::ROOK, side_waiting_color);
-    const Piece enemy_bishop_piece = create_piece(PieceType::BISHOP, side_waiting_color);
-    const Piece enemy_queen_piece = create_piece(PieceType::QUEEN, side_waiting_color);
 
-    const uint64_t possible_checkers_pieces = is_diagonal_direction(d)
-        ? board.get_bitboard_piece(enemy_bishop_piece) | board.get_bitboard_piece(enemy_queen_piece)
-        : board.get_bitboard_piece(enemy_rook_piece) | board.get_bitboard_piece(enemy_queen_piece);
+    const uint64_t rook_attacks = PrecomputedMoveData::rookAttacks(king_sq);
+    const uint64_t bishop_attacks = PrecomputedMoveData::bishopAttacks(king_sq);
+    const uint64_t knight_attacks = PrecomputedMoveData::knightAttacks(king_sq);
 
-    uint64_t push_mask = 0ULL;
+    const Piece friendly_pawn = create_piece(PieceType::PAWN, side_to_move);
+    const uint64_t pawns_attacks_inverted = PrecomputedMoveData::pieceAttacks(king_sq, friendly_pawn);
 
-    Square possible_pinned_piece_sq = Square::INVALID;
-    Square sq = king_sq;
-    sq.to_direction(d);
+    uint64_t sliders_bb = ((enemy_rooks & rook_attacks) | (enemy_bishops & bishop_attacks) |
+                           enemy_queens & (rook_attacks | bishop_attacks));
 
-    while (sq.is_valid()) {
+    // diagonal slider pins and checks
+    while (sliders_bb) {
+        const Square slider_sq(pop_lsb(sliders_bb));
+        const uint64_t in_between_bb = PrecomputedMoveData::in_between_bitboard(king_sq, slider_sq);
+        const uint64_t in_between_pieces = in_between_bb & blockers;
+        const uint64_t possible_pinned = in_between_bb & side_to_move_bb;
 
-        if (sq.mask() & possible_checkers_pieces) {
-            moveGeneratorInfo.new_checker_found(sq, push_mask);   // checker found
+        if (only_one_bit_set(in_between_pieces) &&
+            in_between_pieces == possible_pinned) {   // if only one piece in between, the piece is pinned
+            moveGeneratorInfo.pinned_squares_mask |= possible_pinned;
+        }
+        else if (in_between_pieces == 0ULL) {   // no pieces in between, there is a check
+            moveGeneratorInfo.new_checker_found(slider_sq, in_between_bb);
             // the king cannot move to the squares behind him in the same dir of the check
             // we put all the direction minus the checker sq as danger as a sufficient approximation
-            moveGeneratorInfo.king_danger_squares_mask |= get_direction_mask(sq, king_sq) & ~sq.mask();
-            break;
-        }
-        else if (sq.mask() & side_to_move_pieces) {
-            possible_pinned_piece_sq = sq;   // possible pinned piece found
-            break;
-        }
-        else if (sq.mask() & blockers) {
-            break;   // piece that is not a checker or po pinned piece blocks path
-        }
-        else {
-            push_mask |= sq.mask();
-            sq.to_direction(d);
+            moveGeneratorInfo.king_danger_squares_mask |= get_direction_mask(slider_sq, king_sq) & ~slider_sq.mask();
         }
     }
 
-    if (!possible_pinned_piece_sq.is_valid()) {
-        return;
+    // knight checks
+    uint64_t knight_checkers = knight_attacks & enemy_knights;
+    while (knight_checkers) {
+        moveGeneratorInfo.new_checker_found(Square(pop_lsb(knight_checkers)), 0ULL);
     }
 
-    sq.to_direction(d);
-    while (sq.is_valid()) {
-        if (sq.mask() & possible_checkers_pieces) {
-            // pinned piece found
-            moveGeneratorInfo.pinned_squares_mask |= possible_pinned_piece_sq.mask();
-            break;
-        }
-        else if (sq.mask() & blockers) {
-            break;   // piece that is not a checker blocks path
-        }
-        else {
-            sq.to_direction(d);
-        }
+    // pawn checks
+    uint64_t pawn_checkers = pawns_attacks_inverted & enemy_pawns;
+    while (pawn_checkers) {
+        moveGeneratorInfo.new_checker_found(Square(pop_lsb(pawn_checkers)), 0ULL);
     }
 }
 
@@ -223,13 +205,6 @@ static void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorI
     const uint64_t pawn_attacks_mask = PrecomputedMoveData::pawnAttacks(pawn_sq, side_waiting);
 
     moveGeneratorInfo.king_danger_squares_mask |= pawn_attacks_mask;
-
-    // there is a check if the enemy king mask is inside the pawn attack mask
-    const Square side_to_move_king_square = moveGeneratorInfo.side_to_move_king_square;
-
-    if (pawn_attacks_mask & side_to_move_king_square.mask()) {
-        moveGeneratorInfo.new_checker_found(pawn_sq, 0ULL);
-    }
 }
 
 static void update_knight_danger(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo)
@@ -239,13 +214,6 @@ static void update_knight_danger(Square knight_sq, MoveGeneratorInfo& moveGenera
     const uint64_t knight_attacks_mask = PrecomputedMoveData::knightAttacks(knight_sq);
 
     moveGeneratorInfo.king_danger_squares_mask |= knight_attacks_mask;
-
-    // there is a check if the enemy king mask is inside the knight attack mask
-    const Square side_to_move_king_square = moveGeneratorInfo.side_to_move_king_square;
-
-    if (knight_attacks_mask & side_to_move_king_square.mask()) {
-        moveGeneratorInfo.new_checker_found(knight_sq, 0ULL);
-    }
 }
 
 static void update_rook_danger(Square rook_sq, MoveGeneratorInfo& moveGeneratorInfo)

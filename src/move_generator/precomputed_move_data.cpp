@@ -9,36 +9,40 @@
  */
 
 #include "precomputed_move_data.hpp"
+#include "coordinates.hpp"
 
-using ArrayBitboards = std::array<uint64_t, 64>;
-using ArrayBitboardsConst = const std::array<uint64_t, 64>;
+using ArrayBB = std::array<uint64_t, 64>;
+using ArrayBBConst = const std::array<uint64_t, 64>;
 
-static constexpr ArrayBitboardsConst initialize_white_pawn_attacks();
-static constexpr ArrayBitboardsConst initialize_black_pawn_attacks();
-static constexpr ArrayBitboardsConst initialize_king_attacks();
-static constexpr ArrayBitboardsConst initialize_knight_attacks();
-static constexpr ArrayBitboardsConst initialize_rook_attacks();
-static constexpr ArrayBitboardsConst initialize_bishop_attacks();
+static constexpr ArrayBBConst init_white_pawn_attacks();
+static constexpr ArrayBBConst init_black_pawn_attacks();
+static constexpr ArrayBBConst init_king_attacks();
+static constexpr ArrayBBConst init_knight_attacks();
+static constexpr ArrayBBConst init_rook_attacks();
+static constexpr ArrayBBConst init_bishop_attacks();
+static constexpr ArrayBBConst init_queen_attacks(ArrayBBConst& rookAttacks, ArrayBBConst& bishopAttacks);
 
 static constexpr uint64_t calculate_rook_moves(Square square, uint64_t blockerBB);
 static constexpr uint64_t calculate_bishop_moves(Square square, uint64_t blockerBB);
 
-static const TableRookMoves initialize_rook_legal_moves(ArrayBitboardsConst& ROOK_ATTACKS);
-static const TableBishopMoves initialize_bishop_legal_moves(ArrayBitboardsConst& BISHOP_ATTACKS);
+static const TableRookMoves init_rook_legal_moves(ArrayBBConst& ROOK_ATTACKS);
+static const TableBishopMoves init_bishop_legal_moves(ArrayBBConst& BISHOP_ATTACKS);
 
 
-ArrayBitboardsConst PrecomputedMoveData::WHITE_PAWN_ATTACKS = initialize_white_pawn_attacks();
-ArrayBitboardsConst PrecomputedMoveData::BLACK_PAWN_ATTACKS = initialize_black_pawn_attacks();
-ArrayBitboardsConst PrecomputedMoveData::KING_ATTACKS = initialize_king_attacks();
-ArrayBitboardsConst PrecomputedMoveData::KNIGHT_ATTACKS = initialize_knight_attacks();
-ArrayBitboardsConst PrecomputedMoveData::BISHOP_ATTACKS = initialize_bishop_attacks();
-ArrayBitboardsConst PrecomputedMoveData::ROOK_ATTACKS = initialize_rook_attacks();
+ArrayBBConst PrecomputedMoveData::WHITE_PAWN_ATTACKS = init_white_pawn_attacks();
+ArrayBBConst PrecomputedMoveData::BLACK_PAWN_ATTACKS = init_black_pawn_attacks();
+ArrayBBConst PrecomputedMoveData::KING_ATTACKS = init_king_attacks();
+ArrayBBConst PrecomputedMoveData::KNIGHT_ATTACKS = init_knight_attacks();
+ArrayBBConst PrecomputedMoveData::BISHOP_ATTACKS = init_bishop_attacks();
+ArrayBBConst PrecomputedMoveData::ROOK_ATTACKS = init_rook_attacks();
+ArrayBBConst PrecomputedMoveData::QUEEN_ATTACKS = init_queen_attacks(ROOK_ATTACKS, BISHOP_ATTACKS);
 
-const TableRookMoves PrecomputedMoveData::ROOK_MOVES = initialize_rook_legal_moves(ROOK_ATTACKS);
-const TableBishopMoves PrecomputedMoveData::BISHOP_MOVES = initialize_bishop_legal_moves(BISHOP_ATTACKS);
+const TableRookMoves PrecomputedMoveData::ROOK_MOVES = init_rook_legal_moves(ROOK_ATTACKS);
+const TableBishopMoves PrecomputedMoveData::BISHOP_MOVES = init_bishop_legal_moves(BISHOP_ATTACKS);
 
+const std::array<std::array<uint64_t, 64>, 64> PrecomputedMoveData::BETWEEN_BITBOARDS = init_between_bitboards();
 
-static const TableRookMoves initialize_rook_legal_moves(ArrayBitboardsConst& ROOK_ATTACKS)
+static const TableRookMoves init_rook_legal_moves(ArrayBBConst& ROOK_ATTACKS)
 {
     TableRookMoves ROOK_MOVES;
 
@@ -78,7 +82,7 @@ static const TableRookMoves initialize_rook_legal_moves(ArrayBitboardsConst& ROO
     return ROOK_MOVES;
 }
 
-static const TableBishopMoves initialize_bishop_legal_moves(ArrayBitboardsConst& BISHOP_ATTACKS)
+static const TableBishopMoves init_bishop_legal_moves(ArrayBBConst& BISHOP_ATTACKS)
 {
     TableBishopMoves BISHOP_MOVES;
 
@@ -123,9 +127,9 @@ static const TableBishopMoves initialize_bishop_legal_moves(ArrayBitboardsConst&
 }
 
 
-constexpr ArrayBitboardsConst initialize_king_attacks()
+constexpr ArrayBBConst init_king_attacks()
 {
-    ArrayBitboards KING_ATTACKS {};
+    ArrayBB KING_ATTACKS {};
 
     const int dirs[8][2] = {{1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}};
 
@@ -153,9 +157,9 @@ constexpr ArrayBitboardsConst initialize_king_attacks()
 }
 
 
-constexpr ArrayBitboardsConst initialize_knight_attacks()
+constexpr ArrayBBConst init_knight_attacks()
 {
-    ArrayBitboards KNIGHT_ATTACKS {};
+    ArrayBB KNIGHT_ATTACKS {};
 
     const int dirs[8][2] = {{-2, -1}, {-2, 1}, {2, -1}, {2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}};
 
@@ -180,9 +184,9 @@ constexpr ArrayBitboardsConst initialize_knight_attacks()
     return KNIGHT_ATTACKS;
 }
 
-constexpr ArrayBitboardsConst initialize_white_pawn_attacks()
+constexpr ArrayBBConst init_white_pawn_attacks()
 {
-    ArrayBitboards WHITE_PAWN_ATTACKS {};
+    ArrayBB WHITE_PAWN_ATTACKS {};
 
     const int dirs[2][2] = {{1, 1}, {1, -1}};
 
@@ -208,9 +212,9 @@ constexpr ArrayBitboardsConst initialize_white_pawn_attacks()
     return WHITE_PAWN_ATTACKS;
 }
 
-constexpr ArrayBitboardsConst initialize_black_pawn_attacks()
+constexpr ArrayBBConst init_black_pawn_attacks()
 {
-    ArrayBitboards BLACK_PAWN_ATTACKS {};
+    ArrayBB BLACK_PAWN_ATTACKS {};
 
     const int dirs[2][2] = {{-1, -1}, {-1, +1}};
 
@@ -236,9 +240,9 @@ constexpr ArrayBitboardsConst initialize_black_pawn_attacks()
     return BLACK_PAWN_ATTACKS;
 }
 
-constexpr ArrayBitboardsConst initialize_rook_attacks()
+constexpr ArrayBBConst init_rook_attacks()
 {
-    ArrayBitboards ROOK_ATTACKS {};
+    ArrayBB ROOK_ATTACKS {};
 
     for (Row row = ROW_1; is_valid_row(row); row++) {
         for (Col col = COL_A; is_valid_col(col); col++) {
@@ -249,9 +253,9 @@ constexpr ArrayBitboardsConst initialize_rook_attacks()
     }
     return ROOK_ATTACKS;
 }
-constexpr ArrayBitboardsConst initialize_bishop_attacks()
+constexpr ArrayBBConst init_bishop_attacks()
 {
-    ArrayBitboards BISHOP_ATTACKS {};
+    ArrayBB BISHOP_ATTACKS {};
 
     for (Row row = ROW_1; is_valid_row(row); row++) {
         for (Col col = COL_A; is_valid_col(col); col++) {
@@ -268,6 +272,17 @@ constexpr ArrayBitboardsConst initialize_bishop_attacks()
         }
     }
     return BISHOP_ATTACKS;
+}
+
+constexpr ArrayBBConst init_queen_attacks(ArrayBBConst& rookAttacks, ArrayBBConst& bishopAttacks)
+{
+    ArrayBB QUEEN_ATTACKS {};
+
+    for (Square queen_sq = Square::A1; queen_sq.is_valid(); queen_sq++) {
+
+        QUEEN_ATTACKS[queen_sq] = rookAttacks[queen_sq] | bishopAttacks[queen_sq];
+    }
+    return QUEEN_ATTACKS;
 }
 
 constexpr uint64_t calculate_rook_moves(Square square, uint64_t blockers)
@@ -326,4 +341,28 @@ constexpr uint64_t calculate_bishop_moves(Square square, uint64_t blockers)
     }
 
     return moves_mask;
+}
+
+
+constexpr const std::array<std::array<uint64_t, 64>, 64> PrecomputedMoveData::init_between_bitboards()
+{
+    std::array<std::array<uint64_t, 64>, 64> between_bb = {};
+
+    for (Square sq1 = Square::A1; sq1.is_valid(); sq1++) {
+
+        const uint64_t sq1_blocker = sq1.mask();
+        for (Square sq2 = Square::A1; sq2.is_valid(); sq2++) {
+            const uint64_t sq2_blocker = sq2.mask();
+
+            const uint64_t direction_mask = get_direction_mask(sq1, sq2);
+
+            // the in between moves are the intersection between the rays of moves casted from sq1 and sq2.
+            between_bb[sq1][sq2] = (rookMoves(sq1, sq2_blocker) | bishopMoves(sq1, sq2_blocker)) &
+                (rookMoves(sq2, sq1_blocker) | bishopMoves(sq2, sq1_blocker));
+
+            between_bb[sq1][sq2] &= direction_mask;   // filter squares outside the direction
+        }
+    }
+
+    return between_bb;
 }

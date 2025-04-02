@@ -22,6 +22,17 @@
 constexpr inline bool is_power_of_two(uint64_t number) { return std::has_single_bit(number); }
 
 /**
+ * @brief only_one_bit_set()
+ * 
+ * Checks if the given number only has one bit set
+ * 
+ * @param[in] number The number to check.
+ * 
+ * @return true if the number has only one bit set, false otherwise
+ */
+constexpr inline bool only_one_bit_set(uint64_t number) { return std::has_single_bit(number); }
+
+/**
  * @brief mb_to_bytes()
  * 
  * Converts megabytes to bytes
