@@ -52,22 +52,7 @@ constexpr inline bool is_valid_coord(Row row, Col col)
  * - Direction::NORTH_EAST
  * 
  */
-constexpr Direction get_direction(Row origin_row, Col origin_col, Row end_row, Col end_col)
-{
-    assert(is_valid_row(origin_row) && is_valid_col(origin_col));
-    assert(is_valid_row(end_row) && is_valid_col(end_col));
-
-    // Calculate row and column differences
-    const int row_diff = static_cast<int>(end_row) - static_cast<int>(origin_row);
-    const int col_diff = static_cast<int>(end_col) - static_cast<int>(origin_col);
-
-    // Normalize row and column differences to {-1, 0, 1}
-    const int normalized_row = (row_diff > 0) - (row_diff < 0);
-    const int normalized_col = (col_diff > 0) - (col_diff < 0);
-
-    // Compute the direction based taking advantage of the int value of each direction
-    return static_cast<Direction>(8 * normalized_row + normalized_col);
-}
+Direction get_direction(Row origin_row, Col origin_col, Row end_row, Col end_col);
 
 
 /**
@@ -124,23 +109,4 @@ constexpr inline bool squares_in_same_antidiagonal(Square sq1, Square sq2)
  * - antidiagonal_mask of sq1,sq2 if squares_in_same_antidiagonal(sq1, sq2).
  * - 0ULL in other case
  */
-constexpr inline uint64_t get_direction_mask(Square sq1, Square sq2)
-{
-    assert(sq1.is_valid() && sq2.is_valid());
-
-    if (sq1.row() == sq2.row()) {
-        return get_row_mask(sq1.row());
-    }
-    else if (sq1.col() == sq2.col()) {
-        return get_col_mask(sq1.col());
-    }
-    else if (squares_in_same_diagonal(sq1, sq2)) {
-        return get_diagonal_mask(sq1.diagonal());
-    }
-    else if (squares_in_same_antidiagonal(sq1, sq2)) {
-        return get_antidiagonal_mask(sq1.antidiagonal());
-    }
-    else {
-        return 0ULL;
-    }
-}
+uint64_t get_direction_mask(Square sq1, Square sq2);

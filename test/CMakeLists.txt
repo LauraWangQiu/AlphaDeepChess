@@ -22,6 +22,7 @@ add_executable(testsAlphaDeepChess
     ../src/utilities/transposition_table.cpp
     ../src/search/history.cpp
     ../src/move_generator/precomputed_move_data.cpp
+    ../src/utilities/coordinates.cpp
 )
 
 # Add basic algorithm source files

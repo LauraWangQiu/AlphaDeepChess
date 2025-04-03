@@ -375,6 +375,19 @@ constexpr inline PieceType piece_to_pieceType(Piece piece)
     return static_cast<PieceType>(type_int - (6 * (type_int >= 6)));
 }
 
+// clang-format off
+// PIECE_CREATOR[PieceType][ChessColor(0-white,1-black)]
+static constexpr const Piece CREATE_PIECE[NUM_CHESS_PIECE_TYPES][2] = {
+    {Piece::W_PAWN, Piece::B_PAWN}, 
+    {Piece::W_KNIGHT, Piece::B_KNIGHT},
+    {Piece::W_BISHOP, Piece::B_BISHOP},
+    {Piece::W_ROOK, Piece::B_ROOK},
+    {Piece::W_QUEEN, Piece::B_QUEEN}, 
+    {Piece::W_KING, Piece::B_KING},
+    {Piece::EMPTY, Piece::EMPTY}
+};
+//clang-format on
+
 /**
  * @brief create_piece 
  * 
@@ -390,11 +403,8 @@ constexpr inline Piece create_piece(PieceType type, ChessColor color)
 {
     assert(is_valid_pieceType(type));
     assert(is_valid_color(color));
-
-    // the white and black pieces have a difference of +6 int value
-    // E.g  WKnight = 1, BKnight = 7
-    return type == PieceType::EMPTY ? Piece::EMPTY
-                                    : static_cast<Piece>(static_cast<int>(type) + (6 * static_cast<int>(color)));
+    
+    return CREATE_PIECE[static_cast<int>(type)][static_cast<int>(color)];
 }
 
 /**

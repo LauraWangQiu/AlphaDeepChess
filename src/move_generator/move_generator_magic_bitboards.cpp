@@ -20,14 +20,6 @@
 #include "coordinates.hpp"
 
 static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo);
-
-static void update_king_danger(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
-static void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo);
-static void update_knight_danger(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo);
-static void update_rook_danger(Square rook_sq, MoveGeneratorInfo& moveGeneratorInfo);
-static void update_bishop_danger(Square bishop_sq, MoveGeneratorInfo& moveGeneratorInfo);
-static void update_queen_danger(Square queen_sq, MoveGeneratorInfo& moveGeneratorInfo);
-static void update_pin_in_dir(Square king_sq, Direction d, MoveGeneratorInfo& moveGeneratorInfo);
 static void update_pins_and_checks(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
 
 static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
@@ -64,7 +56,6 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* inCheck)
 
     update_move_generator_info(moveGeneratorInfo);
 
-    const ChessColor side_to_move = board.state().side_to_move();
     const uint8_t num_checkers = moveGeneratorInfo.number_of_checkers;
 
     if (num_checkers >= 2) {
@@ -73,6 +64,7 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* inCheck)
         if (inCheck) *inCheck = true;
         return;
     }
+
     uint64_t side_to_move_pieces = moveGeneratorInfo.side_to_move_pieces_mask;
 
     while (side_to_move_pieces) {
@@ -81,7 +73,7 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* inCheck)
         const PieceType piece_type = piece_to_pieceType(piece);
 
         assert(!board.is_empty(square));
-        assert(get_color(piece) == side_to_move);
+        assert(get_color(piece) == board.state().side_to_move());
 
         switch (piece_type) {
         case PieceType::PAWN: calculate_pawn_moves<genType>(square, moveGeneratorInfo); break;
@@ -93,6 +85,7 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* inCheck)
         default: break;
         }
     }
+
     if (inCheck) *inCheck = (num_checkers > 0);
 }
 
@@ -103,7 +96,7 @@ template void generate_legal_moves<ONLY_CAPTURES>(MoveList& moves, const Board& 
 static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
 {
     const Board& board = moveGeneratorInfo.board;
-    const ChessColor side_waiting = moveGeneratorInfo.side_waiting;
+    const uint64_t blockers = moveGeneratorInfo.board.get_bitboard_all();
 
     update_pins_and_checks(moveGeneratorInfo.side_to_move_king_square, moveGeneratorInfo);
 
@@ -113,20 +106,13 @@ static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
 
         const Square square(pop_lsb(side_waiting_pieces));
         const Piece piece = board.get_piece(square);
-        const PieceType piece_type = piece_to_pieceType(piece);
 
         assert(!board.is_empty(square));
-        assert(get_color(piece) == side_waiting);
+        assert(get_color(piece) == moveGeneratorInfo.side_waiting);
 
-        switch (piece_type) {
-        case PieceType::PAWN: update_pawn_danger(square, moveGeneratorInfo); break;
-        case PieceType::KNIGHT: update_knight_danger(square, moveGeneratorInfo); break;
-        case PieceType::KING: update_king_danger(square, moveGeneratorInfo); break;
-        case PieceType::QUEEN: update_queen_danger(square, moveGeneratorInfo); break;
-        case PieceType::ROOK: update_rook_danger(square, moveGeneratorInfo); break;
-        case PieceType::BISHOP: update_bishop_danger(square, moveGeneratorInfo); break;
-        default: break;
-        }
+        const uint64_t moves_mask = PrecomputedMoveData::pieceMoves(square, piece, blockers);
+
+        moveGeneratorInfo.king_danger_squares_mask |= moves_mask;
     }
 }
 
@@ -135,7 +121,6 @@ static void update_pins_and_checks(Square king_sq, MoveGeneratorInfo& moveGenera
     const Board& board = moveGeneratorInfo.board;
     const ChessColor side_to_move = moveGeneratorInfo.side_to_move;
     const ChessColor side_waiting_color = moveGeneratorInfo.side_waiting;
-    const uint64_t side_waiting_bb = moveGeneratorInfo.side_waiting_pieces_mask;
     const uint64_t side_to_move_bb = moveGeneratorInfo.side_to_move_pieces_mask;
     const uint64_t enemy_rooks = board.get_bitboard_piece(create_piece(PieceType::ROOK, side_waiting_color));
     const uint64_t enemy_bishops = board.get_bitboard_piece(create_piece(PieceType::BISHOP, side_waiting_color));
@@ -153,7 +138,7 @@ static void update_pins_and_checks(Square king_sq, MoveGeneratorInfo& moveGenera
     const uint64_t pawns_attacks_inverted = PrecomputedMoveData::pieceAttacks(king_sq, friendly_pawn);
 
     uint64_t sliders_bb = ((enemy_rooks & rook_attacks) | (enemy_bishops & bishop_attacks) |
-                           enemy_queens & (rook_attacks | bishop_attacks));
+                           (enemy_queens & (rook_attacks | bishop_attacks)));
 
     // diagonal slider pins and checks
     while (sliders_bb) {
@@ -185,68 +170,6 @@ static void update_pins_and_checks(Square king_sq, MoveGeneratorInfo& moveGenera
     while (pawn_checkers) {
         moveGeneratorInfo.new_checker_found(Square(pop_lsb(pawn_checkers)), 0ULL);
     }
-}
-
-static void update_king_danger(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo)
-{
-    assert(king_sq.is_valid());
-
-    const uint64_t king_attacks_mask = PrecomputedMoveData::kingAttacks(king_sq);
-
-    moveGeneratorInfo.king_danger_squares_mask |= king_attacks_mask;
-}
-
-static void update_pawn_danger(Square pawn_sq, MoveGeneratorInfo& moveGeneratorInfo)
-{
-    assert(pawn_sq.is_valid());
-
-    const ChessColor side_waiting = moveGeneratorInfo.side_waiting;
-
-    const uint64_t pawn_attacks_mask = PrecomputedMoveData::pawnAttacks(pawn_sq, side_waiting);
-
-    moveGeneratorInfo.king_danger_squares_mask |= pawn_attacks_mask;
-}
-
-static void update_knight_danger(Square knight_sq, MoveGeneratorInfo& moveGeneratorInfo)
-{
-    assert(knight_sq.is_valid());
-
-    const uint64_t knight_attacks_mask = PrecomputedMoveData::knightAttacks(knight_sq);
-
-    moveGeneratorInfo.king_danger_squares_mask |= knight_attacks_mask;
-}
-
-static void update_rook_danger(Square rook_sq, MoveGeneratorInfo& moveGeneratorInfo)
-{
-    assert(rook_sq.is_valid());
-
-    const uint64_t blockers = moveGeneratorInfo.board.get_bitboard_all();
-
-    const uint64_t moves_mask = PrecomputedMoveData::rookMoves(rook_sq, blockers);
-
-    moveGeneratorInfo.king_danger_squares_mask |= moves_mask;
-}
-
-static void update_bishop_danger(Square bishop_sq, MoveGeneratorInfo& moveGeneratorInfo)
-{
-    assert(bishop_sq.is_valid());
-
-    const uint64_t blockers = moveGeneratorInfo.board.get_bitboard_all();
-
-    const uint64_t moves_mask = PrecomputedMoveData::bishopMoves(bishop_sq, blockers);
-
-    moveGeneratorInfo.king_danger_squares_mask |= moves_mask;
-}
-
-static void update_queen_danger(Square queen_sq, MoveGeneratorInfo& moveGeneratorInfo)
-{
-    assert(queen_sq.is_valid());
-
-    const uint64_t blockers = moveGeneratorInfo.board.get_bitboard_all();
-
-    const uint64_t moves_mask = PrecomputedMoveData::queenMoves(queen_sq, blockers);
-
-    moveGeneratorInfo.king_danger_squares_mask |= moves_mask;
 }
 
 static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo)
