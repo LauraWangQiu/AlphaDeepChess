@@ -18,7 +18,9 @@
 #include <algorithm>
 
 static constexpr inline int calculate_endgame_percentage(const Board& board);
-static constexpr inline int mobility_piece_score(Square square, Piece piece, const Board& board);
+static inline int mobility_piece_score(Square square, Piece piece, const Board& board);
+template<ChessColor color>
+static inline int king_safety(const Board& board);
 
 /** 
  * @brief evaluate_position
@@ -47,11 +49,12 @@ int evaluate_position(const Board& board)
 
         const Square square(pop_lsb(pieces));
         const Piece piece = board.get_piece(square);
+        const PieceType piece_type = piece_to_pieceType(piece);
         const ChessColor piece_color = get_color(piece);
         const int piece_raw_value = raw_value(piece);
         const int bonus_middlegame = PrecomputedEvalData::get_piece_square_table<PST_TYPE_MIDDLEGAME>(piece, square);
         const int bonus_endgame = PrecomputedEvalData::get_piece_square_table<PST_TYPE_ENDGAME>(piece, square);
-        const int mobility = mobility_piece_score(square, piece, board);
+        const int mobility = piece_type == PieceType::KING ? 0 : mobility_piece_score(square, piece, board);
 
         const int piece_value_middlegame = piece_raw_value + bonus_middlegame + mobility;
         const int piece_value_endgame = piece_raw_value + bonus_endgame + mobility;
@@ -60,6 +63,9 @@ int evaluate_position(const Board& board)
         middlegame_eval += is_white(piece_color) ? piece_value_middlegame : -piece_value_middlegame;
         endgame_eval += is_white(piece_color) ? piece_value_endgame : -piece_value_endgame;
     }
+
+    middlegame_eval += 4 * king_safety<ChessColor::BLACK>(board) - 4 * king_safety<ChessColor::WHITE>(board);
+    endgame_eval += 4 * king_safety<ChessColor::BLACK>(board) - 4 * king_safety<ChessColor::WHITE>(board);
 
     const int blended_eval = (middlegame_eval * (100 - endgame_percentage) + endgame_eval * endgame_percentage) / 100;
 
@@ -106,7 +112,7 @@ static constexpr inline int calculate_endgame_percentage(const Board& board)
     return game_endgame_percentage;
 }
 
-static constexpr inline int mobility_piece_score(Square square, Piece piece, const Board& board)
+static inline int mobility_piece_score(Square square, Piece piece, const Board& board)
 {
     const ChessColor piece_color = get_color(piece);
     const uint64_t blockers = board.get_bitboard_all();
@@ -117,6 +123,15 @@ static constexpr inline int mobility_piece_score(Square square, Piece piece, con
     return number_of_1_bits(moves);
 }
 
+template<ChessColor color>
+static inline int king_safety(const Board& board)
+{
+    constexpr Piece king_piece = is_white(color) ? Piece::W_KING : Piece::B_KING;
+    const Square king_square = lsb(board.get_bitboard_piece(king_piece));
+    const uint64_t enemy_pieces = board.get_bitboard_color(opposite_color(color));
+
+    return number_of_1_bits(PrecomputedEvalData::get_king_danger_zone(king_square) & enemy_pieces);
+}
 
 // Pieces values
 // 1. Avoid exchanging one minor piece for three pawns

@@ -99,6 +99,12 @@ public:
         return MANHATTAN_DISTANCE[square1][square2];
     }
 
+    static inline uint64_t get_king_danger_zone(Square king_sq)
+    {
+        assert(king_sq.is_valid());
+        return KING_DANGER_ZONE[king_sq];
+    }
+
     /**
      * @brief get_safety_table 
      * 
@@ -145,9 +151,50 @@ private:
         return distances;
     };
 
+    static inline const std::array<uint64_t, 64> init_king_danger_zone()
+    {
+        std::array<uint64_t, 64> zone;
+
+        for (Square sq = Square::A1; sq.is_valid(); sq++) {
+            const Row king_row = sq.row();
+            const Col king_col = sq.col();
+            zone[sq] = sq.mask();
+
+            const Row row_plus_1 = king_row + 1;
+            const Row row_plus_2 = king_row + 2;
+            const Row row_plus_3 = king_row + 3;
+            const Row row_minus_1 = king_row - 1;
+            const Row row_minus_2 = king_row - 2;
+            const Row row_minus_3 = king_row - 3;
+
+            const Col col_plus_1 = king_col + 1;
+            const Col col_plus_2 = king_col + 2;
+            const Col col_plus_3 = king_col + 3;
+            const Col col_minus_1 = king_col - 1;
+            const Col col_minus_2 = king_col - 2;
+            const Col col_minus_3 = king_col - 3;
+
+            zone[sq] |= is_valid_row(row_plus_1) ? get_row_mask(row_plus_1) : 0ULL;
+            zone[sq] |= is_valid_row(row_plus_2) ? get_row_mask(row_plus_2) : 0ULL;
+            zone[sq] |= is_valid_row(row_plus_3) ? get_row_mask(row_plus_3) : 0ULL;
+            zone[sq] |= is_valid_row(row_minus_1) ? get_row_mask(row_minus_1) : 0ULL;
+            zone[sq] |= is_valid_row(row_minus_2) ? get_row_mask(row_minus_2) : 0ULL;
+            zone[sq] |= is_valid_row(row_minus_3) ? get_row_mask(row_minus_3) : 0ULL;
+
+            zone[sq] |= is_valid_col(col_plus_1) ? get_col_mask(col_plus_1) : 0ULL;
+            zone[sq] |= is_valid_col(col_plus_2) ? get_col_mask(col_plus_2) : 0ULL;
+            zone[sq] |= is_valid_col(col_plus_3) ? get_col_mask(col_plus_3) : 0ULL;
+            zone[sq] |= is_valid_col(col_minus_1) ? get_col_mask(col_minus_1) : 0ULL;
+            zone[sq] |= is_valid_col(col_minus_2) ? get_col_mask(col_minus_2) : 0ULL;
+            zone[sq] |= is_valid_col(col_minus_3) ? get_col_mask(col_minus_3) : 0ULL;
+        }
+
+        return zone;
+    };
 
     static inline const std::array<std::array<int, 64>, 64> CHEBYSHEV_DISTANCE = init_chebyshev_distance();
     static inline const std::array<std::array<int, 64>, 64> MANHATTAN_DISTANCE = init_manhattan_distance();
+    static inline const std::array<uint64_t, 64> KING_DANGER_ZONE = init_king_danger_zone();
 
     // clang-format off
 
@@ -283,5 +330,6 @@ private:
         QUEEN_PIECE_SQUARE_TABLE,
         KING_ENDGAME_SQUARE_TABLE
     };
+
     // clang-format on
 };
