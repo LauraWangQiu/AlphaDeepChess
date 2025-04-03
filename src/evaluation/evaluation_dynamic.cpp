@@ -13,10 +13,12 @@
 #include "move_list.hpp"
 #include "move_generator.hpp"
 #include "precomputed_eval_data.hpp"
+#include "precomputed_move_data.hpp"
 #include "bit_utilities.hpp"
 #include <algorithm>
 
-constexpr inline int calculate_endgame_percentage(const Board& board);
+static constexpr inline int calculate_endgame_percentage(const Board& board);
+static constexpr inline int mobility_piece_score(Square square, Piece piece, const Board& board);
 
 /** 
  * @brief evaluate_position
@@ -49,9 +51,11 @@ int evaluate_position(const Board& board)
         const int piece_raw_value = raw_value(piece);
         const int bonus_middlegame = PrecomputedEvalData::get_piece_square_table<PST_TYPE_MIDDLEGAME>(piece, square);
         const int bonus_endgame = PrecomputedEvalData::get_piece_square_table<PST_TYPE_ENDGAME>(piece, square);
+        const int mobility = mobility_piece_score(square, piece, board);
 
-        const int piece_value_middlegame = piece_raw_value + bonus_middlegame;
-        const int piece_value_endgame = piece_raw_value + bonus_endgame;
+        const int piece_value_middlegame = piece_raw_value + bonus_middlegame + mobility;
+        const int piece_value_endgame = piece_raw_value + bonus_endgame + mobility;
+
 
         middlegame_eval += is_white(piece_color) ? piece_value_middlegame : -piece_value_middlegame;
         endgame_eval += is_white(piece_color) ? piece_value_endgame : -piece_value_endgame;
@@ -71,7 +75,7 @@ int evaluate_position(const Board& board)
  *  - (0) middlegame
  *  - (100) endgame
  */
-constexpr inline int calculate_endgame_percentage(const Board& board)
+static constexpr inline int calculate_endgame_percentage(const Board& board)
 {
     constexpr int ENDGAME_PIECE_THRESHOLD = 8;   // less that 10 pieces is considered endgame
 
@@ -100,6 +104,17 @@ constexpr inline int calculate_endgame_percentage(const Board& board)
 
     assert(game_endgame_percentage >= 0 && game_endgame_percentage <= 100);
     return game_endgame_percentage;
+}
+
+static constexpr inline int mobility_piece_score(Square square, Piece piece, const Board& board)
+{
+    const ChessColor piece_color = get_color(piece);
+    const uint64_t blockers = board.get_bitboard_all();
+    const uint64_t friendly_pieces = board.get_bitboard_color(piece_color);
+
+    const uint64_t moves = PrecomputedMoveData::pieceMoves(square, piece, blockers) & ~friendly_pieces;
+
+    return number_of_1_bits(moves);
 }
 
 
