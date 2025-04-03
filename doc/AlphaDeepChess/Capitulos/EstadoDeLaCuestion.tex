@@ -3,15 +3,11 @@
 
 \section{Board representation}
 
-Let's introduce the battlefield where the game takes place: the chessboard, which serves as the foundation for all operations.
+The chessboard is where the game takes place and which serves as the foundation for all operations. In order to store a position setting with its pieces and other additional information like the side to move\footnote{Corresponds to the colour that has the turn of movement.}, the castling rights\footnote{Refers to the possibilities for each side to castle both short and long. Castling is explained in~\ref{sec:castling}.} or the fifty-move rule counter\footnote{This rule is explained in~\ref{itm:fifty-move-rule}.}, we can encounter different types of representations: piece centric, square centric and hybrid solutions. We chose to use bitboards as the primary representation, complemented by a piece list to store the piece on each square (piece centric representation). Additionally, the game state is stored in a bit field.
 
 \vspace{1em}
 
-In order to store a position setting with its pieces and its piece colors and other additional information like the side to move\footnote{Corresponds to the colour that has the turn of movement.}, the castling rights\footnote{Refers to the possibilities for each side to castle both short and long. Castling is explained in \ref{sec:castling}.} or the fifty-move rule counter\footnote{This rule is explained in \ref{itm:fifty-move-rule}.}, we can encounter different types of representations: piece centric, square centric and hybrid solutions. We chose to use bitboards as the primary representation, complemented by a piece list to store the piece on each square (piece centric representation). Additionally, the game state is stored in a bit field.
-
-\vspace{1em}
-
-A \textbf{bitboard\footnote{\url{https://www.chessprogramming.org/Board_Representation}}}, also known as a bitset or bitmap, is a 64-bit word structure that efficiently represents a  chessboard because it matches with the number of squares: every bit corresponds to a square of the chessboard.
+A \textbf{bitboard\footnote{\url{https://www.chessprogramming.org/Bitboards}}}, also known as a bitset or bitmap, is a 64-bit word structure that efficiently represents a  chessboard because it matches with the number of squares: every bit corresponds to a square of the chessboard.
 
 \vspace{1em}
 
@@ -27,7 +23,7 @@ For more information about board representation, refer to the Wikipedia page: \u
 
 \section{Game trees}
 
-Sequential games, such as chess or tic-tac-toe, where players take turns alternately, unlike simultaneous games, can be represented in a game tree or graph. In this representation, each node is a possible option or game state, and child nodes branch out to represent subsequent states, forming a tree-like structure. This tree has a height or depth that refers to the number of levels or layers in the tree, starting from the root node (the initial game state) and extending to the leaf nodes.
+Sequential games, such as chess or tic-tac-toe, where players take turns alternately, unlike simultaneous games, can be represented in a game tree or graph. In this representation, the root node is the main position from which we look for the best move, and each subsequent node is a possible option or game state, forming a tree-like structure. This tree has a height or depth that refers to the number of levels or layers in the tree, starting from the root node (the initial game state) and extending to the leaf nodes.
 
 \vspace{1em}
 
@@ -35,7 +31,21 @@ The depth of a chess game tree is important because it determines the extent to 
 
 \vspace{1em}
 
-The search algorithms in these game trees will be discussed below.
+Take into consideration that many positions can be reached in different ways. This is formally known as tranpositions\footnote{\url{https://www.chessprogramming.org/Transposition}}. Just like in dynamic programming\footnote{\url{https://en.wikipedia.org/wiki/Dynamic_programming}}, the different positions' evaluations are stored in a structure to avoid repeating the process of searching and evaluating which adds efficiency. Then, this implies that the game tree should be a directed acyclic graph (DAG)\footnote{\url{https://en.wikipedia.org/wiki/Directed_acyclic_graph}}.
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[
+        setpieces={Ne2},
+        showmover=false,
+        pgfstyle=straightmove, color=blue,
+        markmoves={e2-d4,e2-f4,d4-e6,f4-e6},
+        arrow=to
+    ]
+    \caption{Really simple example of transposition.}
+    \label{fig:simple-example-transposition}
+\end{figure}
 
 \section{Search algorithms}
 

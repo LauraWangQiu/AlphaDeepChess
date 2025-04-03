@@ -1,6 +1,6 @@
 # AlphaDeepChess
 
-AlphaDeepChess, desarrollo de un motor de ajedrez basado en podas alfa-beta
+AlphaDeepChess, developing a chess engine based in alpha-beta pruning.
 
 ## Getting Started
 
@@ -20,7 +20,6 @@ These instructions will help you set up and build the project on your local mach
     ```bash
     sudo apt-get install g++
     sudo apt-get install cmake
-    # sudo apt install ocl-icd-opencl-dev
     ```
 
 3. **Move to the project folder and run the setup script for cmake**:
@@ -41,14 +40,10 @@ These instructions will help you set up and build the project on your local mach
     git clone https://github.com/LauraWangQiu/AlphaDeepChess.git
     ```
 
-2. **Download g++(mingw), cmake**:
+2. **Download g++(mingw) and cmake**:
 
     [Mingw](https://www.mingw-w64.org/downloads/)  
     [CMake](https://cmake.org/download/)  
-    <!-- OpenCL:
-    - [NVIDIA](https://developer.nvidia.com/cuda-downloads)
-    - [AMD](https://www.amd.com/en/developer.html)
-    - [Intel](https://www.intel.com/content/www/us/en/developer/articles/tool/tools-for-opencl-applications.html) -->
 
     configure the PATH enviroment variable  
     configure cmake build folder
@@ -77,8 +72,6 @@ These instructions will help you set up and build the project on your local mach
     # PowerShell installation
     # brew install --cask powershell
     ```
-
-    <!-- OpenCL is pre-installed on MacOS. -->
 
 3. **Move to the project folder and run the setup script for cmake**:
 
@@ -120,7 +113,8 @@ There should be a new directory called `enginesComparator` with the `cutechess` 
 |-- /stockfish
 |   |-- /stockfish
 |       |-- stockfish_X_x86_64
-|       |-- ...```
+|       |-- ...
+```
 
 To compare the engines, we will use the `cutechess-cli` tool. We will run a match between `stockfish` and our engine. To do so, we will use the `compareEngines.py`.
 
@@ -247,4 +241,4 @@ enum class EnumName {
 
 ### Using Python's pygame library to visualize the board from the engine
 
-Execute [main.py](main.py) to send commands as with the UCI and visualize the chessboard.
+Execute [AlphaDeepChessGUI.py](AlphaDeepChessGUI.py) to send commands as with the UCI and visualize the chessboard.

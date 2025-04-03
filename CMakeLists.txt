@@ -18,11 +18,6 @@ include_directories(include/uci)
 include_directories(include/move_ordering)
 include_directories(include/move_generator)
 
-#find_package(OpenCL REQUIRED)
-
-# message(STATUS "OpenCL include directory: ${OpenCL_INCLUDE_DIR}")
-# message(STATUS "OpenCL library path: ${OpenCL_LIBRARY}")
-
 add_executable(AlphaDeepChess 
 src/main.cpp
 src/board/board.cpp
@@ -39,11 +34,49 @@ target_link_libraries(AlphaDeepChess PRIVATE ${OpenCL_LIBRARY})
 # Add basic algorithm source files
 set(BASIC_SOURCES
     src/evaluation/evaluation_dynamic.cpp
+    # src/evaluation/evaluation_gpu.cpp
     src/search/search_transposition_table.cpp
     #src/search/search_multithread.cpp
     src/move_ordering/move_ordering_MVV_LVA.cpp
     src/move_generator/move_generator_magic_bitboards.cpp
 )
+
+# Check if evaluation_gpu.cpp is included
+if ("src/evaluation/evaluation_gpu.cpp" IN_LIST BASIC_SOURCES)
+target_compile_definitions(AlphaDeepChess PRIVATE EVALUATION_GPU)
+
+    set(JULIA_HOME "C:/Users/lwq20/AppData/Local/Programs/Julia-1.11.4")
+    set(JULIA_INCLUDE_DIR "${JULIA_HOME}/include/julia")
+    set(JULIA_BIN_DIR "${JULIA_HOME}/bin")
+    set(JULIA_LIB_DIR "${JULIA_HOME}/lib")
+    set(JULIA_LIBRARY "${JULIA_BIN_DIR}/libjulia.dll")
+
+    include_directories(${JULIA_INCLUDE_DIR})
+
+    target_link_directories(AlphaDeepChess PRIVATE ${JULIA_BIN_DIR})
+    target_link_libraries(AlphaDeepChess PRIVATE ${JULIA_LIBRARY})
+    target_compile_options(AlphaDeepChess PRIVATE -std=c++20 -static-libstdc++)
+
+    set(OUTPUT_PARENT_DIR "$<TARGET_FILE_DIR:AlphaDeepChess>/..")
+
+    # Copy bin directory to one level up
+    add_custom_command(TARGET AlphaDeepChess POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_PARENT_DIR}/bin"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${JULIA_BIN_DIR}" "${OUTPUT_PARENT_DIR}/bin"
+    )
+
+    # Copy lib directory to one level up
+    add_custom_command(TARGET AlphaDeepChess POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_PARENT_DIR}/lib"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${JULIA_LIB_DIR}" "${OUTPUT_PARENT_DIR}/lib"
+    )
+
+    add_custom_command(TARGET AlphaDeepChess POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${JULIA_BIN_DIR}"
+        $<TARGET_FILE_DIR:AlphaDeepChess>
+    )
+endif()
 
 # Add advanced algorithm source files
 set(ADVANCED_SOURCES
