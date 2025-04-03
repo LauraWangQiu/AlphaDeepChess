@@ -34,6 +34,61 @@ public:
     ~PrecomputedMoveData() = delete;
 
     /**
+     * @brief pieceMoves
+     * 
+     * calculates the 64 bit mask with 1 on the squares that the piece could move
+     * 
+     * @note square must be valid and piece should be not Empty
+     * 
+     * @param[in] square piece square
+     * @param[in] piece selected piece
+     * @param[in] blockers bitboard with all pieces on the board, they block the path of the piece
+     * 
+     * @return pieceMoves(square,blockers)
+     */
+    static inline uint64_t pieceMoves(Square square, Piece piece, uint64_t blockers)
+    {
+        assert(is_valid_piece(piece) && piece != Piece::EMPTY);
+        assert(square.is_valid());
+
+        switch (piece) {
+        case Piece::W_PAWN: return WHITE_PAWN_ATTACKS[square]; break;
+        case Piece::W_KNIGHT: return KNIGHT_ATTACKS[square]; break;
+        case Piece::W_BISHOP: return bishopMoves(square, blockers); break;
+        case Piece::W_ROOK: return rookMoves(square, blockers); break;
+        case Piece::W_QUEEN: return queenMoves(square, blockers); break;
+        case Piece::W_KING: return KING_ATTACKS[square]; break;
+        case Piece::B_PAWN: return BLACK_PAWN_ATTACKS[square]; break;
+        case Piece::B_KNIGHT: return KNIGHT_ATTACKS[square]; break;
+        case Piece::B_BISHOP: return bishopMoves(square, blockers); break;
+        case Piece::B_ROOK: return rookMoves(square, blockers); break;
+        case Piece::B_QUEEN: return queenMoves(square, blockers); break;
+        case Piece::B_KING: return KING_ATTACKS[square]; break;
+        default: return 0ULL; break;
+        }
+    }
+
+    /**
+     * @brief pieceAttacks
+     * 
+     * calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board
+     * 
+     * @note square must be valid, piece must be valid and not EMPTY
+     * 
+     * @param[in] square The selected square
+     * @param[in] square The selected piece
+     * 
+     * @return PIECE_ATTACKS[piece][square]
+     */
+    static inline uint64_t pieceAttacks(Square square, Piece piece)
+    {
+        assert(square.is_valid());
+        assert(is_valid_piece(piece) && piece != Piece::EMPTY);
+
+        return PIECE_ATTACKS[static_cast<int>(piece)][square];
+    }
+
+    /**
      * @brief rookMoves
      * 
      * calculates the 64 bit mask with 1 on the squares that the piece could move
@@ -197,26 +252,6 @@ public:
     {
         assert(square.is_valid());
         return ROOK_ATTACKS[square] | BISHOP_ATTACKS[square];
-    }
-
-    /**
-     * @brief pieceAttacks
-     * 
-     * calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board
-     * 
-     * @note square must be valid, piece must be valid and not EMPTY
-     * 
-     * @param[in] square The selected square
-     * @param[in] square The selected piece
-     * 
-     * @return PIECE_ATTACKS[piece][square]
-     */
-    static inline uint64_t pieceAttacks(Square square, Piece piece)
-    {
-        assert(square.is_valid());
-        assert(is_valid_piece(piece) && piece != Piece::EMPTY);
-
-        return PIECE_ATTACKS[static_cast<int>(piece)][square];
     }
 
     /**

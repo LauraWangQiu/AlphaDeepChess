@@ -26,6 +26,7 @@ src/utilities/perft.cpp
 src/search/history.cpp
 src/utilities/transposition_table.cpp
 src/move_generator/precomputed_move_data.cpp
+src/utilities/coordinates.cpp
 )
 
 target_include_directories(AlphaDeepChess PRIVATE ${OpenCL_INCLUDE_DIR})
