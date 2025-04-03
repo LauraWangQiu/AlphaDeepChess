@@ -6,6 +6,7 @@
  * 
  * https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
  * https://www.chessprogramming.org/Alpha-Beta
+ * https://www.chessprogramming.org/Aspiration_Windows
  * https://www.chessprogramming.org/Quiescence_Search
  * https://www.chessprogramming.org/Transposition_Table
  * https://www.chessprogramming.org/Parallel_Search
@@ -100,16 +101,32 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
 {
     Board& board = context.board;
     const ChessColor side_to_move = board.state().side_to_move();
-
     KillerMoves::clear();
 
-    for (int depth = 1; depth <= max_depth; depth++) {
+    int alpha = -INF_EVAL;
+    int beta = +INF_EVAL;
 
+    for (int depth = 1; depth <= max_depth; depth++) {
         context.bestMoveInIteration = Move::null();
         context.bestEvalInIteration = is_white(side_to_move) ? -INF_EVAL : +INF_EVAL;
 
-        is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, -INF_EVAL, +INF_EVAL, context)
-                               : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, -INF_EVAL, +INF_EVAL, context);
+        // if it is not the first iteration, adjust alpha and beta
+        if (depth > 1) {
+            alpha = context.bestEvalFound - ASPIRATION_MARGIN;
+            beta  = context.bestEvalFound + ASPIRATION_MARGIN;
+        }
+
+        is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, context)
+                               : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, context);
+
+        // if the evaluation is out of bounds of the window, redo the search with -INF_EVAL and +INF_EVAL
+        if (context.bestEvalInIteration <= alpha || context.bestEvalInIteration >= beta) {
+            alpha = -INF_EVAL;
+            beta  = +INF_EVAL;
+
+            is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, context)
+                                   : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, context);
+        }
 
         if (stop) {
             break;

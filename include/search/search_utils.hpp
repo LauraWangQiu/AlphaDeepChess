@@ -29,6 +29,9 @@ constexpr int MATE_THRESHOLD = INMEDIATE_MATE_SCORE - 1000U;
 // max ply to be reached
 constexpr int MAX_PLY = 64;
 
+// initial aspiration window margin (50 cp)
+constexpr int ASPIRATION_MARGIN = 50;
+
 /**
  * @brief SearchType
  * 

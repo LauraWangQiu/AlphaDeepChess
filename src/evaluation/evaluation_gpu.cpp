@@ -18,8 +18,6 @@
 #include <iostream>
 #include <mutex>
 
-std::mutex julia_mutex;
-
 /** 
  * @brief evaluate_position
  *
@@ -36,8 +34,6 @@ std::mutex julia_mutex;
  */
 int evaluate_position(const Board& board)
 {
-    std::lock_guard<std::mutex> lock(julia_mutex);
-    
     std::string fen = board.fen();
     std::string julia_call = "evaluate_position(\"" + fen + "\")";
     jl_value_t *result = jl_eval_string(julia_call.c_str());
