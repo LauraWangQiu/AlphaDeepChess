@@ -155,38 +155,29 @@ private:
     {
         std::array<uint64_t, 64> zone;
 
+
         for (Square sq = Square::A1; sq.is_valid(); sq++) {
-            const Row king_row = sq.row();
-            const Col king_col = sq.col();
-            zone[sq] = sq.mask();
+            const int king_row = sq.row();
+            const int king_col = sq.col();
 
-            const Row row_plus_1 = king_row + 1;
-            const Row row_plus_2 = king_row + 2;
-            const Row row_plus_3 = king_row + 3;
-            const Row row_minus_1 = king_row - 1;
-            const Row row_minus_2 = king_row - 2;
-            const Row row_minus_3 = king_row - 3;
+            // Calculate boundaries for a 3-square radius, clamped to the board
+            const int row_min = std::max(king_row - 3, 0);
+            const int row_max = std::min(king_row + 3, 7);
+            const int col_min = std::max(king_col - 3, 0);
+            const int col_max = std::min(king_col + 3, 7);
 
-            const Col col_plus_1 = king_col + 1;
-            const Col col_plus_2 = king_col + 2;
-            const Col col_plus_3 = king_col + 3;
-            const Col col_minus_1 = king_col - 1;
-            const Col col_minus_2 = king_col - 2;
-            const Col col_minus_3 = king_col - 3;
-
-            zone[sq] |= is_valid_row(row_plus_1) ? get_row_mask(row_plus_1) : 0ULL;
-            zone[sq] |= is_valid_row(row_plus_2) ? get_row_mask(row_plus_2) : 0ULL;
-            zone[sq] |= is_valid_row(row_plus_3) ? get_row_mask(row_plus_3) : 0ULL;
-            zone[sq] |= is_valid_row(row_minus_1) ? get_row_mask(row_minus_1) : 0ULL;
-            zone[sq] |= is_valid_row(row_minus_2) ? get_row_mask(row_minus_2) : 0ULL;
-            zone[sq] |= is_valid_row(row_minus_3) ? get_row_mask(row_minus_3) : 0ULL;
-
-            zone[sq] |= is_valid_col(col_plus_1) ? get_col_mask(col_plus_1) : 0ULL;
-            zone[sq] |= is_valid_col(col_plus_2) ? get_col_mask(col_plus_2) : 0ULL;
-            zone[sq] |= is_valid_col(col_plus_3) ? get_col_mask(col_plus_3) : 0ULL;
-            zone[sq] |= is_valid_col(col_minus_1) ? get_col_mask(col_minus_1) : 0ULL;
-            zone[sq] |= is_valid_col(col_minus_2) ? get_col_mask(col_minus_2) : 0ULL;
-            zone[sq] |= is_valid_col(col_minus_3) ? get_col_mask(col_minus_3) : 0ULL;
+            uint64_t mask = 0ULL;
+            // Iterate over the allowed rows and columns to set the mask bits
+            for (int row = row_min; row <= row_max; row++) {
+                // Get the full mask for the row, but then restrict it to allowed columns
+                uint64_t row_mask = get_row_mask(static_cast<Row>(row));
+                uint64_t col_range_mask = 0ULL;
+                for (int col = col_min; col <= col_max; col++) {
+                    col_range_mask |= get_col_mask(static_cast<Col>(col));
+                }
+                mask |= row_mask & col_range_mask;
+            }
+            zone[sq] = mask;
         }
 
         return zone;
@@ -212,7 +203,7 @@ private:
         50,  50,  50,  50,  50,  50,  50,  50,
         10,  10,  20,  30,  30,  20,  10,  10,
         5,   5,   10,  25,  25,  10,  5,   5,
-        0,   0,   0,   20,  20,  0,   0,   0,
+        0,   0,  0,   20,  20,  0,   -5,  0,
         5,   -5,  -10, 0,   0,   -10, -5,  5,
         5,   10,  10,  -20, -20, 10,  10,  5,
         0,   0,   0,   0,   0,   0,   0,   0

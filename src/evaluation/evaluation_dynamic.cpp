@@ -20,7 +20,9 @@
 static constexpr inline int calculate_endgame_percentage(const Board& board);
 static inline int mobility_piece_score(Square square, Piece piece, const Board& board);
 template<ChessColor color>
-static inline int king_safety(const Board& board);
+static int king_safety(const Board& board);
+template<ChessColor color>
+static int king_shield(const Board& board);
 
 /** 
  * @brief evaluate_position
@@ -63,9 +65,12 @@ int evaluate_position(const Board& board)
         middlegame_eval += is_white(piece_color) ? piece_value_middlegame : -piece_value_middlegame;
         endgame_eval += is_white(piece_color) ? piece_value_endgame : -piece_value_endgame;
     }
+    const int safety_penalty = king_safety<ChessColor::BLACK>(board) - king_safety<ChessColor::WHITE>(board);
+    const int king_shield_bonus = king_shield<ChessColor::WHITE>(board) - king_shield<ChessColor::BLACK>(board);
 
-    middlegame_eval += 4 * king_safety<ChessColor::BLACK>(board) - 4 * king_safety<ChessColor::WHITE>(board);
-    endgame_eval += 4 * king_safety<ChessColor::BLACK>(board) - 4 * king_safety<ChessColor::WHITE>(board);
+    middlegame_eval += safety_penalty + king_shield_bonus;
+    endgame_eval += safety_penalty / 2 + king_shield_bonus / 2;
+
 
     const int blended_eval = (middlegame_eval * (100 - endgame_percentage) + endgame_eval * endgame_percentage) / 100;
 
@@ -83,10 +88,10 @@ int evaluate_position(const Board& board)
  */
 static constexpr inline int calculate_endgame_percentage(const Board& board)
 {
-    constexpr int ENDGAME_PIECE_THRESHOLD = 8;   // less that 10 pieces is considered endgame
+    constexpr int ENDGAME_PIECE_THRESHOLD = 8;   // less that this number of pieces is considered endgame
 
-    const bool white_has_queen = !board.get_bitboard_piece(Piece::W_QUEEN);
-    const bool black_has_queen = !board.get_bitboard_piece(Piece::B_QUEEN);
+    const bool white_has_queen = board.get_bitboard_piece(Piece::W_QUEEN);
+    const bool black_has_queen = board.get_bitboard_piece(Piece::B_QUEEN);
 
     // if we have less that ENDGAME_PIECE_THRESHOLD we consider that we have the THRESHOLD
     const int num_pieces = std::max(board.get_num_pieces(), ENDGAME_PIECE_THRESHOLD);
@@ -124,13 +129,78 @@ static inline int mobility_piece_score(Square square, Piece piece, const Board& 
 }
 
 template<ChessColor color>
-static inline int king_safety(const Board& board)
+static int king_safety(const Board& board)
 {
     constexpr Piece king_piece = is_white(color) ? Piece::W_KING : Piece::B_KING;
     const Square king_square = lsb(board.get_bitboard_piece(king_piece));
-    const uint64_t enemy_pieces = board.get_bitboard_color(opposite_color(color));
+    const ChessColor enemy_color = opposite_color(color);
+    const uint64_t enemy_pieces = board.get_bitboard_color(enemy_color);
 
-    return number_of_1_bits(PrecomputedEvalData::get_king_danger_zone(king_square) & enemy_pieces);
+    const uint64_t king_zone = PrecomputedEvalData::get_king_danger_zone(king_square);
+
+    // Attack weights and safety calculation
+    constexpr int weights[] = {1, 2, 2, 3, 5, 1};   // Pawn, Knight, Bishop, Rook, Queen, King
+    int attack_score = 0;
+
+    // Pawn attacks
+    uint64_t enemy_pawns = board.get_bitboard_piece(create_piece(PieceType::PAWN, enemy_color));
+    while (enemy_pawns) {
+        Square s(pop_lsb(enemy_pawns));
+        if (PrecomputedMoveData::pawnAttacks(s, enemy_color) & king_zone) attack_score += weights[0];
+    }
+
+    // Knight attacks
+    uint64_t enemy_knights = board.get_bitboard_piece(create_piece(PieceType::KNIGHT, enemy_color));
+    while (enemy_knights) {
+        Square s(pop_lsb(enemy_knights));
+        if (PrecomputedMoveData::knightAttacks(s) & king_zone) attack_score += weights[1];
+    }
+
+    // Sliding pieces attacks
+    const uint64_t blockers = board.get_bitboard_all();
+
+    // Bishop attacks
+    uint64_t enemy_bishops = board.get_bitboard_piece(create_piece(PieceType::BISHOP, enemy_color));
+    while (enemy_bishops) {
+        Square s(pop_lsb(enemy_bishops));
+        if (PrecomputedMoveData::bishopMoves(s, blockers) & king_zone) attack_score += weights[2];
+    }
+
+    // Rook attacks
+    uint64_t enemy_rooks = board.get_bitboard_piece(create_piece(PieceType::ROOK, enemy_color));
+    while (enemy_rooks) {
+        Square s(pop_lsb(enemy_rooks));
+        if (PrecomputedMoveData::rookMoves(s, blockers) & king_zone) attack_score += weights[3];
+    }
+
+    // Queen attacks
+    uint64_t enemy_queens = board.get_bitboard_piece(create_piece(PieceType::QUEEN, enemy_color));
+    while (enemy_queens) {
+        Square s(pop_lsb(enemy_queens));
+        if (PrecomputedMoveData::queenMoves(s, blockers) & king_zone) attack_score += weights[4];
+    }
+
+    // King attacks
+    Square enemy_king_sq = lsb(board.get_bitboard_piece(create_piece(PieceType::KING, enemy_color)));
+    if (PrecomputedMoveData::kingAttacks(enemy_king_sq) & king_zone) attack_score += weights[5];
+
+    // Non-linear safety penalty (quadratic scaling)
+    const int safety_penalty = (attack_score * attack_score) / 2;
+
+    return safety_penalty;
+}
+template<ChessColor color>
+static int king_shield(const Board& board)
+{
+    constexpr Piece king_piece = is_white(color) ? Piece::W_KING : Piece::B_KING;
+    const Square king_square = lsb(board.get_bitboard_piece(king_piece));
+    const uint64_t friendly_pawns = board.get_bitboard_piece(create_piece(PieceType::PAWN, color));
+
+    const Row next_row = Row(is_white(color) ? king_square.row() + 1 : king_square.row() - 1);
+    const uint64_t next_row_mask = is_valid_row(next_row) ? get_row_mask(next_row) : 0ULL;
+    const uint64_t king_shield_zone = PrecomputedMoveData::kingAttacks(king_square) & next_row_mask;
+
+    return 10 * number_of_1_bits(king_shield_zone & friendly_pawns);
 }
 
 // Pieces values
