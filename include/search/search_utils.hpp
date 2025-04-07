@@ -60,6 +60,7 @@ struct SearchContext
     Move bestMoveFound;
     Move bestMoveInIteration;
     Board& board;
+    // std::mutex context_mutex; // multithreading version
 
     SearchContext(Board& board)
         : bestEvalFound(0), bestEvalInIteration(0), bestMoveFound(), bestMoveInIteration(), board(board)

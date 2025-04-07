@@ -1,8 +1,9 @@
 /**
- * @file search_transposition_table.cpp
+ * @file search_multithread.cpp
  * @brief search services.
  *
- * chess search with transposition table implementation. 
+ * chess search with transposition table implementation
+ * and multithreading. 
  * 
  * https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
  * https://www.chessprogramming.org/Alpha-Beta
@@ -25,10 +26,10 @@
 static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results, int max_depth, SearchContext& context);
 
 template<SearchType searchType>
-static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context);
+static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context, Board board);
 
 template<SearchType searchType>
-static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int beta, SearchContext& context);
+static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int beta, Board& board);
 
 static bool get_entry_in_transposition_table(uint64_t zobrist, int depth, int alpha, int beta, int& eval, Move& move);
 
@@ -80,7 +81,7 @@ void search(std::atomic<bool>& stop, SearchResults& results, Board& board, uint3
     // stop signal
     stop = true;
 
-    //notify the reader thread that search has stopped
+    // notify the reader thread that search has stopped
     results.data_available_cv.notify_one();
 }
 
@@ -105,32 +106,33 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
 
     int alpha = -INF_EVAL;
     int beta = +INF_EVAL;
+    int eval = 0;
 
     for (int depth = 1; depth <= max_depth; depth++) {
         context.bestMoveInIteration = Move::null();
         context.bestEvalInIteration = is_white(side_to_move) ? -INF_EVAL : +INF_EVAL;
 
-        // if it is not the first iteration, adjust alpha and beta
-        if (depth > 1) {
-            alpha = context.bestEvalFound - ASPIRATION_MARGIN;
-            beta  = context.bestEvalFound + ASPIRATION_MARGIN;
-        }
+        // Set aspiration window for depths > 1 using the previous iteration's score
+        /*if (depth > 1) {
+            alpha = eval - ASPIRATION_MARGIN;
+            beta = eval + ASPIRATION_MARGIN;
+        }*/
 
-        is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, context)
-                               : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, context);
-
-        // if the evaluation is out of bounds of the window, redo the search with -INF_EVAL and +INF_EVAL
-        if (context.bestEvalInIteration <= alpha || context.bestEvalInIteration >= beta) {
-            alpha = -INF_EVAL;
-            beta  = +INF_EVAL;
-
-            is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, context)
-                                   : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, context);
-        }
+        eval = is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, context, board)
+                                      : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, context, board);
 
         if (stop) {
             break;
         }
+
+        // Check if the score is outside the aspiration window (fail-low or fail-high)
+        /*if (eval <= alpha || eval >= beta) {
+            // Re-search with full window to get the exact score
+
+            eval = is_white(side_to_move)
+                ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, -INF_EVAL, +INF_EVAL, context, board)
+                : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, -INF_EVAL, +INF_EVAL, context, board);
+        }*/
 
         context.bestMoveFound = context.bestMoveInIteration;
         context.bestEvalFound = context.bestEvalInIteration;
@@ -163,12 +165,11 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
   * 
   */
 template<SearchType searchType>
-static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context)
+static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context, Board board)
 {
     constexpr bool MAXIMIZING_WHITE = searchType == MAXIMIZE_WHITE;
     constexpr bool MINIMIZING_BLACK = searchType == MINIMIZE_BLACK;
 
-    Board& board = context.board;
     const uint64_t zobrist_key = board.state().get_zobrist_key();
 
     if (ply > 0) History::push_position(zobrist_key);
@@ -178,6 +179,7 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
         int eval_tt;
         Move move_tt;
         if (get_entry_in_transposition_table(zobrist_key, depth, alpha, beta, eval_tt, move_tt)) {
+            // std::lock_guard<std::mutex> lock(context.context_mutex);
             context.bestEvalInIteration = eval_tt;
             context.bestMoveInIteration = move_tt;
             return eval_tt;
@@ -208,7 +210,7 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
         return 0;
     }
     else if (depth == 0) {
-        return quiescence_search<searchType>(stop, ply, alpha, beta, context);
+        return quiescence_search<searchType>(stop, ply, alpha, beta, board);
     }
 
     TranspositionTable::NodeType node_tt = TranspositionTable::NodeType::EXACT;
@@ -229,7 +231,7 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
 
     // Search the first move sequentially
     board.make_move(moves[0]);
-    int eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, context);
+    int eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, context, board);
     board.unmake_move(moves[0], game_state);
     History::pop_position();
 
@@ -242,6 +244,7 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
             best_move_for_tt = moves[0];
         }
 
+        // std::lock_guard<std::mutex> lock(context.context_mutex);
         if (ply == 0 && eval > context.bestEvalInIteration) {
             context.bestEvalInIteration = eval;
             context.bestMoveInIteration = moves[0];   // if we are in the root node update the best move
@@ -265,6 +268,7 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
             best_move_for_tt = moves[0];
         }
 
+        // std::lock_guard<std::mutex> lock(context.context_mutex);
         if (ply == 0 && eval < context.bestEvalInIteration) {
             context.bestEvalInIteration = eval;
             context.bestMoveInIteration = moves[0];   // if we are in the root node update the best move
@@ -292,7 +296,7 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
             constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
 
             board.make_move(moves[i]);
-            int eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, context);
+            int eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, context, board);
             board.unmake_move(moves[i], game_state);
             History::pop_position();
 
@@ -303,6 +307,7 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
                     best_move_for_tt = moves[i];
                 }
 
+                // std::lock_guard<std::mutex> lock(context.context_mutex);
                 if (ply == 0 && eval > context.bestEvalInIteration) {
                     context.bestEvalInIteration = eval;
                     context.bestMoveInIteration = moves[i];   // if we are in the root node update the best move
@@ -326,6 +331,7 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
                     best_move_for_tt = moves[i];
                 }
 
+                // std::lock_guard<std::mutex> lock(context.context_mutex);
                 if (ply == 0 && eval < context.bestEvalInIteration) {
                     context.bestEvalInIteration = eval;
                     context.bestMoveInIteration = moves[i];   // if we are in the root node update the best move
@@ -379,12 +385,11 @@ end_search:
   * 
   */
 template<SearchType searchType>
-static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int beta, SearchContext& context)
+static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int beta, Board& board)
 {
     constexpr bool MAXIMIZING_WHITE = searchType == MAXIMIZE_WHITE;
     constexpr bool MINIMIZING_BLACK = searchType == MINIMIZE_BLACK;
 
-    Board& board = context.board;
     const uint64_t zobrist_key = board.state().get_zobrist_key();
 
     const uint8_t fifty_move_rule_counter = board.state().fifty_move_rule_counter();
@@ -435,7 +440,7 @@ static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int be
 
         History::push_position(zobrist_key);
         board.make_move(capture_moves[i]);
-        int eval = quiescence_search<nextSearchType>(stop, ply + 1, alpha, beta, context);
+        int eval = quiescence_search<nextSearchType>(stop, ply + 1, alpha, beta, board);
         board.unmake_move(capture_moves[i], game_state);
         History::pop_position();
 
