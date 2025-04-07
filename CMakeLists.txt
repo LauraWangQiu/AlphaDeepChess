@@ -145,5 +145,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
         -fomit-frame-pointer  # Free up a register
         #-fno-exceptions       # Disable exceptions
         -fno-rtti             # Disable RTTI
+        -mbmi2                # for pext instruction
     )
 endif()

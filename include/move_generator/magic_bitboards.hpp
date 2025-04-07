@@ -28,6 +28,9 @@
 #include "bit_utilities.hpp"
 #include "piece.hpp"
 #include <array>
+#ifdef __BMI2__
+#include <immintrin.h>   // for _pext_u64
+#endif
 
 /**
  * @brief rook_magic(Square)
@@ -68,7 +71,7 @@ inline constexpr uint64_t bishop_magic(Square square);
  * 
  * @return blockers * magic_number >> (64 - number_occupancy_squares)
  */
-inline constexpr uint64_t magic_index_rook(uint64_t blockers, Square rook_square, uint64_t rook_attacks);
+inline uint64_t magic_index_rook(uint64_t blockers, Square rook_square, uint64_t rook_attacks);
 
 /**
  * @brief magic_index_bishop(uint64_t,Square,uint64_t)
@@ -83,7 +86,7 @@ inline constexpr uint64_t magic_index_rook(uint64_t blockers, Square rook_square
  * 
  * @return blockers * magic_number >> (64 - number_occupancy_squares)
  */
-inline constexpr uint64_t magic_index_bishop(uint64_t blockers, Square bishop_square, uint64_t bishop_attacks);
+inline uint64_t magic_index_bishop(uint64_t blockers, Square bishop_square, uint64_t bishop_attacks);
 
 /**
  * @brief ROOK_MAGICS
@@ -212,7 +215,7 @@ inline constexpr uint64_t bishop_magic(Square square)
  * 
  * @return blockers * magic_number >> (64 - number_occupancy_squares)
  */
-inline constexpr uint64_t magic_index_rook(uint64_t blockers, Square rook_square, uint64_t rook_attacks)
+inline uint64_t magic_index_rook(uint64_t blockers, Square rook_square, uint64_t rook_attacks)
 {
     // we cut unnecesary information to optimize memory space: board edges and squares outside the attack mask.
     const uint64_t edges = ((ROW_1_MASK | ROW_8_MASK) & ~get_row_mask(rook_square.row())) |
@@ -220,8 +223,13 @@ inline constexpr uint64_t magic_index_rook(uint64_t blockers, Square rook_square
 
     blockers &= rook_attacks & ~edges;
 
+#ifdef __BMI2__
+    // Optimized version using pext if available.
+    return _pext_u64(blockers, rook_magic(rook_square));
+#else
     // index is calculated by multiplying blockers by the magic number, then squeeze all bits to the right
     return (blockers * rook_magic(rook_square)) >> (64 - ROOK_OCCUPANCY_NUMBER[rook_square]);
+#endif
 }
 
 /**
@@ -237,7 +245,7 @@ inline constexpr uint64_t magic_index_rook(uint64_t blockers, Square rook_square
  * 
  * @return blockers * magic_number >> (64 - number_occupancy_squares)
  */
-inline constexpr uint64_t magic_index_bishop(uint64_t blockers, Square bishop_square, uint64_t bishop_attacks)
+inline uint64_t magic_index_bishop(uint64_t blockers, Square bishop_square, uint64_t bishop_attacks)
 {
     // we cut unnecesary information to optimize memory space: board edges and squares outside the attack mask.
     const uint64_t edges = ((ROW_1_MASK | ROW_8_MASK) & ~get_row_mask(bishop_square.row())) |
@@ -245,6 +253,10 @@ inline constexpr uint64_t magic_index_bishop(uint64_t blockers, Square bishop_sq
 
     blockers &= bishop_attacks & ~edges;
 
+#ifdef __BMI2__
+    return _pext_u64(blockers, bishop_magic(bishop_square));
+#else
     // index is calculated by multiplying blockers by the magic number, then squeeze all bits to the right
     return (blockers * bishop_magic(bishop_square)) >> (64 - BISHOP_OCCUPANCY_NUMBER[bishop_square]);
+#endif
 }
