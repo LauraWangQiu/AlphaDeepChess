@@ -475,7 +475,7 @@ For each position, a numerical value is assigned representing how favorable the 
 
 \vspace{1em}
 
-\noindent There are two ways to do it:
+\noindent There are two ways to implement it:
 
 \begin{itemize}
     \item \textbf{Traditional hand-crafted evaluation}
@@ -605,13 +605,23 @@ For each position, a numerical value is assigned representing how favorable the 
 
 \vspace{1em}
 
-\noindent During opening and middlegame, king safety is an important factor to consider. When the king has castled, it is crucial to maintain the pawns nearby to shield it from attacks. Generally, it is preferable to keep the pawns unmoved or advanced by only one square. This is called \textbf{king's shield} and a bonus is awarded for each pawn that still has not moved from the castling area. On the contrary, \textbf{king safety penalization} can also mean to punish the player based on the number and type of enemy attacks targeting the area around the king. All these ensures that positions with exposed kings are evaluated as less favorable. If there are open\footnote{Columns where there are no pawns of either color.} or semi-open\footnote{Columns where there are no pawns of one color but at least one pawn of the opposite color.} files near the king, the position is penalized further, as these files provide attacking opportunities for enemy rooks and queens.
+\noindent During opening and middlegame, king safety is an important factor to consider. When the king has castled, it is crucial to maintain the pawns nearby to shield it from attacks. Generally, it is preferable to keep the pawns unmoved or advanced by only one square. This is called \textbf{king's shield} and a bonus is awarded for each pawn that still has not moved from the castling area.
+
+\vspace{1em}
+
+\noindent On the contrary, \textbf{king safety penalization} can also mean to punish the player based on the number and type of enemy attacks targeting the area around the king.
+
+\vspace{1em}
+
+\noindent All these ensures that positions with exposed kings are evaluated as less favorable. If there are open\footnote{Columns where there are no pawns of either color.} or semi-open\footnote{Columns where there are no pawns of one color but at least one pawn of the opposite color.} files near the king, the position is penalized further, as these files provide attacking opportunities for enemy rooks and queens.
 
 \vspace{1em}
 
 % Pawn Structure...
 
-\section{Strength Assessment}
+\section{How can we determine the strength of our engine?}
+
+This can be answered by playing against other engines and analyzing the results. The most common way to do this is by using the \textbf{Computer Chess Rating Lists}\footnote{\url{https://www.computerchess.org.uk/ccrl/}} which ranks chess engines based on their performance in various tournaments and matches. By the time being, we have chosen to compare different versions of the engine with Stockfish, currently ranked as the number one on the list.
 
 %En el estado de la cuestión es donde aparecen gran parte de las referencias bibliográficas del trabajo. Una de las formas más cómodas de gestionar la bibliografía en {\LaTeX} es utilizando \textbf{bibtex}. Las entradas bibliográficas deben estar en un fichero con extensión \textit{.bib} (con esta plantilla se proporciona el fichero biblio.bib, donde están las entradas referenciadas más abajo). Cada entrada bibliográfica tiene una clave que permite referenciarla desde cualquier parte del texto con los siguiente comandos:
 
