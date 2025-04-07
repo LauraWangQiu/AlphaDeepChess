@@ -22,6 +22,7 @@ The chessboard is where the game takes place and which serves as the foundation 
 \noindent For more information about board representation, refer to the Chess Programming page: \url{https://www.chessprogramming.org/Board_Representation}.
 
 \section{Move generation}
+\label{sec:move-generation}
 
 An essential part of any chess engine is move generation. It involves generating all possible legal moves from a given position ensuring chess rules.
 
@@ -468,7 +469,147 @@ The alpha-beta algorithm has been further improved over time with various enhanc
 
 \paragraph{Killer moves} is a heuristic that considers moves that produced cutoffs or pruning while searching. When the engine encounters a similar position at the same depth later in the search, it will prioritize the last move that caused a cutoff, potentially leading to faster pruning.
 
-\section{Evaluation functions}
+\section{Evaluation}
+
+For each position, a numerical value is assigned representing how favorable the position is for one side (positive for white and negative for black). These values guide the engine in selecting the best moves during the search process. Generally, this value is expressed in centipawns (cp), which represent one hundredth of a pawn's value.
+
+\vspace{1em}
+
+\noindent There are two ways to do it:
+
+\begin{itemize}
+    \item \textbf{Traditional hand-crafted evaluation}
+    \item \textbf{Multi-layer neuronal networks}
+\end{itemize}
+
+\noindent The use of neural networks is beyond the scope of the project, so traditional evaluation has been implemented.
+
+\vspace{1em}
+
+\noindent When teaching new chess players how to evaluate their position, assigning a simple value to each piece on board is an effective approach.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        \textbf{Piece} & \textbf{Value} \\ \hline
+        Pawn & 100 \\ \hline
+        Knight & 320 \\ \hline
+        Bishop & 330 \\ \hline
+        Rook & 500 \\ \hline
+        Queen & 950 \\ \hline
+        King & $\infty$ \\ \hline
+    \end{tabular}
+    \caption{Standard values assigned to chess pieces in centipawns.}
+    \label{tab:piece-values}
+\end{table}
+
+\noindent By summing up the piece values for each side, we end up with the concept of \textbf{material}. Over the time, there have been different point values for each piece. A table can be found in \url{https://www.chessprogramming.org/Point_Value} in \textit{Basic values} section.
+
+\vspace{1em}
+
+\noindent There are other material considerations like \textit{bonus for the bishop pair} depending on the position that can be advantageous to control squares of different color, or \textbf{insufficient material}, which refers to situations where neither side has enough pieces to deliver checkmate. This is also mentioned in Section \ref{sec:rules}.
+
+\vspace{1em}
+
+\noindent However, the higher the level one aims to reach in chess, the greater the need to evaluate other aspects.
+
+\vspace{1em}
+
+\noindent There are squares in which the pieces have less value because of their activity. Consider the following example:
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[
+        setpieces={Nh8,Nd4},
+        showmover=false,
+        pgfstyle=straightmove, color=blue,
+        markmoves={h8-g6,h8-f7,d4-b5,d4-b3,d4-c2,d4-c6,d4-e6,d4-e2,d4-f5,d4-f3},
+        arrow=to
+    ]
+    \caption{Knight's movement on corner square and center square.}
+    \label{fig:knight-movement-corner-and-center}
+\end{figure}
+
+\noindent A knight on a corner has only 2 moves, while one in the center can reach up to 8.
+
+\vspace{1em}
+
+\noindent A way to add this to the evaluation is to have precomputed \textbf{piece-square tables} like the following one for the bishop:
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[scale=0.65]
+        % Draw the chessboard
+        \foreach \x in {0,1,...,7} {
+            \foreach \y in {0,1,...,7} {
+                \pgfmathparse{mod(\x+\y,2) ? "black!20" : "white"}
+                \edef\col{\pgfmathresult}
+                \fill[\col] (\x,\y) rectangle (\x+1,\y+1);
+            }
+        }
+
+        % Add the values to the squares
+        \node at (0.5,7.5) {-20}; \node at (1.5,7.5) {-10}; \node at (2.5,7.5) {-10}; \node at (3.5,7.5) {-10};
+        \node at (4.5,7.5) {-10}; \node at (5.5,7.5) {-10}; \node at (6.5,7.5) {-10}; \node at (7.5,7.5) {-20};
+
+        \node at (0.5,6.5) {-10}; \node at (1.5,6.5) {0}; \node at (2.5,6.5) {0}; \node at (3.5,6.5) {0};
+        \node at (4.5,6.5) {0}; \node at (5.5,6.5) {0}; \node at (6.5,6.5) {0}; \node at (7.5,6.5) {-10};
+
+        \node at (0.5,5.5) {-10}; \node at (1.5,5.5) {0}; \node at (2.5,5.5) {5}; \node at (3.5,5.5) {10};
+        \node at (4.5,5.5) {10}; \node at (5.5,5.5) {5}; \node at (6.5,5.5) {0}; \node at (7.5,5.5) {-10};
+
+        \node at (0.5,4.5) {-10}; \node at (1.5,4.5) {5}; \node at (2.5,4.5) {5}; \node at (3.5,4.5) {10};
+        \node at (4.5,4.5) {10}; \node at (5.5,4.5) {5}; \node at (6.5,4.5) {5}; \node at (7.5,4.5) {-10};
+
+        \node at (0.5,3.5) {-10}; \node at (1.5,3.5) {0}; \node at (2.5,3.5) {10}; \node at (3.5,3.5) {10};
+        \node at (4.5,3.5) {10}; \node at (5.5,3.5) {10}; \node at (6.5,3.5) {0}; \node at (7.5,3.5) {-10};
+
+        \node at (0.5,2.5) {-10}; \node at (1.5,2.5) {10}; \node at (2.5,2.5) {10}; \node at (3.5,2.5) {10};
+        \node at (4.5,2.5) {10}; \node at (5.5,2.5) {10}; \node at (6.5,2.5) {10}; \node at (7.5,2.5) {-10};
+
+        \node at (0.5,1.5) {-10}; \node at (1.5,1.5) {5}; \node at (2.5,1.5) {0}; \node at (3.5,1.5) {0};
+        \node at (4.5,1.5) {0}; \node at (5.5,1.5) {0}; \node at (6.5,1.5) {5}; \node at (7.5,1.5) {-10};
+
+        \node at (0.5,0.5) {-20}; \node at (1.5,0.5) {-10}; \node at (2.5,0.5) {-10}; \node at (3.5,0.5) {-10};
+        \node at (4.5,0.5) {-10}; \node at (5.5,0.5) {-10}; \node at (6.5,0.5) {-10}; \node at (7.5,0.5) {-20};
+
+        % Draw the grid
+        \draw[thick] (0,0) grid (8,8);
+    \end{tikzpicture}
+    \caption{Chessboard with precomputed piece-square values for the bishop.}
+    \label{fig:piece-square-values-bishop}
+\end{figure}
+
+\noindent For more information about piece-square tables, refer to the Chess Programming page in \textit{Piece-Square Tables} section: \url{https://www.chessprogramming.org/Simplified_Evaluation_Function}.
+
+\vspace{1em}
+
+\noindent It is important to consider the \textbf{game phase} to select these piece-square tables, especially in the endgame phase. These phases are:
+
+\begin{itemize}
+    \item \textbf{Opening}: where players develop their minor pieces\footnote{Knights and bishops.}, control the center of the board and try to ensure king safety.
+    \item \textbf{Middlegame}: where players try to create tactical opportunities and attack the opponent's position once they have developed their pieces and secured their king.
+    \item \textbf{Endgame}: where players have fewer pieces on the board and the focus is on promoting pawns and achieving checkmate.
+\end{itemize}
+
+\noindent In the endgame phase, when there are no queens, king activity becomes extremely significant in supporting the advancement of the pawns.
+
+\vspace{1em}
+
+\noindent In relation to the above and Section \ref{sec:move-generation}, the \textbf{mobility score} measures the number of legal moves a piece can make from its current position. As it is mentioned in \url{https://www.chessprogramming.org/Mobility},
+\begin{quotation}
+\textit{\dots the more choices you have at your disposal, the stronger your position.}
+\end{quotation} This score is calculated as the number of legal moves adjusted for certain factors like blocked moves by friendly pieces (pieces of the same color as the current piece) and enemy attacks\footnote{Refer to the squares controlled by the opponent.}.
+
+\vspace{1em}
+
+\noindent During opening and middlegame, king safety is an important factor to consider. When the king has castled, it is crucial to maintain the pawns nearby to shield it from attacks. Generally, it is preferable to keep the pawns unmoved or advanced by only one square. This is called \textbf{king's shield} and a bonus is awarded for each pawn that still has not moved from the castling area. On the contrary, \textbf{king safety penalization} can also mean to punish the player based on the number and type of enemy attacks targeting the area around the king. All these ensures that positions with exposed kings are evaluated as less favorable. If there are open\footnote{Columns where there are no pawns of either color.} or semi-open\footnote{Columns where there are no pawns of one color but at least one pawn of the opposite color.} files near the king, the position is penalized further, as these files provide attacking opportunities for enemy rooks and queens.
+
+\vspace{1em}
+
+% Pawn Structure...
 
 \section{Strength Assessment}
 
