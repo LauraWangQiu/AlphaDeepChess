@@ -31,45 +31,223 @@ The depth of a chess game tree is important because it determines the extent to 
 
 \vspace{1em}
 
-Take into consideration that many positions can be reached in different ways. This is formally known as tranpositions\footnote{\url{https://www.chessprogramming.org/Transposition}}. Just like in dynamic programming\footnote{\url{https://en.wikipedia.org/wiki/Dynamic_programming}}, the different positions' evaluations are stored in a structure to avoid repeating the process of searching and evaluating which adds efficiency. Then, this implies that the game tree should be a directed acyclic graph (DAG)\footnote{\url{https://en.wikipedia.org/wiki/Directed_acyclic_graph}}.
+Take into consideration that many positions can be reached in different ways. This is formally known as \textbf{transpositions\footnote{\url{https://www.chessprogramming.org/Transposition}}}. Just like in dynamic programming\footnote{\url{https://en.wikipedia.org/wiki/Dynamic_programming}}, the evaluations of different positions are stored in a structure to avoid repeating the process of searching and evaluating, which improves efficiency. This implies that the game tree should be a directed acyclic graph (DAG)\footnote{\url{https://en.wikipedia.org/wiki/Directed_acyclic_graph}}.
+
+\vspace{1em}
 
 \begin{figure}[H]
     \centering
-    \newchessgame
-    \chessboard[
-        setpieces={Ne2},
-        showmover=false,
-        pgfstyle=straightmove, color=blue,
-        markmoves={e2-d4,e2-f4,d4-e6,f4-e6},
-        arrow=to
-    ]
-    \caption{Really simple example of transposition.}
-    \label{fig:simple-example-transposition}
+    \begin{minipage}{0.6\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            setfen=rnbqkb1r/ppp2ppp/5n2/3p4/3P4/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 1
+        ]
+    \end{minipage}
+    \hspace{1em}
+    \begin{minipage}{0.35\textwidth}
+        \centering
+        \textbf{French Defense:}\\
+        1. e4 e6 2. d4 d5 3. exd5 exd5 4. Nf3 Nf6
+        \vspace{1em}\\
+        \textbf{Petrov Defense:}\\
+        1. e4 e5 2. Nf3 Nf6 3. Nxe5 d6 4. Nf3 Nxe4 5. d3 Nf6 6. d4 d5
+    \end{minipage}
+    \caption{Example of transposition.}
+    \label{fig:example-transposition}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % Ciclico
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \begin{tikzpicture}
+            % Nodos
+            \node[draw, circle] (A) at (0, 0) {A};
+            \node[draw, circle] (B) at (2, 0) {B};
+            \node[draw, circle] (C) at (0, -2) {C};
+            \node[draw, circle] (D) at (2, -2) {D};
+        
+            % Aristas
+            \draw[-{Stealth}, bend left, draw=red] (A) to (B);
+            \draw[-{Stealth}, bend left, draw=red] (B) to (A);
+            \draw[-{Stealth}] (A) -- (C);
+            \draw[-{Stealth}] (B) -- (D);
+            \draw[-{Stealth}] (C) -- (B);
+            \draw[-{Stealth}] (D) -- (C);
+        \end{tikzpicture}
+        \caption*{Cyclic graph}
+    \end{minipage}
+
+    % Aciclico
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \begin{tikzpicture}
+            % Nodos
+            \node[draw, circle] (A) at (0, 0) {A};
+            \node[draw, circle] (B) at (2, 0) {B};
+            \node[draw, circle] (C) at (0, -2) {C};
+            \node[draw, circle] (D) at (2, -2) {D};
+        
+            % Aristas
+            \draw[-{Stealth}] (A) -- (B);
+            \draw[-{Stealth}] (A) -- (C);
+            \draw[-{Stealth}] (B) -- (D);
+            \draw[-{Stealth}] (C) -- (B);
+            \draw[-{Stealth}] (D) -- (C);
+        \end{tikzpicture}
+        \caption*{Acyclic graph}
+    \end{minipage}
+    \caption{Examples of cyclic and acyclic graphs.}
+    \label{fig:graphs}
 \end{figure}
 
 \section{Search algorithms}
 
-There are different approaches to find the best move from a position. Some of these search algorithms are: Depth-First Search (DFS), Best-First Search (not to be confused with Breadth-First Search or BFS) and Parallel Search.
+There are different approaches to find the best move from a position. Some of these search algorithms are: Depth-First Search (DFS)\footnote{\url{https://www.chessprogramming.org/Depth-First}}, Best-First Search\footnote{\url{https://www.chessprogramming.org/Best-First}} (not to be confused with Breadth-First Search or BFS) and Parallel Search\footnote{\url{https://www.chessprogramming.org/Parallel_Search}}.
 
-\paragraph{Depth-First Search} refers to the process of exploring each branch of a tree or graph to its deepest level before backtracking\footnote{\url{https://en.wikipedia.org/wiki/Depth-first_searchs}}.
+\paragraph{Depth-First Search} refers to the process of exploring each branch of a tree or graph to its deepest level before backtracking\footnote{\url{https://en.wikipedia.org/wiki/Backtracking}}.
 
 \paragraph{Best-First Search} refers to the way of exploring the most promising nodes first. They typically require significant memory resources, as they must store a search space\footnote{Represents the collection of all potential solutions in search algorithms.} that grows exponentially.
 
-\paragraph{Parallel Search} 
+\paragraph{Parallel Search} refers to mulithreaded search, a technique used to accelerate search processes by leveraging multiple processors. The downside part is that by utilizing these additional processors effectively poses unique challenges, as searchtree traversal is inherently sequential.
+
+\vspace{1em}
+
+% Comparar entre ellas y escribir la causa de haber elegido depth-first search
+Let's visualize each of the search algorithms with their advantages and disadvantages:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3.5cm}|p{4.5cm}|p{4.5cm}|}
+\hline
+\textbf{Algorithm} & \textbf{Advantages} & \textbf{Disadvantages} \\ \hline
+\textbf{Depth-First Search (DFS)} 
+& 
+- Memory-efficient: it does not store the entire search space. \newline 
+- Simple to implement and compatible with alpha-beta pruning. 
+& 
+- May explore less promising branches before finding optimal solutions.
+\newline
+- Sequential dependency: it is not easy to parallelize. \\ \hline
+
+\textbf{Best-First Search} 
+& 
+- Explores the most promising nodes first, potentially finding solutions faster. 
+& 
+- Requires significant memory to store the search space, which grows exponentially. \newline \\ \hline
+
+\textbf{Parallel Search} 
+& 
+- Accelerates search by taking advantage of multiple processors. \newline 
+- Effective for modern multiprocessor systems. 
+& 
+- Challenging to manage synchronization and resource utilization. \newline 
+- Limited scalability due to the inherently sequential nature of search tree traversal. \\ \hline
+\end{tabular}
+\caption{Comparison of search algorithms.}
+\label{tab:search-algorithms}
+\end{table}
+
+Based on this comparison, we selected Depth-First Search for its simplicity, low memory requirements, and compatibility with alpha-beta pruning.
 
 \subsection{Minimax algorithm}
 
-\subsubsection{Alpha-beta pruning}
+The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} algorithm is a decision making algorithm that follows DFS principles. It is based on the assumption that both players play optimally, with one player (the maximizer) trying to maximize his score and the other player (the minimizer) trying to minimize his score. It explores the game tree to evaluate all possible moves and determines the best move for the current player.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        level 1/.style={sibling distance=4cm},
+        level 2/.style={sibling distance=2cm},
+        circleNode/.style={circle, draw, minimum size=1cm, inner sep=0pt},
+        squareNode/.style={rectangle, draw, minimum size=1cm, inner sep=0pt}
+    ]
+        % Root node
+        \node[squareNode] (root) {3}
+            child {node[circleNode] (b) {3}
+                child {node[squareNode] (d) {3}}
+                child {node[squareNode] (e) {5}}
+            }
+            child {node[circleNode] (c) {2}
+                child {node[squareNode] (f) {2}}
+                child {node[squareNode] (g) {9}}
+            };
+
+        \node[left=1.2cm] at (root) {\textbf{MAX}};
+        \node[left=1.2cm] at (b) {\textbf{MIN}};
+        \node[left=1.2cm] at (d) {\textbf{MAX}};
+
+        % Edges
+        \draw[-{Stealth}] (root) -- (b);
+        \draw[-{Stealth}] (root) -- (c);
+        \draw[-{Stealth}] (b) -- (d);
+        \draw[-{Stealth}] (b) -- (e);
+        \draw[-{Stealth}] (c) -- (f);
+        \draw[-{Stealth}] (c) -- (g);
+    \end{tikzpicture}
+    \caption{Example of minimax.}
+    \label{fig:minimax}
+\end{figure}
+
+In this example\footnote{Note that this example is a binary tree, but there could be more moves or nodes in a real scenario.}, white is represented by square nodes and black by circle nodes. Each of them wants to maximize or minimize their respective final value in each position. For the leftmost pair of leaf nodes with values of 3 and 5, 3 is chosen because black tries to get the lowest score between them. Then, the other pair of leaf nodes with values of 2 and 9, 2 is chosen for the same reason. Lastly, at the root node, white selects 3 as the maximum number between 3 and 2.
+
+\paragraph{Negamax} is a variant of minimax that simplifies the implementation by assuming that the gain of one player is the loss of the other. This allows the use of a single evaluation function with inverted values. In this project, this variant is not used.
+
+\paragraph{Alpha-beta pruning}\footnote{\url{https://www.chessprogramming.org/Alpha-Beta}} is an optimization of minimax that reduces significantly the number of evaluated nodes in the game tree. It uses two values, alpha and beta, to discard branches that cannot influence the final decision improving the efficiency.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        level 1/.style={sibling distance=4cm},
+        level 2/.style={sibling distance=2cm},
+        circleNode/.style={circle, draw, minimum size=1cm, inner sep=0pt},
+        squareNode/.style={rectangle, draw, minimum size=1cm, inner sep=0pt}
+    ]
+        % Root node
+        \node[squareNode] (root) {3}
+            child {node[circleNode] (b) {3}
+                child {node[squareNode] (d) {3}}
+                child {node[squareNode] (e) {5}}
+            }
+            child {node[circleNode] (c) {2}
+                child {node[squareNode] (f) {2}}
+                child {node[squareNode, dashed, red] (g) {X}}
+            };
+
+        \node[left=1.2cm] at (root) {\textbf{MAX}};
+        \node[left=1.2cm] at (b) {\textbf{MIN}};
+        \node[left=1.2cm] at (d) {\textbf{MAX}};
+
+        % Edges
+        \draw[-{Stealth}] (root) -- (b);
+        \draw[-{Stealth}] (root) -- (c);
+        \draw[-{Stealth}] (b) -- (d);
+        \draw[-{Stealth}] (b) -- (e);
+        \draw[-{Stealth}] (c) -- (f);
+        \draw[-{Stealth}] (c) -- (g);
+    \end{tikzpicture}
+    \caption{Example of alpha-beta pruning.}
+    \label{fig:alpha-beta-pruning}
+\end{figure}
+
+In this other example, the red dashed node is pruned because it cannot influence the final decision independently of its value. If its value is less than or equal to 2, it will never improve the previously analyzed value of 3. On the other hand, if its value is greater than 2, black will still choose 2 to minimize the score.
+% Añadir valores alpha-beta para explicarlo mejor?
+
+\section{Iterative deepening}
+
+As it is mentioned in \url{https://www.chessprogramming.org/Search}, \textit{<<Depth-first algorithms are generally embedded inside an iterative deepening framework for time control and move ordering issues.>>}. \textbf{Iterative deepening} refers to the combination of DFS with limited depth searches. It performs successive searches by increasing the depth limit at each iteration, allowing you to obtain partial results quickly and improve accuracy over time.
+
+\section{Quiescence search}
+
+\section{Move ordering}
 
 \section{Move generation}
 
 \section{Evaluation functions}
-
-\section{Move ordering}
-
-\section{Iterative deepening}
-
-\section{Quiescence search}
 
 \section{Zobrist hashing}
 
