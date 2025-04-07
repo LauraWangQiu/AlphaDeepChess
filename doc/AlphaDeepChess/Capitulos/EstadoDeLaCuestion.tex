@@ -7,19 +7,19 @@ The chessboard is where the game takes place and which serves as the foundation 
 
 \vspace{1em}
 
-A \textbf{bitboard\footnote{\url{https://www.chessprogramming.org/Bitboards}}}, also known as a bitset or bitmap, is a 64-bit word structure that efficiently represents a chessboard because it matches with the number of squares: every bit corresponds to a square of the chessboard.
+\noindent A \textbf{bitboard\footnote{\url{https://www.chessprogramming.org/Bitboards}}}, also known as a bitset or bitmap, is a 64-bit word structure that efficiently represents a chessboard because it matches with the number of squares: every bit corresponds to a square of the chessboard.
 
 \vspace{1em}
 
-A \textbf{bit field}, in constrast to a bitboard, uses a fixed number of bits within an integer to store multiple small values or flags.
+\noindent A \textbf{bit field}, in constrast to a bitboard, uses a fixed number of bits within an integer to store multiple small values or flags.
 
 \vspace{1em}
 
-For example, using a 64-bit bitfield, we can allocate 6 bits to store the number of pieces on the board, as $2^6 = 64$ possibilities. This means the bits would occupy an interval from $X$ included to $X+5$.
+\noindent For example, using a 64-bit bitfield, we can allocate 6 bits to store the number of pieces on the board, as $2^6 = 64$ possibilities. This means the bits would occupy an interval from $X$ included to $X+5$.
 
 \vspace{1em}
 
-For more information about board representation, refer to the Chess Programming page: \url{https://www.chessprogramming.org/Board_Representation}.
+\noindent For more information about board representation, refer to the Chess Programming page: \url{https://www.chessprogramming.org/Board_Representation}.
 
 \section{Move generation}
 
@@ -27,18 +27,22 @@ An essential part of any chess engine is move generation. It involves generating
 
 \vspace{1em}
 
-There are two types of move generation:
+\noindent There are two types of move generation:
 
 \begin{itemize}
     \item \textbf{Pseudolegal move generation}: generates all moves without considering whether the king is left in check after the move. It requires additional filtering to remove illegal moves.
     \item \textbf{Legal move generation}: generates only moves that are valid according to the chess rules, ensuring that the king is not left in check. The more accurate, the computationally more expensive it is.
 \end{itemize}
 
-We have preferred to use \textbf{legal move generation}. Although it is computationally more expensive than pseudolegal move generation, it simplifies the filtering process and ensures that the generated moves are correct.
+\noindent We have preferred to use \textbf{legal move generation}. Although it is computationally more expensive than pseudolegal move generation, it simplifies the filtering process and ensures that the generated moves are correct.
 
-Additionally, we have chosen to implement \textbf{magic bitboards} for this type of move generator, particularly for sliding pieces such as rooks, bishops, and queens. Magic bitboards use precomputed attack tables and bitwise operations. This approach significantly reduces the computational cost of move generation, enabling the engine to explore deeper levels of the game tree while maintaining accuracy and performance.
+\vspace{1em}
 
-For more information about move generation, refer to the Chess Programming page: \url{https://www.chessprogramming.org/Move_Generation}.
+\noindent Additionally, we have chosen to implement \textbf{magic bitboards} for this type of move generator, particularly for sliding pieces such as rooks, bishops, and queens. Magic bitboards use precomputed attack tables and bitwise operations. This approach significantly reduces the computational cost of move generation, enabling the engine to explore deeper levels of the game tree while maintaining accuracy and performance.
+
+\vspace{1em}
+
+\noindent For more information about move generation, refer to the Chess Programming page: \url{https://www.chessprogramming.org/Move_Generation}.
 
 \section{Game trees}
 
@@ -46,7 +50,7 @@ Sequential games, such as chess or tic-tac-toe, where players take turns alterna
 
 \vspace{1em}
 
-The depth of a chess game tree is important because it determines the extent to which it will be analysed and evaluated. A depth of 1 represents all possible moves for the current player or side to move, while a depth of 2 includes the opponent's responses to those moves. As the depth increases, the tree grows exponentially, making it computationally expensive to explore all possible states.
+\noindent The depth of a chess game tree is important because it determines the extent to which it will be analysed and evaluated. A depth of 1 represents all possible moves for the current player or side to move, while a depth of 2 includes the opponent's responses to those moves. As the depth increases, the tree grows exponentially, making it computationally expensive to explore all possible states.
 
 \section{Search algorithms}
 
@@ -61,7 +65,6 @@ There are different approaches to find the best move from a position. Some of th
 \vspace{1em}
 
 % Comparar entre ellas y escribir la causa de haber elegido depth-first search
-Let's visualize each of the search algorithms with their advantages and disadvantages:
 
 \begin{table}[H]
 \centering
@@ -95,7 +98,7 @@ Let's visualize each of the search algorithms with their advantages and disadvan
 \label{tab:search-algorithms}
 \end{table}
 
-Based on this comparison, we selected Depth-First Search for its simplicity, low memory requirements, and compatibility with alpha-beta pruning.
+\noindent Based on this comparison, we selected Depth-First Search for its simplicity, low memory requirements, and compatibility with alpha-beta pruning.
 
 \subsection{Minimax algorithm}
 
@@ -137,7 +140,7 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
     \label{fig:minimax}
 \end{figure}
 
-In this example\footnote{Note that this example is a binary tree, but there could be more moves or nodes in a real scenario.}, white is represented by square nodes and black by circle nodes. Each of them wants to maximize or minimize their respective final value in each position. For the leftmost pair of leaf nodes with values of 3 and 5, 3 is chosen because black tries to get the lowest score between them. Then, the other pair of leaf nodes with values of 2 and 9, 2 is chosen for the same reason. Lastly, at the root node, white selects 3 as the maximum number between 3 and 2.
+\noindent In this example\footnote{Note that this example is a binary tree, but there could be more moves or nodes in a real scenario.}, white is represented by square nodes and black by circle nodes. Each of them wants to maximize or minimize their respective final value in each position. For the leftmost pair of leaf nodes with values of 3 and 5, 3 is chosen because black tries to get the lowest score between them. Then, the other pair of leaf nodes with values of 2 and 9, 2 is chosen for the same reason. Lastly, at the root node, white selects 3 as the maximum number between 3 and 2.
 
 \paragraph{Negamax} is a variant of minimax that simplifies the implementation by assuming that the gain of one player is the loss of the other. This allows the use of a single evaluation function with inverted values. In this project, this variant is not used.
 
@@ -179,11 +182,11 @@ In this example\footnote{Note that this example is a binary tree, but there coul
     \label{fig:alpha-beta-pruning}
 \end{figure}
 
-In this other example, the red dashed node is pruned because it cannot influence the final decision independently of its value. If its value is less than or equal to 2, it will never improve the previously analyzed value of 3. On the other hand, if its value is greater than 2, black will still choose 2 to minimize the score.
+\noindent In this other example, the red dashed node is pruned because it cannot influence the final decision independently of its value. If its value is less than or equal to 2, it will never improve the previously analyzed value of 3. On the other hand, if its value is greater than 2, black will still choose 2 to minimize the score.
 
 \vspace{1em}
 
-Another formal explain this is by using $alpha$ and $beta$ values:
+\noindent Another formal way to explain this is by using $alpha$ and $beta$ values:
 
 \begin{figure}[H]
     \centering
@@ -301,8 +304,11 @@ Another formal explain this is by using $alpha$ and $beta$ values:
         \draw[-] (c) -- (g);
     \end{tikzpicture}
 
-    \hspace{3em}
-    
+    \caption{Example of alpha-beta pruning with $\alpha$ and $\beta$ values (1).}
+    \label{fig:alpha-beta-pruning-with-alpha-beta-values-1}
+\end{figure}
+
+\begin{figure}[H]
     \centering
     \begin{tikzpicture}[
         level distance=1.5cm,
@@ -381,9 +387,11 @@ Another formal explain this is by using $alpha$ and $beta$ values:
         \draw[-, draw=gray, dashed] (c) -- (g);
     \end{tikzpicture}
 
-    \caption{Example of alpha-beta pruning with $\alpha$ and $\beta$ values.}
-    \label{fig:alpha-beta-pruning-with-alpha-beta-values}
+    \caption{Example of alpha-beta pruning with $\alpha$ and $\beta$ values (2).}
+    \label{fig:alpha-beta-pruning-with-alpha-beta-values-2}
 \end{figure}
+
+\newpage
 
 \subsubsection{Alpha-Beta Enhancements}
 
@@ -391,7 +399,7 @@ The alpha-beta algorithm has been further improved over time with various enhanc
 
 \vspace{1em}
 
-Take into consideration that many positions can be reached in different ways. This is formally known as \textbf{transpositions\footnote{\url{https://www.chessprogramming.org/Transposition}}}. Just like in dynamic programming\footnote{\url{https://en.wikipedia.org/wiki/Dynamic_programming}}, the evaluations of different positions are stored in a structure, the \textbf{transposition tables}, to avoid repeating the process of searching and evaluating, which improves efficiency. Take this following example:
+\noindent Take into consideration that many positions can be reached in different ways. This is formally known as \textbf{transpositions\footnote{\url{https://www.chessprogramming.org/Transposition}}}. Just like in dynamic programming\footnote{\url{https://en.wikipedia.org/wiki/Dynamic_programming}}, the evaluations of different positions are stored in a structure, the \textbf{transposition tables}, to avoid repeating the process of searching and evaluating, which improves efficiency. Take this following example:
 
 \begin{figure}[H]
     \centering
@@ -415,23 +423,23 @@ Take into consideration that many positions can be reached in different ways. Th
     \label{fig:example-transposition}
 \end{figure}
 
-Both games reach the same position, although they involve a different number of moves.
+\noindent Both games reach the same position, although they involve a different number of moves.
 
 \vspace{1em}
 
-In order to store these different positions and access them in a map or dictionary structure, there is a need for a unique and efficient way to index positions: \textbf{Zobrist hashing}. Zobrist hashing maps a large number of possible positions to a fixed-size hash value, which can lead to collisions, as different positions may produce the same hash. To handle these collisions, storing additional information like the depth is used to verify the correctness of the entry. In some cases, overwriting the older or less relevant entries can be also useful.
+\noindent In order to store these different positions and access them in a map or dictionary structure, there is a need for a unique and efficient way to index positions: \textbf{Zobrist hashing}. Zobrist hashing maps a large number of possible positions to a fixed-size hash value, which can lead to collisions, as different positions may produce the same hash. To handle these collisions, storing additional information like the depth is used to verify the correctness of the entry. In some cases, overwriting the older or less relevant entries can be also useful.
 
 \vspace{1em}
 
-As it is mentioned in \url{https://www.chessprogramming.org/Search}, \textit{<<Depth-first algorithms are generally embedded inside an iterative deepening framework for time control and move ordering issues.>>}. \textbf{Iterative deepening} refers to the combination of DFS with limited depth searches. It performs successive searches by increasing the depth limit at each iteration, allowing you to obtain partial results quickly and improve accuracy over time.
+\noindent As it is mentioned in \url{https://www.chessprogramming.org/Search}, \textit{<<Depth-first algorithms are generally embedded inside an iterative deepening framework for time control and move ordering issues.>>}. \textbf{Iterative deepening} refers to the combination of DFS with limited depth searches. It performs successive searches by increasing the depth limit at each iteration, allowing you to obtain partial results quickly and improve accuracy over time.
 
 \vspace{1em}
 
-An important concept related to iterative deepening is the use of \textbf{aspiration windows}. Their main objective is to reduce the search space by narrowing the search bounds. In other words, by adjusting $alpha$ and $beta$ values in each iteration of the iterative deepening. If the value of the evaluation in the iteration falls outside this range or window, a re-search is performed with a wider window to ensure accuracy.
+\noindent An important concept related to iterative deepening is the use of \textbf{aspiration windows}. Their main objective is to reduce the search space by narrowing the search bounds. In other words, by adjusting $alpha$ and $beta$ values in each iteration of the iterative deepening. If the value of the evaluation in the iteration falls outside this range or window, a re-search is performed with a wider window to ensure accuracy.
 
 \vspace{1em}
 
-Another critical concept is \textbf{quiescence search}. This is a search technique used to address the horizon effect at the end of the search. Simply stopping the search at a fixed or desired depth and evaluating the position can lead to inaccuracies, as critical tactical moves, such as captures, are often overlooked.
+\noindent Another critical concept is \textbf{quiescence search}. This is a search technique used to address the horizon effect at the end of the search. Simply stopping the search at a fixed or desired depth and evaluating the position can lead to inaccuracies, as critical tactical moves, such as captures, are often overlooked.
 
 \begin{quotation}
     \textit{Consider the situation where the last move you consider is QxP. If you stop there and evaluate, you might think that you have won a pawn. But what if you were to search one move deeper and find that the next move is PxQ? You didn't win a pawn, you actually lost a queen. Hence the need to make sure that you are evaluating only quiescent (quiet) positions.}\footnote{\url{https://www.chessprogramming.org/Quiescence_Search}}
@@ -439,7 +447,7 @@ Another critical concept is \textbf{quiescence search}. This is a search techniq
 
 \vspace{1em}
 
-Finally, alpha-beta algorithm could not perform well without \textbf{move ordering}\footnote{\url{https://www.chessprogramming.org/Move_Ordering}}. This is important to ensure that best moves are searched first and to reduce the search space of the game tree. Some of the techniques for move ordering are: Most Valuable victim - Least Valuable Aggressor (MVV-LVA) for captures and killer moves for non-captures. 
+\noindent Finally, alpha-beta algorithm could not perform well without \textbf{move ordering}\footnote{\url{https://www.chessprogramming.org/Move_Ordering}}. This is important to ensure that best moves are searched first and to reduce the search space of the game tree. Some of the techniques for move ordering are: Most Valuable victim - Least Valuable Aggressor (MVV-LVA) for captures and killer moves for non-captures. 
 
 \paragraph{MVV-LVA} is a heuristic that prioritizes capturing moves by evaluating the value of the piece being captured (the victim) and the value of the piece performing the capture (the aggressor). The goal is to maximize the gain while minimizing the risk. The following example reflects this:
 
@@ -456,7 +464,7 @@ Finally, alpha-beta algorithm could not perform well without \textbf{move orderi
     \label{fig:example-mvv-lva}
 \end{figure}
 
-In this position, it is black's turn to play after white has moved $d4$, black has the option to capture the pawn on $d4$ with the pawn on $e5$ or with the bishop on $c5$. Between the two capturing movements, the best option is to take $d4$'s pawn with $e5$'s pawn because the pawn has less value than the bishop. Then, after $exd4$, white can re-capture with the pawn on $c3$ or the knight on $f3$. If black had taken the pawn with the bishop, white would have won a bishop for a pawn. This simple heuristic that orders what is best in capturing movements for each side can efficiently evaluate tactical exchanges and focus on moves that are more likely to yield a favorable outcome.
+\noindent In this position, it is black's turn to play after white has moved $d4$, black has the option to capture the pawn on $d4$ with the pawn on $e5$ or with the bishop on $c5$. Between the two capturing movements, the best option is to take $d4$'s pawn with $e5$'s pawn because the pawn has less value than the bishop. Then, after $exd4$, white can re-capture with the pawn on $c3$ or the knight on $f3$. If black had taken the pawn with the bishop, white would have won a bishop for a pawn. This simple heuristic that orders what is best in capturing movements for each side can efficiently evaluate tactical exchanges and focus on moves that are more likely to yield a favorable outcome.
 
 \paragraph{Killer moves} is a heuristic that considers moves that produced cutoffs or pruning while searching. When the engine encounters a similar position at the same depth later in the search, it will prioritize the last move that caused a cutoff, potentially leading to faster pruning.
 

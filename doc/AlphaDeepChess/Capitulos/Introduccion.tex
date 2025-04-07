@@ -8,11 +8,11 @@ Chess, one of the oldest and most strategic games in human history, has long bee
 
 \vspace{1em}
 
-In 1997, the chess engine Deep Blue made history by defeating the world champion at the time, Garry Kasparov, marking the first time a computer had defeated a reigning world champion in a six-game match under standard chess tournament time controls\footnote{\url{https://en.wikipedia.org/wiki/Deep_Blue_(chess_computer)}}.
+\noindent In 1997, the chess engine Deep Blue made history by defeating the world champion at the time, Garry Kasparov, marking the first time a computer had defeated a reigning world champion in a six-game match under standard chess tournament time controls\footnote{\url{https://en.wikipedia.org/wiki/Deep_Blue_(chess_computer)}}.
 
 \vspace{1em}
 
-Since then, the development of chess engines has advanced rapidly, moving from rule-based systems to AI-driven models. However, classical search algorithms, such as alpha-beta pruning, continue to be fundamental to understanding the basics of efficient search and evaluation of game trees.
+\noindent Since then, the development of chess engines has advanced rapidly, moving from rule-based systems to AI-driven models. However, classical search algorithms, such as alpha-beta pruning, continue to be fundamental to understanding the basics of efficient search and evaluation of game trees.
 
 %\section{Motivation}
 
@@ -22,11 +22,11 @@ Let's start from the beginning. What is chess? Chess is a board game where two p
 
 \vspace{1em}
 
-What about a chess engine? A chess engine consists of a software program that analyzes chess positions and returns optimal moves depending on its configuration. In order to help users to use these engines, chess community agreed on creating an open communication protocol called \textbf{Universal Chess Interface} or commonly referred to as UCI, that provides the interaction with chess engines through user interfaces.
+\noindent What about a chess engine? A chess engine consists of a software program that analyzes chess positions and returns optimal moves depending on its configuration. In order to help users to use these engines, chess community agreed on creating an open communication protocol called \textbf{Universal Chess Interface} or commonly referred to as UCI, that provides the interaction with chess engines through user interfaces.
 
 \vspace{1em}
 
-In the following section~\ref{sec:basicConcepts}, we will talk about the basic concepts of chess, but if you already have the knowledge we recommend you to advance directly to the chapter~\ref{cap:estadoDeLaCuestion}.
+\noindent In the following section~\ref{sec:basicConcepts}, we will talk about the basic concepts of chess, but if you already have the knowledge we recommend you to advance directly to the chapter~\ref{cap:estadoDeLaCuestion}.
 
 \section{Basic concepts}
 \label{sec:basicConcepts}
@@ -46,7 +46,9 @@ A chessboard is a game board of 64 squares, 8 rows by 8 columns. To refer to eac
     \label{fig:chessboard}
 \end{figure}
 
-For example, $g5$ refers to the following square:
+\newpage 
+
+\noindent For example, $g5$ refers to the following square:
 
 \begin{figure}[H]
     \centering
@@ -62,7 +64,7 @@ For example, $g5$ refers to the following square:
     \caption{Example: square $g5$ highlighted and arrows pointing to it.}
 \end{figure}
 
-It is important to know that when placing a chessboard in the correct orientation, there should always be a \textbf{white square in the bottom-right corner} or a \textbf{black square in the bottom-left corner}.
+\noindent It is important to know that when placing a chessboard in the correct orientation, there should always be a \textbf{white square in the bottom-right corner} or a \textbf{black square in the bottom-left corner}.
 
 \subsection{Chess pieces}
 
@@ -86,7 +88,7 @@ There are 6 types of chess pieces: king, queen, rook, bishop, knight and pawn, a
     \label{tab:number-of-pieces}
 \end{table}
 
-The starting position of the chess pieces on a chessboard is the following:
+\noindent The starting position of the chess pieces on a chessboard is the following:
 
 \begin{figure}[H]
     \centering
@@ -96,9 +98,7 @@ The starting position of the chess pieces on a chessboard is the following:
     \label{fig:start-pos}
 \end{figure}
 
-Notice that the queen and king are placed in the center columns. The queen is placed on a square of its color, while the king is placed on the remaining central column. The rest of the pieces are positioned symmetrically, as shown in Figure \ref{fig:start-pos}.
-
-This means that the chessboard is divided into two sides relative to the positions of the king and queen at the start of the game:
+\noindent Notice that the queen and king are placed in the center columns. The queen is placed on a square of its color, while the king is placed on the remaining central column. The rest of the pieces are positioned symmetrically, as shown in Figure \ref{fig:start-pos}. This means that the chessboard is divided into two sides relative to the positions of the king and queen at the start of the game:
 
 \begin{figure}[H]
   \centering
@@ -180,7 +180,7 @@ The pawn can move one square forward, but it can only capture pieces one square 
     \end{minipage}
 \end{figure}
 
-There is a specific capture movement which is \textbf{en passant \footnote{\url{https://en.wikipedia.org/wiki/En_passant}}}. This move allows a pawn that has moved two squares forward from its starting position to be captured by an opponent's pawn as if it had only moved one square. The capturing pawn must be on an adjacent file and can only capture the en passant pawn immediately after it moves.
+\noindent There is a specific capture movement which is \textbf{en passant \footnote{\url{https://en.wikipedia.org/wiki/En_passant}}}. This move allows a pawn that has moved two squares forward from its starting position to be captured by an opponent's pawn as if it had only moved one square. The capturing pawn must be on an adjacent file and can only capture the en passant pawn immediately after it moves.
 
 \begin{figure}[H]
     \centering
@@ -315,11 +315,11 @@ The king can move one square in any direction: horizontally, vertically, or diag
    \end{minipage}
 \end{figure}
 
-In Figure \ref{fig:white-king-movement-game}, the white king cannot move to $e4$ because the black king is attacking that square. When two kings are positioned close to each other, neither can move to a square adjacent to the other.
+\noindent In Figure \ref{fig:white-king-movement-game}, the white king cannot move to $e4$ because the black king is attacking that square. When two kings are positioned close to each other, neither can move to a square adjacent to the other.
 
 \vspace{1em} % Añade espacio
 
-Additionally, the king can perform a special move called \textbf{castling}, which involves moving the king two squares towards a rook and moving the rook to the square next to the king. Castling has specific conditions which are:
+\noindent Additionally, the king can perform a special move called \textbf{castling}, which involves moving the king two squares towards a rook and moving the rook to the square next to the king. Castling has specific conditions which are:
 
 \begin{itemize}
     \item Neither the king nor the rook involved in castling must have moved previously.
@@ -341,7 +341,7 @@ Additionally, the king can perform a special move called \textbf{castling}, whic
     \label{fig:castling}
 \end{figure}
 
-In this case, the white king can castle on either the king's side or the queen's side as long as the rooks have not been moved from their starting position, but the black king cannot castle because there is a bishop on $f8$ interfering with the movement and the rook on the queen's side has been moved to $b8$.
+\noindent In this case, the white king can castle on either the king's side or the queen's side as long as the rooks have not been moved from their starting position, but the black king cannot castle because there is a bishop on $f8$ interfering with the movement and the rook on the queen's side has been moved to $b8$.
 
 \subsubsection{Queen}
 
@@ -365,7 +365,9 @@ The queen can move any number of squares in any direction: horizontally, vertica
 
 Each player aims to checkmate the opponent's king, which means that the king is under attack and cannot escape.
 
-In every game, \textbf{white starts first} and the possible results of each game can be win for white, win for black or draw\footnote{\url{https://en.wikipedia.org/wiki/Draw_(chess)}}. A tie could be caused by different conditions:
+\vspace{1em}
+
+\noindent In every game, \textbf{white starts first} and the possible results of each game can be win for white, win for black or draw\footnote{\url{https://en.wikipedia.org/wiki/Draw_(chess)}}. A tie could be caused by different conditions:
 
 \begin{enumerate}
     \item Stalemate: the player whose turn it is to move has no legal moves, and their king is not in check.
@@ -416,11 +418,13 @@ In every game, \textbf{white starts first} and the possible results of each game
    \end{minipage}
 \end{figure}
 
-Players can also resign at any time, conceding victory to the opponent. Also, if a player runs out of time in a timed game, they lose unless the opponent does not have enough material to checkmate, in which case the game is drawn.
+\noindent Players can also resign at any time, conceding victory to the opponent. Also, if a player runs out of time in a timed game, they lose unless the opponent does not have enough material to checkmate, in which case the game is drawn.
 
 \vspace{1em}
 
-For more information about chess rules, refer to the Wikipedia page: \url{https://en.wikipedia.org/wiki/Rules_of_chess}.
+\noindent For more information about chess rules, refer to the Wikipedia page: \url{https://en.wikipedia.org/wiki/Rules_of_chess}.
+
+\newpage
 
 \subsection{Notation}
 
@@ -480,7 +484,7 @@ They are written with an $"x"$ between the piece uppercase letter and coordinate
     \label{fig:bishop-captures-knight}
 \end{figure}
 
-In Figure \ref{fig:bishop-captures-knight}, the white bishop capturing the black knight is written as $Bxc6$. If it were black's turn, the pawn on $a6$ could capture the white bishop, and it would be written as $Pxb5$ or simply $axb5$, indicating the pawn's column.
+\noindent In Figure \ref{fig:bishop-captures-knight}, the white bishop capturing the black knight is written as $Bxc6$. If it were black's turn, the pawn on $a6$ could capture the white bishop, and it would be written as $Pxb5$ or simply $axb5$, indicating the pawn's column.
 
 \paragraph{Pawn promotion}
 It is written as the pawn's movement to the last row, followed by the piece to which it is promoted:
@@ -498,11 +502,10 @@ It is written as the pawn's movement to the last row, followed by the piece to w
     \label{fig:pawn-captures-rook}
 \end{figure}
 
-In Figure \ref{fig:pawn-captures-rook}, white pawn capturing and promoting in $a8$ to a queen is written as $bxa8Q$ or $bxa8=Q$.
+\noindent In Figure \ref{fig:pawn-captures-rook}, white pawn capturing and promoting in $a8$ to a queen is written as $bxa8Q$ or $bxa8=Q$.
 
 \paragraph{Castling}
 \label{sec:castling}
-
 Depending on whether it is on the king's side or the queen's side, it is written as $0-0$ and $0-0-0$, respectively.
 
 \paragraph{Check and checkmate}
@@ -521,10 +524,9 @@ They are written by adding a $+$ sign for check or $++$ for checkmate, respectiv
     \label{fig:black-queen-checkmates}
 \end{figure}
 
-In Figure \ref{fig:black-queen-checkmates}, black queen movement checkmates and it is written as $Dh4++$.
+\noindent In Figure \ref{fig:black-queen-checkmates}, black queen movement checkmates and it is written as $Dh4++$.
 
-\paragraph{The end of game notation}
-It indicates the result of the game. It is typically written as:
+\paragraph{The end of game notation} indicates the result of the game. It is typically written as:
 
 \begin{itemize}
     \item \textbf{1-0}: White wins.
@@ -532,7 +534,7 @@ It indicates the result of the game. It is typically written as:
     \item \textbf{1/2-1/2}: The game ends in a draw.
 \end{itemize}
 
-For more information about notation, refer to the Wikipedia page: \url{https://en.wikipedia.org/wiki/Algebraic_notation_(chess)}.
+\noindent For more information about notation, refer to the Wikipedia page: \url{https://en.wikipedia.org/wiki/Algebraic_notation_(chess)}.
 
 \subsubsection{Forsyth–Edwards Notation (FEN)}
 
@@ -544,11 +546,11 @@ rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 
 \vspace{1em}
 
-Keep in mind this notation is important for the engine to understand the position of the pieces on the board.
+\noindent Keep in mind this notation is important for the engine to understand the position of the pieces on the board.
 
 \vspace{1em}
 
-For more information about FEN, refer to the Wikipedia page: \url{https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation}.
+\noindent For more information about FEN, refer to the Wikipedia page: \url{https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation}.
 
 \subsubsection{Portable Game Notation (PGN)}
 
@@ -565,7 +567,7 @@ This notation is mostly used for keeping information about the game and a header
 1. e4 c6 2. d4 d5 3. exd5 cxd5 4. Bd3 Nc6 5. c3 Nf6 6. Bf4 Bg4 7. Qb3 Qd7 8. h3 Bh5 9. Nd2 e6 10. Ngf3 a6 11. O-O Be7 12. Rfe1 O-O 13. Re3 b5 14. Ne5 Qb7 15. Nxc6 Qxc6 16. Nf3 Nd7 17. a3 Bg6 18. Bxg6 hxg6 19. Rae1 a5 20. Qd1 b4 21. axb4 axb4 22. h4 bxc3 23. bxc3 Ra3 24. Qd3 Rc8 25. Rc1 Bb4 26. h5 gxh5 27. Ng5 Nf6 28. Be5 Rxc3 29. Rxc3 Qxc3 30. Qe2 Qc1+ 31. Kh2 Bd2 32. Bxf6 Bxe3 33. fxe3 gxf6 34. Nh3 Qb1 35. Nf4 Rc1 36. Nxh5 Rh1+ 37. Kg3
 \end{lstlisting}
 
-For more information about PGN, refer to the Wikipedia page: \url{https://en.wikipedia.org/wiki/Portable_Game_Notation}.
+\noindent For more information about PGN, refer to the Wikipedia page: \url{https://en.wikipedia.org/wiki/Portable_Game_Notation}.
 
 \section{Objectives}
 
