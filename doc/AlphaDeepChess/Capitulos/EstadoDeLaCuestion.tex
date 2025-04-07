@@ -29,80 +29,6 @@ Sequential games, such as chess or tic-tac-toe, where players take turns alterna
 
 The depth of a chess game tree is important because it determines the extent to which it will be analysed and evaluated. A depth of 1 represents all possible moves for the current player or side to move, while a depth of 2 includes the opponent's responses to those moves. As the depth increases, the tree grows exponentially, making it computationally expensive to explore all possible states.
 
-\vspace{1em}
-
-Take into consideration that many positions can be reached in different ways. This is formally known as \textbf{transpositions\footnote{\url{https://www.chessprogramming.org/Transposition}}}. Just like in dynamic programming\footnote{\url{https://en.wikipedia.org/wiki/Dynamic_programming}}, the evaluations of different positions are stored in a structure to avoid repeating the process of searching and evaluating, which improves efficiency. This implies that the game tree should be a directed acyclic graph (DAG)\footnote{\url{https://en.wikipedia.org/wiki/Directed_acyclic_graph}}.
-
-\vspace{1em}
-
-\begin{figure}[H]
-    \centering
-    \begin{minipage}{0.6\textwidth}
-        \centering
-        \newchessgame
-        \chessboard[
-            setfen=rnbqkb1r/ppp2ppp/5n2/3p4/3P4/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 1
-        ]
-    \end{minipage}
-    \hspace{1em}
-    \begin{minipage}{0.35\textwidth}
-        \centering
-        \textbf{French Defense:}\\
-        1. e4 e6 2. d4 d5 3. exd5 exd5 4. Nf3 Nf6
-        \vspace{1em}\\
-        \textbf{Petrov Defense:}\\
-        1. e4 e5 2. Nf3 Nf6 3. Nxe5 d6 4. Nf3 Nxe4 5. d3 Nf6 6. d4 d5
-    \end{minipage}
-    \caption{Example of transposition.}
-    \label{fig:example-transposition}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    % Ciclico
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \begin{tikzpicture}
-            % Nodos
-            \node[draw, circle] (A) at (0, 0) {A};
-            \node[draw, circle] (B) at (2, 0) {B};
-            \node[draw, circle] (C) at (0, -2) {C};
-            \node[draw, circle] (D) at (2, -2) {D};
-        
-            % Aristas
-            \draw[-{Stealth}, bend left, draw=red] (A) to (B);
-            \draw[-{Stealth}, bend left, draw=red] (B) to (A);
-            \draw[-{Stealth}] (A) -- (C);
-            \draw[-{Stealth}] (B) -- (D);
-            \draw[-{Stealth}] (C) -- (B);
-            \draw[-{Stealth}] (D) -- (C);
-        \end{tikzpicture}
-        \caption*{Cyclic graph}
-    \end{minipage}
-
-    % Aciclico
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \begin{tikzpicture}
-            % Nodos
-            \node[draw, circle] (A) at (0, 0) {A};
-            \node[draw, circle] (B) at (2, 0) {B};
-            \node[draw, circle] (C) at (0, -2) {C};
-            \node[draw, circle] (D) at (2, -2) {D};
-        
-            % Aristas
-            \draw[-{Stealth}] (A) -- (B);
-            \draw[-{Stealth}] (A) -- (C);
-            \draw[-{Stealth}] (B) -- (D);
-            \draw[-{Stealth}] (C) -- (B);
-            \draw[-{Stealth}] (D) -- (C);
-        \end{tikzpicture}
-        \caption*{Acyclic graph}
-    \end{minipage}
-    \caption{Examples of cyclic and acyclic graphs.}
-    \label{fig:graphs}
-\end{figure}
-
 \section{Search algorithms}
 
 There are different approaches to find the best move from a position. Some of these search algorithms are: Depth-First Search (DFS)\footnote{\url{https://www.chessprogramming.org/Depth-First}}, Best-First Search\footnote{\url{https://www.chessprogramming.org/Best-First}} (not to be confused with Breadth-First Search or BFS) and Parallel Search\footnote{\url{https://www.chessprogramming.org/Parallel_Search}}.
@@ -181,12 +107,12 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
         \node[left=1.2cm] at (d) {\textbf{MAX}};
 
         % Edges
-        \draw[-{Stealth}] (root) -- (b);
-        \draw[-{Stealth}] (root) -- (c);
-        \draw[-{Stealth}] (b) -- (d);
-        \draw[-{Stealth}] (b) -- (e);
-        \draw[-{Stealth}] (c) -- (f);
-        \draw[-{Stealth}] (c) -- (g);
+        \draw[-{Stealth}, draw=red] (b) -- (root);
+        \draw[-] (root) -- (c);
+        \draw[-{Stealth}, draw=red] (d) -- (b);
+        \draw[-] (b) -- (e);
+        \draw[-{Stealth}, draw=red] (f) -- (c);
+        \draw[-] (c) -- (g);
     \end{tikzpicture}
     \caption{Example of minimax.}
     \label{fig:minimax}
@@ -223,33 +149,278 @@ In this example\footnote{Note that this example is a binary tree, but there coul
         \node[left=1.2cm] at (d) {\textbf{MAX}};
 
         % Edges
-        \draw[-{Stealth}] (root) -- (b);
-        \draw[-{Stealth}] (root) -- (c);
-        \draw[-{Stealth}] (b) -- (d);
-        \draw[-{Stealth}] (b) -- (e);
-        \draw[-{Stealth}] (c) -- (f);
-        \draw[-{Stealth}] (c) -- (g);
+        \draw[-{Stealth}, draw=red] (b) -- (root);
+        \draw[-] (root) -- (c);
+        \draw[-{Stealth}, draw=red] (d) -- (b);
+        \draw[-] (b) -- (e);
+        \draw[-{Stealth}, draw=red] (f) -- (c);
+        \draw[-] (c) -- (g);
     \end{tikzpicture}
     \caption{Example of alpha-beta pruning.}
     \label{fig:alpha-beta-pruning}
 \end{figure}
 
 In this other example, the red dashed node is pruned because it cannot influence the final decision independently of its value. If its value is less than or equal to 2, it will never improve the previously analyzed value of 3. On the other hand, if its value is greater than 2, black will still choose 2 to minimize the score.
-% Añadir valores alpha-beta para explicarlo mejor?
 
-\section{Iterative deepening}
+\vspace{1em}
+
+Another formal explain this is by using $alpha$ and $beta$ values:
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        level 1/.style={sibling distance=4cm},
+        level 2/.style={sibling distance=2cm},
+        circleNode/.style={circle, draw, minimum size=1cm, inner sep=0pt},
+        squareNode/.style={rectangle, draw, minimum size=1cm, inner sep=0pt}
+    ]
+        % Root node
+        \node[squareNode] (root) {}
+            child {node[circleNode] (b) {}
+                child {node[squareNode] (d) {3}}
+                child {node[squareNode] (e) {5}}
+            }
+            child {node[circleNode] (c) {}
+                child {node[squareNode] (f) {2}}
+                child {node[squareNode] (g) {1}}
+            };
+
+        % Labels for alpha and beta
+        \node[right=0.7cm, align=left] at (root) {$\alpha = -\infty$ \\ $\beta = +\infty$};
+        \node[right=0.7cm, align=left] at (b) {$\alpha = -\infty$ \\ $\beta = +\infty$};
+
+        % Node labels
+        \node[left=0.7cm] at (root) {\textbf{MAX}};
+        \node[left=0.7cm] at (b) {\textbf{MIN}};
+        \node[left=0.7cm] at (d) {\textbf{MAX}};
+
+        % Edges
+        \draw[-, draw=red] (root) -- (b);
+        \draw[-] (root) -- (c);
+        \draw[-, draw=red] (b) -- (d);
+        \draw[-] (b) -- (e);
+        \draw[-] (c) -- (f);
+        \draw[-] (c) -- (g);
+    \end{tikzpicture}
+
+    \hspace{3em}
+
+    \centering
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        level 1/.style={sibling distance=4cm},
+        level 2/.style={sibling distance=2cm},
+        circleNode/.style={circle, draw, minimum size=1cm, inner sep=0pt},
+        squareNode/.style={rectangle, draw, minimum size=1cm, inner sep=0pt}
+    ]
+        % Root node
+        \node[squareNode] (root) {}
+            child {node[circleNode] (b) {}
+                child {node[squareNode] (d) {3}}
+                child {node[squareNode] (e) {5}}
+            }
+            child {node[circleNode] (c) {}
+                child {node[squareNode] (f) {2}}
+                child {node[squareNode] (g) {1}}
+            };
+
+        % Labels for alpha and beta
+        \node[right=0.7cm, align=left] at (root) {$\alpha = -\infty$ \\ $\beta = +\infty$};
+        \node[right=0.7cm, align=left] at (b) {$\alpha = -\infty$ \\ $\textcolor{red}{\beta = 3}$};
+
+        % Node labels
+        \node[left=0.7cm] at (root) {\textbf{MAX}};
+        \node[left=0.7cm] at (b) {\textbf{MIN}};
+        \node[left=0.7cm] at (d) {\textbf{MAX}};
+
+        % Edges
+        \draw[-, draw=red] (root) -- (b);
+        \draw[-] (root) -- (c);
+        \draw[-, draw=red] (d) -- (b);
+        \draw[-] (b) -- (e);
+        \draw[-] (c) -- (f);
+        \draw[-] (c) -- (g);
+    \end{tikzpicture}
+
+    \hspace{3em}
+
+    \centering
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        level 1/.style={sibling distance=4cm},
+        level 2/.style={sibling distance=2cm},
+        circleNode/.style={circle, draw, minimum size=1cm, inner sep=0pt},
+        squareNode/.style={rectangle, draw, minimum size=1cm, inner sep=0pt}
+    ]
+        % Root node
+        \node[squareNode] (root) {}
+            child {node[circleNode, draw=red] (b) {\textcolor{red}{3}}
+                child {node[squareNode] (d) {3}}
+                child {node[squareNode] (e) {5}}
+            }
+            child {node[circleNode] (c) {}
+                child {node[squareNode] (f) {2}}
+                child {node[squareNode] (g) {1}}
+            };
+
+        % Labels for alpha and beta
+        \node[right=0.7cm, align=left] at (root) {$\textcolor{red}{\alpha = 3}$ \\ $\beta = +\infty$};
+        \node[right=0.7cm, align=left] at (b) {$\alpha = -\infty$ \\ $\beta = 3$};
+
+        % Node labels
+        \node[left=0.7cm] at (root) {\textbf{MAX}};
+        \node[left=0.7cm] at (b) {\textbf{MIN}};
+        \node[left=0.7cm] at (d) {\textbf{MAX}};
+
+        % Edges
+        \draw[-, draw=red] (root) -- (b);
+        \draw[-] (root) -- (c);
+        \draw[-, draw=red] (d) -- (b);
+        \draw[-, draw=red] (b) -- (e);
+        \draw[-] (c) -- (f);
+        \draw[-] (c) -- (g);
+    \end{tikzpicture}
+
+    \hspace{3em}
+    
+    \centering
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        level 1/.style={sibling distance=4cm},
+        level 2/.style={sibling distance=2cm},
+        circleNode/.style={circle, draw, minimum size=1cm, inner sep=0pt},
+        squareNode/.style={rectangle, draw, minimum size=1cm, inner sep=0pt}
+    ]
+        % Root node
+        \node[squareNode] (root) {}
+            child {node[circleNode] (b) {3}
+                child {node[squareNode] (d) {3}}
+                child {node[squareNode] (e) {5}}
+            }
+            child {node[circleNode, draw=red] (c) {\textcolor{red}{2}}
+                child {node[squareNode] (f) {2}}
+                child {node[squareNode, dashed, gray] (g) {1}}
+            };
+
+        % Labels for alpha and beta
+        \node[right=0.7cm, align=left] at (root) {$\alpha = 3$ \\ $\beta = +\infty$};
+        \node[right=0.7cm, align=left] at (b) {$\alpha = -\infty$ \\ $\beta = 3$};
+        \node[right=0.7cm, align=left] at (c) {$\alpha = 3$ \\ $\textcolor{red}{\beta = 2}$};
+
+        % Node labels
+        \node[left=0.7cm] at (root) {\textbf{MAX}};
+        \node[left=0.7cm] at (b) {\textbf{MIN}};
+        \node[left=0.7cm] at (d) {\textbf{MAX}};
+
+        % Edges
+        \draw[-] (b) -- (root);
+        \draw[-, draw=red] (root) -- (c);
+        \draw[-] (d) -- (b);
+        \draw[-] (b) -- (e);
+        \draw[-, draw=red] (c) -- (f);
+        \draw[-, draw=gray, dashed] (c) -- (g);
+    \end{tikzpicture}
+
+    \hspace{3em}
+
+    \centering
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        level 1/.style={sibling distance=4cm},
+        level 2/.style={sibling distance=2cm},
+        circleNode/.style={circle, draw, minimum size=1cm, inner sep=0pt},
+        squareNode/.style={rectangle, draw, minimum size=1cm, inner sep=0pt}
+    ]
+        % Root node
+        \node[squareNode] (root) {3}
+            child {node[circleNode] (b) {3}
+                child {node[squareNode] (d) {3}}
+                child {node[squareNode] (e) {5}}
+            }
+            child {node[circleNode] (c) {2}
+                child {node[squareNode] (f) {2}}
+                child {node[squareNode, dashed, gray] (g) {1}}
+            };
+
+        % Labels for alpha and beta
+        \node[right=0.7cm, align=left] at (root) {$\alpha = 3$ \\ $\beta = +\infty$};
+        \node[right=0.7cm, align=left] at (b) {$\alpha = -\infty$ \\ $\beta = 3$};
+        \node[right=0.7cm, align=left] at (c) {$\alpha = 3$ \\ $\beta = 2$};
+
+        % Node labels
+        \node[left=0.7cm] at (root) {\textbf{MAX}};
+        \node[left=0.7cm] at (b) {\textbf{MIN}};
+        \node[left=0.7cm] at (d) {\textbf{MAX}};
+
+        % Edges
+        \draw[-, draw=red] (b) -- (root);
+        \draw[-] (root) -- (c);
+        \draw[-, draw=red] (d) -- (b);
+        \draw[-] (b) -- (e);
+        \draw[-] (f) -- (c);
+        \draw[-, draw=gray, dashed] (c) -- (g);
+    \end{tikzpicture}
+
+    \caption{Example of alpha-beta pruning with $\alpha$ and $\beta$ values.}
+    \label{fig:alpha-beta-pruning-with-alpha-beta-values}
+\end{figure}
+
+\subsubsection{Alpha-Beta Enhancements}
+
+The alpha-beta algorithm has been further improved over time with various enhancements to increase the overall efficiency. Some of these are: Transposition Tables, Iterative Deepening, Aspiration Windows and Quiescence Search.
+
+\vspace{1em}
+
+Take into consideration that many positions can be reached in different ways. This is formally known as \textbf{transpositions\footnote{\url{https://www.chessprogramming.org/Transposition}}}. Just like in dynamic programming\footnote{\url{https://en.wikipedia.org/wiki/Dynamic_programming}}, the evaluations of different positions are stored in a structure, the \textbf{transposition tables}, to avoid repeating the process of searching and evaluating, which improves efficiency. Take this following example:
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.6\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            setfen=rnbqkb1r/ppp2ppp/5n2/3p4/3P4/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 1
+        ]
+    \end{minipage}
+    \hspace{1em}
+    \begin{minipage}{0.35\textwidth}
+        \centering
+        \textbf{French Defense:}\\
+        1. e4 e6 2. d4 d5 3. exd5 exd5 4. Nf3 Nf6
+        \vspace{1em}\\
+        \textbf{Petrov Defense:}\\
+        1. e4 e5 2. Nf3 Nf6 3. Nxe5 d6 4. Nf3 Nxe4 5. d3 Nf6 6. d4 d5
+    \end{minipage}
+    \caption{Example of transposition.}
+    \label{fig:example-transposition}
+\end{figure}
+
+Both games reach the same position, although they involve a different number of moves.
+
+\vspace{1em}
+
+In order to store these different positions and access them in a map or dictionary structure, there is a need for a unique and efficient way to index positions: \textbf{Zobrist hashing}. Zobrist hashing maps a large number of possible positions to a fixed-size hash value, which can lead to collisions, as different positions may produce the same hash. To handle these collisions, storing additional information like the depth is used to verify the correctness of the entry. In some cases, overwriting the older or less relevant entries can be also useful.
+
+\vspace{1em}
 
 As it is mentioned in \url{https://www.chessprogramming.org/Search}, \textit{<<Depth-first algorithms are generally embedded inside an iterative deepening framework for time control and move ordering issues.>>}. \textbf{Iterative deepening} refers to the combination of DFS with limited depth searches. It performs successive searches by increasing the depth limit at each iteration, allowing you to obtain partial results quickly and improve accuracy over time.
 
-\section{Quiescence search}
+\vspace{1em}
+
+An important concept related to iterative deepening is the use of \textbf{aspiration windows}. Their main objective is to reduce the search space by narrowing the search bounds. In other words, by adjusting $alpha$ and $beta$ values in each iteration of the iterative deepening. If the value of the evaluation in the iteration falls outside this range or window, a re-search is performed with a wider window to ensure accuracy.
+
+\vspace{1em}
+
+Another critical concept is \textbf{quiescence search}. This is a search technique used to address the horizon effect at the end of the search. Simply stopping the search at a fixed or desired depth and evaluating the position can lead to inaccuracies, as critical tactical moves, such as captures, are often overlooked.
+
+\quote{\textit{Consider the situation where the last move you consider is QxP. If you stop there and evaluate, you might think that you have won a pawn. But what if you were to search one move deeper and find that the next move is PxQ? You didn't win a pawn, you actually lost a queen. Hence the need to make sure that you are evaluating only quiescent (quiet) positions.}\footnote{\url{https://www.chessprogramming.org/Quiescence_Search}}}
 
 \section{Move ordering}
 
 \section{Move generation}
 
 \section{Evaluation functions}
-
-\section{Zobrist hashing}
 
 \section{Strength Assessment}
 
