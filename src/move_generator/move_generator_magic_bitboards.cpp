@@ -19,7 +19,6 @@
 #include "move_generator_info.hpp"
 #include "coordinates.hpp"
 
-static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo);
 static void update_pins_and_checks(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
 
 static void calculate_castling_moves(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo);
@@ -96,29 +95,6 @@ void generate_legal_moves(MoveList& moves, Board& board, bool* inCheck)
 // Explicit template instantiations
 template void generate_legal_moves<ALL_MOVES>(MoveList& moves, Board& board, bool* inCheck);
 template void generate_legal_moves<ONLY_CAPTURES>(MoveList& moves, Board& board, bool* inCheck);
-
-static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
-{
-    const Board& board = moveGeneratorInfo.board;
-    const uint64_t blockers = moveGeneratorInfo.board.get_bitboard_all();
-
-    update_pins_and_checks(moveGeneratorInfo.side_to_move_king_square, moveGeneratorInfo);
-
-    uint64_t side_waiting_pieces = moveGeneratorInfo.side_waiting_pieces_mask;
-
-    while (side_waiting_pieces) {
-
-        const Square square(pop_lsb(side_waiting_pieces));
-        const Piece piece = board.get_piece(square);
-
-        assert(!board.is_empty(square));
-        assert(get_color(piece) == moveGeneratorInfo.side_waiting);
-
-        const uint64_t moves_mask = PrecomputedMoveData::pieceMoves(square, piece, blockers);
-
-        moveGeneratorInfo.king_danger_squares_mask |= moves_mask;
-    }
-}
 
 static void update_pins_and_checks(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo)
 {

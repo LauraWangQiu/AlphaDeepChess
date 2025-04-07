@@ -20,6 +20,7 @@ static int constexpr BISHOP_TABLE_SIZE = 512;
 typedef std::array<std::array<uint64_t, ROOK_TABLE_SIZE>, NUM_SQUARES> TableRookMoves;
 typedef std::array<std::array<uint64_t, BISHOP_TABLE_SIZE>, NUM_SQUARES> TableBishopMoves;
 
+
 /**
  * @brief PrecomputedMoveData
  *
@@ -48,24 +49,31 @@ public:
      */
     static inline uint64_t pieceMoves(Square square, Piece piece, uint64_t blockers)
     {
+
+        using MoveGenFunc = uint64_t (*)(Square square, uint64_t blockers);
+
+        // jump table indexed by piece type
+        static constexpr MoveGenFunc MOVE_FUNC_TABLE[12] = {
+            // White pieces
+            [](Square s, uint64_t) { return WHITE_PAWN_ATTACKS[s]; },   // WHITE_PAWN
+            [](Square s, uint64_t) { return KNIGHT_ATTACKS[s]; },       // WHITE_KNIGHT
+            [](Square s, uint64_t b) { return bishopMoves(s, b); },     // WHITE_BISHOP
+            [](Square s, uint64_t b) { return rookMoves(s, b); },       // WHITE_ROOK
+            [](Square s, uint64_t b) { return queenMoves(s, b); },      // WHITE_QUEEN
+            [](Square s, uint64_t) { return KING_ATTACKS[s]; },         // WHITE_KING
+            // Black pieces
+            [](Square s, uint64_t) { return BLACK_PAWN_ATTACKS[s]; },   // BLACK_PAWN
+            [](Square s, uint64_t) { return KNIGHT_ATTACKS[s]; },       // BLACK_KNIGHT
+            [](Square s, uint64_t b) { return bishopMoves(s, b); },     // BLACK_BISHOP
+            [](Square s, uint64_t b) { return rookMoves(s, b); },       // BLACK_ROOK
+            [](Square s, uint64_t b) { return queenMoves(s, b); },      // BLACK_QUEEN
+            [](Square s, uint64_t) { return KING_ATTACKS[s]; }          // BLACK_KING
+        };
+
         assert(is_valid_piece(piece) && piece != Piece::EMPTY);
         assert(square.is_valid());
 
-        switch (piece) {
-        case Piece::W_PAWN: return WHITE_PAWN_ATTACKS[square]; break;
-        case Piece::W_KNIGHT: return KNIGHT_ATTACKS[square]; break;
-        case Piece::W_BISHOP: return bishopMoves(square, blockers); break;
-        case Piece::W_ROOK: return rookMoves(square, blockers); break;
-        case Piece::W_QUEEN: return queenMoves(square, blockers); break;
-        case Piece::W_KING: return KING_ATTACKS[square]; break;
-        case Piece::B_PAWN: return BLACK_PAWN_ATTACKS[square]; break;
-        case Piece::B_KNIGHT: return KNIGHT_ATTACKS[square]; break;
-        case Piece::B_BISHOP: return bishopMoves(square, blockers); break;
-        case Piece::B_ROOK: return rookMoves(square, blockers); break;
-        case Piece::B_QUEEN: return queenMoves(square, blockers); break;
-        case Piece::B_KING: return KING_ATTACKS[square]; break;
-        default: return 0ULL; break;
-        }
+        return MOVE_FUNC_TABLE[static_cast<int>(piece)](square, blockers);
     }
 
     /**
