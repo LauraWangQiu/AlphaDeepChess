@@ -45,7 +45,7 @@ int evaluate_position(Board& board)
     int endgame_eval = 0;
 
     const int middlegame_percentage = calculate_middlegame_percentage(board);
-    const int endgame_percentage = 100 - calculate_middlegame_percentage(board);
+    const int endgame_percentage = 24 - calculate_middlegame_percentage(board);
 
     const Square white_king_sq = lsb(board.get_bitboard_piece(Piece::W_KING));
     const Square black_king_sq = lsb(board.get_bitboard_piece(Piece::B_KING));
@@ -81,7 +81,7 @@ int evaluate_position(Board& board)
     endgame_eval += king_safety_penality / 4;
 
 
-    const int blended_eval = (middlegame_eval * middlegame_percentage + endgame_eval * endgame_percentage) / 100;
+    const int blended_eval = (middlegame_eval * middlegame_percentage + endgame_eval * endgame_percentage) / 24;
 
     return blended_eval;
 }
@@ -178,7 +178,7 @@ static int king_safety_penalization(Square king_sq, const Board& board)
  */
 static constexpr inline int calculate_middlegame_percentage(const Board& board)
 {
-    constexpr int ENDGAME_PIECE_THRESHOLD = 8;
+    /*constexpr int ENDGAME_PIECE_THRESHOLD = 8;
     constexpr int MAX_PIECES = 32;
     constexpr int PIECE_DENOM = MAX_PIECES - ENDGAME_PIECE_THRESHOLD;
 
@@ -199,7 +199,18 @@ static constexpr inline int calculate_middlegame_percentage(const Board& board)
     const int middlegame_percentage = (3 * queen_phase + piece_phase) / 4;
 
     assert(middlegame_percentage >= 0 && middlegame_percentage <= 100);
-    return middlegame_percentage;
+    return middlegame_percentage;*/
+
+    const int queens = board.get_piece_counter(Piece::W_QUEEN) + board.get_piece_counter(Piece::B_QUEEN);
+
+    const int rooks = board.get_piece_counter(Piece::W_ROOK) + board.get_piece_counter(Piece::B_ROOK);
+
+    const int minor_pieces = board.get_piece_counter(Piece::W_KNIGHT) + board.get_piece_counter(Piece::B_KNIGHT) +
+        board.get_piece_counter(Piece::W_BISHOP) + board.get_piece_counter(Piece::B_BISHOP);
+
+    const int game_phase = minor_pieces + 2 * rooks + 4 * queens;
+
+    return std::min(game_phase, 24);   // max gamephase is 24
 }
 
 // Pieces values

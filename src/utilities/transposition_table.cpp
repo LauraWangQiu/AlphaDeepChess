@@ -10,6 +10,7 @@
 
 std::vector<TranspositionTable::Entry> TranspositionTable::entries = initialization();
 
+constexpr TranspositionTable::SIZE TT_DEFAULT_SIZE = TranspositionTable::SIZE::MB_2048;
 
 /**
  * @brief resize(SIZE)
@@ -49,7 +50,7 @@ void TranspositionTable::resize(SIZE new_size_mb)
  */
 std::vector<TranspositionTable::Entry> TranspositionTable::initialization()
 {
-    const SIZE size_mb = SIZE::MB_256;
+    const SIZE size_mb = TT_DEFAULT_SIZE;
     const uint64_t size_table_bytes = mb_to_bytes(static_cast<uint64_t>(size_mb));
     const uint64_t num_entries = size_table_bytes >> lsb(next_power_of_two(sizeof(Entry)));
     return std::vector<Entry>(int(num_entries));

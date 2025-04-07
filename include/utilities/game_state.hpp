@@ -43,8 +43,8 @@ static constexpr uint64_t MASK_MOVE_NUMBER = (0xfffffULL << SHIFT_MOVE_NUMBER);
  * Represents the sate of the chess game.
  * 
  * @note game state is stored as a 64-bit number :
- * 49 : attacks_updated : 1 if updated, 0 if not
- * 43-48 : num_pieces : 0 to 64 pieces
+ * 50 : attacks_updated : 1 if updated, 0 if not
+ * 43-49 : num_pieces : 0 to 64 pieces
  * 35-42 : fifty_move_rule_counter : if counter gets to 100 then game is a draw.
  * 32-34 : last_captured_piece : PieceType::Empty if last move was not a capture.
  * 31 : side_to_move : 0 if white, 1 if black.
@@ -426,6 +426,37 @@ public:
     constexpr inline bool attacks_updated() const { return state_register & MASK_ATTACKS_UPDATED; }
 
     /**
+     * @brief number of pieces of the specified type in the board
+     * 
+     * @note piece should be valid and not Empty
+     * 
+     * @param[in] piece selected piece
+     * 
+     * @return piece_counter[piece]
+     * 
+     */
+    constexpr inline uint64_t get_piece_counter(Piece piece) const
+    {
+        assert(is_valid_piece(piece) && piece != Piece::EMPTY);
+        return piece_counter[static_cast<int>(piece)];
+    }
+
+    /**
+     * @brief set the number of pieces of the specified type in the board
+     * 
+     * @note piece should be valid and not Empty
+     * 
+     * @param[in] piece piece to set its attack bitboard
+     * @param[in] number_of_pieces number of pieces of the specified type in the board
+     * 
+     */
+    constexpr inline void set_piece_counter(Piece piece, uint8_t number_of_pieces)
+    {
+        assert(is_valid_piece(piece) && piece != Piece::EMPTY);
+        piece_counter[static_cast<int>(piece)] = number_of_pieces;
+    }
+
+    /**
      * @brief clean
      * 
      *  Cleans the game state to 0 (initial value)
@@ -440,6 +471,7 @@ public:
         zobrist_key = 0ULL;
         clear_attacks_bb();
         set_move_number(1ULL);
+        piece_counter.fill(0U);
         set_side_to_move(ChessColor::WHITE);
         set_en_passant_square(Square::INVALID);
         set_last_captured_piece(PieceType::EMPTY);
@@ -459,7 +491,7 @@ public:
      * set_last_captured_piece(PieceType::EMPTY);
      * 
      */
-    constexpr GameState() : state_register(0ULL), zobrist_key(0ULL), attacks_bb {{0}} { clean(); }
+    constexpr GameState() : state_register(0ULL), zobrist_key(0ULL), attacks_bb {{0}}, piece_counter {{0}} { clean(); }
 
     /**
      * @brief GameState
@@ -470,7 +502,8 @@ public:
      * 
      */
     constexpr GameState(const GameState& gs)
-        : state_register(gs.state_register), zobrist_key(gs.zobrist_key), attacks_bb(gs.attacks_bb)
+        : state_register(gs.state_register), zobrist_key(gs.zobrist_key), attacks_bb(gs.attacks_bb),
+          piece_counter(gs.piece_counter)
     { }
 
     /**
@@ -481,12 +514,13 @@ public:
      * @param[in] gs gameState to compare with.
      * 
      * @return
-     * - TRUE if state_register == gs.state_register && zobrist_key == gs.zobrist_key && attacks_bb == gs.attacks_bb.
+     * - TRUE if state_register == gs.state_register && all other fields the same.
      * - FALSE otherwise.
      */
     constexpr bool operator==(const GameState& gs) const
     {
-        return state_register == gs.state_register && zobrist_key == gs.zobrist_key && attacks_bb == attacks_bb;
+        return state_register == gs.state_register && zobrist_key == gs.zobrist_key && attacks_bb == attacks_bb &&
+            piece_counter == piece_counter;
     }
 
     /**
@@ -519,6 +553,7 @@ public:
             this->state_register = other.state_register;
             this->zobrist_key = other.zobrist_key;
             this->attacks_bb = other.attacks_bb;
+            this->piece_counter = other.piece_counter;
         }
         return *this;
     }
@@ -560,7 +595,23 @@ private:
      */
     std::array<uint64_t, NUM_CHESS_PIECES - 1 + 2> attacks_bb;
 
-    static constexpr int ATTACKS_BB_COLOR_BASE = 12;
+    static constexpr int ATTACKS_BB_COLOR_BASE = 12;   // index of attacks_bb[WHITE]
+
+    /** number of pieces by type [NUM_CHESS_PIECES - 1]
+     * 
+     * [0] W_PAWN
+     * [1] W_KNIGHT
+     * [2] W_BISHOP
+     * [3] W_ROOK
+     * [4] W_QUEEN
+     * [5] W_KING
+     * [6] B_PAWN
+     * [7] B_KNIGHT
+     * [8] B_BISHOP
+     * [9] B_ROOK
+     * [10] B_QUEEN 
+     */
+    std::array<uint8_t, NUM_CHESS_PIECES - 1> piece_counter;
 };
 
 /**

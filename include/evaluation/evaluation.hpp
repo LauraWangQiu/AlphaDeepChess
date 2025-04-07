@@ -10,8 +10,6 @@
 
 #include "board.hpp"
 
-constexpr int MATE_IN_ONE_SCORE = 32000U;
-
 /** 
  * @brief evaluate_position
  *

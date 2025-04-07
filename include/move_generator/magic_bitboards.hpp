@@ -32,31 +32,8 @@
 #include <immintrin.h>   // for _pext_u64
 #endif
 
-/**
- * @brief rook_magic(Square)
- * 
- * returns the magic number for the square
- * 
- * @note square must be valid
- * 
- * @param[in] square rook square
- * 
- * @return ROOK_MAGICS[square]
- */
-inline constexpr uint64_t rook_magic(Square square);
-
-/**
- * @brief bishop_magic(Square)
- * 
- * returns the magic number for the square
- * 
- * @note square must be valid
- * 
- * @param[in] square bishop square
- * 
- * @return BISHOP_MAGICS[square]
- */
-inline constexpr uint64_t bishop_magic(Square square);
+constexpr int ROOK_TABLE_SIZE = 4096;
+constexpr int BISHOP_TABLE_SIZE = 512;
 
 /**
  * @brief magic_index_rook(uint64_t,Square,uint64_t)
@@ -87,6 +64,34 @@ inline uint64_t magic_index_rook(uint64_t blockers, Square rook_square, uint64_t
  * @return blockers * magic_number >> (64 - number_occupancy_squares)
  */
 inline uint64_t magic_index_bishop(uint64_t blockers, Square bishop_square, uint64_t bishop_attacks);
+
+#ifndef __BMI2__
+
+/**
+ * @brief rook_magic(Square)
+ * 
+ * returns the magic number for the square
+ * 
+ * @note square must be valid
+ * 
+ * @param[in] square rook square
+ * 
+ * @return ROOK_MAGICS[square]
+ */
+static inline constexpr uint64_t rook_magic(Square square);
+
+/**
+ * @brief bishop_magic(Square)
+ * 
+ * returns the magic number for the square
+ * 
+ * @note square must be valid
+ * 
+ * @param[in] square bishop square
+ * 
+ * @return BISHOP_MAGICS[square]
+ */
+static inline constexpr uint64_t bishop_magic(Square square);
 
 /**
  * @brief ROOK_MAGICS
@@ -168,6 +173,7 @@ static constexpr int BISHOP_OCCUPANCY_NUMBER[NUM_SQUARES] = {
 
 // clang-format on
 
+
 /**
  * @brief rook_magic(Square)
  * 
@@ -179,7 +185,7 @@ static constexpr int BISHOP_OCCUPANCY_NUMBER[NUM_SQUARES] = {
  * 
  * @return ROOK_MAGICS[square]
  */
-inline constexpr uint64_t rook_magic(Square square)
+static inline constexpr uint64_t rook_magic(Square square)
 {
     assert(square.is_valid());
     return ROOK_MAGICS[square];
@@ -196,12 +202,12 @@ inline constexpr uint64_t rook_magic(Square square)
  * 
  * @return BISHOP_MAGICS[square]
  */
-inline constexpr uint64_t bishop_magic(Square square)
+static inline constexpr uint64_t bishop_magic(Square square)
 {
     assert(square.is_valid());
     return BISHOP_MAGICS[square];
 }
-
+#endif
 /**
  * @brief magic_index_rook(uint64_t,Square,uint64_t)
  * 

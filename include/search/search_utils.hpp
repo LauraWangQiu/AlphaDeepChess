@@ -21,10 +21,10 @@ constexpr uint32_t INF_DEPTH = 1024;
 constexpr int INF_EVAL = std::numeric_limits<int>::max();
 
 // score for mate in one
-constexpr int INMEDIATE_MATE_SCORE = 32000;
+constexpr int MATE_IN_ONE_SCORE = 3200000;
 
 // score from which it is consider mate evaluation
-constexpr int MATE_THRESHOLD = INMEDIATE_MATE_SCORE - 1000U;
+constexpr int MATE_THRESHOLD = MATE_IN_ONE_SCORE - 1000U;
 
 // max ply to be reached
 constexpr int MAX_PLY = 64;

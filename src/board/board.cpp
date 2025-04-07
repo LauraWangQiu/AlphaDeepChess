@@ -91,6 +91,15 @@ void Board::make_move(Move move)
 
     if (is_move_capture) {
         game_state.set_num_pieces(game_state.num_pieces() - 1);
+        const Piece enemy_pawn = create_piece(PieceType::PAWN, opposite_color(get_color(origin_piece)));
+        const Piece captured_piece = move.type() != MoveType::EN_PASSANT ? end_piece : enemy_pawn;
+        game_state.set_piece_counter(captured_piece, game_state.get_piece_counter(captured_piece) - 1);
+    }
+
+    if (move.type() == MoveType::PROMOTION) {
+        game_state.set_piece_counter(origin_piece, game_state.get_piece_counter(origin_piece) - 1);
+        const Piece promoted_piece = create_piece(move.promotion_piece(), get_color(origin_piece));
+        game_state.set_piece_counter(promoted_piece, game_state.get_piece_counter(promoted_piece) + 1);
     }
 
     game_state.set_attacks_updated(false);
@@ -123,7 +132,7 @@ void Board::unmake_move(Move move, GameState previous_state)
 
     game_state = previous_state;
 
-    assert(game_state.num_pieces() == number_of_1_bits(bitboard_all));
+    assert(assert_that_piece_counter_is_correct());
 }
 
 /**
@@ -219,6 +228,7 @@ void Board::load_fen(const std::string& fen)
     game_state.set_zobrist_key(Zobrist::hash(*this));
 
     game_state.set_num_pieces(number_of_1_bits(bitboard_all));
+    update_piece_counter();
 
     game_state.clear_attacks_bb();
 }
@@ -765,4 +775,30 @@ void Board::update_attacks_bb()
     }
 
     game_state.set_attacks_updated(true);
+}
+
+/**
+ * @brief recalculates all the number of pieces
+ */
+void Board::update_piece_counter()
+{
+    for (Piece piece = Piece(0); is_valid_piece(piece); piece = piece + 1) {
+        if (piece == Piece::EMPTY) break;
+        game_state.set_piece_counter(piece, number_of_1_bits(get_bitboard_piece(piece)));
+    }
+}
+
+/**
+ * @brief check that piece counter is correct (for debug)
+ */
+bool Board::assert_that_piece_counter_is_correct()
+{
+    for (Piece piece = Piece(0); is_valid_piece(piece); piece = piece + 1) {
+        if (piece == Piece::EMPTY) break;
+        if (int(game_state.get_piece_counter(piece)) != number_of_1_bits(get_bitboard_piece(piece))) {
+            return false;
+        }
+    }
+
+    return game_state.num_pieces() == number_of_1_bits(bitboard_all);
 }

@@ -14,9 +14,6 @@
 #include <array>
 #include <cassert>
 
-static int constexpr ROOK_TABLE_SIZE = 4096;
-static int constexpr BISHOP_TABLE_SIZE = 512;
-
 typedef std::array<std::array<uint64_t, ROOK_TABLE_SIZE>, NUM_SQUARES> TableRookMoves;
 typedef std::array<std::array<uint64_t, BISHOP_TABLE_SIZE>, NUM_SQUARES> TableBishopMoves;
 

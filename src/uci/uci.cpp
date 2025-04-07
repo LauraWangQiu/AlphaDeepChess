@@ -230,7 +230,7 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
             depth = INF_DEPTH;
         }
         else if (tokens[i] == "ponder") {
-            pondering.store(true);
+            //pondering.store(true);
         }
         else if (tokens[i] == "perft") {
             try {
@@ -284,8 +284,8 @@ void Uci::go_command_action(const TokenArray& tokens, uint32_t num_tokens)
             ponderhitCv.wait(lock);
         }
 
-        std::cout << "bestmove " << Move(searchResults.results[depthReaded - 1].bestMove_data).to_string();
-        std::cout << " ponder " << Move(searchResults.ponderMove_data).to_string() << std::endl;
+        std::cout << "bestmove " << Move(searchResults.results[depthReaded - 1].bestMove_data).to_string() << std::endl;
+        //std::cout << " ponder " << Move(searchResults.ponderMove_data).to_string() << std::endl;
 
         searchResults.depthReached = 0;   // reset depthReached when we consume all data
     });

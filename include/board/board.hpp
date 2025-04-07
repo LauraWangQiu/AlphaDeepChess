@@ -282,6 +282,18 @@ public:
     }
 
     /**
+     * @brief number of pieces of the specified type in the board
+     * 
+     * @note piece should be valid and not Empty
+     * 
+     * @param[in] piece selected piece
+     * 
+     * @return piece_counter[piece]
+     * 
+     */
+    constexpr inline uint8_t get_piece_counter(Piece piece) const { return game_state.get_piece_counter(piece); }
+
+    /**
      * @brief recalculates all the attack bitboards for each piece in the position
      */
     void update_attacks_bb();
@@ -399,6 +411,16 @@ private:
      * 
      */
     void check_and_modify_en_passant_rule();
+
+    /**
+     * @brief recalculates all the number of pieces
+     */
+    void update_piece_counter();
+
+    /**
+     * @brief check that piece counter is correct (for debug)
+     */
+    bool assert_that_piece_counter_is_correct();
 };
 
 /**
