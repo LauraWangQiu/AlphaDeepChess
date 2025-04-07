@@ -26,4 +26,4 @@ constexpr int MATE_IN_ONE_SCORE = 32000U;
  *  - (+) if position is evaluated as white is better.
  *  - (-) if position is evaluated as black is better.
  */
-int evaluate_position(const Board& board);
+int evaluate_position(Board& board);

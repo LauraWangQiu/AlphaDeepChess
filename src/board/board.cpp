@@ -93,6 +93,8 @@ void Board::make_move(Move move)
         game_state.set_num_pieces(game_state.num_pieces() - 1);
     }
 
+    game_state.set_attacks_updated(false);
+
     assert(game_state.num_pieces() == number_of_1_bits(bitboard_all));
 }
 
@@ -217,6 +219,8 @@ void Board::load_fen(const std::string& fen)
     game_state.set_zobrist_key(Zobrist::hash(*this));
 
     game_state.set_num_pieces(number_of_1_bits(bitboard_all));
+
+    game_state.clear_attacks_bb();
 }
 
 /**
@@ -731,4 +735,34 @@ void Board::check_and_modify_en_passant_rule()
     if (game_state.en_passant_square().is_valid()) {
         game_state.xor_zobrist(Zobrist::get_en_passant_seed(eps.col()));
     }
+}
+
+/**
+ * @brief recalculates all the attack bitboards for each piece in the position
+ */
+void Board::update_attacks_bb()
+{
+    if (game_state.attacks_updated()) {
+        return;   // if the attacks are updated dont recalculate
+    }
+
+    game_state.clear_attacks_bb();
+
+    uint64_t pieces = get_bitboard_all();
+
+    const uint64_t blockers = pieces;
+
+
+    while (pieces) {
+
+        const Square square(pop_lsb(pieces));
+        const Piece piece = get_piece(square);
+        const ChessColor color = get_color(piece);
+        const uint64_t attacks = PrecomputedMoveData::pieceMoves(square, piece, blockers);
+
+        set_attacks_bb(piece, get_attacks_bb(piece) | attacks);
+        set_attacks_bb(color, get_attacks_bb(color) | attacks);
+    }
+
+    game_state.set_attacks_updated(true);
 }

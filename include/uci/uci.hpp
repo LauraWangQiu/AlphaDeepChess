@@ -197,7 +197,7 @@ private:
      * Evaluate chess position.
      * 
      */
-    void eval_command_action() const;
+    void eval_command_action();
 
     /**
      * @brief position_command_action

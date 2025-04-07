@@ -3,6 +3,7 @@
 #include "piece.hpp"
 #include "square.hpp"
 #include <cassert>
+#include "array"
 
 /**
  * @file game_state.hpp
@@ -11,6 +12,7 @@
  * 
  */
 
+static constexpr uint64_t SHIFT_ATTACKS_UPDATED = 50ULL;
 static constexpr uint64_t SHIFT_NUM_PIECES = 43ULL;
 static constexpr uint64_t SHIFT_FIFTY_MOVE_RULE = 35ULL;
 static constexpr uint64_t SHIFT_LAST_CAPTURED_PIECE = 32ULL;
@@ -22,6 +24,7 @@ static constexpr uint64_t SHIFT_CASTLE_QUEEN_BLACK = 27ULL;
 static constexpr uint64_t SHIFT_EN_PASSANT_SQUARE = 20ULL;
 static constexpr uint64_t SHIFT_MOVE_NUMBER = 0ULL;
 
+static constexpr uint64_t MASK_ATTACKS_UPDATED = (1ULL << SHIFT_ATTACKS_UPDATED);
 static constexpr uint64_t MASK_NUM_PIECES = (0x7fULL << SHIFT_NUM_PIECES);
 static constexpr uint64_t MASK_FIFTY_MOVE_RULE = (0xffULL << SHIFT_FIFTY_MOVE_RULE);
 static constexpr uint64_t MASK_LAST_CAPTURED_PIECE = (7ULL << SHIFT_LAST_CAPTURED_PIECE);
@@ -40,6 +43,7 @@ static constexpr uint64_t MASK_MOVE_NUMBER = (0xfffffULL << SHIFT_MOVE_NUMBER);
  * Represents the sate of the chess game.
  * 
  * @note game state is stored as a 64-bit number :
+ * 49 : attacks_updated : 1 if updated, 0 if not
  * 43-48 : num_pieces : 0 to 64 pieces
  * 35-42 : fifty_move_rule_counter : if counter gets to 100 then game is a draw.
  * 32-34 : last_captured_piece : PieceType::Empty if last move was not a capture.
@@ -331,6 +335,97 @@ public:
     constexpr inline void xor_zobrist(uint64_t seed) { zobrist_key ^= seed; };
 
     /**
+     * @brief returns the bitboard with 1 in the squares that all pieces of this type attacks on the position
+     * 
+     * @note piece should be valid and not Empty
+     * 
+     * @param[in] piece piece to get its attack bitboard
+     * 
+     * @return (uint64_t) attacks_bb[piece]
+     * 
+     */
+    constexpr inline uint64_t get_attacks_bb(Piece piece) const
+    {
+        assert(is_valid_piece(piece) && piece != Piece::EMPTY);
+        return attacks_bb[static_cast<int>(piece)];
+    }
+
+    /**
+     * @brief returns the bitboard with 1 in the squares that all pieces of this type attacks on the position
+     * 
+     * @param[in] color color side to get its attack bitboard
+     * 
+     * @return (uint64_t) attacks_bb[color]
+     * 
+     */
+    constexpr inline uint64_t get_attacks_bb(ChessColor color) const
+    {
+        assert(is_valid_color(color));
+        return attacks_bb[ATTACKS_BB_COLOR_BASE + static_cast<int>(color)];
+    }
+
+    /**
+     * @brief set the bitboard with 1 in the squares that all pieces of this type attacks on the position
+     * 
+     * @note piece should be valid and not Empty
+     * 
+     * @param[in] piece piece to set its attack bitboard
+     * @param[in] attacks attacks bitboard
+     * 
+     */
+    constexpr inline void set_attacks_bb(Piece piece, uint64_t attacks)
+    {
+        assert(is_valid_piece(piece) && piece != Piece::EMPTY);
+        attacks_bb[static_cast<int>(piece)] = attacks;
+    }
+
+    /**
+     * @brief set the bitboard with 1 in the squares that all pieces of this type attacks on the position
+     * 
+     * @param[in] color color side to get its attack bitboard
+     * @param[in] attacks attacks bitboard
+     * 
+     */
+    constexpr inline void set_attacks_bb(ChessColor color, uint64_t attacks)
+    {
+        assert(is_valid_color(color));
+        attacks_bb[ATTACKS_BB_COLOR_BASE + static_cast<int>(color)] = attacks;
+    }
+
+    /**
+     * @brief put all attacks bitboard to zero
+     * 
+     */
+    constexpr inline void clear_attacks_bb()
+    {
+        attacks_bb.fill(0ULL);
+        set_attacks_updated(false);
+    }
+
+    /**
+     * @brief set_attacks_updated
+     * 
+     * set the flag of attacks updated
+     * 
+     * @param[in] value flag value
+     * 
+     */
+    constexpr inline void set_attacks_updated(bool value)
+    {
+        state_register &= ~MASK_ATTACKS_UPDATED;
+        state_register |= static_cast<uint64_t>(value) << SHIFT_ATTACKS_UPDATED;
+    }
+
+    /**
+     * @brief attacks_updated
+     * 
+     * @return
+     * - TRUE if attacks are updated
+     * - FALSE if attacks are not updated
+     */
+    constexpr inline bool attacks_updated() const { return state_register & MASK_ATTACKS_UPDATED; }
+
+    /**
      * @brief clean
      * 
      *  Cleans the game state to 0 (initial value)
@@ -343,6 +438,7 @@ public:
     {
         state_register = 0ULL;
         zobrist_key = 0ULL;
+        clear_attacks_bb();
         set_move_number(1ULL);
         set_side_to_move(ChessColor::WHITE);
         set_en_passant_square(Square::INVALID);
@@ -363,7 +459,7 @@ public:
      * set_last_captured_piece(PieceType::EMPTY);
      * 
      */
-    constexpr GameState() : state_register(0ULL), zobrist_key(0ULL) { clean(); }
+    constexpr GameState() : state_register(0ULL), zobrist_key(0ULL), attacks_bb {{0}} { clean(); }
 
     /**
      * @brief GameState
@@ -373,7 +469,9 @@ public:
      * @param[in] gs gameState where to copy the initial value.
      * 
      */
-    constexpr GameState(const GameState& gs) : state_register(gs.state_register), zobrist_key(gs.zobrist_key) { }
+    constexpr GameState(const GameState& gs)
+        : state_register(gs.state_register), zobrist_key(gs.zobrist_key), attacks_bb(gs.attacks_bb)
+    { }
 
     /**
      * @brief operator==
@@ -383,13 +481,12 @@ public:
      * @param[in] gs gameState to compare with.
      * 
      * @return
-     * - TRUE if state_register == gs.state_register && zobrist_key == gs.zobrist_key.
-     * - FALSE else.
-     * 
+     * - TRUE if state_register == gs.state_register && zobrist_key == gs.zobrist_key && attacks_bb == gs.attacks_bb.
+     * - FALSE otherwise.
      */
     constexpr bool operator==(const GameState& gs) const
     {
-        return state_register == gs.state_register && zobrist_key == gs.zobrist_key;
+        return state_register == gs.state_register && zobrist_key == gs.zobrist_key && attacks_bb == attacks_bb;
     }
 
     /**
@@ -400,14 +497,10 @@ public:
      * @param[in] gs gameState to compare with.
      * 
      * @return
-     * - TRUE if state_register != gs.state_register.
-     * - FALSE state_register == gs.state_register.
-     * 
+     * - TRUE if the states are not equal.
+     * - FALSE if the states are equal.
      */
-    constexpr bool operator!=(const GameState& gs) const
-    {
-        return state_register != gs.state_register || zobrist_key != gs.zobrist_key;
-    }
+    constexpr bool operator!=(const GameState& gs) const { return !(*this == gs); }
 
     /**
      * @brief operator=
@@ -425,6 +518,7 @@ public:
         {
             this->state_register = other.state_register;
             this->zobrist_key = other.zobrist_key;
+            this->attacks_bb = other.attacks_bb;
         }
         return *this;
     }
@@ -445,6 +539,28 @@ private:
      * 
      */
     uint64_t zobrist_key;
+
+    /**
+     * @brief attack squares bitboard by every piece[NUM_CHESS_PIECES - 1]
+     * 
+     * [0] W_PAWN
+     * [1] W_KNIGHT
+     * [2] W_BISHOP
+     * [3] W_ROOK
+     * [4] W_QUEEN
+     * [5] W_KING
+     * [6] B_PAWN
+     * [7] B_KNIGHT
+     * [8] B_BISHOP
+     * [9] B_ROOK
+     * [10] B_QUEEN 
+     * [11] B_KING 
+     * [12] WHITE
+     * [13] BLACK
+     */
+    std::array<uint64_t, NUM_CHESS_PIECES - 1 + 2> attacks_bb;
+
+    static constexpr int ATTACKS_BB_COLOR_BASE = 12;
 };
 
 /**

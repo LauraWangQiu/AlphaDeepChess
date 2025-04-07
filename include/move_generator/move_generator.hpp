@@ -11,7 +11,8 @@
 #include "board.hpp"
 #include "move_list.hpp"
 
-enum MoveGeneratorType {
+enum MoveGeneratorType
+{
     ALL_MOVES,      // Generate all legal moves
     ONLY_CAPTURES   // Generate only capture moves
 };
@@ -26,6 +27,5 @@ enum MoveGeneratorType {
  * @param[out] inCheck (optional) return true if the king is in check.
  * 
  */
-template <MoveGeneratorType genType>
-void generate_legal_moves(MoveList& moves, const Board& board, bool* inCheck = nullptr);
-
+template<MoveGeneratorType genType>
+void generate_legal_moves(MoveList& moves, Board& board, bool* inCheck = nullptr);

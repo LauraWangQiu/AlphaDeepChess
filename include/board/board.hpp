@@ -19,6 +19,7 @@
 #include "square.hpp"
 #include "game_state.hpp"
 #include "move.hpp"
+#include "precomputed_move_data.hpp"
 
 /**
  * @brief Board
@@ -234,6 +235,56 @@ public:
      * 
      */
     std::string fen() const;
+
+    /**
+     * @brief returns the bitboard with 1 in the squares that all pieces of this type attacks on the position
+     * 
+     * @note piece should be valid and not Empty
+     * 
+     * @param[in] piece piece to get its attack bitboard
+     * 
+     * @return (uint64_t) attacks_bb[piece]
+     * 
+     */
+    constexpr inline uint64_t get_attacks_bb(Piece piece) const { return game_state.get_attacks_bb(piece); }
+
+    /**
+     * @brief returns the bitboard with 1 in the squares that all pieces of this type attacks on the position
+     * 
+     * @param[in] color color side to get its attack bitboard
+     * 
+     * @return (uint64_t) attacks_bb[color]
+     * 
+     */
+    constexpr inline uint64_t get_attacks_bb(ChessColor color) const { return game_state.get_attacks_bb(color); }
+
+    /**
+     * @brief set the bitboard with 1 in the squares that all pieces of this type attacks on the position
+     * 
+     * @note piece should be valid and not Empty
+     * 
+     * @param[in] piece piece to set its attack bitboard
+     * @param[in] attacks attacks bitboard
+     * 
+     */
+    constexpr inline void set_attacks_bb(Piece piece, uint64_t attacks) { game_state.set_attacks_bb(piece, attacks); }
+
+    /**
+     * @brief set the bitboard with 1 in the squares that all pieces of this type attacks on the position
+     * 
+     * @param[in] color color side to get its attack bitboard
+     * @param[in] attacks attacks bitboard
+     * 
+     */
+    constexpr inline void set_attacks_bb(ChessColor color, uint64_t attacks)
+    {
+        game_state.set_attacks_bb(color, attacks);
+    }
+
+    /**
+     * @brief recalculates all the attack bitboards for each piece in the position
+     */
+    void update_attacks_bb();
 
     /**
      * @brief state

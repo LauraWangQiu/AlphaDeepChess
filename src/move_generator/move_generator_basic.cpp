@@ -47,7 +47,7 @@ static bool en_passant_move_doesnt_allow_king_capture(Move enPassant_move, MoveG
  * 
  */
 template<MoveGeneratorType genType>
-void generate_legal_moves(MoveList& moves, const Board& board, bool* inCheck)
+void generate_legal_moves(MoveList& moves, Board& board, bool* inCheck)
 {
     MoveGeneratorInfo moveGeneratorInfo(board, moves);
 
@@ -94,8 +94,8 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* inCheck)
 }
 
 // Explicit template instantiations
-template void generate_legal_moves<ALL_MOVES>(MoveList& moves, const Board& board, bool* inCheck);
-template void generate_legal_moves<ONLY_CAPTURES>(MoveList& moves, const Board& board, bool* inCheck);
+template void generate_legal_moves<ALL_MOVES>(MoveList& moves, Board& board, bool* inCheck);
+template void generate_legal_moves<ONLY_CAPTURES>(MoveList& moves, Board& board, bool* inCheck);
 
 static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
 {

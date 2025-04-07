@@ -50,11 +50,15 @@ static bool en_passant_move_doesnt_allow_king_capture(Move enPassant_move, MoveG
  * 
  */
 template<MoveGeneratorType genType>
-void generate_legal_moves(MoveList& moves, const Board& board, bool* inCheck)
+void generate_legal_moves(MoveList& moves, Board& board, bool* inCheck)
 {
+    board.update_attacks_bb();
+
     MoveGeneratorInfo moveGeneratorInfo(board, moves);
 
-    update_move_generator_info(moveGeneratorInfo);
+    moveGeneratorInfo.king_danger_squares_mask = board.get_attacks_bb(moveGeneratorInfo.side_waiting);
+
+    update_pins_and_checks(moveGeneratorInfo.side_to_move_king_square, moveGeneratorInfo);
 
     const uint8_t num_checkers = moveGeneratorInfo.number_of_checkers;
 
@@ -90,8 +94,8 @@ void generate_legal_moves(MoveList& moves, const Board& board, bool* inCheck)
 }
 
 // Explicit template instantiations
-template void generate_legal_moves<ALL_MOVES>(MoveList& moves, const Board& board, bool* inCheck);
-template void generate_legal_moves<ONLY_CAPTURES>(MoveList& moves, const Board& board, bool* inCheck);
+template void generate_legal_moves<ALL_MOVES>(MoveList& moves, Board& board, bool* inCheck);
+template void generate_legal_moves<ONLY_CAPTURES>(MoveList& moves, Board& board, bool* inCheck);
 
 static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)
 {

@@ -349,7 +349,7 @@ void Uci::stop_command_action()
  * Evaluate chess position.
  * 
  */
-void Uci::eval_command_action() const { std::cout << "Evaluation: " << evaluate_position(board) << std::endl; }
+void Uci::eval_command_action() { std::cout << "Evaluation: " << evaluate_position(board) << std::endl; }
 
 /**
  * @brief position_command_action
@@ -694,7 +694,7 @@ uint32_t Uci::think_time(ChessColor us, uint32_t movetime, uint32_t wtime, uint3
 
     if (remaining_time >= 60000)   // time >= 1min
     {
-        return 5000;   // think 5 seconds
+        return 10000;   // think 5 seconds
     }
     else if (remaining_time >= 10000)   // 1min > time >= 10 seconds
     {

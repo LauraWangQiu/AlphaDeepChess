@@ -42,6 +42,9 @@ public:
     {
         assert(PST_TYPE == PST_TYPE_MIDDLEGAME || PST_TYPE == PST_TYPE_ENDGAME);
 
+        assert(KING_PIECE_SQUARE_TABLE[pst_index_sq(Move::castle_white_king().square_to(), ChessColor::WHITE)] ==
+               KING_PIECE_SQUARE_TABLE[pst_index_sq(Move::castle_black_king().square_to(), ChessColor::BLACK)]);
+
         assert(square.is_valid());
         assert(is_valid_piece(piece));
 
@@ -51,7 +54,7 @@ public:
         assert(piece_type != PieceType::EMPTY);
         assert(is_valid_color(color));
 
-        const int index_sq = is_white(color) ? 63 - square.value() : square.value();
+        const int index_sq = pst_index_sq(square, color);
 
         if constexpr (PST_TYPE == PST_TYPE_MIDDLEGAME) {
             return PIECE_SQUARE_TABLE[static_cast<int>(piece_type)][index_sq];
@@ -59,6 +62,19 @@ public:
         else {
             return PIECE_ENDGAME_SQUARE_TABLE[static_cast<int>(piece_type)][index_sq];
         }
+    }
+    /**
+     * @brief calculates the king safety penalization
+     * 
+     * @param[in] number_of_attackers_to_king_danger_zone number of attackers
+     * 
+     * @return (0-500) SAFETY_TABLE[number_of_attackers]
+     */
+    static inline int king_safety_penalization(int number_of_attackers_to_king_danger_zone)
+    {
+        assert(number_of_attackers_to_king_danger_zone >= 0);
+        // max of 99 attackers
+        return SAFETY_TABLE[std::min(number_of_attackers_to_king_danger_zone, 99)];
     }
 
     /**
@@ -123,6 +139,14 @@ public:
     }
 
 private:
+    static constexpr inline int pst_index_sq(Square sq, ChessColor color)
+    {
+        assert(sq.is_valid());
+        assert(is_valid_color(color));
+
+        return is_white(color) ? ((7 - static_cast<int>(sq.row())) << 3) + static_cast<int>(sq.col()) : sq.value();
+    }
+
     static inline const std::array<std::array<int, 64>, 64> init_chebyshev_distance()
     {
         std::array<std::array<int, 64>, 64> distances;
@@ -259,7 +283,7 @@ private:
         -20, -30, -30, -40, -40, -30, -30, -20,
         -10, -20, -20, -20, -20, -20, -20, -10,
         20,  20,  0,   0,   0,   0,   20,  20,
-        20,  30,  10,  0,   0,   10,  30,  20
+        20,  30,  30,  0,   0,   10,  40,  20
     };
 
     static constexpr int PAWN_ENDGAME_SQUARE_TABLE[64] = {

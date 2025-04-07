@@ -127,22 +127,22 @@ static constexpr char pieceRepresentation[NUM_CHESS_PIECES] = {'P', 'N', 'B', 'R
  * Piece raw value :
  * 
  *   W_PAWN(0) = 100,
- *   W_KNIGHT(1) = 300,
- *   W_BISHOP(2) = 310,
+ *   W_KNIGHT(1) = 320,
+ *   W_BISHOP(2) = 330,
  *   W_ROOK(3) = 500,
- *   W_QUEEN(4) = 900,
+ *   W_QUEEN(4) = 950,
  *   W_KING(5) = 500,
  *   B_PAWN(6) = 100,
- *   B_KNIGHT(7) = 300,
- *   B_BISHOP(8) = 310,
+ *   B_KNIGHT(7) = 320,
+ *   B_BISHOP(8) = 330,
  *   B_ROOK(9) = 500,
- *   B_QUEEN(10) = 900,
+ *   B_QUEEN(10) = 950,
  *   B_KING(11) = 500,
  *   EMPTY(12) = 0,
  * 
  */
-static constexpr uint32_t pieceRawValue[NUM_CHESS_PIECES] = {100U, 320U, 330U, 500U, 900U, 500U, 100U,
-                                                             320U, 330U, 500U, 900U, 500U, 0U};
+static constexpr uint32_t RAW_VALUE[NUM_CHESS_PIECES] = {100U, 320U, 330U, 500U, 950U, 500U, 100U,
+                                                         320U, 330U, 500U, 950U, 500U, 0U};
 
 
 /**
@@ -419,13 +419,13 @@ constexpr inline Piece create_piece(PieceType type, ChessColor color)
  *   W_KNIGHT(1) = 320,
  *   W_BISHOP(2) = 330,
  *   W_ROOK(3) = 500,
- *   W_QUEEN(4) = 900,
+ *   W_QUEEN(4) = 950,
  *   W_KING(5) = 500,
  *   B_PAWN(6) = 100,
  *   B_KNIGHT(7) = 320,
  *   B_BISHOP(8) = 330,
  *   B_ROOK(9) = 500,
- *   B_QUEEN(10) = 900,
+ *   B_QUEEN(10) = 950,
  *   B_KING(11) = 500,
  *   EMPTY(12) = 0,
  * 
@@ -433,7 +433,7 @@ constexpr inline Piece create_piece(PieceType type, ChessColor color)
 constexpr inline uint32_t raw_value(Piece piece)
 {
     assert(is_valid_piece(piece));
-    return pieceRawValue[static_cast<int>(piece)];
+    return RAW_VALUE[static_cast<int>(piece)];
 }
 
 /**
@@ -448,7 +448,7 @@ constexpr inline uint32_t raw_value(Piece piece)
  *   KNIGHT(7) = 320,
  *   BISHOP(8) = 330,
  *   ROOK(9) = 500,
- *   QUEEN(10) = 900,
+ *   QUEEN(10) = 950,
  *   KING(11) = 500,
  *   EMPTY(12) = 0,
  */
@@ -456,7 +456,7 @@ constexpr inline uint32_t raw_value(PieceType piece)
 {
     assert(is_valid_pieceType(piece));
 
-    return pieceRawValue[6 + static_cast<int>(piece)];
+    return RAW_VALUE[6 + static_cast<int>(piece)];
 }
 
 /**
