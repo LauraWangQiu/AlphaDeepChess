@@ -220,12 +220,11 @@ inline uint64_t magic_index_rook(uint64_t blockers, Square rook_square, uint64_t
     // we cut unnecesary information to optimize memory space: board edges and squares outside the attack mask.
     const uint64_t edges = ((ROW_1_MASK | ROW_8_MASK) & ~get_row_mask(rook_square.row())) |
         ((COL_A_MASK | COL_H_MASK) & ~get_col_mask(rook_square.col()));
-
     blockers &= rook_attacks & ~edges;
 
 #ifdef __BMI2__
-    // Optimized version using pext if available.
-    return _pext_u64(blockers, rook_magic(rook_square));
+    const uint64_t occupancy_mask = rook_attacks & ~edges;
+    return _pext_u64(blockers, occupancy_mask);   // Optimized version using pext if available.
 #else
     // index is calculated by multiplying blockers by the magic number, then squeeze all bits to the right
     return (blockers * rook_magic(rook_square)) >> (64 - ROOK_OCCUPANCY_NUMBER[rook_square]);
@@ -254,7 +253,8 @@ inline uint64_t magic_index_bishop(uint64_t blockers, Square bishop_square, uint
     blockers &= bishop_attacks & ~edges;
 
 #ifdef __BMI2__
-    return _pext_u64(blockers, bishop_magic(bishop_square));
+    const uint64_t occupancy_mask = bishop_attacks & ~edges;
+    return _pext_u64(blockers, occupancy_mask);   // Optimized version using pext if available.
 #else
     // index is calculated by multiplying blockers by the magic number, then squeeze all bits to the right
     return (blockers * bishop_magic(bishop_square)) >> (64 - BISHOP_OCCUPANCY_NUMBER[bishop_square]);
