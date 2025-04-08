@@ -64,7 +64,7 @@ endif()
 # Compilation settings for Release mode
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     target_compile_definitions(testsAlphaDeepChess PRIVATE _RELEASE NDEBUG)
-    target_compile_options(testsAlphaDeepChess PRIVATE 
+    set(RELEASE_FLAGS
         #-O3                   
         -Ofast                # Aggressive optimization
         -march=native         # CPU-specific instructions
@@ -74,6 +74,15 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
         -fomit-frame-pointer  # Free up a register
         #-fno-exceptions       # Disable exceptions
         -fno-rtti             # Disable RTTI
-        -mbmi2                # for pext instruction
     )
+
+    if(COMPILER_SUPPORTS_BMI2)
+    list(APPEND RELEASE_FLAGS -mbmi2)  # for pext instruction
+    message(STATUS "Adding -mbmi2 flag in Release mode")
+    else()
+        message(STATUS "Compiler does not support -mbmi2; not adding it")
+    endif()
+
+    target_compile_options(testsAlphaDeepChess PRIVATE ${RELEASE_FLAGS})
+
 endif()

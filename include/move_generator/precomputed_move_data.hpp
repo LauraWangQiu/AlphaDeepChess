@@ -17,7 +17,6 @@
 typedef std::array<std::array<uint64_t, ROOK_TABLE_SIZE>, NUM_SQUARES> TableRookMoves;
 typedef std::array<std::array<uint64_t, BISHOP_TABLE_SIZE>, NUM_SQUARES> TableBishopMoves;
 
-
 /**
  * @brief PrecomputedMoveData
  *
