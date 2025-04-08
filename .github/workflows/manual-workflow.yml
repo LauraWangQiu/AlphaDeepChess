@@ -99,7 +99,6 @@ jobs:
                 -DUSE_SEARCH_MULTITHREAD=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_multithread" ]] && echo ON || echo OFF) \
                 -DUSE_SEARCH_TRANSPOSITION_TABLE=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_transposition_table" ]] && echo ON || echo OFF) \
                 -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_tt_extensions_reductions" ]] && echo ON || echo OFF) \
-                -DEXECUTABLE_NAME=AlphaDeepChess_0 \
                 ../..
           make
 
