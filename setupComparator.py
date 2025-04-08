@@ -4,8 +4,14 @@ import subprocess
 import requests
 import tarfile
 import zipfile
+import argparse
 
 default_comparator_dir = "enginesComparator"
+
+os_name = platform.system()
+is_windows = os_name == "Windows"
+is_linux = os_name == "Linux"
+is_macos = os_name == "Darwin"
 
 def download_file(url, dest):
     response = requests.get(url, stream=True)
@@ -21,12 +27,7 @@ def extract_tar(file, dest):
     with tarfile.open(file, 'r:gz') as tar_ref:
         tar_ref.extractall(dest)
 
-def main():
-    os_name = platform.system()
-    is_windows = os_name == "Windows"
-    is_linux = os_name == "Linux"
-    is_macos = os_name == "Darwin"
-
+def download_cutechess():
     if is_windows:
         cutechess_file = "cutechess-1.3.1-win64.zip"
     elif is_linux:
@@ -55,6 +56,7 @@ def main():
         os.remove(cutechess_file)
         print("CuteChess 1.3.1 is ready to use.")
 
+def download_stockfish():
     if is_windows:
         stockfish_file = "stockfish-windows-x86-64.zip"
     elif is_linux:
@@ -74,6 +76,15 @@ def main():
         
     os.remove(stockfish_file)
     print("Stockfish 17 is ready to use.")
+
+def main():
+    download_cutechess()
+
+    parser = argparse.ArgumentParser(description="Setup comparator environment.")
+    parser.add_argument("--download-stockfish", action="store_true", help="Download Stockfish engine")
+    args = parser.parse_args()
+    if args.download_stockfish:
+        download_stockfish()
 
 if __name__ == "__main__":
     main()

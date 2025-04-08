@@ -2,6 +2,60 @@ name: Manual Workflow
 
 on:
   workflow_dispatch:
+    inputs:
+      test_id:
+        description: "Select the test to run"
+        type: choice
+        options:
+          - "0: CUSTOM TEST vs Stockfish"
+          - "1: search_basic vs search_multithread"
+          - "2: search_basic vs search_transposition_table"
+          - "3: move_generator_basic vs move_generator_magic_bitboards"
+          - "4: Elo Performance Test vs Stockfish (1500 Elo)"
+          - "5: Elo Performance Test vs Stockfish (1800 Elo)"
+          - "6: Elo Performance Test vs Stockfish (2000 Elo)"
+          - "7: Elo Performance Test vs Stockfish (2200 Elo)"
+        default: "0: CUSTOM TEST vs Stockfish"
+      games:
+        description: "Number of games to play"
+        required: false
+        default: "10"
+      st:
+        description: "Search time per move (in seconds)"
+        required: false
+        default: "5"
+      depth:
+        description: "Search depth"
+        required: false
+        default: "5"
+      pgn_file:
+        description: "PGN output filename"
+        required: false
+        default: "results.pgn"
+      epd_file:
+        description: "EPD output filename"
+        required: false
+        default: "results.epd"
+      log_file:
+        description: "Log output filename"
+        required: false
+        default: "results.log"
+      move_generator:
+        description: "Select the move generator to use (only for CUSTOM TEST)"
+        type: choice
+        options:
+          - move_generator_basic
+          - move_generator_magic_bitboards
+        default: move_generator_magic_bitboards
+      search_algorithm:
+        description: "Select the search algorithm to use (only for CUSTOM TEST)"
+        type: choice
+        options:
+          - search_basic
+          - search_multithread
+          - search_transposition_table
+          - search_tt_extensions_reductions
+        default: search_transposition_table
 
 jobs:
   build-and-test:
@@ -26,25 +80,113 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests
 
-    - name: Run setup script
+    - name: Extract numeric test_id
+      id: extract_test_id
       run: |
-        chmod +x setup_linux.sh
-        ./setup_linux.sh
-      
-    - name: Build project in release mode
+        echo "TEST_ID=$(echo '${{ github.event.inputs.test_id }}' | cut -d':' -f1)" >> $GITHUB_ENV
+
+    - name: Build with CMake (only release mode)
       run: |
+        mkdir -p build/release
         cd build/release
-        make
+
+        if [ "$TEST_ID" == "0" ]; then
+          echo "Custom test"
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_MOVE_GENERATOR_BASIC=$([[ "${{ github.event.inputs.move_generator }}" == "move_generator_basic" ]] && echo ON || echo OFF) \
+                -DUSE_MOVE_GENERATOR_MAGIC_BITBOARDS=$([[ "${{ github.event.inputs.move_generator }}" == "move_generator_magic_bitboards" ]] && echo ON || echo OFF) \
+                -DUSE_SEARCH_BASIC=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_basic" ]] && echo ON || echo OFF) \
+                -DUSE_SEARCH_MULTITHREAD=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_multithread" ]] && echo ON || echo OFF) \
+                -DUSE_SEARCH_TRANSPOSITION_TABLE=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_transposition_table" ]] && echo ON || echo OFF) \
+                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_tt_extensions_reductions" ]] && echo ON || echo OFF) \
+                -DEXECUTABLE_NAME=AlphaDeepChess_0 \
+                ../..
+          make
+
+        elif [ "$TEST_ID" == "1" ]; then
+          echo "Running Test 1: search_basic vs search_multithread"
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_SEARCH_BASIC=ON \
+                -DUSE_SEARCH_MULTITHREAD=OFF \
+                -DUSE_SEARCH_TRANSPOSITION_TABLE=OFF \
+                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=OFF \
+                -DEXECUTABLE_NAME=AlphaDeepChess_search_basic \
+                ../..
+          make
+
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_SEARCH_BASIC=OFF \
+                -DUSE_SEARCH_MULTITHREAD=ON \
+                -DUSE_SEARCH_TRANSPOSITION_TABLE=OFF \
+                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=OFF \
+                -DEXECUTABLE_NAME=AlphaDeepChess_search_multithread \
+                ../..
+          make
+
+        elif [ "$TEST_ID" == "2" ]; then
+          echo "Running Test 2: search_basic vs search_transposition_table"
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_SEARCH_BASIC=ON \
+                -DUSE_SEARCH_MULTITHREAD=OFF \
+                -DUSE_SEARCH_TRANSPOSITION_TABLE=OFF \
+                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=OFF \
+                -DEXECUTABLE_NAME=AlphaDeepChess_search_basic \
+                ../..
+          make
+
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_SEARCH_BASIC=ON \
+                -DUSE_SEARCH_MULTITHREAD=OFF \
+                -DUSE_SEARCH_TRANSPOSITION_TABLE=ON \
+                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=OFF \
+                -DEXECUTABLE_NAME=AlphaDeepChess_search_transposition_table \
+                ../..
+          make
+
+        elif [ "$TEST_ID" == "3" ]; then
+          echo "Running Test 3: move_generator_basic vs move_generator_magic_bitboards"
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_MOVE_GENERATOR_BASIC=ON \
+                -DUSE_MOVE_GENERATOR_MAGIC_BITBOARDS=OFF \
+                -DEXECUTABLE_NAME=AlphaDeepChess_move_generator_basic \
+                ../..
+          make
+
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_MOVE_GENERATOR_BASIC=OFF \
+                -DUSE_MOVE_GENERATOR_MAGIC_BITBOARDS=ON \
+                -DEXECUTABLE_NAME=AlphaDeepChess_move_generator_magic_bitboards \
+                ../..
+          make
+        else
+          echo "Running Test ${{ github.event.inputs.test_id }}"
+          cmake -DCMAKE_BUILD_TYPE=Release ../..
+          make
+        fi
+        
         cd ../..
 
     - name: Run setupComparator.py
-      run: python setupComparator.py
+      run: |
+        if [[ "$TEST_ID" -ge 4 || "$TEST_ID" == "0" ]]; then
+          python setupComparator.py --download-stockfish
+        else
+          python setupComparator.py
+        fi
 
     - name: Run tests
-      run: python tests.py
+      run: |
+        python tests.py \
+          --test-id $TEST_ID \
+          --games ${{ github.event.inputs.games }} \
+          --st ${{ github.event.inputs.st }} \
+          --depth ${{ github.event.inputs.depth }} \
+          --pgn ${{ github.event.inputs.pgn_file }} \
+          --epd ${{ github.event.inputs.epd_file }} \
+          --log ${{ github.event.inputs.log_file }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: engines-comparator-artifacts
-        path: enginesComparator/test*.*
+        path: enginesComparator/*.*

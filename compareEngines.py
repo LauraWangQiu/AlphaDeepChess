@@ -6,6 +6,12 @@ import re
 import json
 
 default_comparator_dir = "enginesComparator"
+engines_config_path = "engines.json"
+
+os_name = platform.system()
+is_windows = os_name == "Windows"
+is_linux = os_name == "Linux"
+is_macos = os_name == "Darwin"
 
 def parse_options(options_list):
     options_dict = {}
@@ -21,12 +27,7 @@ def parse_options(options_list):
                 print(f"Invalid option format: {option}. Expected format is 'engine_name.option_name=value'.")
     return options_dict
 
-def main(pgn_path, edp_path, log_path, build_type, games, tc, st, depth, timemargin, concurrency, options):
-    os_name = platform.system()
-    is_windows = os_name == "Windows"
-    is_linux = os_name == "Linux"
-    is_macos = os_name == "Darwin"
-
+def main(pgn_path, edp_path, log_path, build_type, games, tc, st, depth, timemargin, concurrency, engines, options):
     if is_windows:
         cutechess_internal_dir = "cutechess-1.3.1-win64"
         stockfish_internal_dir = "stockfish-windows-x86-64"
@@ -42,30 +43,24 @@ def main(pgn_path, edp_path, log_path, build_type, games, tc, st, depth, timemar
 
     options_dict = parse_options(options)
 
-    engines_config_path = "engines.json"
-    engines_config_content = [
-        {
-            "name": "AlphaDeepChess",
-            "command": f"../build/{build_type}/AlphaDeepChess",
+    engines_config_content = []
+    for engine in engines:
+        engine_config = {
+            "name": engine,
+            "command": f"../build/{build_type}/{engine}" if engine != "Stockfish" else f"./stockfish/stockfish/{stockfish_internal_dir}",
             "protocol": "uci",
-            "options": options_dict.get("AlphaDeepChess", {}),
-        },
-        {
-            "name": "Stockfish",
-            "command": f"./stockfish/stockfish/{stockfish_internal_dir}",
-            "protocol": "uci",
-            "options": options_dict.get("Stockfish", {}),
+            "options": options_dict.get(engine, {}),
         }
-    ]
+        engines_config_content.append(engine_config)
 
     with open(engines_config_path, 'w', encoding='utf8') as f:
         json.dump(engines_config_content, f, indent=4)
 
     cutechess_cmd = [
         os.path.join(cutechess_dir, "cutechess-cli"),
-        "-engine", "conf=AlphaDeepChess",
-        "-engine", "conf=Stockfish",
     ]
+    for engine in engines_config_content:
+        cutechess_cmd.extend(["-engine", f"conf={engine['name']}"])
 
     for engine in engines_config_content:
         engine_options = []
@@ -115,10 +110,16 @@ if __name__ == "__main__":
     parser.add_argument("-depth", type=int, help="Search depth")
     parser.add_argument("-concurrency", type=int, help="Concurrency level")
     parser.add_argument(
+        "-engines",
+        nargs="+",
+        required=True,
+        help="List of engine names to test"
+    )
+    parser.add_argument(
         "-options",
         nargs="*",
         help="List of UCI options for engines in the format 'engine_name.option_name=value' (e.g., 'Stockfish.UCI_LimitStrength=true AlphaDeepChess.UCI_Elo=1500')"
     )
     args = parser.parse_args()
 
-    main(args.pgn, args.epd, args.log, args.buildType, args.games, args.tc, args.st, args.depth, args.timemargin, args.concurrency, args.options)
+    main(args.pgn, args.epd, args.log, args.buildType, args.games, args.tc, args.st, args.depth, args.timemargin, args.concurrency, args.engines, args.options)
