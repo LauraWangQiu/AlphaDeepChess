@@ -22,7 +22,10 @@ def get_engines_and_options(test_id):
     engines = []
     options = {}
 
-    if test_id == 1:
+    if test_id == 0:
+        # Custom test 0: AlphaDeepChess vs Stockfish
+        engines = ["AlphaDeepChess", "Stockfish"]
+    elif test_id == 1:
         # Test 1: AlphaDeepChess_search_basic vs AlphaDeepChess_search_multithread
         engines = ["AlphaDeepChess_search_basic", "AlphaDeepChess_search_multithread"]
     elif test_id == 2:
