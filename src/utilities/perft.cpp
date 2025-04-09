@@ -12,6 +12,7 @@
 #include "board.hpp"
 #include "transposition_table.hpp"
 #include "zobrist.hpp"
+#include "search_utils.hpp"
 #include <chrono>
 
 // store node result in transposition table
@@ -25,6 +26,7 @@ static inline bool get_nodes_in_tt(uint64_t zobrist_key, uint8_t depth, int& nod
  * 
  * Count all the nodes of the position until the maximum depth.
  * 
+ * @tparam use_tt use transposition table
  * @param[in,out] board The output stream
  * @param[in] depth maximum depth to reach.
  * @param[in] use_tt use of transposition table to speed up process
@@ -32,7 +34,8 @@ static inline bool get_nodes_in_tt(uint64_t zobrist_key, uint8_t depth, int& nod
  * @return counted nodes.
  * 
  */
-static uint64_t perft_recursive(Board& board, uint8_t depth, bool use_tt);
+template<bool use_tt>
+static uint64_t perft_recursive(Board& board, uint8_t depth);
 
 /**
  * @brief perft
@@ -75,7 +78,8 @@ void perft(const std::string& FEN, uint64_t depth, MoveNodesList& moveNodeList, 
 
     for (int i = 0; i < moves.size(); i++) {
         board.make_move(moves[i]);
-        moveNodeList[i].second = perft_recursive(board, depth - 1, use_tt);
+        uint64_t nodes = use_tt ? perft_recursive<true>(board, depth - 1) : perft_recursive<false>(board, depth - 1);
+        moveNodeList[i].second = nodes;
         board.unmake_move(moves[i], game_state);
     }
 
@@ -91,6 +95,7 @@ void perft(const std::string& FEN, uint64_t depth, MoveNodesList& moveNodeList, 
  * 
  * Count all the nodes of the position until the maximum depth.
  * 
+ * @tparam use_tt use transposition table
  * @param[in,out] board The output stream
  * @param[in] depth maximum depth to reach.
  * @param[in] use_tt use of transposition table to speed up process
@@ -98,7 +103,8 @@ void perft(const std::string& FEN, uint64_t depth, MoveNodesList& moveNodeList, 
  * @return counted nodes.
  * 
  */
-static uint64_t perft_recursive(Board& board, uint8_t depth, bool use_tt)
+template<bool use_tt>
+static uint64_t perft_recursive(Board& board, uint8_t depth)
 {
     assert(board.state().get_zobrist_key() == Zobrist::hash(board));
 
@@ -109,7 +115,11 @@ static uint64_t perft_recursive(Board& board, uint8_t depth, bool use_tt)
     const GameState game_state = board.state();
     const uint64_t zobrist_key = game_state.get_zobrist_key();
 
-    if (use_tt) {
+    if constexpr (use_tt) {
+        prefetch(TranspositionTable::get_address_of_entry(zobrist_key));
+    }
+
+    if constexpr (use_tt) {
         int nodes_tt = 0;
 
         if (get_nodes_in_tt(zobrist_key, depth, nodes_tt)) {
@@ -125,11 +135,11 @@ static uint64_t perft_recursive(Board& board, uint8_t depth, bool use_tt)
 
     for (int i = 0; i < moves.size(); i++) {
         board.make_move(moves[i]);
-        nodes += perft_recursive(board, depth - 1, use_tt);
+        nodes += perft_recursive<use_tt>(board, depth - 1);
         board.unmake_move(moves[i], game_state);
     }
 
-    if (use_tt) {
+    if constexpr (use_tt) {
         store_nodes_in_tt(zobrist_key, depth, int(nodes));
     }
 

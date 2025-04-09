@@ -115,6 +115,18 @@ public:
      */
     static inline constexpr uint32_t get_num_entries() { return entries.size(); }
 
+    /**
+     * @brief returns the memory address of the entry in the tt
+     *
+     * @param[in] zobrist_key hash of the position
+     * 
+     * @return &(entries[zobrist_key])
+     */
+    static inline constexpr const void* get_address_of_entry(uint64_t zobrist_key)
+    {
+        return &(entries[index_in_table(zobrist_key)]);
+    }
+
     TranspositionTable() = delete;
     ~TranspositionTable() = delete;
 

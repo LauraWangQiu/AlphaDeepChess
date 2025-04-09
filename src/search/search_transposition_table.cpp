@@ -170,6 +170,8 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
     Board& board = context.board;
     const uint64_t zobrist_key = board.state().get_zobrist_key();
 
+    prefetch(TranspositionTable::get_address_of_entry(zobrist_key));   // load to cache the tt entry
+
     if (ply > 0) History::push_position(zobrist_key);
 
     // check transposition table

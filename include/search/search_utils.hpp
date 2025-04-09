@@ -13,6 +13,9 @@
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
+#ifdef _MSC_VER
+#include <xmmintrin.h> // For _mm_prefetch
+#endif
 
 // value that represents an infinite search depth.
 constexpr uint32_t INF_DEPTH = 1024;
@@ -106,4 +109,23 @@ inline void insert_new_result(SearchResults& results, int depth, int evaluation,
     results.depthReached++;
 
     results.data_available_cv.notify_one();
+}
+
+
+/**
+ * @brief Tells the CPU to load data from memory into the cache.
+ * 
+ * @param[in] addr Memory address to prefetch.
+ */
+inline void prefetch(const void* addr)
+{
+#ifdef NO_PREFETCH
+    (void)addr; // suppress unused param warning
+#else
+    #if defined(_MSC_VER)
+        _mm_prefetch((char const*)addr, _MM_HINT_T0);
+    #else
+        __builtin_prefetch(addr);
+    #endif
+#endif
 }
