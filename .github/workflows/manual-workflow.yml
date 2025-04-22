@@ -10,11 +10,13 @@ on:
           - "0: CUSTOM TEST vs Stockfish"
           - "1: search_basic vs search_multithread"
           - "2: search_basic vs search_transposition_table"
-          - "3: move_generator_basic vs move_generator_magic_bitboards"
-          - "4: Elo Performance Test vs Stockfish (1500 Elo)"
-          - "5: Elo Performance Test vs Stockfish (1800 Elo)"
-          - "6: Elo Performance Test vs Stockfish (2000 Elo)"
-          - "7: Elo Performance Test vs Stockfish (2200 Elo)"
+          - "3: search_transposition_table vs search_tt_reductions"
+          - "4: move_generator_basic vs move_generator_magic_bitboards"
+          - "5: evaluation_dynamic vs evaluation_safety_mobility"
+          - "6: Elo Performance Test vs Stockfish (1500 Elo)"
+          - "7: Elo Performance Test vs Stockfish (1800 Elo)"
+          - "8: Elo Performance Test vs Stockfish (2000 Elo)"
+          - "9: Elo Performance Test vs Stockfish (2200 Elo)"
         default: "0: CUSTOM TEST vs Stockfish"
       games:
         description: "Number of games to play"
@@ -40,6 +42,13 @@ on:
         description: "Log output filename"
         required: false
         default: "results.log"
+      evaluation:
+        description: "Select the evaluation to use (only for CUSTOM TEST)"
+        type: choice
+        options:
+          - evaluation_dynamic
+          - evaluation_safety_mobility
+        default: evaluation_safety_mobility
       move_generator:
         description: "Select the move generator to use (only for CUSTOM TEST)"
         type: choice
@@ -55,7 +64,7 @@ on:
           - search_multithread
           - search_transposition_table
           - search_tt_extensions_reductions
-        default: search_transposition_table
+        default: search_tt_extensions_reductions
 
 jobs:
   build-and-test:
@@ -93,6 +102,8 @@ jobs:
         if [ "$TEST_ID" == "0" ]; then
           echo "Custom test"
           cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_EVALUATION_DYNAMIC=$([[ "${{ github.event.inputs.evaluation }}" == "evaluation_dynamic" ]] && echo ON || echo OFF) \
+                -DUSE_EVALUATION_SAFETY_MOBILITY=$([[ "${{ github.event.inputs.evaluation }}" == "evaluation_safety_mobility" ]] && echo ON || echo OFF) \
                 -DUSE_MOVE_GENERATOR_BASIC=$([[ "${{ github.event.inputs.move_generator }}" == "move_generator_basic" ]] && echo ON || echo OFF) \
                 -DUSE_MOVE_GENERATOR_MAGIC_BITBOARDS=$([[ "${{ github.event.inputs.move_generator }}" == "move_generator_magic_bitboards" ]] && echo ON || echo OFF) \
                 -DUSE_SEARCH_BASIC=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_basic" ]] && echo ON || echo OFF) \
@@ -134,7 +145,7 @@ jobs:
           make
 
           cmake -DCMAKE_BUILD_TYPE=Release \
-                -DUSE_SEARCH_BASIC=ON \
+                -DUSE_SEARCH_BASIC=OFF \
                 -DUSE_SEARCH_MULTITHREAD=OFF \
                 -DUSE_SEARCH_TRANSPOSITION_TABLE=ON \
                 -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=OFF \
@@ -143,6 +154,42 @@ jobs:
           make
 
         elif [ "$TEST_ID" == "3" ]; then
+          echo "Running Test 3: search_transposition_table vs search_tt_reductions"
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_SEARCH_BASIC=OFF \
+                -DUSE_SEARCH_MULTITHREAD=OFF \
+                -DUSE_SEARCH_TRANSPOSITION_TABLE=ON \
+                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=OFF \
+                -DEXECUTABLE_NAME=AlphaDeepChess_search_transposition_table \
+                ../..
+          make
+
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_SEARCH_BASIC=OFF \
+                -DUSE_SEARCH_MULTITHREAD=OFF \
+                -DUSE_SEARCH_TRANSPOSITION_TABLE=OFF \
+                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=ON \
+                -DEXECUTABLE_NAME=AlphaDeepChess_search_tt_reductions \
+                ../..
+          make
+
+        elif [ "$TEST_ID" == "4" ]; then
+          echo "Running Test 4: evaluation_dynamic vs evaluation_safety_mobility"
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_EVALUATION_DYNAMIC=ON \
+                -DUSE_EVALUATION_SAFETY_MOBILITY=OFF \
+                -DEXECUTABLE_NAME=AlphaDeepChess_evaluation_dynamic \
+                ../..
+          make
+
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_EVALUATION_DYNAMIC=OFF \
+                -DUSE_EVALUATION_SAFETY_MOBILITY=ON \
+                -DEXECUTABLE_NAME=AlphaDeepChess_evaluation_safety_mobility \
+                ../..
+          make
+
+        elif [ "$TEST_ID" == "5" ]; then
           echo "Running Test 3: move_generator_basic vs move_generator_magic_bitboards"
           cmake -DCMAKE_BUILD_TYPE=Release \
                 -DUSE_MOVE_GENERATOR_BASIC=ON \
@@ -157,6 +204,7 @@ jobs:
                 -DEXECUTABLE_NAME=AlphaDeepChess_move_generator_magic_bitboards \
                 ../..
           make
+
         else
           echo "Running Test ${{ github.event.inputs.test_id }}"
           cmake -DCMAKE_BUILD_TYPE=Release ../..

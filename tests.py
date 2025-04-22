@@ -32,10 +32,16 @@ def get_engines_and_options(test_id):
         # Test 2: AlphaDeepChess_search_basic vs AlphaDeepChess_search_transposition_table
         engines = ["AlphaDeepChess_search_basic", "AlphaDeepChess_search_transposition_table"]
     elif test_id == 3:
-        # Test 3: move_generator_basic vs move_generator_magic_bitboards
-        engines = ["AlphaDeepChess_move_generator_basic", "AlphaDeepChess_move_generator_magic_bitboards"]
+        # Test 3: search_transposition_table vs search_tt_reductions
+        engines = ["AlphaDeepChess_search_transposition_table", "AlphaDeepChess_search_tt_reductions"]
     elif test_id == 4:
-        # Test 4: Elo Performance Test vs Stockfish (1500 Elo)
+        # Test 4: move_generator_basic vs move_generator_magic_bitboards
+        engines = ["AlphaDeepChess_move_generator_basic", "AlphaDeepChess_move_generator_magic_bitboards"]
+    elif test_id == 5:
+        # Test 5: evaluation_dynamic vs evaluation_safety_mobility
+        engines = ["AlphaDeepChess_evaluation_dynamic", "AlphaDeepChess_evaluation_safety_mobility"]
+    elif test_id == 6:
+        # Test 6: Elo Performance Test vs Stockfish (1500 Elo)
         engines = ["AlphaDeepChess", "Stockfish"]
         options = {
             "Stockfish": {
@@ -43,8 +49,8 @@ def get_engines_and_options(test_id):
                 "UCI_Elo": "1500"
             }
         }
-    elif test_id == 5:
-        # Test 5: Elo Performance Test vs Stockfish (1800 Elo)
+    elif test_id == 7:
+        # Test 7: Elo Performance Test vs Stockfish (1800 Elo)
         engines = ["AlphaDeepChess", "Stockfish"]
         options = {
             "Stockfish": {
@@ -52,8 +58,8 @@ def get_engines_and_options(test_id):
                 "UCI_Elo": "1800"
             }
         }
-    elif test_id == 6:
-        # Test 6: Elo Performance Test vs Stockfish (2000 Elo)
+    elif test_id == 8:
+        # Test 8: Elo Performance Test vs Stockfish (2000 Elo)
         engines = ["AlphaDeepChess", "Stockfish"]
         options = {
             "Stockfish": {
@@ -61,8 +67,8 @@ def get_engines_and_options(test_id):
                 "UCI_Elo": "2000"
             }
         }
-    elif test_id == 7:
-        # Test 7: Elo Performance Test vs Stockfish (2200 Elo)
+    elif test_id == 9:
+        # Test 9: Elo Performance Test vs Stockfish (2200 Elo)
         engines = ["AlphaDeepChess", "Stockfish"]
         options = {
             "Stockfish": {
