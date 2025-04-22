@@ -78,8 +78,6 @@ int evaluate_position(Board& board)
     const int king_shield_bonus = king_shield_bonus_white - king_shield_bonus_black;
 
     middlegame_eval += king_shield_bonus + king_safety_penality;
-    endgame_eval += king_safety_penality / 8;
-
 
     const int blended_eval = (middlegame_eval * middlegame_percentage + endgame_eval * endgame_percentage) / 24;
 

@@ -218,13 +218,13 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
 
         constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
 
-        const int reduction = !isCheck && depth >= 3 && i >= 3 ? 1 : 0;
+        const int reduction = !isCheck && depth >= 3 && i >= 10 ? 1 : 0;
 
         board.make_move(moves[i]);
         int eval = alpha_beta_search<nextSearchType>(stop, depth - 1 - reduction, ply + 1, alpha, beta, context);
 
         if (reduction) {
-            const bool needs_full_search = MAXIMIZING_WHITE ? eval > alpha : eval < beta;
+            const bool needs_full_search = eval > alpha && eval < beta;
             if (needs_full_search) {
                 eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, context);
             }
