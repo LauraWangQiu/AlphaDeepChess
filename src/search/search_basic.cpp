@@ -179,6 +179,9 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
     else if (ply > 0 && (fify_move_rule_draw || History::threefold_repetition_detected(fifty_move_rule_counter))) {
         return 0;
     }
+    else if (isCheck) {
+        depth++;   // check extension, never enter quiescence search while in check
+    }
     else if (depth == 0) {
         return quiescence_search<searchType>(stop, ply, alpha, beta, context);
     }

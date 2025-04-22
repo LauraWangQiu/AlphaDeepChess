@@ -1,5 +1,5 @@
 /**
- * @file evaluation_dynamic.cpp
+ * @file evaluation_safety_mobility.cpp
  * @brief evaluation services implementation.
  *
  * chess position dynamic evaluation implementation.
@@ -62,8 +62,8 @@ int evaluate_position(Board& board)
         const int bonus_endgame = PrecomputedEvalData::get_piece_square_table<PST_TYPE_ENDGAME>(piece, square);
         const int mobility = mobility_piece_score(square, piece, board);
 
-        const int piece_value_middlegame = piece_raw_value + bonus_middlegame + 2 * mobility;
-        const int piece_value_endgame = piece_raw_value + bonus_endgame + 2 * mobility;
+        const int piece_value_middlegame = piece_raw_value + bonus_middlegame + mobility;
+        const int piece_value_endgame = piece_raw_value + bonus_endgame + mobility;
 
         middlegame_eval += is_white(color) ? piece_value_middlegame : -piece_value_middlegame;
         endgame_eval += is_white(color) ? piece_value_endgame : -piece_value_endgame;
@@ -78,7 +78,7 @@ int evaluate_position(Board& board)
     const int king_shield_bonus = king_shield_bonus_white - king_shield_bonus_black;
 
     middlegame_eval += king_shield_bonus + king_safety_penality;
-    endgame_eval += king_safety_penality / 4;
+    endgame_eval += king_safety_penality / 8;
 
 
     const int blended_eval = (middlegame_eval * middlegame_percentage + endgame_eval * endgame_percentage) / 24;

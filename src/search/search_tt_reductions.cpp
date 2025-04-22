@@ -1,8 +1,8 @@
 /**
- * @file search_tt_extensions_reductions.cpp
+ * @file search_tt_reductions.cpp
  * @brief search services.
  *
- * chess search with transposition table implementation. 
+ * chess search with transposition table and reductions implementation. 
  * 
  * https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
  * https://www.chessprogramming.org/Alpha-Beta
@@ -24,16 +24,12 @@
 static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results, int max_depth, SearchContext& context);
 
 template<SearchType searchType>
-static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, int extension,
-                             int reduction, SearchContext& context);
+static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context);
 
 template<SearchType searchType>
 static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int beta, SearchContext& context);
 
 static bool get_entry_in_transposition_table(uint64_t zobrist, int depth, int alpha, int beta, int& eval, Move& move);
-
-static int search_extension(const Board& board, Move move, bool in_check, int depth);
-static inline int search_reduction(int num_move, bool in_check, int depth);
 
 /**
   * @brief search(std::atomic<bool>&, SearchResults&, Board&, int32_t)
@@ -113,23 +109,8 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
         context.bestMoveInIteration = Move::null();
         context.bestEvalInIteration = is_white(side_to_move) ? -INF_EVAL : +INF_EVAL;
 
-        // if it is not the first iteration, adjust alpha and beta
-        if (depth > 1) {
-            alpha = context.bestEvalFound - ASPIRATION_MARGIN;
-            beta  = context.bestEvalFound + ASPIRATION_MARGIN;
-        }
-
-        is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, 0, 0, context)
-                               : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, 0, 0, context);
-
-        // if the evaluation is out of bounds of the window, redo the search with -INF_EVAL and +INF_EVAL
-        if (context.bestEvalInIteration <= alpha || context.bestEvalInIteration >= beta) {
-            alpha = -INF_EVAL;
-            beta  = +INF_EVAL;
-
-            is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, 0, 0, context)
-                                   : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, 0, 0, context);
-        }
+        is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, context)
+                               : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, context);
 
         if (stop) {
             break;
@@ -166,14 +147,15 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
    * 
    */
 template<SearchType searchType>
-static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, int extension,
-                             int reduction, SearchContext& context)
+static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context)
 {
     constexpr bool MAXIMIZING_WHITE = searchType == MAXIMIZE_WHITE;
     constexpr bool MINIMIZING_BLACK = searchType == MINIMIZE_BLACK;
 
     Board& board = context.board;
     const uint64_t zobrist_key = board.state().get_zobrist_key();
+
+    //prefetch(TranspositionTable::get_address_of_entry(zobrist_key));   // load to cache the tt entry
 
     if (ply > 0) History::push_position(zobrist_key);
 
@@ -211,7 +193,10 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
     else if (ply > 0 && (fify_move_rule_draw || History::threefold_repetition_detected(fifty_move_rule_counter))) {
         return 0;
     }
-    else if (depth + extension - reduction <= 0) {
+    else if (isCheck) {
+        depth++;   // check extension, never enter quiescence search while in check
+    }
+    else if (depth <= 0) {
         return quiescence_search<searchType>(stop, ply, alpha, beta, context);
     }
 
@@ -233,17 +218,15 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
 
         constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
 
-        int extension = search_extension(board, moves[i], isCheck, depth);
-        int reduction = search_reduction(i, isCheck, depth);
+        const int reduction = !isCheck && depth >= 3 && i >= 3 ? 1 : 0;
 
         board.make_move(moves[i]);
-        int eval =
-            alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, extension, reduction, context);
+        int eval = alpha_beta_search<nextSearchType>(stop, depth - 1 - reduction, ply + 1, alpha, beta, context);
 
         if (reduction) {
-            const bool need_full_search = MAXIMIZING_WHITE ? eval > alpha : eval < beta;
-            if (need_full_search) {
-                eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, extension, 0, context);
+            const bool needs_full_search = MAXIMIZING_WHITE ? eval > alpha : eval < beta;
+            if (needs_full_search) {
+                eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, context);
             }
         }
 
@@ -409,47 +392,7 @@ static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int be
 }
 
 /**
-  * @brief extends the search by 1 move if position is interesting
-  *    
-  * @param[in] board chess position
-  * @param[in] move move to analyze
-  * @param[in] in_check if position is check
-  * 
-  * @return (int) extension number
-  * 
-  */
-static int search_extension(const Board& board, Move move, bool in_check, int depth)
-{
-    if (depth > 2) {
-        return 0;   // only extend the search if we are in the last depth
-    }
-    else if (in_check) {
-        return 1;   // check extension
-    }
-
-    const Square sq_origin = move.square_from();
-    const Square sq_end = move.square_to();
-    const Piece moved_piece = board.get_piece(sq_origin);
-
-    // pre-promotion rank extension
-    const bool is_pawn_move = piece_to_pieceType(moved_piece) == PieceType::PAWN;
-    const bool move_to_prepromotion_row = sq_end.mask() & (ROW_1_MASK | ROW_7_MASK);
-    const bool is_prepromotion_pawn_move = is_pawn_move && move_to_prepromotion_row;
-
-    const int extension = is_prepromotion_pawn_move ? 1 : 0;
-
-    return extension;
-}
-
-static inline int search_reduction(int num_move, bool in_check, int depth)
-{
-    return depth >= 3 && !in_check && num_move > 5;
-}
-
-/**
-  * @brief get_entry_in_transposition_table(uint64_t, int, int, int, int&, Move&)
-  * 
-  * Reads an entry in the transposition table
+  * @brief Reads an entry in the transposition table
   * 
   * @param[in] zobrist hash key of the position
   * @param[in] depth actual depth

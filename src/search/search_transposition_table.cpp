@@ -103,33 +103,17 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
 
     int alpha = -INF_EVAL;
     int beta = +INF_EVAL;
-    int eval = 0;
 
     for (int depth = 1; depth <= max_depth; depth++) {
         context.bestMoveInIteration = Move::null();
         context.bestEvalInIteration = is_white(side_to_move) ? -INF_EVAL : +INF_EVAL;
 
-        // Set aspiration window for depths > 1 using the previous iteration's score
-        /*if (depth > 1) {
-            alpha = eval - ASPIRATION_MARGIN;
-            beta = eval + ASPIRATION_MARGIN;
-        }*/
-
-        eval = is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, context)
-                                      : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, context);
+        is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, context)
+                               : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, context);
 
         if (stop) {
             break;
         }
-
-        // Check if the score is outside the aspiration window (fail-low or fail-high)
-        /*if (eval <= alpha || eval >= beta) {
-            // Re-search with full window to get the exact score
-
-            eval = is_white(side_to_move)
-                ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, -INF_EVAL, +INF_EVAL, context)
-                : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, -INF_EVAL, +INF_EVAL, context);
-        }*/
 
         context.bestMoveFound = context.bestMoveInIteration;
         context.bestEvalFound = context.bestEvalInIteration;
@@ -138,9 +122,9 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
 
         insert_new_result(results, depth, context.bestEvalFound, context.bestMoveFound);
 
-        /*if (abs(context.bestEvalFound) > MATE_THRESHOLD) {
+        if (abs(context.bestEvalFound) > MATE_THRESHOLD) {
             break;   // We found a checkmate, we stop because we cant find a shorter checkMate
-        }*/
+        }
     }
 }
 
@@ -170,7 +154,7 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
     Board& board = context.board;
     const uint64_t zobrist_key = board.state().get_zobrist_key();
 
-    prefetch(TranspositionTable::get_address_of_entry(zobrist_key));   // load to cache the tt entry
+    //prefetch(TranspositionTable::get_address_of_entry(zobrist_key));   // load to cache the tt entry
 
     if (ply > 0) History::push_position(zobrist_key);
 
@@ -207,6 +191,9 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
     }
     else if (ply > 0 && (fify_move_rule_draw || History::threefold_repetition_detected(fifty_move_rule_counter))) {
         return 0;
+    }
+    else if (isCheck) {
+        depth++;   // check extension, never enter quiescence search while in check
     }
     else if (depth == 0) {
         return quiescence_search<searchType>(stop, ply, alpha, beta, context);
@@ -394,9 +381,7 @@ static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int be
 }
 
 /**
- * @brief get_entry_in_transposition_table(uint64_t, int, int, int, int&, Move&)
- * 
- * Reads an entry in the transposition table
+ * @brief Reads an entry in the transposition table
  * 
  * @param[in] zobrist hash key of the position
  * @param[in] depth actual depth
