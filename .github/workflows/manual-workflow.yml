@@ -63,8 +63,8 @@ on:
           - search_basic
           - search_multithread
           - search_transposition_table
-          - search_tt_extensions_reductions
-        default: search_tt_extensions_reductions
+          - search_tt_reductions
+        default: search_tt_reductions
 
 jobs:
   build-and-test:
@@ -109,7 +109,7 @@ jobs:
                 -DUSE_SEARCH_BASIC=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_basic" ]] && echo ON || echo OFF) \
                 -DUSE_SEARCH_MULTITHREAD=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_multithread" ]] && echo ON || echo OFF) \
                 -DUSE_SEARCH_TRANSPOSITION_TABLE=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_transposition_table" ]] && echo ON || echo OFF) \
-                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_tt_extensions_reductions" ]] && echo ON || echo OFF) \
+                -DUSE_SEARCH_TT_REDUCTIONS=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_tt_reductions" ]] && echo ON || echo OFF) \
                 ../..
           make
 
@@ -119,7 +119,7 @@ jobs:
                 -DUSE_SEARCH_BASIC=ON \
                 -DUSE_SEARCH_MULTITHREAD=OFF \
                 -DUSE_SEARCH_TRANSPOSITION_TABLE=OFF \
-                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=OFF \
+                -DUSE_SEARCH_TT_REDUCTIONS=OFF \
                 -DEXECUTABLE_NAME=AlphaDeepChess_search_basic \
                 ../..
           make
@@ -128,7 +128,7 @@ jobs:
                 -DUSE_SEARCH_BASIC=OFF \
                 -DUSE_SEARCH_MULTITHREAD=ON \
                 -DUSE_SEARCH_TRANSPOSITION_TABLE=OFF \
-                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=OFF \
+                -DUSE_SEARCH_TT_REDUCTIONS=OFF \
                 -DEXECUTABLE_NAME=AlphaDeepChess_search_multithread \
                 ../..
           make
@@ -139,7 +139,7 @@ jobs:
                 -DUSE_SEARCH_BASIC=ON \
                 -DUSE_SEARCH_MULTITHREAD=OFF \
                 -DUSE_SEARCH_TRANSPOSITION_TABLE=OFF \
-                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=OFF \
+                -DUSE_SEARCH_TT_REDUCTIONS=OFF \
                 -DEXECUTABLE_NAME=AlphaDeepChess_search_basic \
                 ../..
           make
@@ -148,7 +148,7 @@ jobs:
                 -DUSE_SEARCH_BASIC=OFF \
                 -DUSE_SEARCH_MULTITHREAD=OFF \
                 -DUSE_SEARCH_TRANSPOSITION_TABLE=ON \
-                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=OFF \
+                -DUSE_SEARCH_TT_REDUCTIONS=OFF \
                 -DEXECUTABLE_NAME=AlphaDeepChess_search_transposition_table \
                 ../..
           make
@@ -159,7 +159,7 @@ jobs:
                 -DUSE_SEARCH_BASIC=OFF \
                 -DUSE_SEARCH_MULTITHREAD=OFF \
                 -DUSE_SEARCH_TRANSPOSITION_TABLE=ON \
-                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=OFF \
+                -DUSE_SEARCH_TT_REDUCTIONS=OFF \
                 -DEXECUTABLE_NAME=AlphaDeepChess_search_transposition_table \
                 ../..
           make
@@ -168,7 +168,7 @@ jobs:
                 -DUSE_SEARCH_BASIC=OFF \
                 -DUSE_SEARCH_MULTITHREAD=OFF \
                 -DUSE_SEARCH_TRANSPOSITION_TABLE=OFF \
-                -DUSE_SEARCH_TT_EXTENSIONS_REDUCTIONS=ON \
+                -DUSE_SEARCH_TT_REDUCTIONS=ON \
                 -DEXECUTABLE_NAME=AlphaDeepChess_search_tt_reductions \
                 ../..
           make
@@ -190,7 +190,7 @@ jobs:
           make
 
         elif [ "$TEST_ID" == "5" ]; then
-          echo "Running Test 3: move_generator_basic vs move_generator_magic_bitboards"
+          echo "Running Test 5: evaluation_dynamic vs evaluation_safety_mobility"
           cmake -DCMAKE_BUILD_TYPE=Release \
                 -DUSE_MOVE_GENERATOR_BASIC=ON \
                 -DUSE_MOVE_GENERATOR_MAGIC_BITBOARDS=OFF \
