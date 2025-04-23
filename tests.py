@@ -15,20 +15,18 @@ def parse_options(engine_name, options_str):
                 print(f"Invalid option format: {option}. Expected format is 'key=value'.")
     return {engine_name: options}
 
-def get_engines_and_options(test_id, engine1, engine2, stockfish_options1, stockfish_options2):
+def get_engines_and_options(test_id, engine2, stockfish_options2):
     engines = []
     options = {}
 
     if test_id == 0:
         # Custom test 0: engine1 vs engine2
         engines = [
-            "AlphaDeepChess_1" if engine1 == "AlphaDeepChess" else "Stockfish_1",
-            "AlphaDeepChess_2" if engine2 == "AlphaDeepChess" else "Stockfish_1"
+            "AlphaDeepChess_1",
+            "AlphaDeepChess_2" if engine2 == "AlphaDeepChess" else "Stockfish"
         ]
-        if engine1 == "Stockfish":
-            options.update(parse_options("Stockfish_1", stockfish_options1))
         if engine2 == "Stockfish":
-            options.update(parse_options("Stockfish_2", stockfish_options2))
+            options.update(parse_options("Stockfish", stockfish_options2))
     elif test_id == 1:
         # Test 1: AlphaDeepChess_search_basic vs AlphaDeepChess_search_multithread
         engines = ["AlphaDeepChess_search_basic", "AlphaDeepChess_search_multithread"]
@@ -66,8 +64,8 @@ def get_engines_and_options(test_id, engine1, engine2, stockfish_options1, stock
 
     return engines, options
 
-def run_test(test_id, games, st, depth, pgn, epd, log, engine1, engine2, stockfish_options1, stockfish_options2):
-    engines, options = get_engines_and_options(test_id, engine1, engine2, stockfish_options1, stockfish_options2)
+def run_test(test_id, games, st, depth, pgn, epd, log, engine2, stockfish_options2):
+    engines, options = get_engines_and_options(test_id, engine2, stockfish_options2)
 
     print(f"Running test ({test_id}) with the following configuration:")
     print(f"Games: {games}, Search Time: {st}, Depth: {depth}")
@@ -110,10 +108,8 @@ def main():
     parser.add_argument("--pgn", type=str, default="results.pgn", help="PGN output filename")
     parser.add_argument("--epd", type=str, default="results.epd", help="EPD output filename")
     parser.add_argument("--log", type=str, default="results.log", help="Log output filename")
-    parser.add_argument("--engine1", type=str, required=True, choices=["AlphaDeepChess", "Stockfish"], help="Engine 1 selection")
     parser.add_argument("--engine2", type=str, required=True, choices=["AlphaDeepChess", "Stockfish"], help="Engine 2 selection")
-    parser.add_argument("--stockfish-options1", type=str, default="", help="Options for Stockfish engine 1 (e.g., 'UCI_LimitStrength=true,UCI_Elo=1500')")
-    parser.add_argument("--stockfish-options2", type=str, default="", help="Options for Stockfish engine 2 (e.g., 'UCI_LimitStrength=true,UCI_Elo=1500')")
+    parser.add_argument("--stockfish-options2", type=str, default="", help="Options for Stockfish engine 2 (e.g., 'UCI_LimitStrength=true,UCI_Elo=2000')")
     args = parser.parse_args()
 
     run_test(
@@ -124,9 +120,7 @@ def main():
         pgn=args.pgn,
         epd=args.epd,
         log=args.log,
-        engine1=args.engine1,
         engine2=args.engine2,
-        stockfish_options1=args.stockfish_options1,
         stockfish_options2=args.stockfish_options2
     )
 
