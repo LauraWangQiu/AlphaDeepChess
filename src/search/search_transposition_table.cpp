@@ -122,9 +122,9 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
 
         insert_new_result(results, depth, context.bestEvalFound, context.bestMoveFound);
 
-        if (abs(context.bestEvalFound) > MATE_THRESHOLD) {
+        /*if (abs(context.bestEvalFound) > MATE_THRESHOLD) {
             break;   // We found a checkmate, we stop because we cant find a shorter checkMate
-        }
+        }*/
     }
 }
 
