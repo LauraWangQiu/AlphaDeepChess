@@ -66,8 +66,8 @@ def get_engines_and_options(test_id, engine1, engine2, stockfish_options1, stock
 
     return engines, options
 
-def run_test(test_id, games, st, depth, pgn, epd, log, engine1, engine2):
-    engines, options = get_engines_and_options(test_id, engine1, engine2)
+def run_test(test_id, games, st, depth, pgn, epd, log, engine1, engine2, stockfish_options1, stockfish_options2):
+    engines, options = get_engines_and_options(test_id, engine1, engine2, stockfish_options1, stockfish_options2)
 
     print(f"Running test ({test_id}) with the following configuration:")
     print(f"Games: {games}, Search Time: {st}, Depth: {depth}")
