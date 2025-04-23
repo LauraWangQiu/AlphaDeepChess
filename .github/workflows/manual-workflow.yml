@@ -42,22 +42,67 @@ on:
         description: "Log output filename"
         required: false
         default: "results.log"
-      evaluation:
-        description: "Select the evaluation to use (only for CUSTOM TEST)"
+      engine1:
+        description: "Select the engine to use for engine1 (only for CUSTOM TEST)"
+        type: choice
+        options:
+          - Stockfish
+          - AlphaDeepChess
+        default: AlphaDeepChess
+      engine2:
+        description: "Select the engine to use for engine2 (only for CUSTOM TEST)"
+        type: choice
+        options:
+          - Stockfish
+          - AlphaDeepChess
+        default: AlphaDeepChess
+      stockfish_options1:
+        description: "Options for Stockfish (only for CUSTOM TEST and if engine1 is Stockfish)"
+        required: false
+        default: "UCI_LimitStrength=true,UCI_Elo=2000"
+      stockfish_options2:
+        description: "Options for Stockfish (only for CUSTOM TEST and if engine2 is Stockfish)"
+        required: false
+        default: "UCI_LimitStrength=true,UCI_Elo=2000"
+      evaluation1:
+        description: "Select the evaluation to use for engine1 (only for CUSTOM TEST)"
         type: choice
         options:
           - evaluation_dynamic
           - evaluation_safety_mobility
         default: evaluation_safety_mobility
-      move_generator:
-        description: "Select the move generator to use (only for CUSTOM TEST)"
+      move_generator1:
+        description: "Select the move generator to use for engine1 (only for CUSTOM TEST)"
         type: choice
         options:
           - move_generator_basic
           - move_generator_magic_bitboards
         default: move_generator_magic_bitboards
-      search_algorithm:
-        description: "Select the search algorithm to use (only for CUSTOM TEST)"
+      search_algorithm1:
+        description: "Select the search algorithm to use for engine1 (only for CUSTOM TEST)"
+        type: choice
+        options:
+          - search_basic
+          - search_multithread
+          - search_transposition_table
+          - search_tt_reductions
+        default: search_tt_reductions
+      evaluation2:
+        description: "Select the evaluation to use for engine2 (only for CUSTOM TEST)"
+        type: choice
+        options:
+          - evaluation_dynamic
+          - evaluation_safety_mobility
+        default: evaluation_safety_mobility
+      move_generator2:
+        description: "Select the move generator to use for engine2 (only for CUSTOM TEST)"
+        type: choice
+        options:
+          - move_generator_basic
+          - move_generator_magic_bitboards
+        default: move_generator_magic_bitboards
+      search_algorithm2:
+        description: "Select the search algorithm to use for engine2 (only for CUSTOM TEST)"
         type: choice
         options:
           - search_basic
@@ -101,17 +146,42 @@ jobs:
 
         if [ "$TEST_ID" == "0" ]; then
           echo "Custom test"
-          cmake -DCMAKE_BUILD_TYPE=Release \
-                -DUSE_EVALUATION_DYNAMIC=$([[ "${{ github.event.inputs.evaluation }}" == "evaluation_dynamic" ]] && echo ON || echo OFF) \
-                -DUSE_EVALUATION_SAFETY_MOBILITY=$([[ "${{ github.event.inputs.evaluation }}" == "evaluation_safety_mobility" ]] && echo ON || echo OFF) \
-                -DUSE_MOVE_GENERATOR_BASIC=$([[ "${{ github.event.inputs.move_generator }}" == "move_generator_basic" ]] && echo ON || echo OFF) \
-                -DUSE_MOVE_GENERATOR_MAGIC_BITBOARDS=$([[ "${{ github.event.inputs.move_generator }}" == "move_generator_magic_bitboards" ]] && echo ON || echo OFF) \
-                -DUSE_SEARCH_BASIC=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_basic" ]] && echo ON || echo OFF) \
-                -DUSE_SEARCH_MULTITHREAD=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_multithread" ]] && echo ON || echo OFF) \
-                -DUSE_SEARCH_TRANSPOSITION_TABLE=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_transposition_table" ]] && echo ON || echo OFF) \
-                -DUSE_SEARCH_TT_REDUCTIONS=$([[ "${{ github.event.inputs.search_algorithm }}" == "search_tt_reductions" ]] && echo ON || echo OFF) \
-                ../..
-          make
+
+          if [ "${{ github.event.inputs.engine1 }}" == "stockfish" ]; then
+            echo "Using Stockfish for engine 1"
+          else
+            echo "Using AlphaDeepChess for engine 1"
+            cmake -DCMAKE_BUILD_TYPE=Release \
+                  -DUSE_EVALUATION_DYNAMIC=$([[ "${{ github.event.inputs.evaluation1 }}" == "evaluation_dynamic" ]] && echo ON || echo OFF) \
+                  -DUSE_EVALUATION_SAFETY_MOBILITY=$([[ "${{ github.event.inputs.evaluation1 }}" == "evaluation_safety_mobility" ]] && echo ON || echo OFF) \
+                  -DUSE_MOVE_GENERATOR_BASIC=$([[ "${{ github.event.inputs.move_generator1 }}" == "move_generator_basic" ]] && echo ON || echo OFF) \
+                  -DUSE_MOVE_GENERATOR_MAGIC_BITBOARDS=$([[ "${{ github.event.inputs.move_generator1 }}" == "move_generator_magic_bitboards" ]] && echo ON || echo OFF) \
+                  -DUSE_SEARCH_BASIC=$([[ "${{ github.event.inputs.search_algorithm1 }}" == "search_basic" ]] && echo ON || echo OFF) \
+                  -DUSE_SEARCH_MULTITHREAD=$([[ "${{ github.event.inputs.search_algorithm1 }}" == "search_multithread" ]] && echo ON || echo OFF) \
+                  -DUSE_SEARCH_TRANSPOSITION_TABLE=$([[ "${{ github.event.inputs.search_algorithm1 }}" == "search_transposition_table" ]] && echo ON || echo OFF) \
+                  -DUSE_SEARCH_TT_REDUCTIONS=$([[ "${{ github.event.inputs.search_algorithm1 }}" == "search_tt_reductions" ]] && echo ON || echo OFF) \
+                  -DEXECUTABLE_NAME=AlphaDeepChess_1 \
+                  ../..
+            make
+          fi
+
+          if [ "${{ github.event.inputs.engine2 }}" == "stockfish" ]; then
+            echo "Using Stockfish for engine 2"
+          else
+            echo "Using custom engine for engine 2"
+            cmake -DCMAKE_BUILD_TYPE=Release \
+                  -DUSE_EVALUATION_DYNAMIC=$([[ "${{ github.event.inputs.evaluation2 }}" == "evaluation_dynamic" ]] && echo ON || echo OFF) \
+                  -DUSE_EVALUATION_SAFETY_MOBILITY=$([[ "${{ github.event.inputs.evaluation2 }}" == "evaluation_safety_mobility" ]] && echo ON || echo OFF) \
+                  -DUSE_MOVE_GENERATOR_BASIC=$([[ "${{ github.event.inputs.move_generator2 }}" == "move_generator_basic" ]] && echo ON || echo OFF) \
+                  -DUSE_MOVE_GENERATOR_MAGIC_BITBOARDS=$([[ "${{ github.event.inputs.move_generator2 }}" == "move_generator_magic_bitboards" ]] && echo ON || echo OFF) \
+                  -DUSE_SEARCH_BASIC=$([[ "${{ github.event.inputs.search_algorithm2 }}" == "search_basic" ]] && echo ON || echo OFF) \
+                  -DUSE_SEARCH_MULTITHREAD=$([[ "${{ github.event.inputs.search_algorithm2 }}" == "search_multithread" ]] && echo ON || echo OFF) \
+                  -DUSE_SEARCH_TRANSPOSITION_TABLE=$([[ "${{ github.event.inputs.search_algorithm2 }}" == "search_transposition_table" ]] && echo ON || echo OFF) \
+                  -DUSE_SEARCH_TT_REDUCTIONS=$([[ "${{ github.event.inputs.search_algorithm2 }}" == "search_tt_reductions" ]] && echo ON || echo OFF) \
+                  -DEXECUTABLE_NAME=AlphaDeepChess_2 \
+                  ../..
+            make
+          fi
 
         elif [ "$TEST_ID" == "1" ]; then
           echo "Running Test 1: search_basic vs search_multithread"
@@ -215,7 +285,7 @@ jobs:
 
     - name: Run setupComparator.py
       run: |
-        if [[ "$TEST_ID" -ge 4 || "$TEST_ID" == "0" ]]; then
+        if [[ "$TEST_ID" -ge 6 || ("$TEST_ID" == "0" && ("${{ github.event.inputs.engine1 }}" == "stockfish" || "${{ github.event.inputs.engine2 }}" == "stockfish")) ]]; then
           python setupComparator.py --download-stockfish
         else
           python setupComparator.py
@@ -230,7 +300,11 @@ jobs:
           --depth ${{ github.event.inputs.depth }} \
           --pgn ${{ github.event.inputs.pgn_file }} \
           --epd ${{ github.event.inputs.epd_file }} \
-          --log ${{ github.event.inputs.log_file }}
+          --log ${{ github.event.inputs.log_file }} \
+          --engine1 ${{ github.event.inputs.engine1 }} \
+          --engine2 ${{ github.event.inputs.engine2 }} \
+          --stockfish-options1 "${{ github.event.inputs.stockfish_options1 }}" \
+          --stockfish-options2 "${{ github.event.inputs.stockfish_options2 }}"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
