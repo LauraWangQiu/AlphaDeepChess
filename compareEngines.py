@@ -44,11 +44,15 @@ def fen_to_pgn_lines(fens):
     return lines
 
 def generate_pgn_from_fens(input_file, output_file="positions.pgn"):
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
     with open(input_file, "r") as fin:
         fens = fin.readlines()
 
     pgn_lines = fen_to_pgn_lines(fens)
 
+    os.chdir(default_comparator_dir)
+    
     with open(output_file, "w") as fout:
         fout.write("\n".join(pgn_lines))
 
