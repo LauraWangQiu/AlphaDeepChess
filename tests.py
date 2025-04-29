@@ -72,6 +72,8 @@ def run_test(test_id, games, st, depth, pgn, epd, log, engine2, stockfish_option
     print(f"PGN File: {pgn}, EPD File: {epd}, Log File: {log}")
     print(f"Engines: {engines}")
     print(f"Options: {options}")
+    print(f"Book: {book}")
+    print(f"Positions: {positions}")
 
     # Prepare options list for engines
     options_list = []
@@ -92,6 +94,11 @@ def run_test(test_id, games, st, depth, pgn, epd, log, engine2, stockfish_option
     ] + engines + [
         "-options"
     ] + options_list
+
+    if book:
+            cmd += ["-book", book]
+    if positions:
+            cmd += ["-positions", positions]
 
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     stdout, stderr = process.communicate()

@@ -19,9 +19,9 @@ on:
           - "9: Elo Performance Test vs Stockfish (2200 Elo)"
         default: "0: CUSTOM TEST vs Stockfish"
       game_settings:
-        description: "Game settings in the format 'games=10,st=5,depth=5'"
+        description: "Game settings in the format 'games=100,st=5,depth=5'"
         required: false
-        default: "games=10,st=5,depth=5"
+        default: "games=100,st=5,depth=5"
       engine2:
         description: "Select the engine2 in order to play versus AlphaDeepChess (only for CUSTOM TEST)"
         type: choice
