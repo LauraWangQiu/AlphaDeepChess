@@ -209,23 +209,7 @@ jobs:
           make
 
         elif [ "$TEST_ID" == "4" ]; then
-          echo "Running Test 4: evaluation_dynamic vs evaluation_safety_mobility"
-          cmake -DCMAKE_BUILD_TYPE=Release \
-                -DUSE_EVALUATION_DYNAMIC=ON \
-                -DUSE_EVALUATION_SAFETY_MOBILITY=OFF \
-                -DEXECUTABLE_NAME=AlphaDeepChess_evaluation_dynamic \
-                ../..
-          make
-
-          cmake -DCMAKE_BUILD_TYPE=Release \
-                -DUSE_EVALUATION_DYNAMIC=OFF \
-                -DUSE_EVALUATION_SAFETY_MOBILITY=ON \
-                -DEXECUTABLE_NAME=AlphaDeepChess_evaluation_safety_mobility \
-                ../..
-          make
-
-        elif [ "$TEST_ID" == "5" ]; then
-          echo "Running Test 5: evaluation_dynamic vs evaluation_safety_mobility"
+          echo "Running Test 4: move_generator_basic vs move_generator_magic_bitboards"
           cmake -DCMAKE_BUILD_TYPE=Release \
                 -DUSE_MOVE_GENERATOR_BASIC=ON \
                 -DUSE_MOVE_GENERATOR_MAGIC_BITBOARDS=OFF \
@@ -237,6 +221,22 @@ jobs:
                 -DUSE_MOVE_GENERATOR_BASIC=OFF \
                 -DUSE_MOVE_GENERATOR_MAGIC_BITBOARDS=ON \
                 -DEXECUTABLE_NAME=AlphaDeepChess_move_generator_magic_bitboards \
+                ../..
+          make
+
+        elif [ "$TEST_ID" == "5" ]; then
+          echo "Running Test 5: evaluation_dynamic vs evaluation_safety_mobility"
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_EVALUATION_DYNAMIC=ON \
+                -DUSE_EVALUATION_SAFETY_MOBILITY=OFF \
+                -DEXECUTABLE_NAME=AlphaDeepChess_evaluation_dynamic \
+                ../..
+          make
+
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DUSE_EVALUATION_DYNAMIC=OFF \
+                -DUSE_EVALUATION_SAFETY_MOBILITY=ON \
+                -DEXECUTABLE_NAME=AlphaDeepChess_evaluation_safety_mobility \
                 ../..
           make
 
