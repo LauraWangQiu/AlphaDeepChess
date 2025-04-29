@@ -271,7 +271,8 @@ jobs:
           --st $ST \
           --depth $DEPTH \
           --engine2 ${{ github.event.inputs.engine2 }} \
-          --stockfish-options2 "${{ github.event.inputs.stockfish_options2 }}"
+          --stockfish-options2 "${{ github.event.inputs.stockfish_options2 }}" \
+          --positions positions.fen
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

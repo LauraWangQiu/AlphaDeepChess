@@ -64,7 +64,7 @@ def get_engines_and_options(test_id, engine2, stockfish_options2):
 
     return engines, options
 
-def run_test(test_id, games, st, depth, pgn, epd, log, engine2, stockfish_options2):
+def run_test(test_id, games, st, depth, pgn, epd, log, engine2, stockfish_options2, book, positions):
     engines, options = get_engines_and_options(test_id, engine2, stockfish_options2)
 
     print(f"Running test ({test_id}) with the following configuration:")
@@ -110,6 +110,8 @@ def main():
     parser.add_argument("--log", type=str, default="results.log", help="Log output filename")
     parser.add_argument("--engine2", type=str, required=True, choices=["AlphaDeepChess", "Stockfish"], help="Engine 2 selection")
     parser.add_argument("--stockfish-options2", type=str, default="", help="Options for Stockfish engine 2 (e.g., 'UCI_LimitStrength=true,UCI_Elo=2000')")
+    parser.add_argument("--book", type=str, default="", help="PGN file with book openings")
+    parser.add_argument("--positions", type=str, default="", help="FEN file with positions")
     args = parser.parse_args()
 
     run_test(
@@ -121,7 +123,9 @@ def main():
         epd=args.epd,
         log=args.log,
         engine2=args.engine2,
-        stockfish_options2=args.stockfish_options2
+        stockfish_options2=args.stockfish_options2,
+        book=args.book,
+        positions=args.positions
     )
 
 if __name__ == "__main__":

@@ -27,7 +27,34 @@ def parse_options(options_list):
                 print(f"Invalid option format: {option}. Expected format is 'engine_name.option_name=value'.")
     return options_dict
 
-def main(pgn_path, edp_path, log_path, build_type, games, tc, st, depth, timemargin, concurrency, engines, options):
+def fen_to_pgn_lines(fens):
+    lines = []
+    for i, fen in enumerate(fens):
+        lines.append(f'[Event "FEN {i+1}"]')
+        lines.append('[Site "?"]')
+        lines.append('[Date "?"]')
+        lines.append('[Round "?"]')
+        lines.append('[White "?"]')
+        lines.append('[Black "?"]')
+        lines.append('[Result "*"]')
+        lines.append('[SetUp "1"]')
+        lines.append(f'[FEN "{fen.strip()}"]')
+        lines.append("")
+        lines.append("*\n")
+    return lines
+
+def generate_pgn_from_fens(input_file, output_file="positions.pgn"):
+    with open(input_file, "r") as fin:
+        fens = fin.readlines()
+
+    pgn_lines = fen_to_pgn_lines(fens)
+
+    with open(output_file, "w") as fout:
+        fout.write("\n".join(pgn_lines))
+
+    print(f"PGN file generated: {output_file}")
+
+def main(pgn_path, edp_path, log_path, build_type, games, tc, st, depth, timemargin, concurrency, engines, options, book, positions):
     if is_windows:
         cutechess_internal_dir = "cutechess-1.3.1-win64"
         stockfish_internal_dir = "stockfish-windows-x86-64"
@@ -82,6 +109,12 @@ def main(pgn_path, edp_path, log_path, build_type, games, tc, st, depth, timemar
         "-epdout", edp_path,
         "-debug"
     ])
+    if book:
+            cutechess_cmd.extend(["-openings", f"file={book}", "format=pgn", "order=random"])
+    elif positions:
+        book_file = "positions.pgn"
+        generate_pgn_from_fens(positions, book_file)
+        cutechess_cmd.extend(["-openings", f"file={book_file}", "format=pgn", "order=random"])
 
     with open(log_path, 'w') as log_file:
         process = subprocess.Popen(cutechess_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
@@ -109,6 +142,8 @@ if __name__ == "__main__":
     parser.add_argument("-timemargin", default=500, type=int, help="Time margin")
     parser.add_argument("-depth", type=int, help="Search depth")
     parser.add_argument("-concurrency", type=int, help="Concurrency level")
+    parser.add_argument("-book", type=str, help="Path to the opening book file (e.g., 'openings.pgn')")
+    parser.add_argument("-positions", type=str, help="Path to the positions file (e.g., 'positions.fen')")
     parser.add_argument(
         "-engines",
         nargs="+",
@@ -122,4 +157,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    main(args.pgn, args.epd, args.log, args.buildType, args.games, args.tc, args.st, args.depth, args.timemargin, args.concurrency, args.engines, args.options)
+    main(args.pgn, args.epd, args.log, args.buildType, args.games, args.tc, args.st, args.depth, args.timemargin, args.concurrency, args.engines, args.options, args.book, args.positions)
