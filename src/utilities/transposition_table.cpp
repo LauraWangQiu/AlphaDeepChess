@@ -10,7 +10,7 @@
 
 std::vector<TranspositionTable::Entry> TranspositionTable::entries = initialization();
 
-constexpr TranspositionTable::SIZE TT_DEFAULT_SIZE = TranspositionTable::SIZE::MB_2048;
+constexpr TranspositionTable::SIZE TT_DEFAULT_SIZE = TranspositionTable::SIZE::MB_64;
 
 /**
  * @brief resize(SIZE)

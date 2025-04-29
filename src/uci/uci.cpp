@@ -474,8 +474,9 @@ void Uci::help_command_action() const
                  "\tStart calculating the best move until the specified depth.\n"
                  "\tIn order to finish search use stop command, \n\n"
 
-                 "setoption [hash <size_mb_power_of_two>]\n"
-                 "\tChange internal parameters of the chess engine \n\n"
+                 "setoption name <id> value <value>\n"
+                 "\tChange internal parameters of the chess engine \n"
+                 "\t\tsetoption name Hash value <hash_table_size_mb_power_of_two>\n\n"
 
                  "stop\n"
                  "\tStop calculating.\n\n"
@@ -543,12 +544,26 @@ void Uci::perft_command_action(uint64_t depth) const
  */
 bool Uci::setoption_command_action(const TokenArray& tokens, uint32_t num_tokens)
 {
-    if (num_tokens < 2) {
+    if (num_tokens < 3) {
+        std::cout << "Invalid setoption argument: setoption name <id> value\n";
         return false;
     }
     uint32_t token_i = 1;
 
-    if (tokens[token_i++] == "hash") {
+    if (tokens[token_i++] != "name")
+    {
+        std::cout << "Invalid setoption argument: setoption name <id> value\n";
+        return false;
+    }
+    
+    if (tokens[token_i++] == "Hash") {
+
+        if (tokens[token_i++] != "value")
+        {
+            std::cout << "Invalid setoption Hash argument: setoption name Hash value <hash_table_size_mb_power_of_two>\n";
+            return false;
+        }
+
         try {
             uint32_t size_mb = stoul(std::string(tokens[token_i++]));
             TranspositionTable::SIZE size_tt = TranspositionTable::int_to_tt_size(size_mb);
@@ -557,15 +572,16 @@ bool Uci::setoption_command_action(const TokenArray& tokens, uint32_t num_tokens
                 TranspositionTable::resize(size_tt);
             }
             else {
-                std::cout << "Invalid size for command : setoption hash <mb size power of two>\n";
+                std::cout << "Invalid setoption Hash argument: setoption name Hash value <hash_table_size_mb_power_of_two>\n";
             }
 
         } catch (const std::exception& e) {
-            std::cout << "Invalid argument for command : setoption hash\n";
+            std::cout << "Invalid setoption Hash argument: setoption name Hash value <hash_table_size_mb_power_of_two>\n";
             return false;
         }
     }
     else {
+        std::cout << "Invalid setoption argument: setoption name <id> value\n";
         return false;
     }
 
