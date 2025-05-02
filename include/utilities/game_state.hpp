@@ -743,12 +743,11 @@ constexpr inline int GameState::num_pieces() const { return (state_register & MA
 /**
  * @brief set_fifty_move_rule_counter
  * 
- * set the moves that have passed since the last pawn move or capture.
+ * Set the moves that have passed since the last pawn move or capture.
  * 
  * @note counter must be <=50, otherwise state will be corrupted.
  * 
- * @param[in] counter fifty rule counter counter.
- * 
+ * @param[in] counter Fifty-move rule counter.
  */
 constexpr inline void GameState::set_fifty_move_rule_counter(uint8_t counter)
 {

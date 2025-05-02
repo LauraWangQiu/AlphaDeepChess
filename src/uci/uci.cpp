@@ -18,6 +18,13 @@
 #include <cassert>
 #include <iostream>
 
+/**
+ * @brief Start position in FEN format.
+ *
+ * This constant represents the starting position of a chess game in 
+ * Forsyth-Edwards Notation (FEN). It is used to initialize the chessboard
+ * to the standard starting position.
+ */
 constexpr auto StartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 /**

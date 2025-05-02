@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * @file precomputed_data.hpp
+ * @file precomputed_eval_data.hpp
  * @brief precomputed data.
  *
  * precomputed data
@@ -12,7 +12,20 @@
 #include <array>
 #include <cassert>
 
+/**
+ * @brief Indicates the type of Piece-Square Table (PST) for the middlegame phase.
+ *
+ * This constant is used to specify that the Piece-Square Table being referenced
+ * corresponds to the middlegame phase of a chess game.
+ */
 constexpr bool PST_TYPE_MIDDLEGAME = false;
+
+/**
+ * @brief Indicates the type of Piece-Square Table (PST) for the endgame phase.
+ *
+ * This constant is used to specify that the Piece-Square Table being referenced
+ * corresponds to the endgame phase of a chess game.
+ */
 constexpr bool PST_TYPE_ENDGAME = true;
 
 /**
@@ -115,6 +128,16 @@ public:
         return MANHATTAN_DISTANCE[square1][square2];
     }
 
+    /**
+     * @brief Get the king's danger zone.
+     *
+     * This function calculates a bitboard mask representing the danger zone around the king.
+     * The danger zone is defined as the squares within a 3-square radius of the king's position.
+     *
+     * @param[in] king_sq The square where the king is located.
+     *
+     * @return A 64-bit bitboard mask representing the king's danger zone.
+     */
     static inline uint64_t get_king_danger_zone(Square king_sq)
     {
         assert(king_sq.is_valid());

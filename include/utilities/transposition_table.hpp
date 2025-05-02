@@ -214,48 +214,141 @@ public:
     /**
      * @brief TranspositionTable::Entry
      *
-     *  @note Entry in the transposition table
-     *  
+     * @note Entry in the transposition table
+     * 
+     * Each entry stores information about a specific chess position, including its
+     * Zobrist key, evaluation score, best move, node type, and search depth.
+     * 
      *   - key.        
      *   - evaluation. 
      *   - move.       
      *   - node_type.  
-     *   - depth.      
+     *   - depth. 
      */
     class Entry
     {
     public:
-        uint64_t key;         // zobrist key
-        int evaluation;       // score of the position
-        Move move;            // best move found in position
-        NodeType node_type;   // node type
-        int8_t depth;         // depth where the calculation has been done
+        /**
+         * @brief Zobrist key of the chess position.
+         *
+         * This key uniquely identifies the position in the transposition table.
+         */
+        uint64_t key;
 
+        /**
+         * @brief Evaluation score of the chess position.
+         *
+         * This score represents the evaluation of the position from the perspective
+         * of the side to move.
+         */
+        int evaluation;
+
+        /**
+         * @brief Best move found for the chess position.
+         *
+         * This move represents the best move calculated for the position.
+         */
+        Move move;
+
+        /**
+         * @brief Type of the node in the search tree.
+         *
+         * Indicates whether the node is an exact value, a lower bound, or an upper bound.
+         */
+        NodeType node_type;
+
+        /**
+         * @brief Depth at which the position was evaluated.
+         *
+         * This value represents the search depth at which the evaluation was performed.
+         */
+        int8_t depth;
+
+        /**
+         * @brief Default constructor for an entry.
+         *
+         * Initializes the entry with default values, marking it as invalid.
+         */
         constexpr Entry() : key(0ULL), evaluation(0), move(), node_type(NodeType::FAILED), depth(0U) { }
 
+        /**
+         * @brief Copy constructor for an entry.
+         *
+         * Creates a new entry by copying the values from another entry.
+         *
+         * @param[in] entry The entry to copy.
+         */
         constexpr Entry(const Entry& entry)
             : key(entry.key), evaluation(entry.evaluation), move(entry.move), node_type(entry.node_type),
-              depth(entry.depth)
+            depth(entry.depth)
         { }
 
+        /**
+         * @brief Parameterized constructor for an entry.
+         *
+         * Initializes the entry with the given values.
+         *
+         * @param[in] key Zobrist key of the position.
+         * @param[in] evaluation Evaluation score of the position.
+         * @param[in] move Best move found for the position.
+         * @param[in] node_type Type of the node in the search tree.
+         * @param[in] depth Depth at which the position was evaluated.
+         */
         constexpr Entry(uint64_t key, int evaluation, Move move, NodeType node_type, uint8_t depth)
             : key(key), evaluation(evaluation), move(move), node_type(node_type), depth(depth)
         { }
 
-        // check if entry is valid
+        /**
+         * @brief Checks if the entry is valid.
+         *
+         * An entry is considered valid if its node type is not `NodeType::FAILED`.
+         *
+         * @return True if the entry is valid, false otherwise.
+         */
         inline constexpr bool is_valid() const { return node_type != NodeType::FAILED; }
 
-        // returns a failed entry
+        /**
+         * @brief Returns a failed entry.
+         *
+         * A failed entry is an entry with default values, marked as invalid.
+         *
+         * @return A failed entry.
+         */
         static inline constexpr Entry failed_entry() { return Entry(); }
 
+        /**
+         * @brief Equality operator.
+         *
+         * Compares two entries for equality based on their key, evaluation, move,
+         * node type, and depth.
+         *
+         * @param[in] other The entry to compare with.
+         * @return True if the entries are equal, false otherwise.
+         */
         constexpr bool operator==(const Entry& other) const
         {
             return key == other.key && evaluation == other.evaluation && move == other.move &&
                 node_type == other.node_type && depth == other.depth;
         }
 
+        /**
+         * @brief Inequality operator.
+         *
+         * Compares two entries for inequality.
+         *
+         * @param[in] other The entry to compare with.
+         * @return True if the entries are not equal, false otherwise.
+         */
         constexpr bool operator!=(const Entry& other) const { return !(*this == other); }
 
+        /**
+         * @brief Assignment operator.
+         *
+         * Assigns the values of another entry to this entry.
+         *
+         * @param[in] other The entry to assign from.
+         * @return A reference to this entry.
+         */
         constexpr Entry& operator=(const Entry& other)
         {
             if (this != &other)   // not a self-assignment

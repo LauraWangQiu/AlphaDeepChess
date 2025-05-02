@@ -22,7 +22,7 @@ These instructions will help you set up and build the project on your local mach
     sudo apt-get install cmake
     ```
 
-3. **Move to the project folder and run the setup script for cmake**:
+3. **Go to the project folder and run the setup script for cmake**:
 
     ```bash
     cd ./AlphaDeepChess
@@ -73,7 +73,7 @@ These instructions will help you set up and build the project on your local mach
     # brew install --cask powershell
     ```
 
-3. **Move to the project folder and run the setup script for cmake**:
+3. **Go to the project folder and run the setup script for cmake**:
 
     ```bash
     cd ./AlphaDeepChess
@@ -136,7 +136,7 @@ Standard Doxygen commenting format to be followed for documenting functions, str
 
 ### Header (.hpp) File Comment Template
 
-```cpp
+```
 #pragma once
 
 /**
@@ -149,7 +149,7 @@ Standard Doxygen commenting format to be followed for documenting functions, str
 
 ### Source (.cpp) File Comment Template
 
-```cpp
+```
 /**
  * @file template.cpp
  * @brief Brief description of the file.
@@ -160,7 +160,7 @@ Standard Doxygen commenting format to be followed for documenting functions, str
 
 ### Function Comment Template
 
-```cpp
+```
 /**
  * @brief function_template
  *
@@ -180,7 +180,7 @@ int function_template(int inputParam, int& outputParam);
 
 ### Class Comment Template
 
-```cpp
+```
 /**
  * @brief ClassName
  *
@@ -205,13 +205,12 @@ private:
      * Description of the private member.
      */
     int memberVariable;
-
 };
 ```
 
 ### Struct Comment Template
 
-```cpp
+```
 /**
  * @brief StructName
  *
@@ -219,14 +218,13 @@ private:
  * 
  */
 struct StructName {
-
     int memberVariable;
 };
 ```
 
 ### Enum Comment Template
 
-```cpp
+```
 /**
  * @brief EnumName.
  *
@@ -239,6 +237,6 @@ enum class EnumName {
 };
 ```
 
-### Using Python's pygame library to visualize the board from the engine
+## Visualizing the board
 
 Execute [AlphaDeepChessGUI.py](AlphaDeepChessGUI.py) to send commands as with the UCI and visualize the chessboard.

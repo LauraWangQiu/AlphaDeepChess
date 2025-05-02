@@ -11,6 +11,11 @@
 #include "board.hpp"
 #include "move_list.hpp"
 
+/**
+ * @brief MoveGeneratorType
+ *
+ * Type of move generator.
+ */
 enum MoveGeneratorType
 {
     ALL_MOVES,      // Generate all legal moves

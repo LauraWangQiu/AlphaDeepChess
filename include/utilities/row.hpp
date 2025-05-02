@@ -28,13 +28,68 @@ enum Row : int
     ROW_INVALID
 };
 
+/**
+ * @brief Mask for row 1.
+ *
+ * This constant represents a bitboard mask for row 1 of the chessboard.
+ * Each bit in the mask corresponds to a square in row 1.
+ */
 constexpr uint64_t ROW_1_MASK = 0x00000000000000FFULL;
+
+/**
+ * @brief Mask for row 2.
+ *
+ * This constant represents a bitboard mask for row 2 of the chessboard.
+ * Each bit in the mask corresponds to a square in row 2.
+ */
 constexpr uint64_t ROW_2_MASK = 0x000000000000FF00ULL;
+
+/**
+ * @brief Mask for row 3.
+ *
+ * This constant represents a bitboard mask for row 3 of the chessboard.
+ * Each bit in the mask corresponds to a square in row 3.
+ */
 constexpr uint64_t ROW_3_MASK = 0x0000000000FF0000ULL;
+
+/**
+ * @brief Mask for row 4.
+ *
+ * This constant represents a bitboard mask for row 4 of the chessboard.
+ * Each bit in the mask corresponds to a square in row 4.
+ */
 constexpr uint64_t ROW_4_MASK = 0x00000000FF000000ULL;
+
+/**
+ * @brief Mask for row 5.
+ *
+ * This constant represents a bitboard mask for row 5 of the chessboard.
+ * Each bit in the mask corresponds to a square in row 5.
+ */
 constexpr uint64_t ROW_5_MASK = 0x000000FF00000000ULL;
+
+/**
+ * @brief Mask for row 6.
+ *
+ * This constant represents a bitboard mask for row 6 of the chessboard.
+ * Each bit in the mask corresponds to a square in row 6.
+ */
 constexpr uint64_t ROW_6_MASK = 0x0000FF0000000000ULL;
+
+/**
+ * @brief Mask for row 7.
+ *
+ * This constant represents a bitboard mask for row 7 of the chessboard.
+ * Each bit in the mask corresponds to a square in row 7.
+ */
 constexpr uint64_t ROW_7_MASK = 0x00FF000000000000ULL;
+
+/**
+ * @brief Mask for row 8.
+ *
+ * This constant represents a bitboard mask for row 8 of the chessboard.
+ * Each bit in the mask corresponds to a square in row 8.
+ */
 constexpr uint64_t ROW_8_MASK = 0xFF00000000000000ULL;
 
 static constexpr uint64_t ROW_MASKS[8] = {ROW_1_MASK, ROW_2_MASK, ROW_3_MASK, ROW_4_MASK,

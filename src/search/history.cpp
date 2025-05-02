@@ -69,17 +69,17 @@ void History::pop_position()
 }
 
 /**
- * @brief calculate if threefold repetition has happened in the history of positions
+ * @brief Calculate if threefold repetition has happened in the history of positions.
  * 
+ * @note We consider repetition with 2 instead of 3 repetitions for performance reasons.
  * 
- * @param[in] fify_move_rule_counter also called halfmove clock, it indicates The number of
+ * @param[in] fify_move_rule_counter Also called halfmove clock, it indicates the number of
  *   irreversible moves made before the current position. Serves both in the early return condition
  *   and limits how far up the stack one must look for a potential match.
  * 
  * @return bool
- * @retval True if repetition found
- * @retval False if repetition not found
- * 
+ * @retval True If repetition is found.
+ * @retval False If repetition is not found.
  */
 bool History::threefold_repetition_detected(uint8_t fify_move_rule_counter)
 {

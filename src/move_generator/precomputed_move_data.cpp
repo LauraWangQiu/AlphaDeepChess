@@ -11,7 +11,20 @@
 #include "precomputed_move_data.hpp"
 #include "coordinates.hpp"
 
+/**
+ * @brief Array of bitboards for each square.
+ *
+ * This typedef represents an array of 64-bit integers (`uint64_t`), where each
+ * element corresponds to a bitboard for a specific square on the chessboard.
+ */
 using ArrayBB = std::array<uint64_t, 64>;
+
+/**
+ * @brief Constant array of bitboards for each square.
+ *
+ * This typedef represents a constant array of 64-bit integers (`uint64_t`),
+ * where each element corresponds to a bitboard for a specific square on the chessboard.
+ */
 using ArrayBBConst = const std::array<uint64_t, 64>;
 
 static constexpr ArrayBBConst init_white_pawn_attacks();

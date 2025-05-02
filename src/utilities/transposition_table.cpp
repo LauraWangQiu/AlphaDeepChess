@@ -10,6 +10,12 @@
 
 std::vector<TranspositionTable::Entry> TranspositionTable::entries = initialization();
 
+/**
+ * @brief Default size of the transposition table.
+ *
+ * This constant defines the default size of the transposition table in megabytes (MB).
+ * It is used to initialize the transposition table with a default memory allocation.
+ */
 constexpr TranspositionTable::SIZE TT_DEFAULT_SIZE = TranspositionTable::SIZE::MB_64;
 
 /**

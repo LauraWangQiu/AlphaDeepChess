@@ -93,8 +93,26 @@ void generate_legal_moves(MoveList& moves, Board& board, bool* inCheck)
     }
 }
 
-// Explicit template instantiations
+/**
+ * @brief generate_legal_moves
+ * 
+ * Calculate all the legal moves in the chess position.
+ * 
+ * @param[out] moves Move list.
+ * @param[in] board Chess position.
+ * @param[out] inCheck (optional) Return true if the king is in check.
+ */
 template void generate_legal_moves<ALL_MOVES>(MoveList& moves, Board& board, bool* inCheck);
+
+/**
+ * @brief generate_legal_moves
+ * 
+ * Calculate only captures moves in the chess position.
+ * 
+ * @param[out] moves Move list.
+ * @param[in] board Chess position.
+ * @param[out] inCheck (optional) Return true if the king is in check.
+ */
 template void generate_legal_moves<ONLY_CAPTURES>(MoveList& moves, Board& board, bool* inCheck);
 
 static void update_move_generator_info(MoveGeneratorInfo& moveGeneratorInfo)

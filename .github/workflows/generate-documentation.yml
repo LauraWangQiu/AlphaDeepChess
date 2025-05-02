@@ -1,0 +1,41 @@
+name: Build and Deploy Doxygen Documentation
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      generate_latex:
+        description: "Generate LaTeX documentation (true/false)"
+        required: false
+        default: "false"
+
+jobs:
+  build:
+    name: Generate Doxygen Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install Doxygen
+      run: sudo apt-get install -y doxygen graphviz
+
+    - name: Configure Doxygen for LaTeX
+      run: |
+        if [ "${{ github.event.inputs.generate_latex }}" == "true" ]; then
+          sed -i 's/GENERATE_LATEX *= *NO/GENERATE_LATEX = YES/' Doxyfile
+        else
+          sed -i 's/GENERATE_LATEX *= *YES/GENERATE_LATEX = NO/' Doxyfile
+        fi
+
+    - name: Generate Doxygen Documentation
+      run: doxygen Doxyfile
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/html

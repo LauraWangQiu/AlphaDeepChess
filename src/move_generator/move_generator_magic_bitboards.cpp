@@ -92,8 +92,27 @@ void generate_legal_moves(MoveList& moves, Board& board, bool* inCheck)
     if (inCheck) *inCheck = (num_checkers > 0);
 }
 
-// Explicit template instantiations
+/**
+ * @brief Explicit instantiation of generate_legal_moves for ALL_MOVES.
+ *
+ * This instantiation calculates all legal moves in the chess position,
+ * including captures and non-captures.
+ *
+ * @param[out] moves List of generated moves.
+ * @param[in] board Current chess position.
+ * @param[out] inCheck (optional) Indicates if the king is in check.
+ */
 template void generate_legal_moves<ALL_MOVES>(MoveList& moves, Board& board, bool* inCheck);
+
+/**
+ * @brief Explicit instantiation of generate_legal_moves for ONLY_CAPTURES.
+ *
+ * This instantiation calculates only capture moves in the chess position.
+ *
+ * @param[out] moves List of generated capture moves.
+ * @param[in] board Current chess position.
+ * @param[out] inCheck (optional) Indicates if the king is in check.
+ */
 template void generate_legal_moves<ONLY_CAPTURES>(MoveList& moves, Board& board, bool* inCheck);
 
 static void update_pins_and_checks(Square king_sq, MoveGeneratorInfo& moveGeneratorInfo)

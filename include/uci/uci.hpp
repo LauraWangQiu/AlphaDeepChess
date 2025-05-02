@@ -27,6 +27,15 @@
  */
 constexpr int TOKEN_ARRAY_SIZE = 1024;
 
+/**
+ * @brief TokenArray
+ *
+ * Represents an array of tokens parsed from the user input in the UCI protocol.
+ *
+ * This typedef defines a fixed-size array of `std::string_view` elements, where
+ * each element corresponds to a token extracted from the user's input in the console.
+ * The size of the array is defined by `TOKEN_ARRAY_SIZE`.
+ */
 typedef std::array<std::string_view, TOKEN_ARRAY_SIZE> TokenArray;
 
 /**

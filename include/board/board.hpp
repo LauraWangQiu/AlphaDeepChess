@@ -213,13 +213,12 @@ public:
     /**
      * @brief load_fen
      * 
-     * Set the position represented as fen on the chess board.
+     * Set the position represented as FEN on the chessboard.
      * 
      *  https://www.chess.com/terms/fen-chess
      *  https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
      * 
-     * @param[in] fen Chess position in fen string format
-     * 
+     * @param[in] fen Chess position in FEN string format.
      */
     void load_fen(const std::string& fen);
 

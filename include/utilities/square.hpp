@@ -141,8 +141,8 @@ public:
      * 
      * @note If invalid character representation of square, square is set to INVALID.
      * 
-     * @param[in] square_string Square represented in string format (e.g., "e2"). 
-     *                          
+     * @param[in] col Column that represents the square as a character ('a' to 'h').
+     * @param[in] row Row that represents the square as a character ('1' to '8').
      */
     constexpr Square(char col, char row);
 
@@ -530,8 +530,8 @@ constexpr Square::Square(const std::string& square_string) : sq_value(INVALID)
  * 
  * @note If invalid character representation of square, square is set to INVALID.
  * 
- * @param[in] square_string Square represented in string format (e.g., "e2"). 
- *                          
+ * @param[in] col Column that represents the square as a character ('a' to 'h').
+ * @param[in] row Row that represents the square as a character ('1' to '8').
  */
 constexpr Square::Square(char col, char row) : sq_value(INVALID)
 {

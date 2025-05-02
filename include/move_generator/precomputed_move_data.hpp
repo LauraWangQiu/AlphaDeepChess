@@ -4,7 +4,7 @@
  * @file precomputed_move_data.hpp
  * @brief precomputed move data services.
  *
- * precomputed move data with fancy magic bitboards
+ * Precomputed move data with fancy magic bitboards.
  * 
  */
 
@@ -14,13 +14,28 @@
 #include <array>
 #include <cassert>
 
+/**
+ * @brief Lookup table for rook moves.
+ *
+ * This typedef represents a 2D array where each element corresponds to a precomputed
+ * bitboard of possible rook moves. The first dimension is indexed by the square
+ * where the rook is located, and the second dimension is indexed by the blocker configuration.
+ */
 typedef std::array<std::array<uint64_t, ROOK_TABLE_SIZE>, NUM_SQUARES> TableRookMoves;
+
+/**
+ * @brief Lookup table for bishop moves.
+ *
+ * This typedef represents a 2D array where each element corresponds to a precomputed
+ * bitboard of possible bishop moves. The first dimension is indexed by the square
+ * where the bishop is located, and the second dimension is indexed by the blocker configuration.
+ */
 typedef std::array<std::array<uint64_t, BISHOP_TABLE_SIZE>, NUM_SQUARES> TableBishopMoves;
 
 /**
  * @brief PrecomputedMoveData
  *
- * class with the precomputed moves of chess pieces
+ * Class with the precomputed moves of chess pieces.
  * 
  */
 class PrecomputedMoveData
@@ -33,7 +48,7 @@ public:
     /**
      * @brief pieceMoves
      * 
-     * calculates the 64 bit mask with 1 on the squares that the piece could move
+     * Calculates the 64 bit mask with 1 on the squares that the piece could move.
      * 
      * @note square must be valid and piece should be not Empty
      * 
@@ -75,12 +90,12 @@ public:
     /**
      * @brief pieceAttacks
      * 
-     * calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board
+     * Calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board
      * 
      * @note square must be valid, piece must be valid and not EMPTY
      * 
      * @param[in] square The selected square
-     * @param[in] square The selected piece
+     * @param[in] piece The selected piece
      * 
      * @return PIECE_ATTACKS[piece][square]
      */
@@ -95,7 +110,7 @@ public:
     /**
      * @brief rookMoves
      * 
-     * calculates the 64 bit mask with 1 on the squares that the piece could move
+     * Calculates the 64 bit mask with 1 on the squares that the piece could move.
      * 
      * @note square must be valid
      * 
@@ -116,7 +131,7 @@ public:
     /**
      * @brief bishopMoves
      * 
-     * calculates the 64 bit mask with 1 on the squares that the piece could move
+     * Calculates the 64 bit mask with 1 on the squares that the piece could move.
      * 
      * @note square must be valid
      * 
@@ -137,7 +152,7 @@ public:
     /**
      * @brief queenMoves
      * 
-     * calculates the 64 bit mask with 1 on the squares that the piece could move
+     * Calculates the 64 bit mask with 1 on the squares that the piece could move.
      * 
      * @note square must be valid
      * 
@@ -155,7 +170,7 @@ public:
     /**
      * @brief kingAttacks
      * 
-     * calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board
+     * Calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board.
      * 
      * @note square must be valid
      * 
@@ -172,7 +187,7 @@ public:
     /**
      * @brief knightAttacks
      * 
-     * calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board
+     * Calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board.
      * 
      * @note square must be valid
      * 
@@ -189,7 +204,7 @@ public:
     /**
      * @brief pawnAttacks
      * 
-     * calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board
+     * Calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board.
      * 
      * @note square and color must be valid
      * 
@@ -210,7 +225,7 @@ public:
     /**
      * @brief rookAttacks
      * 
-     * calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board
+     * Calculates the 64 bit mask with 1 on the squares that the piece in the provided square is attacking on an empty board.
      * 
      * @note square must be valid
      * 

@@ -57,7 +57,7 @@ enum class Piece : int
     NUM_PIECES = 13
 };
 
-/*
+/**
  * @brief PieceType
  * 
  * @note Do not change the assigned values, they are used in other functions.
@@ -291,7 +291,7 @@ constexpr inline Piece char_to_piece(char piece_char)
  * 
  * @note capital letters will be converted to lowercase.
  * 
- * @param piece_char {'p', 'n', 'b', 'r', 'q', 'k', ' '}
+ * @param pieceType_char {'p', 'n', 'b', 'r', 'q', 'k', ' '}
  * 
  * @return
  * - PieceType::PAWN if piece_char = 'p'.

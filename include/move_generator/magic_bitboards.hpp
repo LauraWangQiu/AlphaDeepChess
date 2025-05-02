@@ -32,7 +32,20 @@
 #include <immintrin.h>   // for _pext_u64
 #endif
 
+/**
+ * @brief Size of the lookup table for rook moves.
+ *
+ * This constant defines the size of the hash table used to store precomputed
+ * rook moves based on magic bitboards.
+ */
 constexpr int ROOK_TABLE_SIZE = 4096;
+
+/**
+ * @brief Size of the lookup table for bishop moves.
+ *
+ * This constant defines the size of the hash table used to store precomputed
+ * bishop moves based on magic bitboards.
+ */
 constexpr int BISHOP_TABLE_SIZE = 512;
 
 /**

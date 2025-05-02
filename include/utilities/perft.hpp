@@ -15,6 +15,14 @@
 #include <vector>
 #include "move_generator.hpp"
 
+/**
+ * @brief List of moves and their corresponding number of nodes.
+ *
+ * This typedef represents a list of pairs, where each pair contains a move
+ * and the number of nodes (positions) reachable from that move.
+ *
+ * It is used in perft tests to store the results of move generation and node counting.
+ */
 typedef std::vector<std::pair<Move, uint64_t>> MoveNodesList;
 
 /**

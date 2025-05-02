@@ -1,5 +1,5 @@
 /**
- * @file cpp
+ * @file board.cpp
  * @brief Board implementations.
  *
  */
@@ -38,12 +38,11 @@ void Board::clean()
 /**
  * @brief make_move
  * 
- * Make the move in the 
+ * Make the move in the board.
  * 
  * @note If the move is not valid in the position the game will be corrupted.
  * 
  * @param[in] move chess move.
- * 
  */
 void Board::make_move(Move move)
 {
@@ -138,13 +137,12 @@ void Board::unmake_move(Move move, GameState previous_state)
 /**
  * @brief load_fen
  * 
- * Set the position represented as fen on the chess 
+ * Set the position represented as FEN on the chessboard.
  * 
  *  https://www.chess.com/terms/fen-chess
  *  https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
  * 
- * @param[in] fen Chess position in fen string format
- * 
+ * @param[in] fen Chess position in FEN string format.
  */
 void Board::load_fen(const std::string& fen)
 {

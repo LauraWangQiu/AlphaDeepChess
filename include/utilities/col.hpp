@@ -28,17 +28,72 @@ enum Col : int
     COL_INVALID
 };
 
+/**
+ * @brief Mask for column A.
+ *
+ * This constant represents a bitboard mask for column A of the chessboard.
+ * Each bit in the mask corresponds to a square in column A.
+ */
 constexpr uint64_t COL_A_MASK = 0x0101010101010101ULL;
+
+/**
+ * @brief Mask for column B.
+ *
+ * This constant represents a bitboard mask for column B of the chessboard.
+ * Each bit in the mask corresponds to a square in column B.
+ */
 constexpr uint64_t COL_B_MASK = COL_A_MASK << 1;
+
+/**
+ * @brief Mask for column C.
+ *
+ * This constant represents a bitboard mask for column C of the chessboard.
+ * Each bit in the mask corresponds to a square in column C.
+ */
 constexpr uint64_t COL_C_MASK = COL_A_MASK << 2;
+
+/**
+ * @brief Mask for column D.
+ *
+ * This constant represents a bitboard mask for column D of the chessboard.
+ * Each bit in the mask corresponds to a square in column D.
+ */
 constexpr uint64_t COL_D_MASK = COL_A_MASK << 3;
+
+/**
+ * @brief Mask for column E.
+ *
+ * This constant represents a bitboard mask for column E of the chessboard.
+ * Each bit in the mask corresponds to a square in column E.
+ */
 constexpr uint64_t COL_E_MASK = COL_A_MASK << 4;
+
+/**
+ * @brief Mask for column F.
+ *
+ * This constant represents a bitboard mask for column F of the chessboard.
+ * Each bit in the mask corresponds to a square in column F.
+ */
 constexpr uint64_t COL_F_MASK = COL_A_MASK << 5;
+
+/**
+ * @brief Mask for column G.
+ *
+ * This constant represents a bitboard mask for column G of the chessboard.
+ * Each bit in the mask corresponds to a square in column G.
+ */
 constexpr uint64_t COL_G_MASK = COL_A_MASK << 6;
+
+/**
+ * @brief Mask for column H.
+ *
+ * This constant represents a bitboard mask for column H of the chessboard.
+ * Each bit in the mask corresponds to a square in column H.
+ */
 constexpr uint64_t COL_H_MASK = COL_A_MASK << 7;
 
 static constexpr uint64_t COL_MASKS[8] = {COL_A_MASK, COL_B_MASK, COL_C_MASK, COL_D_MASK,
-                                          COL_E_MASK, COL_F_MASK, COL_G_MASK, COL_H_MASK};
+                                          COL_E_MASK, COL_F_MASK, COL_G_MASK, COL_H_MASK}; // Masks for each column
 
 /**
  * @brief is_valid_col 
