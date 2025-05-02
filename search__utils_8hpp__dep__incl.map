@@ -1,0 +1,27 @@
+<map id="include/search/search_utils.hpp" name="include/search/search_utils.hpp">
+<area shape="rect" id="Node000001" title="search utilities declaration." alt="" coords="725,5,888,45"/>
+<area shape="rect" id="Node000002" href="$killer__moves_8hpp.html" title="killer moves utilities declaration." alt="" coords="518,93,671,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="749,53,642,96,640,91,747,48"/>
+<area shape="rect" id="Node000008" href="$search_8hpp.html" title="search services." alt="" coords="711,101,902,126"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="809,59,809,100,804,100,804,59"/>
+<area shape="rect" id="Node000011" href="$perft_8cpp.html" title="perft services." alt="" coords="927,101,1081,126"/>
+<area shape="poly" id="edge14_Node000001_Node000011" title=" " alt="" coords="863,48,979,98,977,103,861,53"/>
+<area shape="rect" id="Node000003" href="$move__ordering__MVV__LVA_8cpp.html" title="move ordering services." alt="" coords="5,181,189,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="505,132,202,184,190,186,189,181,201,179,504,127"/>
+<area shape="rect" id="Node000004" href="$search__basic_8cpp.html" title="search services." alt="" coords="213,189,416,214"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="521,140,353,191,351,186,519,135"/>
+<area shape="rect" id="Node000005" href="$search__multithread_8cpp.html" title="search services." alt="" coords="440,189,685,214"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="585,147,570,189,565,187,580,145"/>
+<area shape="rect" id="Node000006" href="$search__transposition__table_8cpp.html" title="search services." alt="" coords="709,181,936,221"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="659,136,774,179,772,184,657,141"/>
+<area shape="rect" id="Node000007" href="$search__tt__reductions_8cpp.html" title="search services." alt="" coords="960,181,1112,221"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="686,129,949,179,960,181,959,186,947,184,685,134"/>
+<area shape="poly" id="edge10_Node000008_Node000004" title=" " alt="" coords="728,131,381,191,380,186,727,126"/>
+<area shape="poly" id="edge11_Node000008_Node000005" title=" " alt="" coords="762,133,596,191,595,186,760,128"/>
+<area shape="poly" id="edge12_Node000008_Node000006" title=" " alt="" coords="814,139,822,180,816,181,809,140"/>
+<area shape="poly" id="edge13_Node000008_Node000007" title=" " alt="" coords="851,128,986,179,984,184,849,133"/>
+<area shape="rect" id="Node000009" href="$uci_8hpp.html" title="uci services." alt="" coords="1137,189,1279,214"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="875,126,1125,179,1158,186,1157,191,1123,184,874,131"/>
+<area shape="rect" id="Node000010" href="$uci_8cpp.html" title="uci services." alt="" coords="1151,269,1265,295"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="1211,228,1211,269,1205,269,1205,228"/>
+</map>

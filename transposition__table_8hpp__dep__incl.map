@@ -1,0 +1,15 @@
+<map id="include/utilities/transposition_table.hpp" name="include/utilities/transposition_table.hpp">
+<area shape="rect" id="Node000001" title="transposition table utilities declaration." alt="" coords="575,5,785,45"/>
+<area shape="rect" id="Node000002" href="$search__multithread_8cpp.html" title="search services." alt="" coords="5,101,251,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="561,48,202,103,201,98,560,42"/>
+<area shape="rect" id="Node000003" href="$search__transposition__table_8cpp.html" title="search services." alt="" coords="275,93,501,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="604,52,453,96,451,91,602,47"/>
+<area shape="rect" id="Node000004" href="$search__tt__reductions_8cpp.html" title="search services." alt="" coords="525,93,677,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="655,57,621,95,617,91,651,54"/>
+<area shape="rect" id="Node000005" href="$uci_8cpp.html" title="uci services." alt="" coords="701,101,816,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="709,54,750,98,746,102,705,57"/>
+<area shape="rect" id="Node000006" href="$perft_8cpp.html" title="perft services." alt="" coords="840,101,995,126"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="746,48,887,98,885,103,744,53"/>
+<area shape="rect" id="Node000007" href="$transposition__table_8cpp.html" title="transposition table utilities implementation." alt="" coords="1019,93,1202,133"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="789,45,1020,91,1019,97,788,51"/>
+</map>

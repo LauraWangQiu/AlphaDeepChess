@@ -1,0 +1,27 @@
+<map id="include/utilities/coordinates.hpp" name="include/utilities/coordinates.hpp">
+<area shape="rect" id="Node000001" title="Coordinates types and utilities declaration." alt="" coords="462,5,692,31"/>
+<area shape="rect" id="Node000002" href="$square_8hpp.html" title="Square types and utilities declaration." alt="" coords="375,79,470,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="553,33,461,75,459,70,551,28"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="610,225,680,251"/>
+<area shape="poly" id="edge15_Node000001_Node000006" title=" " alt="" coords="592,29,638,78,663,113,681,151,683,168,680,186,665,216,661,213,675,184,678,168,676,153,658,115,634,81,588,33"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="393,152,452,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="425,104,425,138,420,138,420,104"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="265,225,332,251"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="375,95,285,97,178,105,126,113,80,123,44,137,20,154,12,167,8,178,10,187,15,195,39,210,75,220,165,232,251,235,251,240,165,237,73,226,37,215,12,199,5,189,3,177,7,164,16,150,42,132,79,118,125,107,177,100,285,92,375,90"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="162,152,238,177"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="387,107,249,150,248,145,386,101"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="470,95,578,114,627,130,645,139,658,150,665,165,666,182,659,213,654,212,661,181,660,167,654,154,642,144,625,135,577,120,469,101"/>
+<area shape="rect" id="Node000007" href="$col_8hpp.html" title="Board chess Column types and utilities declaration." alt="" coords="574,152,644,177"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="453,102,567,145,565,149,451,107"/>
+<area shape="rect" id="Node000008" href="$row_8hpp.html" title="Board chess Rows types and utilities declaration." alt="" coords="476,152,550,177"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="439,102,489,141,486,145,435,106"/>
+<area shape="rect" id="Node000009" href="$direction_8hpp.html" title="Direction type utilities declaration." alt="" coords="262,152,369,177"/>
+<area shape="poly" id="edge12_Node000002_Node000009" title=" " alt="" coords="407,106,346,147,343,142,404,102"/>
+<area shape="rect" id="Node000010" href="$diagonal_8hpp.html" title="Diagonal types and utilities declaration." alt="" coords="30,152,137,177"/>
+<area shape="poly" id="edge13_Node000002_Node000010" title=" " alt="" coords="375,105,151,152,150,147,374,100"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="575,177,563,180,346,229,344,224,562,175,573,172"/>
+<area shape="poly" id="edge8_Node000007_Node000006" title=" " alt="" coords="617,176,635,212,631,214,613,179"/>
+<area shape="poly" id="edge10_Node000008_Node000004" title=" " alt="" coords="479,180,345,224,344,219,478,175"/>
+<area shape="poly" id="edge11_Node000008_Node000006" title=" " alt="" coords="536,175,613,216,610,221,533,180"/>
+<area shape="poly" id="edge14_Node000010_Node000004" title=" " alt="" coords="119,175,253,219,251,224,117,180"/>
+</map>

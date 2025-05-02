@@ -1,0 +1,28 @@
+var classBoard =
+[
+    [ "Board", "classBoard.html#a9ee491d4fea680cf69b033374a9fdfcb", null ],
+    [ "~Board", "classBoard.html#af73f45730119a1fd8f6670f53f959e68", null ],
+    [ "clean", "classBoard.html#aab2f3f5bbb1e85a9707818b63639f642", null ],
+    [ "fen", "classBoard.html#a0246e50fbf0abc3dcc19aa4fd8100e4a", null ],
+    [ "get_attacks_bb", "classBoard.html#a0abe8903c57f72d85255fb44ae50f243", null ],
+    [ "get_attacks_bb", "classBoard.html#a5933ea040376339a5eb9489ee0a4a42b", null ],
+    [ "get_bitboard_all", "classBoard.html#ad1fb2aa2e5ca85189a27b46d1f4dc6f9", null ],
+    [ "get_bitboard_color", "classBoard.html#a20785d19440a33d11457986c06d22494", null ],
+    [ "get_bitboard_piece", "classBoard.html#acef13f8d6d54181a1745aa75677e8707", null ],
+    [ "get_num_pieces", "classBoard.html#a5bbc0f5b619c3402b5ddc0b8dbd40b85", null ],
+    [ "get_piece", "classBoard.html#a59fcd48aedfbf53760a49466d5a39352", null ],
+    [ "get_piece_counter", "classBoard.html#a635ca69b634e65009df46dd726341085", null ],
+    [ "is_empty", "classBoard.html#a3bf1f2963d160de73a2d5234819beb78", null ],
+    [ "load_fen", "classBoard.html#a0cdd059eb12f0e9d4d0716a322289092", null ],
+    [ "make_move", "classBoard.html#a9e53e2f93658d6706ed6d144a3639ac3", null ],
+    [ "move_is_capture", "classBoard.html#a0f7ff026cd7ab9426480337f742a6298", null ],
+    [ "put_piece", "classBoard.html#ac7c9c2a9669c929fc56231e313305411", null ],
+    [ "remove_piece", "classBoard.html#a404ea9df913b6faaf2ed6e04503ffe26", null ],
+    [ "set_attacks_bb", "classBoard.html#ab417daf13e29a0aa304f4e02a13a4cc4", null ],
+    [ "set_attacks_bb", "classBoard.html#a68c63458063f03a1000755e841ab97ff", null ],
+    [ "set_side_to_move", "classBoard.html#aa175079c41d43c2672adf2338567e0b9", null ],
+    [ "state", "classBoard.html#af8dcffd733cea4b4cbd5bdd0c441652c", null ],
+    [ "unmake_move", "classBoard.html#a889d50042774430b6362a274f9ea8017", null ],
+    [ "update_attacks_bb", "classBoard.html#acb866f29b2e3bfc01d0b8e2c0505d613", null ],
+    [ "operator<<", "classBoard.html#ab371c3ae6aa377e0cbd3da03862935a3", null ]
+];

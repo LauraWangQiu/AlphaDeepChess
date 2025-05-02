@@ -1,0 +1,32 @@
+<map id="include/evaluation/precomputed_eval_data.hpp" name="include/evaluation/precomputed_eval_data.hpp">
+<area shape="rect" id="Node000001" title="precomputed data." alt="" coords="691,5,902,45"/>
+<area shape="rect" id="Node000002" href="$square_8hpp.html" title="Square types and utilities declaration." alt="" coords="376,93,471,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="708,48,485,95,484,89,707,43"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="671,240,741,265"/>
+<area shape="poly" id="edge18_Node000001_Node000006" title=" " alt="" coords="792,46,718,228,713,226,787,44"/>
+<area shape="rect" id="Node000011" href="$piece_8hpp.html" title="Piece types and utilities declaration." alt="" coords="794,93,879,119"/>
+<area shape="poly" id="edge15_Node000001_Node000011" title=" " alt="" coords="809,44,827,80,822,82,804,47"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="903,93,959,119"/>
+<area shape="poly" id="edge17_Node000001_Node000012" title=" " alt="" coords="830,43,901,84,898,89,828,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="237,167,295,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="399,121,305,163,303,159,397,116"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="446,240,513,265"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="405,121,385,135,367,153,357,172,357,181,360,191,375,208,393,221,433,239,431,244,390,226,371,211,356,193,351,182,352,170,363,149,381,131,402,117"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,167,81,192"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="376,118,95,169,94,164,375,113"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="471,110,590,130,645,145,667,154,682,165,693,178,701,194,708,225,702,227,696,196,689,181,679,169,664,159,644,150,589,135,471,115"/>
+<area shape="rect" id="Node000007" href="$col_8hpp.html" title="Board chess Column types and utilities declaration." alt="" coords="501,167,570,192"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="443,116,507,157,504,161,440,121"/>
+<area shape="rect" id="Node000008" href="$row_8hpp.html" title="Board chess Rows types and utilities declaration." alt="" coords="595,167,668,192"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="458,116,585,160,584,165,456,121"/>
+<area shape="rect" id="Node000009" href="$direction_8hpp.html" title="Direction type utilities declaration." alt="" coords="106,167,213,192"/>
+<area shape="poly" id="edge12_Node000002_Node000009" title=" " alt="" coords="382,121,216,166,215,160,380,116"/>
+<area shape="rect" id="Node000010" href="$diagonal_8hpp.html" title="Diagonal types and utilities declaration." alt="" coords="370,167,477,192"/>
+<area shape="poly" id="edge13_Node000002_Node000010" title=" " alt="" coords="426,119,426,153,421,153,421,119"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="528,194,499,231,495,228,524,191"/>
+<area shape="poly" id="edge8_Node000007_Node000006" title=" " alt="" coords="564,190,667,232,665,237,562,194"/>
+<area shape="poly" id="edge10_Node000008_Node000004" title=" " alt="" coords="608,194,517,237,515,232,606,190"/>
+<area shape="poly" id="edge11_Node000008_Node000006" title=" " alt="" coords="645,190,686,229,682,232,641,194"/>
+<area shape="poly" id="edge14_Node000010_Node000004" title=" " alt="" coords="435,191,464,228,460,231,430,194"/>
+<area shape="poly" id="edge16_Node000011_Node000006" title=" " alt="" coords="832,120,809,154,777,194,734,234,730,230,773,190,805,151,827,117"/>
+</map>

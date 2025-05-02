@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['add_0',['add',['../classMoveList.html#a5fd5e1159cf3e064a46939227867aec4',1,'MoveList']]],
+  ['alphadeepchess_1',['AlphaDeepChess',['../index.html',1,'']]],
+  ['antidiagonal_2',['antidiagonal',['../classSquare.html#a5bc65264a5fa2096342ae6b601c80bce',1,'Square::antidiagonal()'],['../diagonal_8hpp.html#a2ecb120b43b89478698c2f00aafbf954',1,'AntiDiagonal:&#160;diagonal.hpp']]],
+  ['antidiagonal_5f0_5fmask_3',['ANTIDIAGONAL_0_MASK',['../diagonal_8hpp.html#a1b4cbc8f71a1af849e0afbfe899156db',1,'diagonal.hpp']]],
+  ['antidiagonal_5f10_5fmask_4',['ANTIDIAGONAL_10_MASK',['../diagonal_8hpp.html#a8aa6cd83d1894c92f55f50d8f4eca451',1,'diagonal.hpp']]],
+  ['antidiagonal_5f11_5fmask_5',['ANTIDIAGONAL_11_MASK',['../diagonal_8hpp.html#a339e98d425a64e1d156d33af132f0ff3',1,'diagonal.hpp']]],
+  ['antidiagonal_5f12_5fmask_6',['ANTIDIAGONAL_12_MASK',['../diagonal_8hpp.html#ab18ae18acd5729e114d74cd75c80d50e',1,'diagonal.hpp']]],
+  ['antidiagonal_5f13_5fmask_7',['ANTIDIAGONAL_13_MASK',['../diagonal_8hpp.html#a93c283dda9b0fddefaa9bb0fa9ea5626',1,'diagonal.hpp']]],
+  ['antidiagonal_5f14_5fmask_8',['ANTIDIAGONAL_14_MASK',['../diagonal_8hpp.html#afa2b3b0981f0ca4aadf971455787b9d4',1,'diagonal.hpp']]],
+  ['antidiagonal_5f1_5fmask_9',['ANTIDIAGONAL_1_MASK',['../diagonal_8hpp.html#a1166eefaef3d6a760f38d497589a1e23',1,'diagonal.hpp']]],
+  ['antidiagonal_5f2_5fmask_10',['ANTIDIAGONAL_2_MASK',['../diagonal_8hpp.html#aea07173ee8884b1601ab104715d5e00a',1,'diagonal.hpp']]],
+  ['antidiagonal_5f3_5fmask_11',['ANTIDIAGONAL_3_MASK',['../diagonal_8hpp.html#acd4ef71a7357592c0e29fc035525526e',1,'diagonal.hpp']]],
+  ['antidiagonal_5f4_5fmask_12',['ANTIDIAGONAL_4_MASK',['../diagonal_8hpp.html#a9acab588ebc15d6193c0b01b0c4a1fa9',1,'diagonal.hpp']]],
+  ['antidiagonal_5f5_5fmask_13',['ANTIDIAGONAL_5_MASK',['../diagonal_8hpp.html#ad52b5f9483051c71632dafb610edc518',1,'diagonal.hpp']]],
+  ['antidiagonal_5f6_5fmask_14',['ANTIDIAGONAL_6_MASK',['../diagonal_8hpp.html#a3abeb7a214ce31347afdee80c609f7a5',1,'diagonal.hpp']]],
+  ['antidiagonal_5f7_5fmask_15',['ANTIDIAGONAL_7_MASK',['../diagonal_8hpp.html#a7816ba471d05a2d8d38e8cec499132a8',1,'diagonal.hpp']]],
+  ['antidiagonal_5f8_5fmask_16',['ANTIDIAGONAL_8_MASK',['../diagonal_8hpp.html#a20181aaf32c46f1c34f4d4482f19b48f',1,'diagonal.hpp']]],
+  ['antidiagonal_5f9_5fmask_17',['ANTIDIAGONAL_9_MASK',['../diagonal_8hpp.html#ad7458bd92c9e478d53228324a6ba0288',1,'diagonal.hpp']]],
+  ['arraybb_18',['ArrayBB',['../precomputed__move__data_8cpp.html#a12640377a6dcec73faa760890f5e3dde',1,'precomputed_move_data.cpp']]],
+  ['arraybbconst_19',['ArrayBBConst',['../precomputed__move__data_8cpp.html#aabb5b3b32cf4d4d4e2f8d227e7defaea',1,'precomputed_move_data.cpp']]],
+  ['aspiration_5fmargin_20',['ASPIRATION_MARGIN',['../search__utils_8hpp.html#aea3fa22030d988d409012850642044b0',1,'search_utils.hpp']]],
+  ['attacks_5fupdated_21',['attacks_updated',['../classGameState.html#ae92fc2e3985afc98bae3a1ac1a3f4c68',1,'GameState']]]
+];

@@ -1,0 +1,7 @@
+<map id="SearchContext" name="SearchContext">
+<area shape="rect" id="Node000001" title="SearchContext." alt="" coords="57,108,175,133"/>
+<area shape="rect" id="Node000002" href="$classMove.html" title="Move." alt="" coords="5,5,64,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="32,44,32,64,38,83,51,96,68,106,66,110,48,100,34,85,27,65,27,44"/>
+<area shape="rect" id="Node000003" href="$classBoard.html" title="Board." alt="" coords="167,5,227,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="192,45,183,66,170,86,140,110,137,106,166,82,179,63,187,43"/>
+</map>

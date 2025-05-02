@@ -1,0 +1,42 @@
+<map id="src/utilities/transposition_table.cpp" name="src/utilities/transposition_table.cpp">
+<area shape="rect" id="Node000001" title="transposition table utilities implementation." alt="" coords="185,5,367,45"/>
+<area shape="rect" id="Node000002" href="$transposition__table_8hpp.html" title="transposition table utilities declaration." alt="" coords="189,93,363,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="279,46,279,79,273,79,273,46"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="175,167,238,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="266,121,229,159,225,155,263,117"/>
+<area shape="rect" id="Node000004" href="$bit__utilities_8hpp.html" title="bit manipulation utilities." alt="" coords="5,313,128,339"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="277,119,270,154,252,193,218,231,179,264,105,309,102,305,176,259,214,228,247,191,265,152,272,118"/>
+<area shape="rect" id="Node000008" href="$move_8hpp.html" title="Move types and utilities declaration." alt="" coords="694,167,781,192"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="351,116,681,167,680,172,350,121"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="47,387,86,412"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="69,339,69,373,64,373,64,339"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="263,387,329,412"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="104,336,250,381,249,386,103,341"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="783,387,852,412"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="129,335,140,336,501,372,769,392,769,398,501,377,140,341,128,340"/>
+<area shape="poly" id="edge24_Node000008_Node000007" title=" " alt="" coords="754,190,806,239,833,273,853,313,856,330,853,347,838,377,833,374,848,345,851,330,848,314,828,276,802,242,751,194"/>
+<area shape="rect" id="Node000009" href="$square_8hpp.html" title="Square types and utilities declaration." alt="" coords="523,240,618,265"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="712,194,611,237,609,232,710,190"/>
+<area shape="rect" id="Node000016" href="$piece_8hpp.html" title="Piece types and utilities declaration." alt="" coords="941,240,1027,265"/>
+<area shape="poly" id="edge22_Node000008_Node000016" title=" " alt="" coords="778,189,932,234,930,239,776,195"/>
+<area shape="poly" id="edge10_Node000009_Node000006" title=" " alt="" coords="523,262,409,282,357,297,323,315,313,328,306,343,300,373,294,372,301,341,309,325,320,311,355,292,408,277,522,257"/>
+<area shape="poly" id="edge12_Node000009_Node000007" title=" " alt="" coords="619,255,676,262,739,274,795,290,816,300,830,312,837,327,839,343,832,374,827,373,834,343,832,328,826,315,813,304,793,295,738,279,675,268,618,261"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="333,313,392,339"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="538,268,406,313,405,308,536,263"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="417,313,493,339"/>
+<area shape="poly" id="edge11_Node000009_Node000011" title=" " alt="" coords="553,268,487,308,484,304,551,263"/>
+<area shape="rect" id="Node000012" href="$col_8hpp.html" title="Board chess Column types and utilities declaration." alt="" coords="747,313,816,339"/>
+<area shape="poly" id="edge13_Node000009_Node000012" title=" " alt="" coords="605,263,735,306,734,311,604,268"/>
+<area shape="rect" id="Node000013" href="$row_8hpp.html" title="Board chess Rows types and utilities declaration." alt="" coords="649,313,722,339"/>
+<area shape="poly" id="edge16_Node000009_Node000013" title=" " alt="" coords="590,263,656,304,654,308,588,268"/>
+<area shape="rect" id="Node000014" href="$direction_8hpp.html" title="Direction type utilities declaration." alt="" coords="517,313,624,339"/>
+<area shape="poly" id="edge19_Node000009_Node000014" title=" " alt="" coords="573,266,573,300,568,300,568,266"/>
+<area shape="rect" id="Node000015" href="$diagonal_8hpp.html" title="Diagonal types and utilities declaration." alt="" coords="152,313,259,339"/>
+<area shape="poly" id="edge20_Node000009_Node000015" title=" " alt="" coords="524,266,273,314,272,309,523,261"/>
+<area shape="poly" id="edge14_Node000012_Node000006" title=" " alt="" coords="747,339,735,341,517,375,344,396,343,391,516,370,734,336,746,334"/>
+<area shape="poly" id="edge15_Node000012_Node000007" title=" " alt="" coords="790,338,808,373,803,376,785,340"/>
+<area shape="poly" id="edge17_Node000013_Node000006" title=" " alt="" coords="649,339,637,341,343,393,342,388,635,336,648,333"/>
+<area shape="poly" id="edge18_Node000013_Node000007" title=" " alt="" coords="708,336,785,378,783,382,705,341"/>
+<area shape="poly" id="edge21_Node000015_Node000006" title=" " alt="" coords="222,337,272,376,269,380,218,341"/>
+<area shape="poly" id="edge23_Node000016_Node000007" title=" " alt="" coords="980,267,958,302,924,341,892,364,859,383,856,378,889,360,921,337,954,299,976,264"/>
+</map>

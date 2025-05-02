@@ -1,0 +1,9 @@
+<map id="include/utilities/bit_utilities.hpp" name="include/utilities/bit_utilities.hpp">
+<area shape="rect" id="Node000001" title="bit manipulation utilities." alt="" coords="31,5,173,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,44,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,47,48,85,44,82,81,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="69,93,135,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="105,46,105,79,99,79,99,46"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="159,93,229,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="126,44,172,82,168,86,123,48"/>
+</map>

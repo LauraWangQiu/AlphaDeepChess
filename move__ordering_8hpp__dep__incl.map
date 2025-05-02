@@ -1,0 +1,13 @@
+<map id="include/move_ordering/move_ordering.hpp" name="include/move_ordering/move_ordering.hpp">
+<area shape="rect" id="Node000001" title="move ordering services." alt="" coords="477,5,648,45"/>
+<area shape="rect" id="Node000002" href="$move__ordering__MVV__LVA_8cpp.html" title="move ordering services." alt="" coords="5,93,189,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="465,47,190,98,189,92,464,42"/>
+<area shape="rect" id="Node000003" href="$search__basic_8cpp.html" title="search services." alt="" coords="213,101,416,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="496,52,349,103,347,98,494,47"/>
+<area shape="rect" id="Node000004" href="$search__multithread_8cpp.html" title="search services." alt="" coords="440,101,685,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="565,59,565,100,560,100,560,59"/>
+<area shape="rect" id="Node000005" href="$search__transposition__table_8cpp.html" title="search services." alt="" coords="709,93,936,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="634,47,767,91,765,96,632,52"/>
+<area shape="rect" id="Node000006" href="$search__tt__reductions_8cpp.html" title="search services." alt="" coords="960,93,1112,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="662,40,948,91,960,93,959,98,948,96,661,45"/>
+</map>

@@ -1,0 +1,21 @@
+var searchData=
+[
+  ['data_5favailable_5fcv_0',['data_available_cv',['../structSearchResults.html#a185685fe95e89a803eab59bb45f2e415',1,'SearchResults']]],
+  ['depth_1',['depth',['../structSearchResult.html#a3b5365b9667e5d3ac07248f7e43051c4',1,'SearchResult::depth'],['../classTranspositionTable_1_1Entry.html#a7e7d4096f03909c328f637cab68cd908',1,'TranspositionTable::Entry::depth']]],
+  ['depthreached_2',['depthReached',['../structSearchResults.html#a7447f5594d7b42119eb6d3ba81bfff29',1,'SearchResults']]],
+  ['diagonal_5f0_5fmask_3',['DIAGONAL_0_MASK',['../diagonal_8hpp.html#a87fd6d743bb8fd50aa23e6a886b02d86',1,'diagonal.hpp']]],
+  ['diagonal_5f10_5fmask_4',['DIAGONAL_10_MASK',['../diagonal_8hpp.html#a1eda4ca972c7771c37bcf9f4b2d40c29',1,'diagonal.hpp']]],
+  ['diagonal_5f11_5fmask_5',['DIAGONAL_11_MASK',['../diagonal_8hpp.html#add754f1fe08edea40fc07c41462a3507',1,'diagonal.hpp']]],
+  ['diagonal_5f12_5fmask_6',['DIAGONAL_12_MASK',['../diagonal_8hpp.html#aa297983a46b9797e93b135dd1c9b4ce6',1,'diagonal.hpp']]],
+  ['diagonal_5f13_5fmask_7',['DIAGONAL_13_MASK',['../diagonal_8hpp.html#abb0cca8fcabcf8b0d918b6fba80cc89c',1,'diagonal.hpp']]],
+  ['diagonal_5f14_5fmask_8',['DIAGONAL_14_MASK',['../diagonal_8hpp.html#a4352528aa8ed0732ae2eab427e796220',1,'diagonal.hpp']]],
+  ['diagonal_5f1_5fmask_9',['DIAGONAL_1_MASK',['../diagonal_8hpp.html#afd85aae7561a30d9b9c7669c3a704199',1,'diagonal.hpp']]],
+  ['diagonal_5f2_5fmask_10',['DIAGONAL_2_MASK',['../diagonal_8hpp.html#a9d4f414801b19e0690ac5babcf3f2bfa',1,'diagonal.hpp']]],
+  ['diagonal_5f3_5fmask_11',['DIAGONAL_3_MASK',['../diagonal_8hpp.html#ae023d33bc869b1ae633c375692ab3e1b',1,'diagonal.hpp']]],
+  ['diagonal_5f4_5fmask_12',['DIAGONAL_4_MASK',['../diagonal_8hpp.html#a75fac749c5b160205d5c06251a10ee1e',1,'diagonal.hpp']]],
+  ['diagonal_5f5_5fmask_13',['DIAGONAL_5_MASK',['../diagonal_8hpp.html#a67b16ede6d84ec42dd2cd09273089846',1,'diagonal.hpp']]],
+  ['diagonal_5f6_5fmask_14',['DIAGONAL_6_MASK',['../diagonal_8hpp.html#a11f00a258a005fa8bd5c285f1db82f92',1,'diagonal.hpp']]],
+  ['diagonal_5f7_5fmask_15',['DIAGONAL_7_MASK',['../diagonal_8hpp.html#a2f627842bfc44e678f0c5d5975edd142',1,'diagonal.hpp']]],
+  ['diagonal_5f8_5fmask_16',['DIAGONAL_8_MASK',['../diagonal_8hpp.html#a5af932147c7ad6dc6e8f26d6e3d9a4bf',1,'diagonal.hpp']]],
+  ['diagonal_5f9_5fmask_17',['DIAGONAL_9_MASK',['../diagonal_8hpp.html#a4521ff24060c91c28b372ab9ae74ccf8',1,'diagonal.hpp']]]
+];

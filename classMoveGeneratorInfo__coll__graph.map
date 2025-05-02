@@ -1,0 +1,9 @@
+<map id="MoveGeneratorInfo" name="MoveGeneratorInfo">
+<area shape="rect" id="Node000001" title="MoveGeneratorInfo." alt="" coords="122,167,270,192"/>
+<area shape="rect" id="Node000002" href="$classSquare.html" title="Square." alt="" coords="5,5,72,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="39,44,43,94,52,119,66,141,92,159,123,170,121,175,89,164,62,145,47,121,38,95,34,45"/>
+<area shape="rect" id="Node000003" href="$classBoard.html" title="Board." alt="" coords="166,5,226,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="199,44,199,166,193,166,193,44"/>
+<area shape="rect" id="Node000004" href="$classMoveList.html" title="MoveList." alt="" coords="250,5,331,31"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="288,45,272,93,260,120,245,144,218,169,214,165,241,141,256,117,268,91,283,43"/>
+</map>

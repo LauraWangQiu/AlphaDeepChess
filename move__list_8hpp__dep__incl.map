@@ -1,0 +1,51 @@
+<map id="include/move/move_list.hpp" name="include/move/move_list.hpp">
+<area shape="rect" id="Node000001" title="Move list types and utilities declaration." alt="" coords="887,5,1093,31"/>
+<area shape="rect" id="Node000002" href="$move__generator_8hpp.html" title="move generator services." alt="" coords="1227,79,1407,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1051,31,1239,76,1238,81,1050,36"/>
+<area shape="rect" id="Node000006" href="$evaluation__dynamic_8cpp.html" title="evaluation services implementation." alt="" coords="1993,174,2179,214"/>
+<area shape="poly" id="edge27_Node000001_Node000006" title=" " alt="" coords="1102,30,1491,81,1735,120,1980,164,2013,171,2012,177,1979,169,1734,125,1491,87,1101,35"/>
+<area shape="rect" id="Node000007" href="$evaluation__safety__mobility_8cpp.html" title="evaluation services implementation." alt="" coords="2203,174,2390,214"/>
+<area shape="poly" id="edge28_Node000001_Node000007" title=" " alt="" coords="1108,25,1313,43,1583,72,1887,112,2192,164,2225,171,2224,176,2191,169,1886,117,1583,77,1312,49,1107,31"/>
+<area shape="rect" id="Node000010" href="$search__basic_8cpp.html" title="search services." alt="" coords="442,181,645,207"/>
+<area shape="poly" id="edge29_Node000001_Node000010" title=" " alt="" coords="913,36,835,55,754,81,697,106,643,135,562,184,559,179,640,130,695,102,752,76,834,50,912,31"/>
+<area shape="rect" id="Node000011" href="$search__multithread_8cpp.html" title="search services." alt="" coords="173,181,418,207"/>
+<area shape="poly" id="edge30_Node000001_Node000011" title=" " alt="" coords="873,27,636,46,524,61,479,71,444,81,401,104,362,132,308,183,304,179,359,128,399,99,442,76,477,65,523,56,635,40,873,22"/>
+<area shape="rect" id="Node000012" href="$search__transposition__table_8cpp.html" title="search services." alt="" coords="877,174,1103,214"/>
+<area shape="poly" id="edge31_Node000001_Node000012" title=" " alt="" coords="993,44,993,174,987,174,987,44"/>
+<area shape="rect" id="Node000013" href="$search__tt__reductions_8cpp.html" title="search services." alt="" coords="1127,174,1279,214"/>
+<area shape="poly" id="edge32_Node000001_Node000013" title=" " alt="" coords="1016,37,1182,172,1179,176,1013,41"/>
+<area shape="rect" id="Node000014" href="$move__ordering_8hpp.html" title="move ordering services." alt="" coords="765,79,935,119"/>
+<area shape="poly" id="edge14_Node000001_Node000014" title=" " alt="" coords="959,40,885,81,882,76,956,35"/>
+<area shape="rect" id="Node000016" href="$search_8hpp.html" title="search services." alt="" coords="456,86,647,111"/>
+<area shape="poly" id="edge20_Node000001_Node000016" title=" " alt="" coords="914,36,616,89,615,83,913,30"/>
+<area shape="rect" id="Node000003" href="$perft_8hpp.html" title="Perft services." alt="" coords="1354,181,1538,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1355,124,1432,179,1429,183,1352,129"/>
+<area shape="rect" id="Node000004" href="$uci_8cpp.html" title="uci services." alt="" coords="1245,269,1359,295"/>
+<area shape="poly" id="edge13_Node000002_Node000004" title=" " alt="" coords="1317,133,1306,270,1300,269,1311,133"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="1420,103,1676,124,1828,142,1980,164,2016,171,2015,177,1979,169,1827,147,1675,130,1420,109"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="1421,100,1572,106,1764,117,1978,136,2192,164,2228,171,2227,177,2191,169,1977,141,1764,122,1572,111,1421,105"/>
+<area shape="rect" id="Node000008" href="$move__generator__basic_8cpp.html" title="move generator services." alt="" coords="1563,174,1764,214"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="1401,120,1594,171,1593,177,1399,125"/>
+<area shape="rect" id="Node000009" href="$move__generator__magic__bitboards_8cpp.html" title="move generator services." alt="" coords="1788,167,1968,221"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="1421,109,1588,132,1776,164,1789,167,1787,172,1775,169,1587,137,1420,115"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="1213,109,959,131,808,148,657,169,588,184,587,179,656,164,807,142,959,125,1213,104"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="1213,109,802,136,587,153,430,169,347,184,346,179,430,164,587,148,802,131,1213,104"/>
+<area shape="poly" id="edge11_Node000002_Node000012" title=" " alt="" coords="1238,125,1057,177,1055,171,1237,120"/>
+<area shape="poly" id="edge12_Node000002_Node000013" title=" " alt="" coords="1285,130,1228,176,1225,172,1281,126"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1416,216,1323,271,1320,267,1414,211"/>
+<area shape="rect" id="Node000005" href="$perft_8cpp.html" title="perft services." alt="" coords="1383,269,1538,295"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="1453,220,1461,268,1456,269,1448,221"/>
+<area shape="poly" id="edge16_Node000014_Node000010" title=" " alt="" coords="776,125,582,184,580,179,774,120"/>
+<area shape="poly" id="edge17_Node000014_Node000011" title=" " alt="" coords="752,117,430,169,353,184,352,179,430,164,751,112"/>
+<area shape="poly" id="edge18_Node000014_Node000012" title=" " alt="" coords="891,124,963,172,960,176,888,129"/>
+<area shape="poly" id="edge19_Node000014_Node000013" title=" " alt="" coords="942,119,1116,164,1142,171,1140,176,1115,169,941,125"/>
+<area shape="rect" id="Node000015" href="$move__ordering__MVV__LVA_8cpp.html" title="move ordering services." alt="" coords="669,174,853,214"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="825,130,781,176,777,172,821,127"/>
+<area shape="poly" id="edge23_Node000016_Node000010" title=" " alt="" coords="552,125,547,181,542,181,547,125"/>
+<area shape="poly" id="edge24_Node000016_Node000011" title=" " alt="" coords="508,119,328,184,326,179,506,114"/>
+<area shape="poly" id="edge25_Node000016_Node000012" title=" " alt="" coords="619,112,902,171,901,177,618,117"/>
+<area shape="poly" id="edge26_Node000016_Node000013" title=" " alt="" coords="661,108,909,135,1029,150,1116,164,1146,171,1144,177,1115,169,1028,155,908,140,660,113"/>
+<area shape="rect" id="Node000017" href="$uci_8hpp.html" title="uci services." alt="" coords="5,181,148,207"/>
+<area shape="poly" id="edge21_Node000016_Node000017" title=" " alt="" coords="452,116,314,138,161,169,111,184,109,179,160,164,313,133,451,111"/>
+<area shape="poly" id="edge22_Node000017_Node000004" title=" " alt="" coords="120,208,161,219,260,232,391,243,706,260,1244,277,1244,282,706,266,391,248,259,237,160,224,119,214"/>
+</map>

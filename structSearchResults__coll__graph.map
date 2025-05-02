@@ -1,0 +1,5 @@
+<map id="SearchResults" name="SearchResults">
+<area shape="rect" id="Node000001" title="SearchResults." alt="" coords="5,93,120,119"/>
+<area shape="rect" id="Node000002" href="$structSearchResult.html" title="SearchResult." alt="" coords="9,5,116,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="65,45,65,93,60,93,60,45"/>
+</map>

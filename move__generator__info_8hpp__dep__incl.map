@@ -1,0 +1,7 @@
+<map id="include/move_generator/move_generator_info.hpp" name="include/move_generator/move_generator_info.hpp">
+<area shape="rect" id="Node000001" title="move generator info services." alt="" coords="116,5,309,45"/>
+<area shape="rect" id="Node000002" href="$move__generator__basic_8cpp.html" title="move generator services." alt="" coords="5,101,207,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,56,129,103,126,99,179,52"/>
+<area shape="rect" id="Node000003" href="$move__generator__magic__bitboards_8cpp.html" title="move generator services." alt="" coords="231,93,411,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="247,52,292,91,289,95,243,56"/>
+</map>
