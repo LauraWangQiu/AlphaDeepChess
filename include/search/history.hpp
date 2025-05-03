@@ -71,7 +71,8 @@ public:
 
 private:
     // max number of positions in the array (must be power of two)
-    static constexpr int HISTORY_MAX_SIZE = 64;
+    static constexpr int HISTORY_MAX_SIZE = 128;
+    static_assert(HISTORY_MAX_SIZE > 100, "HISTORY_MAX_SIZE must be greater than fifty move rule counter");
     static_assert((HISTORY_MAX_SIZE & (HISTORY_MAX_SIZE - 1)) == 0, "HISTORY_MAX_SIZE has to be a power of 2");
 
     // position array circular index

@@ -87,9 +87,9 @@ public:
     constexpr inline bool has_castled_black() const;
 
     /**
-     * @brief fifty_move_rule_counter
+     * @brief fifty_move_rule_counter (half move clock)
      * 
-     * Counter for the fifty move rule, if 100 moves passed without 
+     * Counter for the fifty move rule, if 50 moves passed without 
      * a pawn move or a capture then game is a draw.
      * 
      * @note if this counter gets to 100 the game is a draw.
@@ -209,12 +209,11 @@ public:
     /**
      * @brief set_fifty_move_rule_counter
      * 
-     * set the moves that have passed since the last pawn move or capture.
+     * Set the moves that have passed since the last pawn move or capture.
      * 
      * @note counter must be <=100, otherwise state will be corrupted.
      * 
-     * @param[in] counter fifty rule counter counter.
-     * 
+     * @param[in] counter Fifty-move rule counter.
      */
     constexpr inline void set_fifty_move_rule_counter(uint8_t counter);
 
@@ -615,12 +614,12 @@ private:
 };
 
 /**
- * @brief fifty_move_rule_counter
+ * @brief fifty_move_rule_counter (half move clock)
  * 
  * Counter for the fifty move rule, if 50 moves passed without 
  * a pawn move or a capture then game is a draw.
  * 
- * @note if this counter gets to 50 the game is a draw.
+ * @note if this counter gets to 100 the game is a draw.
  * 
  * @return 50 move rule counter.
  * 
@@ -745,7 +744,7 @@ constexpr inline int GameState::num_pieces() const { return (state_register & MA
  * 
  * Set the moves that have passed since the last pawn move or capture.
  * 
- * @note counter must be <=50, otherwise state will be corrupted.
+ * @note counter must be <=100, otherwise state will be corrupted.
  * 
  * @param[in] counter Fifty-move rule counter.
  */

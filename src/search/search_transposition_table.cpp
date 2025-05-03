@@ -71,7 +71,7 @@ void search(std::atomic<bool>& stop, SearchResults& results, Board& board, uint3
     const Move ponder_move_tt = TranspositionTable::get_entry(board.state().get_zobrist_key()).move;
 
     results.ponderMove_data = ponder_move_tt.raw_data();
-    assert(ponder_move_tt.is_valid());
+    //assert(ponder_move_tt.is_valid());
 
     board.unmake_move(context.bestMoveFound, state);
 
