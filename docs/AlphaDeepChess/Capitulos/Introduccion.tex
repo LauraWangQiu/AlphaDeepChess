@@ -317,10 +317,6 @@ The king can move one square in any direction: horizontally, vertically, or diag
 
 \noindent In Figure \ref{fig:white-king-movement-game}, the white king cannot move to $e4$ because the black king is attacking that square.
 
-\vspace{1em} % Añade espacio
-
-\noindent There are specific terms related with kings that are important to understand:
-
 \paragraph{Castling} is a special move which involves moving the king two squares towards a rook and moving the rook to the square next to the king. Castling has specific conditions which are:
 
 \begin{itemize}
@@ -346,43 +342,6 @@ The king can move one square in any direction: horizontally, vertically, or diag
 \end{figure}
 
 \noindent In Figure \ref{fig:castling}, the white king can castle on either the king's side or the queen's side as long as the rooks have not been moved from their starting position, but the black king cannot castle because there is a bishop on $f8$ interfering with the movement and the rook on the queen's side has been moved to $b8$.
-
-\paragraph{Opposition} occurs when two kings face each other on the same column (file), row (rank), or diagonal, typically with only one square between them. Another type of opposition, known as distant opposition, occurs when the kings are separated by an odd number of squares greater than one. The player who does not have the move is said to have the opposition. This concept is critical because it allows one player to control key squares and restrict the movement of the opposing king. In pawn endgames, where only kings and pawns remain, gaining the opposition can be decisive for promoting a pawn or preventing the opponent from advancing.
-
-\vspace{-2em}
-
-\begin{figure}[H]
-    \centering
-    \newchessgame
-    \chessboard[
-        setpieces={Ke3,ke5},
-        showmover=false
-    ]
-    \caption{Opposition}
-    \label{fig:opposition}
-\end{figure}
-
-\vspace{-2em}
-
-\paragraph{Triangulation} is a technique used to gain the opposition by moving the king in a triangular path to reach a position where the opponent's king is forced to move away from a key square. This is often used in endgames to create winning chances.
-
-\vspace{-2em}
-
-\begin{figure}[H]
-    \centering
-    \newchessgame
-    \chessboard[
-        setpieces={Kd5,kd7,pb7,Pb6,Pc5},
-        showmover=true,
-        markstyle=circle, color=red, markfields={c6},
-        pgfstyle=straightmove, color=blue,
-        markmoves={d5-d4,d4-e5,e5-d5}
-    ]
-    \caption{Triangulation.}
-    \label{fig:triangulation}
-\end{figure}
-
-\noindent In Figure \ref{fig:triangulation}, white needs it to be black's turn in this position to take control of $c6$ square.
 
 \subsubsection{Queen}
 

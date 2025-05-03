@@ -67,51 +67,21 @@ Sequential games, such as chess or tic-tac-toe, where players take turns alterna
 
 \section{Search algorithms}
 
-There are different approaches to find the best move from a position. Some of these search algorithms are: Depth-First Search (DFS)\footnote{\url{https://www.chessprogramming.org/Depth-First}}, Best-First Search\footnote{\url{https://www.chessprogramming.org/Best-First}} (not to be confused with Breadth-First Search or BFS) and Parallel Search\footnote{\url{https://www.chessprogramming.org/Parallel_Search}}.
-
-\paragraph{Depth-First Search} refers to the process of exploring each branch of a tree or graph to its deepest level before backtracking\footnote{\url{https://en.wikipedia.org/wiki/Backtracking}}.
-
-\paragraph{Best-First Search} refers to the way of exploring the most promising nodes first. They typically require significant memory resources, as they must store a search space\footnote{Represents the collection of all potential solutions in search algorithms.} that grows exponentially.
-
-\paragraph{Parallel Search} refers to mulithreaded search, a technique used to accelerate search processes by leveraging multiple processors. The downside part is that by utilizing these additional processors effectively poses unique challenges, as searchtree traversal is inherently sequential.
+There are different approaches to find the best move from a position. Some of these search algorithms are: Depth-First Search (DFS)\footnote{\url{https://www.chessprogramming.org/Depth-First}}, Best-First Search\footnote{\url{https://www.chessprogramming.org/Best-First}} (not to be confused with Breadth-First Search or BFS but they are related) and Parallel Search\footnote{\url{https://www.chessprogramming.org/Parallel_Search}}.
 
 \vspace{1em}
 
-% Comparar entre ellas y escribir la causa de haber elegido depth-first search
+\noindent Note that these search algorithms are the foundation of more advanced and practical algorithms used today. However, explaining them is essential to understand the underlying principles.
 
-\begin{table}[H]
-\centering
-\begin{tabular}{|p{3.5cm}|p{4.5cm}|p{4.5cm}|}
-\hline
-\textbf{Algorithm} & \textbf{Advantages} & \textbf{Disadvantages} \\ \hline
-\textbf{Depth-First Search (DFS)} 
-& 
-- Memory-efficient: it does not store the entire search space. \newline 
-- Simple to implement and compatible with alpha-beta pruning. 
-& 
-- May explore less promising branches before finding optimal solutions.
-\newline
-- Sequential dependency: it is not easy to parallelize. \\ \hline
+\paragraph{Depth-First Search} refers to the process of exploring each branch of a tree or graph to its deepest level before backtracking\footnote{\url{https://en.wikipedia.org/wiki/Backtracking}}. Unfortunately, in chess, this cannot be possible because the number of possible moves grows exponentially with the depth of the search tree, leading to the so-called combinatorial explosion. To address this, depth-first search is often combined with techniques like alpha-beta pruning (discussed below) to reduce the number of nodes evaluated, making the search more efficient while still exploring the tree deeply.
 
-\textbf{Best-First Search} 
-& 
-- Explores the most promising nodes first, potentially finding solutions faster. 
-& 
-- Requires significant memory to store the search space, which grows exponentially. \newline \\ \hline
+\paragraph{Best-First Search} refers to the way of exploring the most promising nodes first. It is similar to a breadth-first search but prioritizes some nodes before others. They typically require significant memory resources, as they must store a search space\footnote{Represents the collection of all potential solutions in search algorithms.} that grows exponentially.
 
-\textbf{Parallel Search} 
-& 
-- Accelerates search by taking advantage of multiple processors. \newline 
-- Effective for modern multiprocessor systems. 
-& 
-- Challenging to manage synchronization and resource utilization. \newline 
-- Limited scalability due to the inherently sequential nature of search tree traversal. \\ \hline
-\end{tabular}
-\caption{Comparison of search algorithms.}
-\label{tab:search-algorithms}
-\end{table}
+\paragraph{Parallel Search} refers to mulithreaded search, a technique used to accelerate search processes by leveraging multiple processors.
 
-\noindent Based on this comparison, we selected Depth-First Search for its simplicity, low memory requirements, and compatibility with alpha-beta pruning.
+\vspace{1em}
+
+\noindent In the next sections, we will explore some of the most used search algorithms in chess engines.
 
 \subsection{Minimax algorithm}
 
@@ -404,19 +374,19 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
     \label{fig:alpha-beta-pruning-with-alpha-beta-values-2}
 \end{figure}
 
-\newpage
-
 \subsubsection{Alpha-Beta Enhancements}
 
 The alpha-beta algorithm has been further improved over time with various enhancements to increase the overall efficiency. Some of these are: transposition tables, iterative deepening, aspiration windows, quiescence search, move ordering\ldots
 
 \vspace{1em}
 
-\noindent Take into consideration that many positions can be reached in different ways. This is formally known as \textbf{transpositions\footnote{\url{https://www.chessprogramming.org/Transposition}}}. Just like in dynamic programming\footnote{\url{https://en.wikipedia.org/wiki/Dynamic_programming}}, the evaluations of different positions are stored in a structure, the \textbf{transposition tables}, to avoid repeating the process of searching and evaluating, which improves efficiency. Take this following example:
+\noindent Take into consideration that many positions can be reached in different ways. This is formally known as \textbf{transpositions}. Just like in dynamic programming, the evaluations of different positions are stored in a structure, the \textbf{transposition tables}, to avoid repeating the process of searching and evaluating, which improves efficiency. Take the following example:
+
+\vspace{-2em}
 
 \begin{figure}[H]
     \centering
-    \begin{minipage}{0.6\textwidth}
+    \begin{minipage}{0.5\textwidth}
         \centering
         \newchessgame
         \chessboard[
@@ -436,7 +406,7 @@ The alpha-beta algorithm has been further improved over time with various enhanc
     \label{fig:example-transposition}
 \end{figure}
 
-\noindent Both games reach the same position, although they involve a different number of moves.
+\noindent Both games reach to the same position, although they involve a different number of moves.
 
 \vspace{1em}
 
