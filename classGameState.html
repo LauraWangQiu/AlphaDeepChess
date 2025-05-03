@@ -117,7 +117,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ae9f284a89581c911553dc1ecb11cc8db"><td class="mdescLeft">&#160;</td><td class="mdescRight">has_castled_black  <br /></td></tr>
 <tr class="separator:ae9f284a89581c911553dc1ecb11cc8db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a67683be0b89f24389bb4da3d3a349bd6" id="r_a67683be0b89f24389bb4da3d3a349bd6"><td class="memItemLeft" align="right" valign="top">constexpr uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGameState.html#a67683be0b89f24389bb4da3d3a349bd6">fifty_move_rule_counter</a> () const</td></tr>
-<tr class="memdesc:a67683be0b89f24389bb4da3d3a349bd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">fifty_move_rule_counter  <br /></td></tr>
+<tr class="memdesc:a67683be0b89f24389bb4da3d3a349bd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">fifty_move_rule_counter (half move clock)  <br /></td></tr>
 <tr class="separator:a67683be0b89f24389bb4da3d3a349bd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a0c7e0a05ea4170a824fd84285e89f6" id="r_a2a0c7e0a05ea4170a824fd84285e89f6"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="piece_8hpp.html#ae2972de02c15e7da555131748af6487a">PieceType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGameState.html#a2a0c7e0a05ea4170a824fd84285e89f6">last_captured_piece</a> () const</td></tr>
 <tr class="memdesc:a2a0c7e0a05ea4170a824fd84285e89f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">last_captured_piece  <br /></td></tr>
@@ -552,12 +552,9 @@ constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>clear_attac
 </table>
 </div><div class="memdoc">
 
-<p>fifty_move_rule_counter </p>
-<p>Counter for the fifty move rule, if 100 moves passed without a pawn move or a capture then game is a draw.</p>
-<dl class="section note"><dt>Note</dt><dd>if this counter gets to 100 the game is a draw.</dd></dl>
-<dl class="section return"><dt>Returns</dt><dd>50 move rule counter.</dd></dl>
+<p>fifty_move_rule_counter (half move clock) </p>
 <p>Counter for the fifty move rule, if 50 moves passed without a pawn move or a capture then game is a draw.</p>
-<dl class="section note"><dt>Note</dt><dd>if this counter gets to 50 the game is a draw.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>if this counter gets to 100 the game is a draw.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>50 move rule counter. </dd></dl>
 
 </div>
@@ -1300,16 +1297,8 @@ constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>clear_attac
 </div><div class="memdoc">
 
 <p>set_fifty_move_rule_counter </p>
-<p>set the moves that have passed since the last pawn move or capture.</p>
-<dl class="section note"><dt>Note</dt><dd>counter must be &lt;=100, otherwise state will be corrupted.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">counter</td><td>fifty rule counter counter.</td></tr>
-  </table>
-  </dd>
-</dl>
 <p>Set the moves that have passed since the last pawn move or capture.</p>
-<dl class="section note"><dt>Note</dt><dd>counter must be &lt;=50, otherwise state will be corrupted.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>counter must be &lt;=100, otherwise state will be corrupted.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">counter</td><td>Fifty-move rule counter. </td></tr>

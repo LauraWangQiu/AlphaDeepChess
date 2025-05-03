@@ -122,15 +122,16 @@ $(document).ready(function(){initNavTree('history_8hpp_source.html',''); initRes
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="keyword">private</span>:</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="comment">// max number of positions in the array (must be power of two)</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">int</span> HISTORY_MAX_SIZE = 64;</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keyword">static_assert</span>((HISTORY_MAX_SIZE &amp; (HISTORY_MAX_SIZE - 1)) == 0, <span class="stringliteral">&quot;HISTORY_MAX_SIZE has to be a power of 2&quot;</span>);</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="comment">// position array circular index</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keyword">static</span> <span class="keywordtype">int</span> next_position_index;</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="comment">// circular array with the hash of the last positions</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keyword">static</span> uint64_t positions[HISTORY_MAX_SIZE];</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>};</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">int</span> HISTORY_MAX_SIZE = 128;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keyword">static_assert</span>(HISTORY_MAX_SIZE &gt; 100, <span class="stringliteral">&quot;HISTORY_MAX_SIZE must be greater than fifty move rule counter&quot;</span>);</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="keyword">static_assert</span>((HISTORY_MAX_SIZE &amp; (HISTORY_MAX_SIZE - 1)) == 0, <span class="stringliteral">&quot;HISTORY_MAX_SIZE has to be a power of 2&quot;</span>);</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="comment">// position array circular index</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keyword">static</span> <span class="keywordtype">int</span> next_position_index;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="comment">// circular array with the hash of the last positions</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keyword">static</span> uint64_t positions[HISTORY_MAX_SIZE];</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>};</div>
 </div>
 <div class="ttc" id="aclassHistory_html"><div class="ttname"><a href="classHistory.html">History</a></div><div class="ttdoc">History.</div><div class="ttdef"><b>Definition</b> history.hpp:18</div></div>
 <div class="ttc" id="aclassHistory_html_a256311933b0074fa655d924228b70f27"><div class="ttname"><a href="classHistory.html#a256311933b0074fa655d924228b70f27">History::threefold_repetition_detected</a></div><div class="ttdeci">static bool threefold_repetition_detected(uint8_t fify_move_rule_counter)</div><div class="ttdoc">Calculate if threefold repetition has happened in the history of positions.</div><div class="ttdef"><b>Definition</b> history.cpp:84</div></div>
