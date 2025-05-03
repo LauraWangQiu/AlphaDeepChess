@@ -11,6 +11,7 @@ A level-1 auxiliary file: Capitulos/Introduccion.aux
 A level-1 auxiliary file: Capitulos/EstadoDeLaCuestion.aux
 A level-1 auxiliary file: Capitulos/DescripcionTrabajo.aux
 A level-1 auxiliary file: Capitulos/Profiling.aux
+A level-1 auxiliary file: Capitulos/Testing.aux
 A level-1 auxiliary file: Capitulos/ConclusionesTrabajoFuturo.aux
 A level-1 auxiliary file: Capitulos/ContribucionesPersonales.aux
 A level-1 auxiliary file: Cascaras/bibliografia.aux
@@ -22,7 +23,7 @@ I found no \citation commands---while reading file TFGTeXiS.aux
 Database file #1: biblio.bib
 You've used 0 entries,
             2962 wiz_defined-function locations,
-            1089 strings with 12662 characters,
+            1090 strings with 12683 characters,
 and the built_in function-call counts, 23 in all, are:
 = -- 0
 > -- 0
