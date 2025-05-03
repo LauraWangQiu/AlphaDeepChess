@@ -36,7 +36,7 @@ Chess is a game of strategy that takes place on a chessboard with specific rules
 \subsection{Chessboard}
 \label{sec:chessboard}
 
-A chessboard is a game board of 64 squares, 8 rows by 8 columns. To refer to each of the squares we mostly use \textbf{algebraic notation\footnote{\url{https://en.wikipedia.org/wiki/Algebraic_notation_(chess)}}} using the numbers from 1 to 8 and the letters from ``a'' to ``h''. There are also other notations like descriptive notation\footnote{\url{https://en.wikipedia.org/wiki/Descriptive_notation}} which is obsolete or ICCF numeric notation\footnote{\url{https://en.wikipedia.org/wiki/ICCF_numeric_notation}} due to chess pieces have different abbreviations depending on language.
+A chessboard is a game board of 64 squares, 8 rows by 8 columns. To refer to each of the squares we mostly use \textbf{algebraic notation\footnote{\url{https://en.wikipedia.org/wiki/Algebraic_notation_(chess)}}} using the numbers from 1 to 8 and the letters from ``a'' to ``h''. There are also other notations like descriptive notation\footnote{\url{https://en.wikipedia.org/wiki/Descriptive_notation}} which is obsolete or ICCF numeric notation\footnote{\url{https://en.wikipedia.org/wiki/ICCF_numeric_notation}} due to chess pieces have different abbreviations depending on the language.
 
 \begin{figure}[H] % H para que la figura se coloque exactamente en la posición donde esté definida (del paquete float)
     \centering
@@ -64,7 +64,7 @@ A chessboard is a game board of 64 squares, 8 rows by 8 columns. To refer to eac
     \caption{Example: square $g5$ highlighted and arrows pointing to it.}
 \end{figure}
 
-\noindent It is important to know that when placing a chessboard in the correct orientation, there should always be a \textbf{white square in the bottom-right corner} or a \textbf{black square in the bottom-left corner}.
+\noindent It is important to know that when placing a chessboard in the correct orientation, there should always be a white square in the bottom-right corner or a black square in the bottom-left corner.
 
 \subsection{Chess pieces}
 
@@ -75,7 +75,7 @@ There are 6 types of chess pieces: king, queen, rook, bishop, knight and pawn, a
     \resizebox{\textwidth}{!}{
     \begin{tabular}{|c|c|c|c|}
         \hline
-        \textbf{Piece} & \textbf{White Pieces} & \textbf{Black Pieces} & \textbf{Number of Pieces} \\ \hline
+        Piece & White Pieces & Black Pieces & Number of Pieces \\ \hline
         King           & \WhiteKingOnWhite     & \BlackKingOnWhite     & 1                         \\ \hline
         Queen          & \WhiteQueenOnWhite    & \BlackQueenOnWhite    & 1                         \\ \hline
         Rook           & \WhiteRookOnWhite\WhiteRookOnWhite & \BlackRookOnWhite\BlackRookOnWhite & 2 \\ \hline
@@ -93,12 +93,12 @@ There are 6 types of chess pieces: king, queen, rook, bishop, knight and pawn, a
 \begin{figure}[H]
     \centering
     \newchessgame
-    \chessboard[showmover=false]
+    \chessboard[showmover=true]
     \caption{Starting position.}
     \label{fig:start-pos}
 \end{figure}
 
-\noindent Notice that the queen and king are placed in the center columns. The queen is placed on a square of its color, while the king is placed on the remaining central column. The rest of the pieces are positioned symmetrically, as shown in Figure \ref{fig:start-pos}. This means that the chessboard is divided into two sides relative to the positions of the king and queen at the start of the game:
+\noindent The smaller white square next to the board indicates which side is to move in the current position. If the square is white, it means it is white's turn to move; if the square is black, it means it is black's turn to move. This visual indicator helps clarify which player has the next move in the game. Notice that the queen and king are placed in the center columns. The queen is placed on a square of its color, while the king is placed on the remaining central column. The rest of the pieces are positioned symmetrically, as shown in Figure \ref{fig:start-pos}. This means that the chessboard is divided into two sides relative to the positions of the king and queen at the start of the game:
 
 \begin{figure}[H]
   \centering
@@ -287,7 +287,7 @@ The king can move one square in any direction: horizontally, vertically, or diag
 
 \begin{figure}[H]
     \centering
-    \begin{minipage}{0.45\textwidth}
+    \begin{minipage}[t]{0.45\textwidth}
        \centering
        \newchessgame
        \chessboard[
@@ -300,7 +300,7 @@ The king can move one square in any direction: horizontally, vertically, or diag
        \caption{King's movement.}
        \label{fig:king-movement}
    \end{minipage}
-   \begin{minipage}{0.45\textwidth}
+   \begin{minipage}[t]{0.45\textwidth}
        \centering
        \newchessgame
        \fenboard{8/8/1p6/p1pBk1p1/P1P2p1p/1P1K1P1P/1b4P1/8 w - - 0 1}
@@ -315,17 +315,21 @@ The king can move one square in any direction: horizontally, vertically, or diag
    \end{minipage}
 \end{figure}
 
-\noindent In Figure \ref{fig:white-king-movement-game}, the white king cannot move to $e4$ because the black king is attacking that square. When two kings are positioned close to each other, neither can move to a square adjacent to the other.
+\noindent In Figure \ref{fig:white-king-movement-game}, the white king cannot move to $e4$ because the black king is attacking that square.
 
 \vspace{1em} % Añade espacio
 
-\noindent Additionally, the king can perform a special move called \textbf{castling}, which involves moving the king two squares towards a rook and moving the rook to the square next to the king. Castling has specific conditions which are:
+\noindent There are specific terms related with kings that are important to understand:
+
+\paragraph{Castling} is a special move which involves moving the king two squares towards a rook and moving the rook to the square next to the king. Castling has specific conditions which are:
 
 \begin{itemize}
     \item Neither the king nor the rook involved in castling must have moved previously.
     \item There must be no pieces between the king and the rook.
     \item The king cannot be in check, move through a square under attack, or end up in check.
 \end{itemize}
+
+\vspace{-2em}
 
 \begin{figure}[H]
     \centering
@@ -341,7 +345,44 @@ The king can move one square in any direction: horizontally, vertically, or diag
     \label{fig:castling}
 \end{figure}
 
-\noindent In this case, the white king can castle on either the king's side or the queen's side as long as the rooks have not been moved from their starting position, but the black king cannot castle because there is a bishop on $f8$ interfering with the movement and the rook on the queen's side has been moved to $b8$.
+\noindent In Figure \ref{fig:castling}, the white king can castle on either the king's side or the queen's side as long as the rooks have not been moved from their starting position, but the black king cannot castle because there is a bishop on $f8$ interfering with the movement and the rook on the queen's side has been moved to $b8$.
+
+\paragraph{Opposition} occurs when two kings face each other on the same column (file), row (rank), or diagonal, typically with only one square between them. Another type of opposition, known as distant opposition, occurs when the kings are separated by an odd number of squares greater than one. The player who does not have the move is said to have the opposition. This concept is critical because it allows one player to control key squares and restrict the movement of the opposing king. In pawn endgames, where only kings and pawns remain, gaining the opposition can be decisive for promoting a pawn or preventing the opponent from advancing.
+
+\vspace{-2em}
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[
+        setpieces={Ke3,ke5},
+        showmover=false
+    ]
+    \caption{Opposition}
+    \label{fig:opposition}
+\end{figure}
+
+\vspace{-2em}
+
+\paragraph{Triangulation} is a technique used to gain the opposition by moving the king in a triangular path to reach a position where the opponent's king is forced to move away from a key square. This is often used in endgames to create winning chances.
+
+\vspace{-2em}
+
+\begin{figure}[H]
+    \centering
+    \newchessgame
+    \chessboard[
+        setpieces={Kd5,kd7,pb7,Pb6,Pc5},
+        showmover=true,
+        markstyle=circle, color=red, markfields={c6},
+        pgfstyle=straightmove, color=blue,
+        markmoves={d5-d4,d4-e5,e5-d5}
+    ]
+    \caption{Triangulation.}
+    \label{fig:triangulation}
+\end{figure}
+
+\noindent In Figure \ref{fig:triangulation}, white needs it to be black's turn in this position to take control of $c6$ square.
 
 \subsubsection{Queen}
 
@@ -368,7 +409,7 @@ Each player aims to checkmate the opponent's king, which means that the king is 
 
 \vspace{1em}
 
-\noindent In every game, \textbf{white starts first} and the possible results of each game can be win for white, win for black or draw\footnote{\url{https://en.wikipedia.org/wiki/Draw_(chess)}}. A tie could be caused by different conditions:
+\noindent In every game, white starts first, and the possible results of each game can be win for white, win for black or draw\footnote{\url{https://en.wikipedia.org/wiki/Draw_(chess)}}. A tie could be caused by different conditions:
 
 \begin{enumerate}
     \item Stalemate: the player whose turn it is to move has no legal moves, and their king is not in check.
@@ -381,7 +422,7 @@ Each player aims to checkmate the opponent's king, which means that the king is 
 
 \begin{figure}[H]
     \centering
-    \begin{minipage}[H]{0.3\textwidth}
+    \begin{minipage}[t]{0.3\textwidth}
         \centering
         \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
         \newchessgame
@@ -396,7 +437,7 @@ Each player aims to checkmate the opponent's king, which means that the king is 
         \label{fig:stalemate}
     \end{minipage}
     \hfill
-    \begin{minipage}[H]{0.3\textwidth}
+    \begin{minipage}[t]{0.3\textwidth}
         \centering
         \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
         \newchessgame
@@ -407,7 +448,7 @@ Each player aims to checkmate the opponent's king, which means that the king is 
         \label{fig:insufficient-material}
     \end{minipage}
     \hfill
-    \begin{minipage}[H]{0.3\textwidth}
+    \begin{minipage}[t]{0.3\textwidth}
         \centering
         \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
         \newchessgame
@@ -433,13 +474,13 @@ Notation is important in chess to record moves and analyze games.
 
 \subsubsection{Algebraic notation}
 
-In addition to the \textbf{algebraic notation} of the squares in Section \ref{sec:chessboard}, each piece is identified by an uppercase letter, which may vary across different languages:
+In addition to the algebraic notation of the squares in Section \ref{sec:chessboard}, each piece is identified by an uppercase letter, which may vary across different languages:
 
 \begin{table}[H]
     \centering
     \begin{tabular}{|c|c|c|}
         \hline
-        \textbf{Piece} & \textbf{English Notation} & \textbf{Spanish Notation} \\ \hline
+        Piece & English Notation & Spanish Notation \\ \hline
         Pawn           & \textit{P}               & \textit{P} (peón)         \\ \hline
         Rook           & \textit{R}               & \textit{T} (torre)        \\ \hline
         Knight         & \textit{N}               & \textit{C} (caballo)      \\ \hline
@@ -452,7 +493,7 @@ In addition to the \textbf{algebraic notation} of the squares in Section \ref{se
 \end{table}
 
 \paragraph{Normal moves (not captures nor promoting)}
-It is written using the piece uppercase letter plus the coordinate of destination:
+is written using the piece uppercase letter plus the coordinate of destination. In the case of pawns, it can be written only with the coordinate of destination:
 
 \begin{figure}[H]
     \centering
@@ -467,10 +508,10 @@ It is written using the piece uppercase letter plus the coordinate of destinatio
     \label{fig:pawn-a6}
 \end{figure}
 
-In Figure \ref{fig:pawn-a6}, the pawn's movement is written as $Pa6$ or directly as $a6$.
+\noindent In Figure \ref{fig:pawn-a6}, the pawn's movement is written as $Pa6$ or directly as $a6$.
 
 \paragraph{Captures}
-They are written with an $"x"$ between the piece uppercase letter and coordinate of destination/the captured piece coordinate:
+are written with an $"x"$ between the piece uppercase letter and coordinate of destination or the captured piece coordinate. In the case of pawns, it can be written with the column letter of the pawn that captures the piece. Also, if two pieces of the same type can capture the same piece, the piece's column or row letter is added to indicate which piece is moving:
 
 \begin{figure}[H]
     \centering
@@ -488,7 +529,7 @@ They are written with an $"x"$ between the piece uppercase letter and coordinate
 \noindent In Figure \ref{fig:bishop-captures-knight}, the white bishop capturing the black knight is written as $Bxc6$. If it were black's turn, the pawn on $a6$ could capture the white bishop, and it would be written as $Pxb5$ or simply $axb5$, indicating the pawn's column.
 
 \paragraph{Pawn promotion}
-It is written as the pawn's movement to the last row, followed by the piece to which it is promoted:
+is written as the pawn's movement to the last row, followed by the piece to which it is promoted:
 
 \begin{figure}[H]
     \centering
@@ -507,10 +548,10 @@ It is written as the pawn's movement to the last row, followed by the piece to w
 
 \paragraph{Castling}
 \label{sec:castling}
-Depending on whether it is on the king's side or the queen's side, it is written as $0-0$ and $0-0-0$, respectively.
+depending on whether it is on the king's side or the queen's side, it is written as $0-0$ and $0-0-0$, respectively.
 
 \paragraph{Check and checkmate}
-They are written by adding a $+$ sign for check or $++$ for checkmate, respectively.
+are written by adding a $+$ sign for check or $++$ for checkmate, respectively.
 
 \begin{figure}[H]
     \centering
@@ -530,16 +571,16 @@ They are written by adding a $+$ sign for check or $++$ for checkmate, respectiv
 \paragraph{The end of game notation} indicates the result of the game. It is typically written as:
 
 \begin{itemize}
-    \item \textbf{1-0}: White wins.
-    \item \textbf{0-1}: Black wins.
-    \item \textbf{1/2-1/2}: The game ends in a draw.
+    \item \textit{1-0}: White wins.
+    \item \textit{0-1}: Black wins.
+    \item \textit{1/2-1/2}: The game ends in a draw.
 \end{itemize}
 
 \noindent For more information about notation, refer to the Wikipedia page: \url{https://en.wikipedia.org/wiki/Algebraic_notation_(chess)}.
 
 \subsubsection{Forsyth–Edwards Notation (FEN)}
 
-This is a notation that describes a specific position on a chessboard. It includes 6 fields separated by spaces: the piece placement, whose turn it is to move, castling availability, en passant target square, halfmove clock and fullmove number.
+This is a notation that describes a specific position on a chessboard. It includes 6 fields separated by spaces: the piece placement, whose turn it is to move, castling availability, en passant target square, halfmove clock, and fullmove number.
 For example, the FEN for the starting position is:
 \begin{verbatim}
 rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
@@ -555,7 +596,7 @@ rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 
 \subsubsection{Portable Game Notation (PGN)}
 
-This notation is mostly used for keeping information about the game and a header section with metadata: the name of the event, site, date of play, round, color and name of each player and result. For example, the PGN for a game could look like this:
+This notation is mostly used for keeping information about the game and a header section with metadata: the name of the event, site, date of play, round, color and name of each player, and result. For example, the PGN for a game could look like this:
 
 \begin{lstlisting}[basicstyle=\ttfamily\small, breaklines=true, frame=single, caption={Example of a PGN file}, label={lst:pgn-example}]
 [Event "XX Gran Torneo Internacional Aficionado"]
@@ -573,6 +614,8 @@ This notation is mostly used for keeping information about the game and a header
 \section{Objectives}
 \label{sec:objectives}
 
+The main objective of this project is to develop a robust and efficient chess engine capable of competing with classical engines and players by leveraging advanced search algorithms and optimization techniques. The specific objectives are as follows:
+
 \begin{itemize}
     \item Develop a functional chess engine using alpha-beta pruning as the core search algorithm.
     \item Optimize search efficiency by implementing move ordering, quiescence search, and iterative deepening to improve pruning effectiveness.
@@ -585,13 +628,15 @@ This notation is mostly used for keeping information about the game and a header
 
 \section{Work plan}
 
+The project will be divided into several phases, each focusing on specific aspects of the engine's development. The timeline for each phase is as follows:
+
 \begin{enumerate}
     \item Research phase and basic implementation: understand the fundamentals of alpha-beta pruning with minimax and position evaluation. Familiarize with the UCI (Universal Chess Interface) and implement the move generator with its specific exceptions and rules.
     \item Optimization: implement quiescence search and iterative deepening to improve pruning effectiveness.
     \item Optimization: improve search efficiency using transposition tables and Zobrist hashing.
     \item Optimization: implement multithreading to enable parallel search.
     \item Profiling: use a profiler to identify performance bottlenecks and optimize critical sections of the code.
-    \item Comparation: use Stockfish to compare efficiency generating tournaments between chess engines.
+    \item Testing: use Stockfish to compare efficiency generating tournaments between chess engines and estimate the performance of the engine. Also, compare different versions of the engine to evaluate the impact of optimizations.
     \item Analyze the results and write the final report.
 \end{enumerate}
 

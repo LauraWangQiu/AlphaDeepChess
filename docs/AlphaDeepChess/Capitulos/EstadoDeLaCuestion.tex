@@ -1,21 +1,33 @@
 \chapter{State of the art}
 \label{cap:estadoDeLaCuestion}
 
+In this chapter, we will explore the fundamental concepts and techniques on which our chess engine is based. This includes board representation, move generation, game trees, etc. Each section will provide an overview of the concepts and techniques used by our engine.
+
 \section{Board representation}
 
-The chessboard is where the game takes place and which serves as the foundation for all operations. In order to store a position setting with its pieces and other additional information like the side to move\footnote{Corresponds to the colour that has the turn of movement.}, the castling rights\footnote{Refers to the possibilities for each side to castle both short and long. Castling is explained in~\ref{sec:castling}.} or the fifty-move rule counter\footnote{This rule is explained in~\ref{itm:fifty-move-rule}.}, we can encounter different types of representations: piece centric, square centric and hybrid solutions. We chose to use bitboards as the primary representation, complemented by a piece list to store the piece on each square (piece centric representation). Additionally, the game state is stored in a bit field.
+The chessboard is where the game takes place and which serves as the foundation for all operations. In order to store a position setting with its pieces and other additional information like the side to move\footnote{Corresponds to the colour that has the turn of movement.}, the castling rights\footnote{Refers to the possibilities for each side to castle both short and long. Castling is explained in~\ref{sec:castling}.} or the fifty-move rule counter\footnote{This rule is explained in~\ref{itm:fifty-move-rule}.}, we can encounter different types of representations: piece centric, square centric and hybrid solutions. We chose to use bitboards\footnote{\url{https://www.chessprogramming.org/Bitboards}} as the primary representation, complemented by a piece list to store the piece on each square (piece centric representation). Additionally, the game state is stored in a bit field.
+
+\paragraph{Bitboard} also known as a bitset or bitmap, is a 64-bit data structure that efficiently represents a chessboard.
 
 \vspace{1em}
 
-\noindent A \textbf{bitboard\footnote{\url{https://www.chessprogramming.org/Bitboards}}}, also known as a bitset or bitmap, is a 64-bit word structure that efficiently represents a chessboard because it matches with the number of squares: every bit corresponds to a square of the chessboard.
+\noindent Bitboards can be used to represent different aspects of the board:
 
-\vspace{1em}
+\begin{itemize}
+    \item All pieces: a bit is set to 1 for every square occupied by a piece, regardless of its type or color.
+    \item Pieces by color: a bit is set to 1 for every square occupied by a piece of a specific color. 
+    \item Specific piece types: a bit is set to 1 for every square occupied by a specific type of piece.
+\end{itemize}
 
-\noindent A \textbf{bit field}, in constrast to a bitboard, uses a fixed number of bits within an integer to store multiple small values or flags.
+\noindent This structure is highly efficient for operations such as move generation and attack detection, as bitwise operations (e.g., AND, OR, XOR, shifts) can be used to manipulate and query the board state quickly.
+
+\paragraph{Bit field} in constrast to a bitboard, uses a fixed number of bits within an integer to store multiple small values or flags.
 
 \vspace{1em}
 
 \noindent For example, using a 64-bit bitfield, we can allocate 6 bits to store the number of pieces on the board, as $2^6 = 64$ possibilities. This means the bits would occupy an interval from $X$ included to $X+5$.
+
+\paragraph{Magic bitboard} is a hashing algorithm used to efficiently generate moves for sliding pieces (rooks, bishops) by using precomputed attack tables. It uses a hash function to map board positions to unique bitboards, allowing for fast move generation in a single operation.
 
 \vspace{1em}
 
@@ -31,7 +43,7 @@ An essential part of any chess engine is move generation. It involves generating
 \noindent There are two types of move generation:
 
 \begin{itemize}
-    \item \textbf{Pseudolegal move generation}: generates all moves without considering whether the king is left in check after the move. It requires additional filtering to remove illegal moves.
+    \item \textbf{Pseudolegal move generation}: generates all moves without considering whether the king is left in check after the move. It requires additional filtering to remove illegal moves which is more computationally expensive than legal move generation.
     \item \textbf{Legal move generation}: generates only moves that are valid according to the chess rules, ensuring that the king is not left in check. The more accurate, the computationally more expensive it is.
 \end{itemize}
 
@@ -145,7 +157,7 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
 
 \paragraph{Negamax} is a variant of minimax that simplifies the implementation by assuming that the gain of one player is the loss of the other. This allows the use of a single evaluation function with inverted values. In this project, this variant is not used.
 
-\paragraph{Alpha-beta pruning}\footnote{\url{https://www.chessprogramming.org/Alpha-Beta}} is an optimization of minimax that reduces significantly the number of evaluated nodes in the game tree. It uses two values, alpha and beta, to discard branches that cannot influence the final decision improving the efficiency.
+\paragraph{Alpha-beta pruning}\footnote{\url{https://www.chessprogramming.org/Alpha-Beta}} is an optimization of minimax that reduces significantly the number of evaluated nodes in the game tree. It uses two values, alpha and beta, to discard branches that cannot influence the final decision, improving the efficiency.
 
 \begin{figure}[H]
     \centering
@@ -396,7 +408,7 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
 
 \subsubsection{Alpha-Beta Enhancements}
 
-The alpha-beta algorithm has been further improved over time with various enhancements to increase the overall efficiency. Some of these are: Transposition Tables, Iterative Deepening, Aspiration Windows, Quiescence Search, Move Ordering\dots
+The alpha-beta algorithm has been further improved over time with various enhancements to increase the overall efficiency. Some of these are: transposition tables, iterative deepening, aspiration windows, quiescence search, move ordering\ldots
 
 \vspace{1em}
 
