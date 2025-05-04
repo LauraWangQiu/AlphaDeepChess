@@ -116,7 +116,7 @@ Linux</h2>
 </div><!-- fragment --></li>
 <li><p class="startli"><b>Go to the project folder and run the setup script for cmake</b>:</p>
 <div class="fragment"><div class="line">cd ./AlphaDeepChess</div>
-<div class="line">sudo chmod +x setup_linux.sh</div>
+<div class="line">sudo chmod +x setupLinux.sh</div>
 <div class="line">./setupLinux.sh</div>
 </div><!-- fragment --></li>
 </ol>
@@ -154,7 +154,7 @@ MacOS</h2>
 </div><!-- fragment --></li>
 <li><p class="startli"><b>Go to the project folder and run the setup script for cmake</b>:</p>
 <div class="fragment"><div class="line">cd ./AlphaDeepChess</div>
-<div class="line">chmod +x setup_linux.sh</div>
+<div class="line">chmod +x setupLinux.sh</div>
 <div class="line">./setupLinux.sh</div>
 </div><!-- fragment --></li>
 </ol>
@@ -184,11 +184,11 @@ Comparing engines with CuteChess</h1>
 <div class="line">|   |-- /stockfish</div>
 <div class="line">|       |-- stockfish_X_x86_64</div>
 <div class="line">|       |-- ...</div>
-</div><!-- fragment --><p>To compare the engines, we will use the <code>cutechess-cli</code> tool. We will run a match between <code>stockfish</code> and our engine. To do so, we will use the <code>compareEngines.py</code>.</p>
+</div><!-- fragment --><p>To compare the engines, we will use the <code>cutechess-cli</code> tool. We will run a match between <code>stockfish</code> and our engine. To do so, we will use the <code>compareEngines.py</code> located in <code>test/manual_tests</code>.</p>
 <div class="fragment"><div class="line">python .\compareEngines.py -buildType [debug (default=release)] -games [num_games (default=10)] -tc [time_control (default=INF)] -st [search_time (default=INF)] -timemargin [time_margin (default=500ms)] -depth [depth (default=INF)] -concurrency [concurrency (default=0)]</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md7"></a>
 Tests</h2>
-<p>To run the tests, we will use the <code>cutechess-cli</code> tool. We will run a match between <code>stockfish</code> and our engine. To do so, we will use the <code>tests.py</code>.</p>
+<p>To run the tests, we will use the <code>cutechess-cli</code> tool. We will run a match between <code>stockfish</code> and our engine. To do so, we will use the <code>tests.py</code> located in <code>test/manual_tests</code>.</p>
 <div class="fragment"><div class="line">python .\tests.py</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md8"></a>
 Doxygen Commenting Guidelines</h1>
@@ -280,7 +280,7 @@ Enum Comment Template</h2>
 <div class="line">};</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md15"></a>
 Visualizing the board</h1>
-<p>Execute <a href="AlphaDeepChessGUI.py">AlphaDeepChessGUI.py</a> to send commands as with the UCI and visualize the chessboard. </p>
+<p>Execute <code>AlphaDeepChessGUI.py</code> to send commands as with the UCI and visualize the chessboard. </p>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
 </div><!-- doc-content -->
