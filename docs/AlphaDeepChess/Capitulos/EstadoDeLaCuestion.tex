@@ -4,6 +4,7 @@
 In this chapter, we will explore the fundamental concepts and techniques on which our chess engine is based. This includes board representation, move generation, game trees, etc. Each section will provide an overview of the concepts and techniques used by our engine.
 
 \section{Board representation}
+\label{sec:board}
 
 The chessboard is where the game takes place and which serves as the foundation for all operations. In order to store a position setting with its pieces and other additional information like the side to move (the colour that has the turn of movement), the castling rights (the possibilities for each side to castle both short and long, explained in Section~\ref{sec:castling}) or the fifty-move rule counter (explained in Section~\ref{sec:rules} Item~\ref{itm:fifty-move-rule}), we can encounter different types of representations: piece centric, square centric and hybrid solutions. We chose to use bitboards as the primary representation, complemented by a piece list to store the piece on each square (piece centric representation). Additionally, the game state is stored in a bit field.
 

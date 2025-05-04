@@ -1,16 +1,27 @@
 \chapter{Work description}
 \label{cap:descripcionTrabajo}
 
-We designed a simple structure to organize all of the scripts. As we are implementing different versions of the engine, there are specific modules that are compulsory to have well distinguished and possibly selected between them. Those modules are presented in the following Section~\ref{sec:modules}.
+We designed a simple structure to organize all the scripts. As we are implementing different versions of the engine, there are specific modules that are compulsory to have well distinguished and possibly selected between them. Those modules are presented in the following Section~\ref{sec:modules}.
 
 \vspace{1em}
 
-\noindent The key point is how to represent each required structure, including the board, chess pieces, precomputed tables, transposition tables, etc., as discussed in Section~\ref{sec:code}.
+\noindent Next, the key point is how to represent each required structure, including the board, chess pieces, precomputed tables, transposition tables, etc., as discussed in Section~\ref{sec:code}.
 
 \section{Modules}
 \label{sec:modules}
 
+Each module is responsible for a specific aspect of the chess engine's functionality. The good part about this modular design is that it ensures clarity, maintainability, and the ability to test and improve individual components independently even more so when it comes to development with more people.
+
 \subsection{Board}
+
+\noindent This module handles the representation of the chessboard, as previously mentioned in Section~\ref{sec:board}, and the state of the game. It includes:
+\begin{itemize}
+    \item Representation of the chessboard with its pieces using bitboards for efficiency.
+    \item Functions to make and unmake moves, including special moves like castling and en passant.
+    \item Updating game state variables, such as castling rights or the half-move counter.
+\end{itemize}
+
+\noindent This module is vital, as it provides the data structures and operations required by other modules.
 
 \subsection{Move generator}
 
@@ -20,21 +31,67 @@ We designed a simple structure to organize all of the scripts. As we are impleme
 
 \subsection{Search}
 
+\subsection{UCI}
+
 \section{Code implementation}
 \label{sec:code}
 
+All the code implementation is written in C++. However, the algorithms will be represented in pseudocode since the focus is on their logic rather than their specific implementation. The data structures, on the other hand, will be described using the programming language employed.
+
 \subsection{Data representation}
 
-Use of uint64\_t as bitboards to store the board information and other code structures and classes justifying why is efficient.
+\subsubsection{Square}
+
+There are 64 possible squares on a chessboard so the first thought is to use a 6-bit structure which seem like a perfect match ($2^6 = 64$). However, modern processors are optimized to work with data sizes aligned to multiples of 8 bits (1 byte). Then, using 6 bits would require packing the data into more complex structures, which could introduce additional overhead in terms of bit manipulation and memory access. We preferred clarity and performance over micro-optimizations that complicate readability so we used a \texttt{uint8\_t} to describe a square.
+
+\vspace{1em}
+
+\noindent Moreover, masks are extremely useful for efficiently identifying and manipulating the squares on a chessboard using bitwise operations. These masks are defined as constants in the code. For example, they can be used to identify the column of a square.
+
+\subsubsection{Piece and PieceType}
+
+They are simply enumerations where each piece and piece type correspond to an integer number to improve code readability.
 
 \begin{lstlisting}
-// Example of code in LaTeX
-#include <iostream>
+enum class Piece : int
+{
+    W_PAWN = 0,
+    W_KNIGHT = 1,
+    W_BISHOP = 2,
+    ...
+    B_QUEEN = 10,
+    B_KING = 11,
+    EMPTY = 12,
+    NUM_PIECES = 13
+};
 
-int main() {
-    std::cout << "Hello world! << std::endl;
-}
+enum class PieceType : int
+{
+    PAWN = 0,
+    KNIGHT = 1,
+    BISHOP = 2,
+    ROOK = 3,
+    QUEEN = 4,
+    KING = 5,
+    EMPTY = 6,
+    NUM_PIECES = 7
+};
 \end{lstlisting}
+
+\subsubsection{Move and MoveType}
+
+
+
+\subsubsection{Game State}
+
+
+\subsubsection{Board}
+
+For the chessboard, as previously mentioned, bitboards are represented as 64-bit structures using \texttt{uint64\_t}. Since the sign is not relevant, an unsigned type is used.
+
+\vspace{1em}
+
+\noindent \parbox{\textwidth}{There are bitboards for all pieces (\texttt{bitboard\_all}), for each piece color (\texttt{bitboard\_color[0]} and \texttt{bitboard\_color[1]}), and for each piece type (\texttt{bitboard\_piece[Piece]} like \texttt{bitboard\_piece[Piece::W\_QUEEN]})}.
 
 \subsection{Initialized memory}
 
