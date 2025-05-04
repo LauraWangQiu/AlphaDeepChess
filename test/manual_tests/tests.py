@@ -83,7 +83,7 @@ def run_test(test_id, games, st, depth, pgn, epd, log, engine2, stockfish_option
                 options_list.append(f"{engine}.{option_name}={option_value}")
 
     cmd = [
-        python_cmd, "compareEngines.py",
+        python_cmd, "./compareEngines.py",
         "-games", str(games),
         "-st", str(st),
         "-depth", str(depth),

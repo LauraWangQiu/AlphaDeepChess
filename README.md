@@ -26,7 +26,7 @@ These instructions will help you set up and build the project on your local mach
 
     ```bash
     cd ./AlphaDeepChess
-    sudo chmod +x setup_linux.sh
+    sudo chmod +x setupLinux.sh
     ./setupLinux.sh
     ```
 
@@ -77,7 +77,7 @@ These instructions will help you set up and build the project on your local mach
 
     ```bash
     cd ./AlphaDeepChess
-    chmod +x setup_linux.sh
+    chmod +x setupLinux.sh
     ./setupLinux.sh
     ```
 
@@ -116,7 +116,7 @@ There should be a new directory called `enginesComparator` with the `cutechess` 
 |       |-- ...
 ```
 
-To compare the engines, we will use the `cutechess-cli` tool. We will run a match between `stockfish` and our engine. To do so, we will use the `compareEngines.py`.
+To compare the engines, we will use the `cutechess-cli` tool. We will run a match between `stockfish` and our engine. To do so, we will use the `compareEngines.py` located in `test/manual_tests`.
 
 ```bash
 python .\compareEngines.py -buildType [debug (default=release)] -games [num_games (default=10)] -tc [time_control (default=INF)] -st [search_time (default=INF)] -timemargin [time_margin (default=500ms)] -depth [depth (default=INF)] -concurrency [concurrency (default=0)]
@@ -124,7 +124,7 @@ python .\compareEngines.py -buildType [debug (default=release)] -games [num_game
 
 ### Tests
 
-To run the tests, we will use the `cutechess-cli` tool. We will run a match between `stockfish` and our engine. To do so, we will use the `tests.py`.
+To run the tests, we will use the `cutechess-cli` tool. We will run a match between `stockfish` and our engine. To do so, we will use the `tests.py` located in `test/manual_tests`.
 
 ```bash
 python .\tests.py
@@ -239,4 +239,4 @@ enum class EnumName {
 
 ## Visualizing the board
 
-Execute [AlphaDeepChessGUI.py](AlphaDeepChessGUI.py) to send commands as with the UCI and visualize the chessboard.
+Execute `AlphaDeepChessGUI.py` to send commands as with the UCI and visualize the chessboard.
