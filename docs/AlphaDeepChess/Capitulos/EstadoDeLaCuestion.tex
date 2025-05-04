@@ -27,7 +27,7 @@ The chessboard is where the game takes place and which serves as the foundation 
 
 \noindent For example, using a 64-bit bitfield, we can allocate 6 bits to store the number of pieces on the board, as $2^6 = 64$ possibilities. This means the bits would occupy an interval from $X$ included to $X+5$.
 
-\paragraph{Magic bitboard} is a hashing algorithm used to efficiently generate moves for sliding pieces (rooks, bishops) by using precomputed attack tables. It uses a hash function to map board positions to unique bitboards, allowing for fast move generation in a single operation.
+\paragraph{Magic bitboard} is a hashing algorithm used to efficiently generate moves for sliding pieces (rooks, bishops and queens) by using precomputed attack tables. It uses a hash function to map board positions to unique bitboards, allowing for fast move generation in a single operation.
 
 \vspace{1em}
 
@@ -450,6 +450,15 @@ The alpha-beta algorithm has been further improved over time with various enhanc
 \noindent In this position, it is black's turn to play after white has moved $d4$, black has the option to capture the pawn on $d4$ with the pawn on $e5$ or with the bishop on $c5$. Between the two capturing movements, the best option is to take $d4$'s pawn with $e5$'s pawn because the pawn has less value than the bishop. Then, after $exd4$, white can re-capture with the pawn on $c3$ or the knight on $f3$. If black had taken the pawn with the bishop, white would have won a bishop for a pawn. This simple heuristic that orders what is best in capturing movements for each side can efficiently evaluate tactical exchanges and focus on moves that are more likely to yield a favorable outcome.
 
 \paragraph{Killer moves} is a heuristic that considers moves that produced cutoffs or pruning while searching. When the engine encounters a similar position at the same depth later in the search, it will prioritize the last move that caused a cutoff, potentially leading to faster pruning.
+
+\paragraph{Young Brothers Wait Concept} is a parallel search algorithm designed to optimize the distribution of work among multiple threads. This is particularly effective in alpha-beta pruning, where the search tree is explored selectively. It is divided into two phases: the principal variation move and the wait concept. The principal variation is searched sequentially by the main thread which ensures that the most promising move is evaluated first. Then, once the first move is evaluated, the remaining moves are distributed among multiple threads for parallel evaluation.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Imagenes/Bitmap/pvsplitting.png}
+    \caption{Principal variation splitting. Taken from Gao, Y. and Marsland, T. A. in \textit{Multithreaded Pruned Tree Search in Distributed Systems}, University of Alberta. Accessed on March 29, 2025.}
+    \label{fig:pv-splitting}
+\end{figure}
 
 \section{Evaluation}
 
