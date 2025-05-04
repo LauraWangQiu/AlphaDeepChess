@@ -5,7 +5,7 @@ We designed a simple structure to organize all of the scripts. As we are impleme
 
 \vspace{1em}
 
-\noindent On the other hand, in addition to implementing the modules, our goal is to generate different versions incrementally and as efficiently as possible. The key point is how to represent each components and structures of a chess set including board, chess pieces, 
+\noindent The key point is how to represent each required structure, including the board, chess pieces, precomputed tables, transposition tables, etc., as discussed in Section~\ref{sec:code}.
 
 \section{Modules}
 \label{sec:modules}
@@ -21,10 +21,20 @@ We designed a simple structure to organize all of the scripts. As we are impleme
 \subsection{Search}
 
 \section{Code implementation}
+\label{sec:code}
 
 \subsection{Data representation}
 
 Use of uint64\_t as bitboards to store the board information and other code structures and classes justifying why is efficient.
+
+\begin{lstlisting}
+// Example of code in LaTeX
+#include <iostream>
+
+int main() {
+    std::cout << "Hello world! << std::endl;
+}
+\end{lstlisting}
 
 \subsection{Initialized memory}
 
@@ -35,5 +45,3 @@ Some tables are memory initialized instead of computed, explain it.
 \subsection{Board visualizer using Python}
 
 \subsection{Comparation using Cutechess and Stockfish engine}
-
-\subsection{Profiling}
