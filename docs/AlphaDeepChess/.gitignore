@@ -29,3 +29,7 @@ rubber.cache
 
 # makeidx
 *.idx
+*.bbl
+*.blg
+*.ilg
+*.ind
