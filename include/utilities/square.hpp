@@ -40,8 +40,6 @@ constexpr const int NUM_SQUARES = 64;
  */
 class Square
 {
-
-
 public:
     // clang-format off
     /**

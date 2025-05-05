@@ -208,7 +208,6 @@ public:
         UPPER_BOUND,   // All-Node, Score is Upper Bound
         LOWER_BOUND,   // Cut-Node, Score is Lower Bound
         PERFT,         // Used only for perft command (ignored in the search)
-
     };
 
     /**
