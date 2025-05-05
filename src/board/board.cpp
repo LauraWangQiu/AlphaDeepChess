@@ -135,6 +135,34 @@ void Board::unmake_move(Move move, GameState previous_state)
 }
 
 /**
+ * @brief make a null move to pass the turn to the opponent
+ * 
+ * @note Only used in null move pruning, this is an illegal move in chess
+ * 
+ */
+void Board::make_null_move()
+{
+    // change side to move
+    game_state.set_side_to_move(opposite_color(game_state.side_to_move()));
+    game_state.xor_zobrist(Zobrist::get_black_to_move_seed());
+
+    // if en passant was valid update hash
+    if (game_state.en_passant_square().is_valid()) {
+        const Square eps = game_state.en_passant_square();
+        game_state.xor_zobrist(Zobrist::get_en_passant_seed(eps.col()));
+    }
+}
+
+/**
+ * @brief unmake the null move
+ * 
+ * @note Only used in null move pruning, this is an illegal move in chess
+ * 
+ * @param[in] previous_state previous game state.
+ */
+void Board::unmake_null_move(GameState previous_state) { game_state = previous_state; }
+
+/**
  * @brief load_fen
  * 
  * Set the position represented as FEN on the chessboard.

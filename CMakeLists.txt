@@ -38,16 +38,16 @@ src/utilities/coordinates.cpp
 list(APPEND BASIC_SOURCES src/move_ordering/move_ordering_MVV_LVA.cpp)
 
 # Add basic algorithm source files
-option(USE_EVALUATION_DYNAMIC "Use evaluation_dynamic.cpp" OFF)
-option(USE_EVALUATION_SAFETY_MOBILITY "Use evaluation_safety_mobility.cpp" ON)
+option(USE_EVALUATION_DYNAMIC "Use evaluation_dynamic.cpp" ON)
+option(USE_EVALUATION_SAFETY_MOBILITY "Use evaluation_safety_mobility.cpp" OFF)
 
 option(USE_MOVE_GENERATOR_BASIC "Use move_generator_basic.cpp" OFF)
 option(USE_MOVE_GENERATOR_MAGIC_BITBOARDS "Use move_generator_magic_bitboards.cpp" ON)
 
 option(USE_SEARCH_BASIC "Use search_basic.cpp" OFF)
 option(USE_SEARCH_MULTITHREAD "Use search_multithread.cpp" OFF)
-option(USE_SEARCH_TRANSPOSITION_TABLE "Use search_transposition_table.cpp" ON)
-option(USE_SEARCH_TT_REDUCTIONS "Use search_tt_reductions.cpp" OFF)
+option(USE_SEARCH_TRANSPOSITION_TABLE "Use search_transposition_table.cpp" OFF)
+option(USE_SEARCH_TT_REDUCTIONS "Use search_tt_reductions.cpp" ON)
 
 if (USE_EVALUATION_DYNAMIC)
     message(STATUS "Using evaluation_dynamic.cpp")

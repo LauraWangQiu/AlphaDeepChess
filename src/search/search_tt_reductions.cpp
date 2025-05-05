@@ -24,12 +24,15 @@
 static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results, int max_depth, SearchContext& context);
 
 template<SearchType searchType>
-static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context);
+static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, bool can_null_pruning,
+                             SearchContext& context);
 
 template<SearchType searchType>
 static int quiescence_search(std::atomic<bool>& stop, int ply, int alpha, int beta, SearchContext& context);
 
 static bool get_entry_in_transposition_table(uint64_t zobrist, int depth, int alpha, int beta, int& eval, Move& move);
+
+bool possible_zuzgwang(const Board& board);
 
 /**
   * @brief search(std::atomic<bool>&, SearchResults&, Board&, int32_t)
@@ -104,13 +107,29 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
 
     int alpha = -INF_EVAL;
     int beta = +INF_EVAL;
+    int eval = 0;
 
     for (int depth = 1; depth <= max_depth; depth++) {
         context.bestMoveInIteration = Move::null();
         context.bestEvalInIteration = is_white(side_to_move) ? -INF_EVAL : +INF_EVAL;
 
-        is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, context)
-                               : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, context);
+        /*if (depth > 1) {
+            alpha = eval - ASPIRATION_MARGIN;
+            beta = eval + ASPIRATION_MARGIN;
+        }*/
+
+        eval = is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, true, context)
+                                      : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, true, context);
+
+
+        // Check if the score is outside the aspiration window (fail-low or fail-high)
+        /*if (eval <= alpha || eval >= beta) {
+            // Re-search with full window to get the exact score
+
+            eval = is_white(side_to_move)
+                ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, -INF_EVAL, +INF_EVAL, true, context)
+                : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, -INF_EVAL, +INF_EVAL, true, context);
+        }*/
 
         if (stop) {
             break;
@@ -147,10 +166,12 @@ static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results,
    * 
    */
 template<SearchType searchType>
-static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context)
+static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, bool can_null_pruning,
+                             SearchContext& context)
 {
     constexpr bool MAXIMIZING_WHITE = searchType == MAXIMIZE_WHITE;
     constexpr bool MINIMIZING_BLACK = searchType == MINIMIZE_BLACK;
+    constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
 
     Board& board = context.board;
     const uint64_t zobrist_key = board.state().get_zobrist_key();
@@ -200,13 +221,32 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
         return quiescence_search<searchType>(stop, ply, alpha, beta, context);
     }
 
+    const GameState game_state = board.state();
+
+    // NULL move pruning, if we pass the turn to the opponent, if his move is irrelevant we can prune this branch
+    /*if (depth > 2 && can_null_pruning && !isCheck && !possible_zuzgwang(board)) {
+
+        board.make_null_move();
+
+        const int R = (depth > 6) ? 3 : 2;
+
+        int eval = alpha_beta_search<nextSearchType>(stop, depth - R - 1, ply + 1, alpha, beta, false, context);
+
+        board.unmake_null_move(game_state);
+
+        if constexpr (MAXIMIZING_WHITE) {
+            if (eval >= beta) return beta;
+        }
+        else if constexpr (MINIMIZING_BLACK) {
+            if (eval <= alpha) return alpha;
+        }
+    }*/
+
     TranspositionTable::NodeType node_tt = TranspositionTable::NodeType::EXACT;
     Move best_move_for_tt;
     constexpr int worst_evaluation = MAXIMIZING_WHITE ? -INF_EVAL : +INF_EVAL;
     int best_eval_for_tt = worst_evaluation;
     int final_node_evaluation = worst_evaluation;
-
-    const GameState game_state = board.state();
 
     order_moves(moves, board, ply);
 
@@ -215,20 +255,17 @@ static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int al
         if (stop) {
             return 0;
         }
-
-        constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
-
-        const int reduction = !isCheck && depth >= 3 && i >= 10 ? 1 : 0;
+        //const int reduction = !isCheck && depth >= 3 && i >= 10 ? 1 : 0;
 
         board.make_move(moves[i]);
-        int eval = alpha_beta_search<nextSearchType>(stop, depth - 1 - reduction, ply + 1, alpha, beta, context);
-
-        if (reduction) {
+        //int eval = alpha_beta_search<nextSearchType>(stop, depth - 1 - reduction, ply + 1, alpha, beta, true, context);
+        int eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, true, context);
+        /*if (reduction) {
             const bool needs_full_search = eval > alpha && eval < beta;
             if (needs_full_search) {
                 eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, context);
             }
-        }
+        }*/
 
         board.unmake_move(moves[i], game_state);
         History::pop_position();
@@ -433,4 +470,20 @@ static bool get_entry_in_transposition_table(uint64_t zobrist, int depth, int al
         break;
     default: return false; break;
     }
+}
+
+/**
+ * @brief check if there is a high risk of zuzgwang
+ * 
+ * @return (bool)
+ * @retval TRUE - if QUEENS == 0 && ROOKS == 0
+ * @retval FALSE otherwise
+ * 
+ */
+bool possible_zuzgwang(const Board& board)
+{
+    const uint16_t queens = board.get_piece_counter(Piece::W_QUEEN) + board.get_piece_counter(Piece::B_QUEEN);
+    const uint16_t rooks = board.get_piece_counter(Piece::W_ROOK) + board.get_piece_counter(Piece::B_ROOK);
+
+    return queens <= 0U && rooks <= 0U;
 }

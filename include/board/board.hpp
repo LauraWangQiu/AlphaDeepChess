@@ -181,6 +181,14 @@ public:
     void make_move(Move move);
 
     /**
+     * @brief make a null move to pass the turn to the opponent
+     * 
+     * @note Only used in null move pruning, this is an illegal move in chess
+     * 
+     */
+    void make_null_move();
+
+    /**
      * @brief unmake_move
      * 
      * unmake the move in the board, restoring the previous game state.
@@ -192,6 +200,15 @@ public:
      * 
      */
     void unmake_move(Move move, GameState previous_state);
+
+    /**
+     * @brief unmake the null move
+     * 
+     * @note Only used in null move pruning, this is an illegal move in chess
+     * 
+     * @param[in] previous_state previous game state.
+     */
+    void unmake_null_move(GameState previous_state);
 
     /**
      * @brief move_is_capture
