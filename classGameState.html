@@ -234,7 +234,7 @@ constexpr void&#160;</td><td class="memItemRight" valign="bottom"><b>clear_attac
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classGameState.html" title="GameState.">GameState</a>. </p>
-<p>Represents the sate of the chess game.</p>
+<p>Represents the state of the chess game.</p>
 <dl class="section note"><dt>Note</dt><dd>game state is stored as a 64-bit number : 50 : attacks_updated : 1 if updated, 0 if not 43-49 : num_pieces : 0 to 64 pieces 35-42 : fifty_move_rule_counter : if counter gets to 100 then game is a draw. 32-34 : last_captured_piece : PieceType::Empty if last move was not a capture. 31 : side_to_move : 0 if white, 1 if black. 30 : castle_king_white : 1 if available, 0 if not. 29 : castle_queen_white : 1 if available, 0 if not. 28 : castle_king_black : 1 if available, 0 if not. 27 : castle_queen_black : 1 if available, 0 if not. 26-20 : en_passant_square : 0-63 if available, &gt;=64 if not available 19-0 : move_number : 0-1048575 number of moves in the game.</dd></dl>
 <p>63-0 zobrist_key : zobrist hash key of the position </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
