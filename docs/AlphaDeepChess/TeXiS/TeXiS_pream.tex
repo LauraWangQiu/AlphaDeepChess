@@ -589,9 +589,13 @@
 % Para poder  incluir código  fuente resaltado fácilmente.   El tamaño
 % básico de la letra, pequeño.
 \usepackage{listings}
-\lstset{basicstyle=\small}
-\lstset{showstringspaces=false}
-\lstset{tabsize=3}
+\lstset{
+  basicstyle=\small,
+  tabsize=3,
+  language=C++,
+  % numbers=left,
+  % xleftmargin=2em
+}
 
 % Para poder utilizar el entorno tabularx, que sirve para hacer tablas
 % con  párrafos, sin tener  que indicar  el ancho  de cada  columna de
@@ -776,6 +780,9 @@
 \usepackage{graphicx}
 % para bibliografia
 \usepackage{makeidx}
+% para texto matematico
+\usepackage{amsmath}
+
 
 % Variable local para emacs, para  que encuentre el fichero maestro de
 % compilación y funcionen mejor algunas teclas rápidas de AucTeX

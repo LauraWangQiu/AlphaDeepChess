@@ -265,6 +265,7 @@ jobs:
 
     - name: Run tests
       run: |
+        cd test/manual_tests
         python tests.py \
           --test-id $TEST_ID \
           --games $GAMES \
@@ -273,6 +274,7 @@ jobs:
           --engine2 ${{ github.event.inputs.engine2 }} \
           --stockfish-options2 "${{ github.event.inputs.stockfish_options2 }}" \
           --positions positions.fen
+        cd ../..
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

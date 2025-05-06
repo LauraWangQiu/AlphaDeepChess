@@ -4,8 +4,9 @@
 In this chapter, we will explore the fundamental concepts and techniques on which our chess engine is based. This includes board representation, move generation, game trees, etc. Each section will provide an overview of the concepts and techniques used by our engine.
 
 \section{Board representation}
+\label{sec:board}
 
-The chessboard is where the game takes place and which serves as the foundation for all operations. In order to store a position setting with its pieces and other additional information like the side to move\footnote{Corresponds to the colour that has the turn of movement.}, the castling rights\footnote{Refers to the possibilities for each side to castle both short and long. Castling is explained in~\ref{sec:castling}.} or the fifty-move rule counter\footnote{This rule is explained in~\ref{itm:fifty-move-rule}.}, we can encounter different types of representations: piece centric, square centric and hybrid solutions. We chose to use bitboards\footnote{\url{https://www.chessprogramming.org/Bitboards}} as the primary representation, complemented by a piece list to store the piece on each square (piece centric representation). Additionally, the game state is stored in a bit field.
+The chessboard is where the game takes place and which serves as the foundation for all operations. In order to store a position setting with its pieces and other additional information like the side to move (the colour that has the turn of movement), the castling rights (the possibilities for each side to castle both short and long, explained in Section~\ref{sec:castling}) or the fifty-move rule counter (explained in Section~\ref{sec:rules} Item~\ref{itm:fifty-move-rule}), we can encounter different types of representations: piece centric, square centric and hybrid solutions. We chose to use bitboards as the primary representation, complemented by a piece list to store the piece on each square (piece centric representation). Additionally, the game state is stored in a bit field.
 
 \paragraph{Bitboard} also known as a bitset or bitmap, is a 64-bit data structure that efficiently represents a chessboard.
 
@@ -25,13 +26,7 @@ The chessboard is where the game takes place and which serves as the foundation 
 
 \vspace{1em}
 
-\noindent For example, using a 64-bit bitfield, we can allocate 6 bits to store the number of pieces on the board, as $2^6 = 64$ possibilities. This means the bits would occupy an interval from $X$ included to $X+5$.
-
-\paragraph{Magic bitboard} is a hashing algorithm used to efficiently generate moves for sliding pieces (rooks, bishops and queens) by using precomputed attack tables. It uses a hash function to map board positions to unique bitboards, allowing for fast move generation in a single operation.
-
-\vspace{1em}
-
-\noindent For more information about board representation, refer to the Chess Programming page: \url{https://www.chessprogramming.org/Board_Representation}.
+\noindent For example, using a 64-bit bitfield, we can allocate 6 bits to store the number of pieces on the board, as $2^6 = 64$ possibilities. This means the bits would occupy an interval from $X$ to $X+5$ inclusive.
 
 \section{Move generation}
 \label{sec:move-generation}
@@ -43,19 +38,15 @@ An essential part of any chess engine is move generation. It involves generating
 \noindent There are two types of move generation:
 
 \begin{itemize}
-    \item \textbf{Pseudolegal move generation}: generates all moves without considering whether the king is left in check after the move. It requires additional filtering to remove illegal moves which is more computationally expensive than legal move generation.
-    \item \textbf{Legal move generation}: generates only moves that are valid according to the chess rules, ensuring that the king is not left in check. The more accurate, the computationally more expensive it is.
+    \item Pseudolegal move generation: generates all moves without considering whether the king is left in check after the move. It requires additional filtering to remove illegal moves which is more computationally expensive than legal move generation.
+    \item Legal move generation: generates only moves that are valid according to the chess rules, ensuring that the king is not left in check. The more accurate, the computationally more expensive it is.
 \end{itemize}
 
-\noindent We have preferred to use \textbf{legal move generation}. Although it is computationally more expensive than pseudolegal move generation, it simplifies the filtering process and ensures that the generated moves are correct.
+\noindent We have preferred to use legal move generation because it ensures that the generated moves are correct.
 
 \vspace{1em}
 
 \noindent Additionally, we have chosen to implement \textbf{magic bitboards} for this type of move generator, particularly for sliding pieces such as rooks, bishops, and queens. Magic bitboards use precomputed attack tables and bitwise operations. This approach significantly reduces the computational cost of move generation, enabling the engine to explore deeper levels of the game tree while maintaining accuracy and performance.
-
-\vspace{1em}
-
-\noindent For more information about move generation, refer to the Chess Programming page: \url{https://www.chessprogramming.org/Move_Generation}.
 
 \section{Game trees}
 
@@ -67,25 +58,25 @@ Sequential games, such as chess or tic-tac-toe, where players take turns alterna
 
 \section{Search algorithms}
 
-There are different approaches to find the best move from a position. Some of these search algorithms are: Depth-First Search (DFS)\footnote{\url{https://www.chessprogramming.org/Depth-First}}, Best-First Search\footnote{\url{https://www.chessprogramming.org/Best-First}} (not to be confused with Breadth-First Search or BFS but they are related) and Parallel Search\footnote{\url{https://www.chessprogramming.org/Parallel_Search}}.
+There are different approaches to find the best move from a position. Some of these search algorithms are: Depth-First Search (DFS), Best-First Search (not to be confused with Breadth-First Search or BFS but they are related) and Parallel Search.
 
 \vspace{1em}
 
 \noindent Note that these search algorithms are the foundation of more advanced and practical algorithms used today. However, explaining them is essential to understand the underlying principles.
 
-\paragraph{Depth-First Search} refers to the process of exploring each branch of a tree or graph to its deepest level before backtracking\footnote{\url{https://en.wikipedia.org/wiki/Backtracking}}. Unfortunately, in chess, this cannot be possible because the number of possible moves grows exponentially with the depth of the search tree, leading to the so-called combinatorial explosion. To address this, depth-first search is often combined with techniques like alpha-beta pruning (discussed below) to reduce the number of nodes evaluated, making the search more efficient while still exploring the tree deeply.
+\paragraph{Depth-First Search} refers to the process of exploring each branch of a tree or graph to its deepest level before backtracking. Unfortunately, in chess, this cannot be possible because the number of possible moves grows exponentially with the depth of the search tree, leading to the so-called combinatorial explosion. To address this, depth-first search is often combined with techniques like alpha-beta pruning (discussed below) to reduce the number of nodes evaluated, making the search more efficient while still exploring the tree deeply.
 
-\paragraph{Best-First Search} refers to the way of exploring the most promising nodes first. It is similar to a breadth-first search but prioritizes some nodes before others. They typically require significant memory resources, as they must store a search space\footnote{Represents the collection of all potential solutions in search algorithms.} that grows exponentially.
+\paragraph{Best-First Search} refers to the way of exploring the most promising nodes first. It is similar to a breadth-first search but prioritizes some nodes before others. They typically require significant memory resources, as they must store a search space (the collection of all potential solutions in search algorithms) that grows exponentially.
 
 \paragraph{Parallel Search} refers to mulithreaded search, a technique used to accelerate search processes by leveraging multiple processors.
 
 \vspace{1em}
 
-\noindent In the next sections, we will explore some of the most used search algorithms in chess engines.
+\noindent Next, we will explore some of the most used search algorithms in chess engines.
 
 \subsection{Minimax algorithm}
 
-The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} algorithm is a decision making algorithm that follows DFS principles. It is based on the assumption that both players play optimally, with one player (the maximizer) trying to maximize his score and the other player (the minimizer) trying to minimize his score. It explores the game tree to evaluate all possible moves and determines the best move for the current player.
+The \textbf{minimax} algorithm is a decision making algorithm that follows DFS principles. It is based on the assumption that both players play optimally, with one player (the maximizer) trying to maximize his score and the other player (the minimizer) trying to minimize his score. It explores the game tree to evaluate all possible moves and determines the best move for the current player.
 
 \begin{figure}[H]
     \centering
@@ -107,9 +98,9 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
                 child {node[squareNode] (g) {9}}
             };
 
-        \node[left=1.2cm] at (root) {\textbf{MAX}};
-        \node[left=1.2cm] at (b) {\textbf{MIN}};
-        \node[left=1.2cm] at (d) {\textbf{MAX}};
+        \node[left=1.2cm] at (root) {MAX};
+        \node[left=1.2cm] at (b) {MIN};
+        \node[left=1.2cm] at (d) {MAX};
 
         % Edges
         \draw[-{Stealth}, draw=red] (b) -- (root);
@@ -123,11 +114,11 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
     \label{fig:minimax}
 \end{figure}
 
-\noindent In this example\footnote{Note that this example is a binary tree, but there could be more moves or nodes in a real scenario.}, white is represented by square nodes and black by circle nodes. Each of them wants to maximize or minimize their respective final value in each position. For the leftmost pair of leaf nodes with values of 3 and 5, 3 is chosen because black tries to get the lowest score between them. Then, the other pair of leaf nodes with values of 2 and 9, 2 is chosen for the same reason. Lastly, at the root node, white selects 3 as the maximum number between 3 and 2.
+\noindent In this example, white is represented by square nodes and black by circle nodes. Note that this example is a binary tree, but there might be more moves or nodes in a real scenario. Each of them wants to maximize or minimize their respective final value in each position. For the leftmost pair of leaf nodes with values of 3 and 5, 3 is chosen because black tries to get the lowest score between them. Then, the other pair of leaf nodes with values of 2 and 9, 2 is chosen for the same reason. Lastly, at the root node, white selects 3 as the maximum number between 3 and 2.
 
 \paragraph{Negamax} is a variant of minimax that simplifies the implementation by assuming that the gain of one player is the loss of the other. This allows the use of a single evaluation function with inverted values. In this project, this variant is not used.
 
-\paragraph{Alpha-beta pruning}\footnote{\url{https://www.chessprogramming.org/Alpha-Beta}} is an optimization of minimax that reduces significantly the number of evaluated nodes in the game tree. It uses two values, alpha and beta, to discard branches that cannot influence the final decision, improving the efficiency.
+\paragraph{Alpha-beta pruning} is an optimization of minimax that reduces significantly the number of evaluated nodes in the game tree. It uses two values, alpha and beta, to discard branches that cannot influence the final decision, improving the efficiency.
 
 \begin{figure}[H]
     \centering
@@ -149,9 +140,9 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
                 child {node[squareNode, dashed, red] (g) {X}}
             };
 
-        \node[left=1.2cm] at (root) {\textbf{MAX}};
-        \node[left=1.2cm] at (b) {\textbf{MIN}};
-        \node[left=1.2cm] at (d) {\textbf{MAX}};
+        \node[left=1.2cm] at (root) {MAX};
+        \node[left=1.2cm] at (b) {MIN};
+        \node[left=1.2cm] at (d) {MAX};
 
         % Edges
         \draw[-{Stealth}, draw=red] (b) -- (root);
@@ -196,9 +187,9 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
         \node[right=0.7cm, align=left] at (b) {$\alpha = -\infty$ \\ $\beta = +\infty$};
 
         % Node labels
-        \node[left=0.7cm] at (root) {\textbf{MAX}};
-        \node[left=0.7cm] at (b) {\textbf{MIN}};
-        \node[left=0.7cm] at (d) {\textbf{MAX}};
+        \node[left=0.7cm] at (root) {MAX};
+        \node[left=0.7cm] at (b) {MIN};
+        \node[left=0.7cm] at (d) {MAX};
 
         % Edges
         \draw[-, draw=red] (root) -- (b);
@@ -235,9 +226,9 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
         \node[right=0.7cm, align=left] at (b) {$\alpha = -\infty$ \\ $\textcolor{red}{\beta = 3}$};
 
         % Node labels
-        \node[left=0.7cm] at (root) {\textbf{MAX}};
-        \node[left=0.7cm] at (b) {\textbf{MIN}};
-        \node[left=0.7cm] at (d) {\textbf{MAX}};
+        \node[left=0.7cm] at (root) {MAX};
+        \node[left=0.7cm] at (b) {MIN};
+        \node[left=0.7cm] at (d) {MAX};
 
         % Edges
         \draw[-, draw=red] (root) -- (b);
@@ -274,9 +265,9 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
         \node[right=0.7cm, align=left] at (b) {$\alpha = -\infty$ \\ $\beta = 3$};
 
         % Node labels
-        \node[left=0.7cm] at (root) {\textbf{MAX}};
-        \node[left=0.7cm] at (b) {\textbf{MIN}};
-        \node[left=0.7cm] at (d) {\textbf{MAX}};
+        \node[left=0.7cm] at (root) {MAX};
+        \node[left=0.7cm] at (b) {MIN};
+        \node[left=0.7cm] at (d) {MAX};
 
         % Edges
         \draw[-, draw=red] (root) -- (b);
@@ -287,11 +278,8 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
         \draw[-] (c) -- (g);
     \end{tikzpicture}
 
-    \caption{Example of alpha-beta pruning with $\alpha$ and $\beta$ values (1).}
-    \label{fig:alpha-beta-pruning-with-alpha-beta-values-1}
-\end{figure}
+    \hspace{3em}
 
-\begin{figure}[H]
     \centering
     \begin{tikzpicture}[
         level distance=1.5cm,
@@ -317,9 +305,9 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
         \node[right=0.7cm, align=left] at (c) {$\alpha = 3$ \\ $\textcolor{red}{\beta = 2}$};
 
         % Node labels
-        \node[left=0.7cm] at (root) {\textbf{MAX}};
-        \node[left=0.7cm] at (b) {\textbf{MIN}};
-        \node[left=0.7cm] at (d) {\textbf{MAX}};
+        \node[left=0.7cm] at (root) {MAX};
+        \node[left=0.7cm] at (b) {MIN};
+        \node[left=0.7cm] at (d) {MAX};
 
         % Edges
         \draw[-] (b) -- (root);
@@ -357,9 +345,9 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
         \node[right=0.7cm, align=left] at (c) {$\alpha = 3$ \\ $\beta = 2$};
 
         % Node labels
-        \node[left=0.7cm] at (root) {\textbf{MAX}};
-        \node[left=0.7cm] at (b) {\textbf{MIN}};
-        \node[left=0.7cm] at (d) {\textbf{MAX}};
+        \node[left=0.7cm] at (root) {MAX};
+        \node[left=0.7cm] at (b) {MIN};
+        \node[left=0.7cm] at (d) {MAX};
 
         % Edges
         \draw[-, draw=red] (b) -- (root);
@@ -370,8 +358,8 @@ The \textbf{minimax}\footnote{\url{https://www.chessprogramming.org/Minimax}} al
         \draw[-, draw=gray, dashed] (c) -- (g);
     \end{tikzpicture}
 
-    \caption{Example of alpha-beta pruning with $\alpha$ and $\beta$ values (2).}
-    \label{fig:alpha-beta-pruning-with-alpha-beta-values-2}
+    \caption{Example of alpha-beta pruning with $\alpha$ and $\beta$ values.}
+    \label{fig:alpha-beta-pruning-with-alpha-beta-values}
 \end{figure}
 
 \subsubsection{Alpha-Beta Enhancements}
@@ -380,7 +368,7 @@ The alpha-beta algorithm has been further improved over time with various enhanc
 
 \vspace{1em}
 
-\noindent Take into consideration that many positions can be reached in different ways. This is formally known as \textbf{transpositions}. Just like in dynamic programming, the evaluations of different positions are stored in a structure, the \textbf{transposition tables}, to avoid repeating the process of searching and evaluating, which improves efficiency. Take the following example:
+\noindent Take into consideration that many positions can be reached in different ways. This is formally known as transpositions. Just like in dynamic programming, the evaluations of different positions are stored in a structure, the \textbf{transposition tables}, to avoid repeating the process of searching and evaluating, which improves efficiency. Take the following example:
 
 \vspace{-2em}
 
@@ -396,10 +384,10 @@ The alpha-beta algorithm has been further improved over time with various enhanc
     \hspace{1em}
     \begin{minipage}{0.35\textwidth}
         \centering
-        \textbf{French Defense:}\\
+        French Defense:\\
         1. e4 e6 2. d4 d5 3. exd5 exd5 4. Nf3 Nf6
         \vspace{1em}\\
-        \textbf{Petrov Defense:}\\
+        Petrov Defense:\\
         1. e4 e5 2. Nf3 Nf6 3. Nxe5 d6 4. Nf3 Nxe4 5. d3 Nf6 6. d4 d5
     \end{minipage}
     \caption{Example of transposition.}
@@ -430,7 +418,7 @@ The alpha-beta algorithm has been further improved over time with various enhanc
 
 \vspace{1em}
 
-\noindent Finally, alpha-beta algorithm could not perform well without \textbf{move ordering}\footnote{\url{https://www.chessprogramming.org/Move_Ordering}}. This is important to ensure that best moves are searched first and to reduce the search space of the game tree. Some of the techniques for move ordering are: Most Valuable victim - Least Valuable Aggressor (MVV-LVA) for captures and killer moves for non-captures. 
+\noindent Finally, alpha-beta algorithm could not perform well without \textbf{move ordering}. It is important to ensure that best moves are searched first and to reduce the search space of the game tree. Some of the techniques for move ordering are: Most Valuable victim - Least Valuable Aggressor (MVV-LVA) for captures and killer moves for non-captures. 
 
 \paragraph{MVV-LVA} is a heuristic that prioritizes capturing moves by evaluating the value of the piece being captured (the victim) and the value of the piece performing the capture (the aggressor). The goal is to maximize the gain while minimizing the risk. The following example reflects this:
 
@@ -456,24 +444,20 @@ The alpha-beta algorithm has been further improved over time with various enhanc
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Imagenes/Bitmap/pvsplitting.png}
-    \caption{Principal variation splitting. Taken from Gao, Y. and Marsland, T. A. in \textit{Multithreaded Pruned Tree Search in Distributed Systems}, University of Alberta. Accessed on March 29, 2025.}
+    \caption{Principal variation splitting.~\cite{PVSplitting}}
     \label{fig:pv-splitting}
 \end{figure}
 
 \section{Evaluation}
 
-For each position, a numerical value is assigned representing how favorable the position is for one side (positive for white and negative for black). These values guide the engine in selecting the best moves during the search process. Generally, this value is expressed in centipawns (cp), which represent one hundredth of a pawn's value.
-
-\vspace{1em}
-
-\noindent There are two ways to implement it:
+For each position, a numerical value is assigned representing how favorable the position is for one side: positive (+) for white and negative (-) for black. These symmetric values were first formulated by~\cite{Shannon1950} and which guide the engine in selecting the best moves during the search process. Generally, this value is expressed in centipawns (cp) that represents one hundredth of a pawn's value. There are two ways to implement it:
 
 \begin{itemize}
-    \item \textbf{Traditional hand-crafted evaluation}
-    \item \textbf{Multi-layer neuronal networks}
+    \item Traditional hand-crafted evaluation
+    \item Multi-layer neuronal networks
 \end{itemize}
 
-\noindent The use of neural networks is beyond the scope of the project, so traditional evaluation has been implemented.
+\noindent The use of neural networks is beyond the scope of the project, so traditional evaluation has been implemented and discussed below.
 
 \vspace{1em}
 
@@ -483,7 +467,7 @@ For each position, a numerical value is assigned representing how favorable the 
     \centering
     \begin{tabular}{|c|c|}
         \hline
-        \textbf{Piece} & \textbf{Value} \\ \hline
+        Piece & Value \\ \hline
         Pawn & 100 \\ \hline
         Knight & 320 \\ \hline
         Bishop & 330 \\ \hline
@@ -495,19 +479,31 @@ For each position, a numerical value is assigned representing how favorable the 
     \label{tab:piece-values}
 \end{table}
 
-\noindent By summing up the piece values for each side, we end up with the concept of \textbf{material}. Over the time, there have been different point values for each piece. A table can be found in \url{https://www.chessprogramming.org/Point_Value} in \textit{Basic values} section.
+\noindent Over the time, there have been different point values for each piece. A table can be found in \url{https://www.chessprogramming.org/Point_Value} in \textit{Basic values} section.
 
 \vspace{1em}
 
-\noindent There are other material considerations like \textit{bonus for the bishop pair} depending on the position that can be advantageous to control squares of different color, or \textbf{insufficient material}, which refers to situations where neither side has enough pieces to deliver checkmate. This is also mentioned in Section \ref{sec:rules}.
+\noindent By summing up the piece values for each side, we end up the concept of material. For example, if white has 1 knight and 1 bishop, while black has 2 bishops, the material calculation is as follows:
+
+\begin{equation}
+    (+)(1 \times \mathrm{knightValue} + 1 \times \mathrm{bishopValue}) - (2 \times \mathrm{bishopValue})
+\end{equation}
+    
+\noindent Substituting the standard piece values in centipawns (cp):
+    
+\begin{equation}
+    (1 \times 320 + 1 \times 330) - (2 \times 330) = -10 \, \mathrm{cp}
+\end{equation}
+
+\noindent This result indicates that black has a slight material advantage of 10 centipawns.
 
 \vspace{1em}
 
-\noindent However, the higher the level one aims to reach in chess, the greater the need to evaluate other aspects.
+\noindent There are other material considerations like \textit{bonus for the bishop pair} depending on the position that can be advantageous to control squares of different color, or insufficient material, which refers to situations where neither side has enough pieces to deliver checkmate. This is also mentioned in Section~\ref{sec:rules}.
 
 \vspace{1em}
 
-\noindent There are squares in which the pieces have less value because of their activity. Consider the following example:
+\noindent However, the higher the level one aims to reach in chess, the greater the need to evaluate other aspects. For instance, there are squares in which the pieces have less value because of their activity.
 
 \begin{figure}[H]
     \centering
@@ -527,7 +523,7 @@ For each position, a numerical value is assigned representing how favorable the 
 
 \vspace{1em}
 
-\noindent A way to add this to the evaluation is to have precomputed \textbf{piece-square tables} like the following one for the bishop:
+\noindent A way to add this to the evaluation is to have precomputed piece-square tables like the following one for the bishop:
 
 \begin{figure}[H]
     \centering
@@ -573,57 +569,37 @@ For each position, a numerical value is assigned representing how favorable the 
     \label{fig:piece-square-values-bishop}
 \end{figure}
 
-\noindent For more information about piece-square tables, refer to the Chess Programming page in \textit{Piece-Square Tables} section: \url{https://www.chessprogramming.org/Simplified_Evaluation_Function}.
-
-\vspace{1em}
-
-\noindent It is important to consider the \textbf{game phase} to select these piece-square tables, especially in the endgame phase. These phases are:
+\noindent It is important to consider the game phase to select these piece-square tables, especially in the endgame phase. These phases are:
 
 \begin{itemize}
-    \item \textbf{Opening}: where players develop their minor pieces\footnote{Knights and bishops.}, control the center of the board and try to ensure king safety.
-    \item \textbf{Middlegame}: where players try to create tactical opportunities and attack the opponent's position once they have developed their pieces and secured their king.
-    \item \textbf{Endgame}: where players have fewer pieces on the board and the focus is on promoting pawns and achieving checkmate.
+    \item Opening: where players develop their minor pieces (knights and bishops), control the center of the board and try to ensure king safety.
+    \item Middlegame: where players try to create tactical opportunities and attack the opponent's position once they have developed their pieces and secured their king.
+    \item Endgame: where players have fewer pieces on the board and the focus is on promoting pawns and achieving checkmate.
 \end{itemize}
 
 \noindent In the endgame phase, when there are no queens, king activity becomes extremely significant in supporting the advancement of the pawns.
 
 \vspace{1em}
 
-\noindent In relation to the above and Section \ref{sec:move-generation}, the \textbf{mobility score} measures the number of legal moves a piece can make from its current position. As it is mentioned in \url{https://www.chessprogramming.org/Mobility},
+\noindent In relation to the above and Section \ref{sec:move-generation}, the mobility score measures the number of legal moves a piece can make from its current position. As it is mentioned in \url{https://www.chessprogramming.org/Mobility},
 \begin{quotation}
 \textit{\dots the more choices you have at your disposal, the stronger your position.}
-\end{quotation} This score is calculated as the number of legal moves adjusted for certain factors like blocked moves by friendly pieces (pieces of the same color as the current piece) and enemy attacks\footnote{Refer to the squares controlled by the opponent.}.
+\end{quotation} This score is calculated as the number of legal moves adjusted for certain factors like blocked moves by friendly pieces (pieces of the same color as the current piece) and enemy attacks (the squares controlled by the opponent).
 
 \vspace{1em}
 
-\noindent During opening and middlegame, king safety is an important factor to consider. When the king has castled, it is crucial to maintain the pawns nearby to shield it from attacks. Generally, it is preferable to keep the pawns unmoved or advanced by only one square. This is called \textbf{king's shield} and a bonus is awarded for each pawn that still has not moved from the castling area.
+\noindent During opening and middlegame, king safety is an important factor to consider. When the king has castled, it is crucial to maintain the pawns nearby to shield it from attacks. Generally, it is preferable to keep the pawns unmoved or advanced by only one square. This is called king's shield and a bonus is awarded for each pawn that still has not moved from the castling area.
 
 \vspace{1em}
 
-\noindent On the contrary, \textbf{king safety penalization} can also mean to punish the player based on the number and type of enemy attacks targeting the area around the king.
+\noindent On the contrary, king safety penalization can also mean to punish the player based on the number and type of enemy attacks targeting the area around the king.
 
 \vspace{1em}
 
-\noindent All these ensures that positions with exposed kings are evaluated as less favorable. If there are open\footnote{Columns where there are no pawns of either color.} or semi-open\footnote{Columns where there are no pawns of one color but at least one pawn of the opposite color.} files near the king, the position is penalized further, as these files provide attacking opportunities for enemy rooks and queens.
+\noindent All these ensures that positions with exposed kings are evaluated as less favorable. If there are open (no pawns of either color) or semi-open (no pawns of one color but at least one pawn of the opposite color) files near the king, the position is penalized further, as these files provide attacking opportunities for enemy rooks and queens.
 
 \vspace{1em}
-
-% Pawn Structure...
 
 \section{How can we determine the strength of our engine?}
 
-This can be answered by playing against other engines and analyzing the results. The most common way to do this is by using the \textbf{Computer Chess Rating Lists}\footnote{\url{https://www.computerchess.org.uk/ccrl/}} which ranks chess engines based on their performance in various tournaments and matches. By the time being, we have chosen to compare different versions of the engine with Stockfish, currently ranked as the number one on the list.
-
-%En el estado de la cuestión es donde aparecen gran parte de las referencias bibliográficas del trabajo. Una de las formas más cómodas de gestionar la bibliografía en {\LaTeX} es utilizando \textbf{bibtex}. Las entradas bibliográficas deben estar en un fichero con extensión \textit{.bib} (con esta plantilla se proporciona el fichero biblio.bib, donde están las entradas referenciadas más abajo). Cada entrada bibliográfica tiene una clave que permite referenciarla desde cualquier parte del texto con los siguiente comandos:
-
-%\begin{itemize}
-%\item Referencia bibliografica con cite: \cite{ldesc2e}
-%\item Referencia bibliográfica con citep: \citep{notsoshort}
-%\item Referencia bibliográfica con citet: \citet{latexAPrimer}
-%\end{itemize}
-
-%Es posible citar más de una fuente, como por ejemplo \citep{latexCompanion,LaTeXLamport,texKnuth}
-
-%Después, \LaTeX se ocupa de rellenar la sección de bibliografía con las entradas \textbf{que hayan sido citadas} (es decir, no con todas las entradas que hay en el .bib, sino sólo con aquellas que se hayan citado en alguna parte del texto).
-
-%Bibtex es un programa separado de latex, pdflatex o cualquier otra cosa que se use para compilar los .tex, de manera que para que se rellene correctamente la sección de bibliografía es necesario compilar primero el trabajo (a veces es necesario compilarlo dos veces), compilar después con bibtex, y volver a compilar otra vez el trabajo (de nuevo, puede ser necesario compilarlo dos veces). 
+This can be answered by playing against other engines and analyzing the results. The most common way to do this is by using the Computer Chess Rating Lists which ranks chess engines based on their performance in various tournaments and matches. By the time being, we have chosen to compare different versions of the engine with Stockfish, currently ranked as the number one on the list. This analysis will be explained in Chapter~\ref{cap:testing}. You can continue reading the next chapter to learn about the tools and the work behind it.

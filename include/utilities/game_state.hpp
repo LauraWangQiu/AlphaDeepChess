@@ -40,7 +40,7 @@ static constexpr uint64_t MASK_MOVE_NUMBER = (0xfffffULL << SHIFT_MOVE_NUMBER);
 /**
  * @brief GameState
  * 
- * Represents the sate of the chess game.
+ * Represents the state of the chess game.
  * 
  * @note game state is stored as a 64-bit number :
  * 50 : attacks_updated : 1 if updated, 0 if not
