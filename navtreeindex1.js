@@ -1,5 +1,7 @@
 var NAVTREEINDEX1 =
 {
+"classTranspositionTable.html#adcbec515cfd6d19949f0db254051b3daad8baa7406d9079c04eab2f9157333e12":[5,0,13,2,6],
+"classTranspositionTable.html#af2d70fd5982c7356b331a238062b5041":[5,0,13,1],
 "classTranspositionTable.html#af2d70fd5982c7356b331a238062b5041a3fe60358a157034e2c9d7cce7c79ed39":[5,0,13,1,4],
 "classTranspositionTable.html#af2d70fd5982c7356b331a238062b5041a75fe593b97fa52826f3dd3eb2b92ff57":[5,0,13,1,3],
 "classTranspositionTable.html#af2d70fd5982c7356b331a238062b5041ab9e14d9b2886bcff408b85aefa780419":[5,0,13,1,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX1 =
 "move__generator_8hpp.html#a2ff3db61e5f8683c3c40a624b5721e1fa288a17c61937271620188bdfaa5dd7a5":[6,0,0,3,1,0,0],
 "move__generator_8hpp.html#a2ff3db61e5f8683c3c40a624b5721e1faba672af6db470853e3f1a935a0460e5b":[6,0,0,3,1,0,1],
 "move__generator_8hpp.html#a60592ae801c6d42d8004890623ea39aa":[6,0,0,3,1,1],
-"move__generator_8hpp_source.html":[6,0,0,3,1],
-"move__generator__basic_8cpp.html":[6,0,1,2,0],
-"move__generator__basic_8cpp.html#a0e17e5370229185a097ff204af049098":[6,0,1,2,0,0]
+"move__generator_8hpp_source.html":[6,0,0,3,1]
 };

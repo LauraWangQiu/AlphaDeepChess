@@ -1,5 +1,7 @@
 var NAVTREEINDEX2 =
 {
+"move__generator__basic_8cpp.html":[6,0,1,2,0],
+"move__generator__basic_8cpp.html#a0e17e5370229185a097ff204af049098":[6,0,1,2,0,0],
 "move__generator__basic_8cpp.html#a165fddee86a21762cfb94f399dbc9498":[6,0,1,2,0,2],
 "move__generator__basic_8cpp.html#acabfaeb215fc7fa1212cbc0c26b0503c":[6,0,1,2,0,1],
 "move__generator__info_8hpp.html":[6,0,0,3,2],
@@ -126,7 +128,8 @@ var NAVTREEINDEX2 =
 "search__transposition__table_8cpp.html":[6,0,1,4,3],
 "search__transposition__table_8cpp.html#a63e8234ede323d87a8aed067862d33ba":[6,0,1,4,3,0],
 "search__tt__reductions_8cpp.html":[6,0,1,4,4],
-"search__tt__reductions_8cpp.html#a63e8234ede323d87a8aed067862d33ba":[6,0,1,4,4,0],
+"search__tt__reductions_8cpp.html#a63e8234ede323d87a8aed067862d33ba":[6,0,1,4,4,1],
+"search__tt__reductions_8cpp.html#a86d67aeb08523d912b43930820af4e73":[6,0,1,4,4,0],
 "search__utils_8hpp.html":[6,0,0,5,3],
 "search__utils_8hpp.html#a115ede74149e97252b8bbcc4a29b4500":[6,0,0,5,3,5],
 "search__utils_8hpp.html#a12a4365d09e9324347f87aab06ad13e2":[6,0,0,5,3,4],

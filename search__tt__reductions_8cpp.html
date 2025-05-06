@@ -233,6 +233,9 @@ Include dependency graph for search_tt_reductions.cpp:</div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a86d67aeb08523d912b43930820af4e73" id="r_a86d67aeb08523d912b43930820af4e73"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="search__tt__reductions_8cpp.html#a86d67aeb08523d912b43930820af4e73">possible_zuzgwang</a> (const <a class="el" href="classBoard.html">Board</a> &amp;board)</td></tr>
+<tr class="memdesc:a86d67aeb08523d912b43930820af4e73"><td class="mdescLeft">&#160;</td><td class="mdescRight">check if there is a high risk of zuzgwang  <br /></td></tr>
+<tr class="separator:a86d67aeb08523d912b43930820af4e73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63e8234ede323d87a8aed067862d33ba" id="r_a63e8234ede323d87a8aed067862d33ba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="search__tt__reductions_8cpp.html#a63e8234ede323d87a8aed067862d33ba">search</a> (std::atomic&lt; bool &gt; &amp;stop, <a class="el" href="structSearchResults.html">SearchResults</a> &amp;results, <a class="el" href="classBoard.html">Board</a> &amp;board, uint32_t max_depth)</td></tr>
 <tr class="memdesc:a63e8234ede323d87a8aed067862d33ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">search(std::atomic&lt;bool&gt;&amp;, SearchResults&amp;, Board&amp;, int32_t)  <br /></td></tr>
 <tr class="separator:a63e8234ede323d87a8aed067862d33ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -242,6 +245,34 @@ Functions</h2></td></tr>
 <p>chess search with transposition table and reductions implementation.</p>
 <p><a href="https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning">https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning</a> <a href="https://www.chessprogramming.org/Alpha-Beta">https://www.chessprogramming.org/Alpha-Beta</a> <a href="https://www.chessprogramming.org/Aspiration_Windows">https://www.chessprogramming.org/Aspiration_Windows</a> <a href="https://www.chessprogramming.org/Quiescence_Search">https://www.chessprogramming.org/Quiescence_Search</a> <a href="https://www.chessprogramming.org/Extensions">https://www.chessprogramming.org/Extensions</a> <a href="https://www.chessprogramming.org/Late_Move_Reductions">https://www.chessprogramming.org/Late_Move_Reductions</a> </p>
 </div><h2 class="groupheader">Function Documentation</h2>
+<a id="a86d67aeb08523d912b43930820af4e73" name="a86d67aeb08523d912b43930820af4e73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86d67aeb08523d912b43930820af4e73">&#9670;&#160;</a></span>possible_zuzgwang()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool possible_zuzgwang </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classBoard.html">Board</a> &amp;&#160;</td>
+          <td class="paramname"><em>board</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>check if there is a high risk of zuzgwang </p>
+<dl class="section return"><dt>Returns</dt><dd>(bool) </dd></dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">TRUE</td><td>- if QUEENS == 0 &amp;&amp; ROOKS == 0 </td></tr>
+    <tr><td class="paramname">FALSE</td><td>otherwise </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a63e8234ede323d87a8aed067862d33ba" name="a63e8234ede323d87a8aed067862d33ba"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a63e8234ede323d87a8aed067862d33ba">&#9670;&#160;</a></span>search()</h2>
 

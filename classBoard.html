@@ -144,9 +144,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9e53e2f93658d6706ed6d144a3639ac3" id="r_a9e53e2f93658d6706ed6d144a3639ac3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBoard.html#a9e53e2f93658d6706ed6d144a3639ac3">make_move</a> (<a class="el" href="classMove.html">Move</a> move)</td></tr>
 <tr class="memdesc:a9e53e2f93658d6706ed6d144a3639ac3"><td class="mdescLeft">&#160;</td><td class="mdescRight">make_move  <br /></td></tr>
 <tr class="separator:a9e53e2f93658d6706ed6d144a3639ac3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbcafbb4771aec39ce0692b034549ab0" id="r_abbcafbb4771aec39ce0692b034549ab0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBoard.html#abbcafbb4771aec39ce0692b034549ab0">make_null_move</a> ()</td></tr>
+<tr class="memdesc:abbcafbb4771aec39ce0692b034549ab0"><td class="mdescLeft">&#160;</td><td class="mdescRight">make a null move to pass the turn to the opponent  <br /></td></tr>
+<tr class="separator:abbcafbb4771aec39ce0692b034549ab0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a889d50042774430b6362a274f9ea8017" id="r_a889d50042774430b6362a274f9ea8017"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBoard.html#a889d50042774430b6362a274f9ea8017">unmake_move</a> (<a class="el" href="classMove.html">Move</a> move, <a class="el" href="classGameState.html">GameState</a> previous_state)</td></tr>
 <tr class="memdesc:a889d50042774430b6362a274f9ea8017"><td class="mdescLeft">&#160;</td><td class="mdescRight">unmake_move  <br /></td></tr>
 <tr class="separator:a889d50042774430b6362a274f9ea8017"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae995dfa07d666a44f43d0c33f46f62de" id="r_ae995dfa07d666a44f43d0c33f46f62de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBoard.html#ae995dfa07d666a44f43d0c33f46f62de">unmake_null_move</a> (<a class="el" href="classGameState.html">GameState</a> previous_state)</td></tr>
+<tr class="memdesc:ae995dfa07d666a44f43d0c33f46f62de"><td class="mdescLeft">&#160;</td><td class="mdescRight">unmake the null move  <br /></td></tr>
+<tr class="separator:ae995dfa07d666a44f43d0c33f46f62de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0f7ff026cd7ab9426480337f742a6298" id="r_a0f7ff026cd7ab9426480337f742a6298"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBoard.html#a0f7ff026cd7ab9426480337f742a6298">move_is_capture</a> (<a class="el" href="classMove.html">Move</a> move) const</td></tr>
 <tr class="memdesc:a0f7ff026cd7ab9426480337f742a6298"><td class="mdescLeft">&#160;</td><td class="mdescRight">move_is_capture  <br /></td></tr>
 <tr class="separator:a0f7ff026cd7ab9426480337f742a6298"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -635,6 +641,26 @@ Friends</h2></td></tr>
 
 </div>
 </div>
+<a id="abbcafbb4771aec39ce0692b034549ab0" name="abbcafbb4771aec39ce0692b034549ab0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abbcafbb4771aec39ce0692b034549ab0">&#9670;&#160;</a></span>make_null_move()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Board::make_null_move </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>make a null move to pass the turn to the opponent </p>
+<dl class="section note"><dt>Note</dt><dd>Only used in null move pruning, this is an illegal move in chess </dd></dl>
+
+</div>
+</div>
 <a id="a0f7ff026cd7ab9426480337f742a6298" name="a0f7ff026cd7ab9426480337f742a6298"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0f7ff026cd7ab9426480337f742a6298">&#9670;&#160;</a></span>move_is_capture()</h2>
 
@@ -942,6 +968,33 @@ Friends</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">move</td><td>chess move. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">previous_state</td><td>previous game state. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae995dfa07d666a44f43d0c33f46f62de" name="ae995dfa07d666a44f43d0c33f46f62de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae995dfa07d666a44f43d0c33f46f62de">&#9670;&#160;</a></span>unmake_null_move()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Board::unmake_null_move </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classGameState.html">GameState</a>&#160;</td>
+          <td class="paramname"><em>previous_state</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>unmake the null move </p>
+<dl class="section note"><dt>Note</dt><dd>Only used in null move pruning, this is an illegal move in chess</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">previous_state</td><td>previous game state. </td></tr>
   </table>
   </dd>

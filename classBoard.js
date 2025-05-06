@@ -15,6 +15,7 @@ var classBoard =
     [ "is_empty", "classBoard.html#a3bf1f2963d160de73a2d5234819beb78", null ],
     [ "load_fen", "classBoard.html#a0cdd059eb12f0e9d4d0716a322289092", null ],
     [ "make_move", "classBoard.html#a9e53e2f93658d6706ed6d144a3639ac3", null ],
+    [ "make_null_move", "classBoard.html#abbcafbb4771aec39ce0692b034549ab0", null ],
     [ "move_is_capture", "classBoard.html#a0f7ff026cd7ab9426480337f742a6298", null ],
     [ "put_piece", "classBoard.html#ac7c9c2a9669c929fc56231e313305411", null ],
     [ "remove_piece", "classBoard.html#a404ea9df913b6faaf2ed6e04503ffe26", null ],
@@ -23,6 +24,7 @@ var classBoard =
     [ "set_side_to_move", "classBoard.html#aa175079c41d43c2672adf2338567e0b9", null ],
     [ "state", "classBoard.html#af8dcffd733cea4b4cbd5bdd0c441652c", null ],
     [ "unmake_move", "classBoard.html#a889d50042774430b6362a274f9ea8017", null ],
+    [ "unmake_null_move", "classBoard.html#ae995dfa07d666a44f43d0c33f46f62de", null ],
     [ "update_attacks_bb", "classBoard.html#acb866f29b2e3bfc01d0b8e2c0505d613", null ],
     [ "operator<<", "classBoard.html#ab371c3ae6aa377e0cbd3da03862935a3", null ]
 ];
