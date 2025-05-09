@@ -3,6 +3,41 @@
 \chapter{Work description}
 \label{cap:descripcionTrabajo}
 
+% #1 = tikz options (optional)
+% #2 = total width (e.g. 7cm)
+% #3 = height      (e.g. 0.5cm)
+% #4 = wins
+% #5 = draws
+% #6 = losses
+\newcommand{\ResultBar}[6][]{%
+  \begingroup
+  % compute totals & scaled lengths
+  \pgfmathsetmacro{\TotalGames}{#4 + #5 + #6}%
+  \pgfmathsetlengthmacro{\TotalWidth}{#2}%
+  \pgfmathsetlengthmacro{\BarHeight}{#3}%
+  \pgfmathsetlengthmacro{\WinWidth}{#4/\TotalGames*\TotalWidth}%
+  \pgfmathsetlengthmacro{\DrawWidth}{#5/\TotalGames*\TotalWidth}%
+  \pgfmathsetlengthmacro{\LossWidth}{#6/\TotalGames*\TotalWidth}%
+  %
+  \begin{tikzpicture}[#1]
+    % coloured segments
+    \fill[green!70!black] (0,0) rectangle (\WinWidth,\BarHeight);
+    \fill[gray] (\WinWidth,0) rectangle (\WinWidth+\DrawWidth,\BarHeight);
+    \fill[red!70!black] (\WinWidth+\DrawWidth,0)
+                       rectangle (\WinWidth+\DrawWidth+\LossWidth,\BarHeight);
+    % outer border
+    \draw (0,0) rectangle (\TotalWidth,\BarHeight);
+    % labels above each segment
+    \node[font=\footnotesize] at (\WinWidth/2,1.4*\BarHeight)
+      {\textbf{#4} wins};
+    \node[font=\footnotesize] at (\WinWidth + \DrawWidth/2,1.4*\BarHeight)
+      {\textbf{#5} draws};
+    \node[font=\footnotesize] at (\WinWidth+\DrawWidth + \LossWidth/2,1.4*\BarHeight)
+      {\textbf{#6} losses};
+  \end{tikzpicture}%
+  \endgroup
+}
+
 We designed a simple structure to organize all the scripts. As we are implementing different versions of the engine, there are specific modules that are compulsory to have well distinguished and possibly selected between them. Those modules are presented in the following Section~\ref{sec:modules}.
 
 \vspace{1em}
@@ -150,11 +185,12 @@ TODO: add bitboard image (this section could be merged with the previous bitboar
 
 \subsection{Move ordering}
 
-Order the legal moves from most to least likely to be the best move in the position.\\
-The sooner we explore the best move, the more branches of the tree will be pruned.\\
-To do this, we use the MVV-LVA heuristic (most valuable victim, least valuable aggressor).\\
-We give higher scores to capturing a low-value piece over a higher-value piece.\\
-Capturing a queen with a pawn scores highly. We also give a bonus to piece promotions.\\
+Order the legal moves from most to least likely to be the best move in the\\
+position. The sooner we explore the best move, the more branches of the tree\\
+will be pruned. To do this, we use the MVV-LVA heuristic (most valuable victim,\\
+least valuable aggressor). We give higher scores to capturing a low-value piece\\
+over a higher-value piece. Capturing a queen with a pawn scores highly. We also\\
+give a bonus to piece promotions.\\
 
 TO DO: insert move ordering image\\
 
@@ -165,6 +201,92 @@ TO DO: insert move ordering image\\
 \ldots
 
 \subsection{Transposition Table}
+
+The basic implementation of the chess engine generates a large amount of\\
+redundant calculations due to transpositions: situations in which the same\\
+board position is reached through different sequences of moves in the game tree.\\
+
+TODO insert transposition image.\\
+
+Taking advantage of the concept of dynamic programming, we're going to create a\\
+look-up table of chess positions and its evaluation. So if we encounter the same\\
+position again, the evaluation is already precalculated. There's a problem: how\\
+much space does the look-up table take up if there are an astronomical amount
+of chess positions? What we can do is assign a hash to each position and make the\\
+table index the last bits of the hash. The larger the table, the less likely access\\
+collisions will be. We also want a hash that's fast to calculate and has\\
+collision-reducing properties; for this, we'll use the Zobrist hashing technique.\\
+
+\subsubsection{Zobrist Hashing}
+
+Zobrist Hashing is a technique to transform a board position of arbitrary size\\
+into a number of a set length, with an equal distribution over all possible\\
+numbers, invented by Albert Zobrist.\\
+
+To generate a 64-bit hash for a position, the following steps are followed:\\
+
+\begin{itemize}
+  \item There are 12 different types of chess pieces. For each of the 64 squares on the board, we generate 12 random 64-bit integers. That is, each piece-square combination is assigned a unique random value. This initialization step is performed only once when the program starts.
+  
+  \item The hash value for a given position is computed by performing the XOR operation between the hash accumulator and the random value corresponding to each piece on its square.
+  
+  \item In addition to the pieces, we also include:
+  \begin{itemize}
+    \item A random value for the side to move (white or black),
+    \item One random value per square to account for the possibility of an \textit{en passant} capture.
+  \end{itemize}
+  
+  \item These random values are carefully chosen so that even slightly different positions produce very different hash values. This greatly reduces the chance of collisions.
+  
+  \item The XOR operation is used not only because it is computationally inexpensive, but also because it is reversible. This means that when a move is made or undone, we can update the hash incrementally by applying XOR only to the affected squares, without needing to recompute the entire hash.
+\end{itemize}
+
+\subsubsection{Table Entry}
+
+Each entry in the transposition table stores the following information:
+
+\begin{itemize}
+  \item \textbf{Zobrist Hash:} The full 64-bit hash of the position. This is used to verify that the entry corresponds to the current position and to detect possible index collisions in the table.
+  
+  \item \textbf{Evaluation:} The numerical evaluation of the position, as computed by the evaluation function.
+  
+  \item \textbf{Depth:} The depth at which the evaluation was calculated. A deeper search could potentially yield a more accurate evaluation, so this value helps determine whether a new evaluation should overwrite the existing one.
+  
+  \item \textbf{Node Type:} Indicates the type of node stored:
+  \begin{itemize}
+    \item \texttt{EXACT} the evaluation is precise for this position.
+    \item \texttt{UPPERBOUND} the evaluation is an upper bound, typically resulting from an alpha cutoff.
+    \item \texttt{LOWERBOUND} the evaluation is a lower bound, typically resulting from a beta cutoff.
+  \end{itemize}
+\end{itemize}
+
+TODO: insertar imagen zobrist hashing
+
+\subsubsection{Collisions}
+
+As discussed earlier, index collisions in the transposition table are handled\\
+by verifying the full Zobrist hash stored in the entry. However, it is still\\
+theoretically possible for a full hash collision to occur, that is two\\
+different positions producing the same hash.\\
+
+This scenario is extremely rare. With 64-bit hashes, there are $2^{64}$ possible\\
+unique values, which is more than sufficient for practical purposes.\\
+In the unlikely event of a true hash collision, it could result in an\\
+incorrect evaluation being reused for a different position.\\
+
+\subsubsection{Analysis}
+
+To evaluate the improvement introduced by the transposition table, we conducted\\
+a 100-game tournament against the basic version of the engine. We selected 50\\
+random starting positions from an opening book and played each position twice,\\
+alternating colors to ensure fairness. Each bot has 4 seconds to think per move.\\
+
+\textbf{64MB Transposition Table bot vs basic bot}\\
+\ResultBar{15cm}{0.5cm}{46}{22}{32}
+\medskip
+
+We see a substantial improvement by adding the transposition table\\
+with 46 wins versus 32 losses.\\
 
 \ldots
 
