@@ -53,6 +53,29 @@ Therefore, the following events happen at each node of the tree:\\
     \item \textbf{Explore each of the legal moves:} from the position in order, update the evaluation, the value of alpha and beta, and check if we can perform pruning.
 \end{itemize}
 
+\subsection{search: iterative deepening}
+
+At what depth do we decide to search? Actually, the simplest thing is to perform\\
+an infinite search, first searching at depth 1, then 2, then 3... to infinity.\\
+The engine will update the evaluation and the best move for the position with\\
+each iteration. Simply by signaling "Stop," the search will stop.\\
+
+TO DO : iterative deepening image\\
+
+\subsection{search: horizon effect, quiescence search}
+
+What happens if, upon reaching maximum depth, we evaluate the position in the\\
+middle of a piece exchange? For example, if a queen captures a pawn. It will\\
+seem like we've won a pawn, but on the next move, another pawn captures the\\
+queen, and now we lose a queen. This is known as the horizon effect. To avoid\\
+this, when we reach the end of the tree at maximum depth, we must extend the\\
+search to include only piece captures. This is known as quiescence search.\\
+
+The purpose of this search is only to stop the search and evaluate quiet\\
+positions, where there is no capture or tactical movement.\\
+
+TO DO : quiescence search  image\\
+
 \ldots
 
 \subsection{Evaluation}
@@ -127,9 +150,41 @@ TODO: add bitboard image (this section could be merged with the previous bitboar
 
 \subsection{Move ordering}
 
+Order the legal moves from most to least likely to be the best move in the position.\\
+The sooner we explore the best move, the more branches of the tree will be pruned.\\
+To do this, we use the MVV-LVA heuristic (most valuable victim, least valuable aggressor).\\
+We give higher scores to capturing a low-value piece over a higher-value piece.\\
+Capturing a queen with a pawn scores highly. We also give a bonus to piece promotions.\\
+
+TO DO: insert move ordering image\\
+
 \ldots
 
-\subsection{UCI}
+\section{Improvements}
+
+\ldots
+
+\subsection{Transposition Table}
+
+\ldots
+
+\subsection{move generator with Magic Bitboards}
+
+\ldots
+
+\subsection{move generator with PEXT instruction}
+
+\ldots
+
+\subsection{Move Ordering with killer moves}
+
+\ldots
+
+\subsection{Evaluation with King Safety and piece mobility}
+
+\ldots
+
+\subsection{Search reductions}
 
 \ldots
 
