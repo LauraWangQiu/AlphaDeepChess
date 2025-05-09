@@ -46,8 +46,8 @@ option(USE_MOVE_GENERATOR_MAGIC_BITBOARDS "Use move_generator_magic_bitboards.cp
 
 option(USE_SEARCH_BASIC "Use search_basic.cpp" OFF)
 option(USE_SEARCH_MULTITHREAD "Use search_multithread.cpp" OFF)
-option(USE_SEARCH_TRANSPOSITION_TABLE "Use search_transposition_table.cpp" OFF)
-option(USE_SEARCH_TT_REDUCTIONS "Use search_tt_reductions.cpp" ON)
+option(USE_SEARCH_TRANSPOSITION_TABLE "Use search_transposition_table.cpp" ON)
+option(USE_SEARCH_TT_REDUCTIONS "Use search_tt_reductions.cpp" OFF)
 
 if (USE_EVALUATION_DYNAMIC)
     message(STATUS "Using evaluation_dynamic.cpp")

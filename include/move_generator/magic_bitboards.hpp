@@ -13,7 +13,7 @@
  * Optimally we could use 11 bits for bishop moves (2048 > 1428) and 13 bits for rooks (8196 > 4900).
  * 
  * A magic number is a multiplier to the index with the following property: 
- *      - keeps intant the important info about the blockers (the nearest blockers to the piece are intact).
+ *      - keeps intact the important info about the blockers (the nearest blockers to the piece are intact).
  *        For example: [Rook] -> -> -> [pawn1][pawn2].
  *        In this case pawn2 is an unnecesary piece inside the blockers bitboard, because the piece that actually
  *        block the path of the rook is pawn1.

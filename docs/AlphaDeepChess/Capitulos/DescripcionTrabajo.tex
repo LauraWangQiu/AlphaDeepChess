@@ -290,13 +290,79 @@ with 46 wins versus 32 losses.\\
 
 \ldots
 
-\subsection{move generator with Magic Bitboards}
+\subsection{move generator with Magic Bitboards and PEXT innstructions}
 
-\ldots
+To identify potential performance bottlenecks, we performed profiling on the engine.\\
 
-\subsection{move generator with PEXT instruction}
+\begin{center}
+    \includegraphics[width=1.0\textwidth]{Imagenes/basic_move_generator_profiling.png}
+\end{center}
 
-\ldots
+Profiling results show that most part of the total execution time\\
+is spent in the generate legal moves function. Therefore, optimizing this component is expected to\\
+lead to significant performance improvements.\\
+
+\subsubsection{Magic bitboards}
+
+We can create a look up table of all the rook and bishop moves for each square\\
+on the board and for each combination of pieces that blocks the path of the slider\\
+piece (blockers  bitboard). Basically we need a hash table to store rook and bishop\\
+moves indexed by square and bitboard of blockers. The problem is that this table\\
+could be very big.\\
+
+Magic bitboards technique used to reduce the size of the look up table.  We cut off\\
+unnecesary information in the blockers bitboard, excluding the board borders and the\\
+squares outside its attack pattern. Optimally we could use 11 bits for bishop moves\\
+(2048 > 1428 configurations) and 13 bits for rooks (8196 > 4900 configurations)\\
+
+A \textbf{magic number} is a multiplier to the index with the following properties:
+
+\begin{itemize}
+  \item \textbf{Preserves relevant blocker information:} 
+  The nearest blockers along a piece’s movement direction are preserved. 
+  \begin{itemize}
+    \item \textit{Example:} Consider a rook with two pawns in its path: \texttt{Rook → → → [Pawn1][Pawn2]}. In this case, only \texttt{Pawn1} blocks the rook's movement, while \texttt{Pawn2} is irrelevant for move generation.
+  \end{itemize}
+  
+  \item \textbf{Compresses the blocker bitboard:} 
+  The multiplication by a magic number followed by a bit shift redundant information and reduces the bitboard to a minimal and near-optimal index size.
+\end{itemize}
+
+\noindent The final index for the lookup table is computed using the formula:
+\[
+\text{index} = (\text{bitboard\_of\_blockers} \times \text{magic\_number}) \gg (64 - \text{number\_of\_relevant\_moves\_from\_square})
+\]
+
+The magic numbers are found by brute force and better and better magics are\\
+still being found. We store one magic number for each slider\\
+piece (rook, bishop) and for square on the board.\\
+
+\subsubsection{PEXT instructions}
+
+The \texttt{PEXT} (Parallel Bits Extract) instruction is a feature available on newer CPU architectures. It extracts specific bits from a source operand, as determined by a mask, and packs them into contiguous lower bits of the destination operand.
+
+\begin{itemize}
+  \item This operation is ideally suited for computing the table index, as it efficiently extracts relevant bits from the blocker bitboard.
+  \item The use of \texttt{PEXT} simplifies the index calculation and eliminates the need for magic numbers.
+\end{itemize}
+
+To maintain compatibility and performance across different hardware platforms, we provide two implementations:
+\begin{itemize}
+  \item If \texttt{PEXT} support is detected at compile time, the engine uses it to compute the index directly.
+  \item Otherwise, the engine falls back to the Magic Bitboards approach using multiplication and bit shifts.
+\end{itemize}
+
+\subsubsection{Analysis}
+
+To evaluate the improvement in the move generator, we conducted the same\\
+100 game match vs the basic bot version.\\ 
+
+\textbf{Move generator with PEXT instructions bot vs basic bot}\\
+\ResultBar{15cm}{0.5cm}{64}{14}{22}
+\medskip
+
+Huge improvement with 64 wins versus 22 losses.\\
+
 
 \subsection{Move Ordering with killer moves}
 
