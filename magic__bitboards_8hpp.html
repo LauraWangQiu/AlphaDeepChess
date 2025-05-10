@@ -270,7 +270,7 @@ Variables</h2></td></tr>
 <p>This technique is used to optimize the memory space of the lookup table of rook and bishop moves.</p>
 <p>The lookup table is indexed by piece square and the blockers bitboard (pieces that block the path of the piece). We cut off unnecesary information like the board borders and the squares outside its attack pattern. Optimally we could use 11 bits for bishop moves (2048 &gt; 1428) and 13 bits for rooks (8196 &gt; 4900).</p>
 <p>A magic number is a multiplier to the index with the following property:</p><ul>
-<li>keeps intant the important info about the blockers (the nearest blockers to the piece are intact). For example: [Rook] -&gt; -&gt; -&gt; [pawn1][pawn2]. In this case pawn2 is an unnecesary piece inside the blockers bitboard, because the piece that actually block the path of the rook is pawn1.</li>
+<li>keeps intact the important info about the blockers (the nearest blockers to the piece are intact). For example: [Rook] -&gt; -&gt; -&gt; [pawn1][pawn2]. In this case pawn2 is an unnecesary piece inside the blockers bitboard, because the piece that actually block the path of the rook is pawn1.</li>
 <li>Reduces the index number close to the optimal size (ideally to fit inside 11 or 13 bits)</li>
 </ul>
 <p>The magic numbers are found by brute force and better and better magics are still being found. We didn't reach yet the optimal hash size. </p>
