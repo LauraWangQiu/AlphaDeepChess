@@ -382,6 +382,32 @@ Huge improvement with 64 wins versus 22 losses.\\
 
 \subsection{Evaluation with King Safety and piece mobility}
 
+It is often beneficial to evaluate additional aspects of a position beyond simply counting material. We introduce the following positional evaluation parameters:
+
+\begin{enumerate}
+    \item \textbf{King Shield Bonus:} The king is typically safer when protected by friendly pawns in front of it. We assign a bonus in the evaluation score for each allied pawn positioned directly in front of the king.
+
+    \item \textbf{King Safety Penalty:} For each square within a $3 \times 3$ area surrounding the king that is attacked by enemy pieces, we apply a penalty to reflect increased vulnerability.
+
+    \item \textbf{Piece Mobility:} Greater piece mobility is generally indicative of a stronger position. Each piece receives a bonus for every available move to a square that is not attacked by enemy pawns.
+\end{enumerate}
+
+
+\subsubsection{Analysis}
+
+To evaluate the improvement in the new evaluation, we conducted the same\\
+100 game match vs the basic bot version.\\ 
+
+\textbf{King Safety and Piece mobility evaluation bot vs basic bot}\\
+\ResultBar{15cm}{0.5cm}{62}{8}{30}
+\medskip
+
+The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
+
+\ldots
+
+\subsection{Search Multithread}
+
 \ldots
 
 \subsection{Search reductions}
