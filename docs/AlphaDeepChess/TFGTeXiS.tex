@@ -65,6 +65,41 @@ constantes,guionado,Cascaras/bibliografia,config%
 \includeonly{\ficherosBasicosTeXiS,\ficherosBasicosTexto,Apendices/#1}%
 }
 
+% #1 = tikz options (optional)
+% #2 = total width (e.g. 7cm)
+% #3 = height      (e.g. 0.5cm)
+% #4 = wins
+% #5 = draws
+% #6 = losses
+\newcommand{\ResultBar}[6][]{%
+  \begingroup
+  % compute totals & scaled lengths
+  \pgfmathsetmacro{\TotalGames}{#4 + #5 + #6}%
+  \pgfmathsetlengthmacro{\TotalWidth}{#2}%
+  \pgfmathsetlengthmacro{\BarHeight}{#3}%
+  \pgfmathsetlengthmacro{\WinWidth}{#4/\TotalGames*\TotalWidth}%
+  \pgfmathsetlengthmacro{\DrawWidth}{#5/\TotalGames*\TotalWidth}%
+  \pgfmathsetlengthmacro{\LossWidth}{#6/\TotalGames*\TotalWidth}%
+  %
+  \begin{tikzpicture}[#1]
+    % coloured segments
+    \fill[green!70!black] (0,0) rectangle (\WinWidth,\BarHeight);
+    \fill[gray] (\WinWidth,0) rectangle (\WinWidth+\DrawWidth,\BarHeight);
+    \fill[red!70!black] (\WinWidth+\DrawWidth,0)
+                       rectangle (\WinWidth+\DrawWidth+\LossWidth,\BarHeight);
+    % outer border
+    \draw (0,0) rectangle (\TotalWidth,\BarHeight);
+    % labels above each segment
+    \node[font=\footnotesize] at (\WinWidth/2,1.4*\BarHeight)
+      {\textbf{#4} wins};
+    \node[font=\footnotesize] at (\WinWidth + \DrawWidth/2,1.4*\BarHeight)
+      {\textbf{#5} draws};
+    \node[font=\footnotesize] at (\WinWidth+\DrawWidth + \LossWidth/2,1.4*\BarHeight)
+      {\textbf{#6} losses};
+  \end{tikzpicture}%
+  \endgroup
+}
+
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %            Preámbulo del documento. Configuraciones varias
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -103,6 +138,7 @@ constantes,guionado,Cascaras/bibliografia,config%
 %                        Documento
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \makeindex
+\setlength{\parindent}{0pt} % Eliminar sangría
 
 \begin{document}
 

@@ -1,42 +1,5 @@
-\usepackage{amsmath}
-
 \chapter{Work description}
 \label{cap:descripcionTrabajo}
-
-% #1 = tikz options (optional)
-% #2 = total width (e.g. 7cm)
-% #3 = height      (e.g. 0.5cm)
-% #4 = wins
-% #5 = draws
-% #6 = losses
-\newcommand{\ResultBar}[6][]{%
-  \begingroup
-  % compute totals & scaled lengths
-  \pgfmathsetmacro{\TotalGames}{#4 + #5 + #6}%
-  \pgfmathsetlengthmacro{\TotalWidth}{#2}%
-  \pgfmathsetlengthmacro{\BarHeight}{#3}%
-  \pgfmathsetlengthmacro{\WinWidth}{#4/\TotalGames*\TotalWidth}%
-  \pgfmathsetlengthmacro{\DrawWidth}{#5/\TotalGames*\TotalWidth}%
-  \pgfmathsetlengthmacro{\LossWidth}{#6/\TotalGames*\TotalWidth}%
-  %
-  \begin{tikzpicture}[#1]
-    % coloured segments
-    \fill[green!70!black] (0,0) rectangle (\WinWidth,\BarHeight);
-    \fill[gray] (\WinWidth,0) rectangle (\WinWidth+\DrawWidth,\BarHeight);
-    \fill[red!70!black] (\WinWidth+\DrawWidth,0)
-                       rectangle (\WinWidth+\DrawWidth+\LossWidth,\BarHeight);
-    % outer border
-    \draw (0,0) rectangle (\TotalWidth,\BarHeight);
-    % labels above each segment
-    \node[font=\footnotesize] at (\WinWidth/2,1.4*\BarHeight)
-      {\textbf{#4} wins};
-    \node[font=\footnotesize] at (\WinWidth + \DrawWidth/2,1.4*\BarHeight)
-      {\textbf{#5} draws};
-    \node[font=\footnotesize] at (\WinWidth+\DrawWidth + \LossWidth/2,1.4*\BarHeight)
-      {\textbf{#6} losses};
-  \end{tikzpicture}%
-  \endgroup
-}
 
 We designed a simple structure to organize all the scripts. As we are implementing different versions of the engine, there are specific modules that are compulsory to have well distinguished and possibly selected between them. Those modules are presented in the following Section~\ref{sec:modules}.
 
@@ -62,154 +25,130 @@ Each module is responsible for a specific aspect of the chess engine's functiona
 
 \subsection{The core, search algorithm}
 
-The core of the chess engine is its search algorithm; alpha-beta pruning is an\\
-improved version of the minimax algorithm. The entire game tree is generated\\
-up to a selected maximum depth. At each node, the next player evaluates the\\
-position; White tries to maximize the evaluation, while Black tries to minimize it.\\
-During execution,the values of alpha (the best evaluation so far for MAX, hence\\
-choosing the highest value) and beta (the best evaluation so far for MIN, hence\\
-choosing the lowest value) are updated. Pruning is performed when a branch of the\\
-tree is detected as irrelevant because the evaluation being examined is worse than\\
-the current value of alpha or beta for MAX or MIN, respectively.\\
+The core of the chess engine is its search algorithm; alpha-beta pruning is an improved version of the minimax algorithm. The entire game tree is generated up to a selected maximum depth. At each node, the next player evaluates the position; White tries to maximize the evaluation, while Black tries to minimize it. During execution, the values of alpha (the best evaluation so far for MAX, hence choosing the highest value) and beta (the best evaluation so far for MIN, hence choosing the lowest value) are updated. Pruning is performed when a branch of the tree is detected as irrelevant because the evaluation being examined is worse than the current value of alpha or beta for MAX or MIN, respectively.
 
-TODO: insert diagram of alpha beta pruning\\
+\vspace{1em}
 
-Therefore, the following events happen at each node of the tree:\\
+TODO: insert diagram of alpha beta pruning
+
+\vspace{1em}
+
+Therefore, the following events happen at each node of the tree:
 
 \begin{itemize}
-    \item \textbf{Check if we are at an end node:} because a checkmate occurs, a draw by triple repetition, the 50-move rule, or because we have reached the maximum selected depth.
-    
-    \item \textbf{Evaluate the position:} A positive value (+) means that White has an advantage, and a negative value (-) means that Black has an advantage. A limit is set that represents mate in one; we have arbitrarily chosen 3,200,000.
-    
-    \item \textbf{Generate legal moves:} create a list of every possible legal move in the position.
-    
-    \item \textbf{Order the legal moves:} from greatest to least intuition of being the best move for the position. The sooner we explore the best move, the more branches of the tree will be pruned.
-    
-    \item \textbf{Explore each of the legal moves:} from the position in order, update the evaluation, the value of alpha and beta, and check if we can perform pruning.
+    \item Check if we are at an end node: because of a checkmate, a draw by triple repetition, the 50-move rule, or because we have reached the maximum selected depth.
+    \item Evaluate the position: A positive value (+) means that White has an advantage, and a negative value (-) means that Black has an advantage. A limit is set that represents mate in one; we have arbitrarily chosen 3,200,000.
+    \item Generate legal moves: create a list of every possible legal move in the position.
+    \item Order the legal moves: from greatest to least intuition of being the best move for the position. The sooner we explore the best move, the more branches of the tree will be pruned.
+    \item Explore each of the legal moves: from the position in order, update the evaluation, the value of alpha and beta, and check if we can perform pruning.
 \end{itemize}
 
-\subsection{search: iterative deepening}
+\subsection{Search: iterative deepening}
 
-At what depth do we decide to search? Actually, the simplest thing is to perform\\
-an infinite search, first searching at depth 1, then 2, then 3... to infinity.\\
-The engine will update the evaluation and the best move for the position with\\
-each iteration. Simply by signaling "Stop," the search will stop.\\
+At what depth do we decide to search? Actually, the simplest thing is to perform an infinite search, first searching at depth 1, then 2, then 3\ldots to infinity. The engine will update the evaluation and the best move for the position with each iteration. Simply by signaling \textit{stop} the search will stop.
 
-TO DO : iterative deepening image\\
+\vspace{1em}
 
-\subsection{search: horizon effect, quiescence search}
+TODO: iterative deepening image
 
-What happens if, upon reaching maximum depth, we evaluate the position in the\\
-middle of a piece exchange? For example, if a queen captures a pawn. It will\\
-seem like we've won a pawn, but on the next move, another pawn captures the\\
-queen, and now we lose a queen. This is known as the horizon effect. To avoid\\
-this, when we reach the end of the tree at maximum depth, we must extend the\\
-search to include only piece captures. This is known as quiescence search.\\
+\subsection{Search: horizon effect, quiescence search}
 
-The purpose of this search is only to stop the search and evaluate quiet\\
-positions, where there is no capture or tactical movement.\\
+What happens if, upon reaching maximum depth, we evaluate the position in the middle of a piece exchange? For example, if a queen captures a pawn. It will seem like we've won a pawn, but on the next move, another pawn captures the queen, and now we lose a queen. This is known as the horizon effect. To avoid this, when we reach the end of the tree at maximum depth, we must extend the search to include only piece captures. This is known as quiescence search.
 
-TO DO : quiescence search  image\\
+\vspace{1em}
 
-\ldots
+\noindent The purpose of this search is only to stop the search and evaluate quiet positions, where there is no capture or tactical movement.
+
+\vspace{1em}
+
+TODO: quiescence search image
 
 \subsection{Evaluation}
 
-TODO: (this section could be merged with the previous evaluation explanation) \\
+TODO: (this section could be merged with the previous evaluation explanation)
 
-The most obvious way to evaluate a chess position is by counting the\\
-pieces on the board. We've assumed that the pawn is worth 100 points,\\
-the knight 320, the bishop 330, the rook 500, and the queen 950. Black's\\
-pieces will have a negative value. Therefore, the evaluation of a position\\
-is the sum of the values of all the pieces.\\
+\vspace{1em}
 
-This approach is very naive for several reasons: pieces are stronger on\\
-different squares on the board. For example, a knight in a corner only\\
-attacks 2 squares, while in the center of the board it attacks 8 squares.\\
+\noindent The most obvious way to evaluate a chess position is by counting the pieces on the board. We've assumed that the pawn is worth 100 points, the knight 320, the bishop 330, the rook 500, and the queen 950. Black's pieces will have a negative value. Therefore, the evaluation of a position is the sum of the values of all the pieces.
 
-TODO: insert diagram of knight moves in square vs in the center\\
+\vspace{1em}
 
-To reflect this characteristic, we add a bonus to the value of each piece\\
-depending on the square it occupies; we use the so-called Piece Square Tables.\\
-This is the bishop's PST:\\
+\noindent This approach is very naive for several reasons: pieces are stronger on different squares on the board. For example, a knight in a corner only attacks 2 squares, while in the center of the board it attacks 8 squares.
 
-TODO: insert diagram of bishop piece square table\\
+\vspace{1em}
 
-This evaluation still ignores the fact that a chess game is divided into three\\
-phases: opening, middlegame, and endgame. The current approach is useful in the\\
-opening and middlegame because it rewards developing pieces and placing them on\\
-squares where they maximize their potential. The problem arises in endgames, where\\
-it's often a good idea to be much more aggressive, seeking to push pawns to their\\
-promotion squares. Furthermore, the king becomes more important because there are\\
-fewer pieces on the board, allowing him to join the attack without compromising\\
-his security.\\
+TODO: insert diagram of knight moves in square vs in the center
 
-We can perform a dynamic evaluation (tampering evaluation). Evaluate twice, once\\
-as if we were in the middlegame and once as if we were in the endgame. The final\\
-evaluation will be the sum of both, but each with a different weight. To do this,\\
-we calculate the middlegame percentage (24 pieces means 100\% middlegame) and the\\
-endgame percentage (0 pieces = 100\% endgame).\\
+\vspace{1em}
 
-TODO: insert diagram of pawn PST in middlegame and in the endgame to compare\\
+To reflect this feature, we add a bonus to the value of each piece depending on the square it occupies; we use the so-called Piece Square Tables. This is the bishop's PST:
+
+\vspace{1em}
+
+TODO: insert diagram of bishop piece square table
+
+\vspace{1em}
+
+This evaluation still ignores the fact that a chess game is divided into three phases: opening, middlegame, and endgame. The current approach is useful in the opening and middlegame because it rewards developing pieces and placing them on squares where they maximize their potential. The problem arises in endgames, where it's often a good idea to be much more aggressive, seeking to push pawns to their promotion squares. Furthermore, the king becomes more important because there are fewer pieces on the board, allowing him to join the attack without compromising his security.
+
+\vspace{1em}
+
+\noindent We can perform a dynamic evaluation (tampering evaluation). Evaluate twice, once as if we were in the middlegame and once as if we were in the endgame. The final evaluation will be the sum of both, but each with a different weight. To do this, we calculate the middlegame percentage (24 pieces means 100\% middlegame) and the endgame percentage (0 pieces = 100\% endgame).
+
+\vspace{1em}
+
+TODO: insert diagram of pawn PST in middlegame and in the endgame to compare
 
 \begin{align*}
-\text{Evaluation} &= middlegame\% \cdot eval_middlegame + endgame\% \cdot eval_endgame \\
+\text{Evaluation} &= middlegame\% \cdot eval\_middlegame + endgame\% \cdot eval\_endgame
 \end{align*}
 
 \ldots
 
 \subsection{Move generator}
 
-TODO: add citation https://peterellisjones.com/posts/generating-legal-chess-moves-efficiently/ \\
+TODO: add citation https://peterellisjones.com/posts/generating-legal-chess-moves-efficiently/
+
+\vspace{1em}
 
 Calculating the legal moves in a chess position is a more difficult and tedious task than it might seem, mainly due to the unintuitive rules of en passant and castling, and it is also difficult to restrict the moves of pinned pieces.
 
+\vspace{1em}
+
 To create an efficient move generator, we will represent a chess position using bitboards. A board is made up of 64 squares; a bitboard is a 64-bit variable in which each bit represents whether a square is occupied or not. We have one bitboard for each type of piece to represent a position. For example, this is the white pawn bitboard in the initial position.
 
-TODO: add bitboard image (this section could be merged with the previous bitboard explanation) \\
+\vspace{1em}
+
+TODO: add bitboard image (this section could be merged with the previous bitboard explanation)
+
+\vspace{1em}
+
+\noindent Bitboards make movement generation more efficient because we can move pieces and calculate their attacks using arithmetic-logical operations and bit masks.
+
+\vspace{1em}
+
+The steps to generate legal movements efficiently are the following:
 
 \begin{itemize}
-    \item \textbf{Bitboards make movement generation more efficient:} because we can move pieces and calculate their attacks using arithmetic-logical operations and bit masks.
-
-    \item \textbf{The steps to generate legal movements efficiently are the following:}
-    \begin{itemize}
-        \item \textbf{Calculate the bitboard of attacked squares:} by the waiting side.
-        \item \textbf{Calculate bitboard dof pinned pieces.}
-        \item \textbf{Generate the legal moves:} of each piece of the side whose turn it is, knowing that the king cannot move to any attacked square and that pinned pieces can only move in the direction of the pin.
-        \item \textbf{Generate the special legal moves:} like en passant and castling.
-    \end{itemize}
+  \item Calculate the bitboard of attacked squares by the waiting side.
+  \item Calculate bitboard of pinned pieces.
+  \item Generate the legal moves of each piece of the side whose turn is, knowing that the king cannot move to any attacked square and that pinned pieces can only move in the direction of the pin.
+  \item Generate the special legal moves like en passant and castling.
 \end{itemize}
-  
-
-\ldots
 
 \subsection{Move ordering}
 
-Order the legal moves from most to least likely to be the best move in the\\
-position. The sooner we explore the best move, the more branches of the tree\\
-will be pruned. To do this, we use the MVV-LVA heuristic (most valuable victim,\\
-least valuable aggressor). We give higher scores to capturing a low-value piece\\
-over a higher-value piece. Capturing a queen with a pawn scores highly. We also\\
-give a bonus to piece promotions.\\
+Order the legal moves from most to least likely to be the best move in the position. The sooner we explore the best move, the more branches of the tree will be pruned. To do this, we use the MVV-LVA heuristic (most valuable victim, least valuable aggressor). We give higher scores to capturing a low-value piece over a higher-value piece. Capturing a queen with a pawn scores highly. We also give a bonus to piece promotions.
 
-TO DO: insert move ordering image\\
+\vspace{1em}
+
+TO DO: insert move ordering image
 
 \subsubsection{Killer moves}
 
-A \textbf{Killer Move} is a non-capturing (quiet) move that previously caused a beta-cutoff during the search in a sibling node or any other branch at the same depth in the game tree.
+A \textbf{killer Move} is a non-capturing (quiet) move that previously caused a beta-cutoff during the search in a sibling node or any other branch at the same depth in the game tree. These moves are often strong candidates, as they have previously led to pruning in similar positions. Promoting them early in the move ordering increases the chances of early cutoffs, which improves search efficiency.
 
-\begin{itemize}
-  \item These moves are often strong candidates, as they have previously led to pruning in similar positions.
-  \item Promoting them early in the move ordering increases the chances of early cutoffs, which improves search efficiency.
-\end{itemize}
-
-To take advantage of this heuristic:
-\begin{itemize}
-  \item We store up to two killer moves for each search depth.
-  \item During move ordering, these killer moves are given a bonus score, allowing them to be explored before other quiet moves.
-\end{itemize}
-
-\ldots
+To take advantage of this heuristic we store up to two killer moves for each search depth. During move ordering, these killer moves are given a bonus score, allowing them to be explored before other quiet moves.
 
 \section{Improvements}
 
@@ -217,42 +156,33 @@ To take advantage of this heuristic:
 
 \subsection{Transposition Table}
 
-The basic implementation of the chess engine generates a large amount of\\
-redundant calculations due to transpositions: situations in which the same\\
-board position is reached through different sequences of moves in the game tree.\\
+The basic implementation of the chess engine generates a large amount of redundant calculations due to transpositions: situations in which the same board position is reached through different sequences of moves in the game tree.
 
-TODO insert transposition image.\\
+\vspace{1em}
 
-Taking advantage of the concept of dynamic programming, we're going to create a\\
-look-up table of chess positions and its evaluation. So if we encounter the same\\
-position again, the evaluation is already precalculated. There's a problem: how\\
-much space does the look-up table take up if there are an astronomical amount
-of chess positions? What we can do is assign a hash to each position and make the\\
-table index the last bits of the hash. The larger the table, the less likely access\\
-collisions will be. We also want a hash that's fast to calculate and has\\
-collision-reducing properties; for this, we'll use the Zobrist hashing technique.\\
+TODO insert transposition image.
+
+\vspace{1em}
+
+\noindent Taking advantage of the concept of dynamic programming, we are going to create a look-up table of chess positions and its evaluation. So if we encounter the same position again, the evaluation is already precalculated. However, we ask ourselves the following question: how much space does the look-up table take up if there are an astronomical amount of chess positions? What we can do is assign a hash to each position and make the table index the last bits of the hash. The larger the table, the less likely access collisions will be. We also want a hash that is fast to calculate and has collision-reducing properties; for this, we'll use the Zobrist hashing technique.
 
 \subsubsection{Zobrist Hashing}
 
-Zobrist Hashing is a technique to transform a board position of arbitrary size\\
-into a number of a set length, with an equal distribution over all possible\\
-numbers, invented by Albert Zobrist.\\
+Zobrist Hashing is a technique to transform a board position of arbitrary size into a number of a set length, with an equal distribution over all possible numbers, invented by Albert Zobrist.
 
-To generate a 64-bit hash for a position, the following steps are followed:\\
+\vspace{1em}
+
+\noindent To generate a 64-bit hash for a position, the following steps are followed:
 
 \begin{itemize}
   \item There are 12 different types of chess pieces. For each of the 64 squares on the board, we generate 12 random 64-bit integers. That is, each piece-square combination is assigned a unique random value. This initialization step is performed only once when the program starts.
-  
   \item The hash value for a given position is computed by performing the XOR operation between the hash accumulator and the random value corresponding to each piece on its square.
-  
   \item In addition to the pieces, we also include:
   \begin{itemize}
     \item A random value for the side to move (white or black),
     \item One random value per square to account for the possibility of an \textit{en passant} capture.
   \end{itemize}
-  
   \item These random values are carefully chosen so that even slightly different positions produce very different hash values. This greatly reduces the chance of collisions.
-  
   \item The XOR operation is used not only because it is computationally inexpensive, but also because it is reversible. This means that when a move is made or undone, we can update the hash incrementally by applying XOR only to the affected squares, without needing to recompute the entire hash.
 \end{itemize}
 
@@ -261,13 +191,10 @@ To generate a 64-bit hash for a position, the following steps are followed:\\
 Each entry in the transposition table stores the following information:
 
 \begin{itemize}
-  \item \textbf{Zobrist Hash:} The full 64-bit hash of the position. This is used to verify that the entry corresponds to the current position and to detect possible index collisions in the table.
-  
-  \item \textbf{Evaluation:} The numerical evaluation of the position, as computed by the evaluation function.
-  
-  \item \textbf{Depth:} The depth at which the evaluation was calculated. A deeper search could potentially yield a more accurate evaluation, so this value helps determine whether a new evaluation should overwrite the existing one.
-  
-  \item \textbf{Node Type:} Indicates the type of node stored:
+  \item \textbf{Zobrist Hash}: The full 64-bit hash of the position. This is used to verify that the entry corresponds to the current position and to detect possible index collisions in the table.
+  \item \textbf{Evaluation}: The numerical evaluation of the position, as computed by the evaluation function.
+  \item \textbf{Depth}: The depth at which the evaluation was calculated. A deeper search could potentially yield a more accurate evaluation, so this value helps determine whether a new evaluation should overwrite the existing one.
+  \item \textbf{Node Type}: Indicates the type of node stored:
   \begin{itemize}
     \item \texttt{EXACT} the evaluation is precise for this position.
     \item \texttt{UPPERBOUND} the evaluation is an upper bound, typically resulting from an alpha cutoff.
@@ -279,78 +206,61 @@ TODO: insertar imagen zobrist hashing
 
 \subsubsection{Collisions}
 
-As discussed earlier, index collisions in the transposition table are handled\\
-by verifying the full Zobrist hash stored in the entry. However, it is still\\
-theoretically possible for a full hash collision to occur, that is two\\
-different positions producing the same hash.\\
+As discussed earlier, index collisions in the transposition table are handled by verifying the full Zobrist hash stored in the entry. However, it is still theoretically possible for a full hash collision to occur, that is two different positions producing the same hash.
 
-This scenario is extremely rare. With 64-bit hashes, there are $2^{64}$ possible\\
-unique values, which is more than sufficient for practical purposes.\\
-In the unlikely event of a true hash collision, it could result in an\\
-incorrect evaluation being reused for a different position.\\
+\noindent This scenario is extremely rare. With 64-bit hashes, there are $2^{64}$ possible unique values, which is more than sufficient for practical purposes. In the unlikely event of a true hash collision, it could result in an incorrect evaluation being reused for a different position.
 
 \subsubsection{Analysis}
 
-To evaluate the improvement introduced by the transposition table, we conducted\\
-a 100-game tournament against the basic version of the engine. We selected 50\\
-random starting positions from an opening book and played each position twice,\\
-alternating colors to ensure fairness. Each bot has 4 seconds to think per move.\\
+To evaluate the improvement introduced by the transposition table, we conducted a 100-game tournament against the basic version of the engine. We selected 50 random starting positions from an opening book and played each position twice, alternating colors to ensure fairness. Each bot has 4 seconds to think per move.
 
-\textbf{64MB Transposition Table bot vs basic bot}\\
+\vspace{1em}
+
+64MB Transposition Table bot vs basic bot\\
 \ResultBar{15cm}{0.5cm}{46}{22}{32}
 \medskip
 
-We see a substantial improvement by adding the transposition table\\
-with 46 wins versus 32 losses.\\
+\noindent We see a substantial improvement by adding the transposition table with 46 wins versus 32 losses.
 
-\ldots
+\subsection{Move generator with Magic Bitboards and PEXT innstructions}
 
-\subsection{move generator with Magic Bitboards and PEXT innstructions}
-
-To identify potential performance bottlenecks, we performed profiling on the engine.\\
+To identify potential performance bottlenecks, we performed profiling on the engine.
 
 \begin{center}
     \includegraphics[width=1.0\textwidth]{Imagenes/basic_move_generator_profiling.png}
 \end{center}
 
-Profiling results show that most part of the total execution time\\
-is spent in the generate legal moves function. Therefore, optimizing this component is expected to\\
-lead to significant performance improvements.\\
+\noindent Profiling results show that most part of the total execution time is spent in the generate legal moves function. Therefore, optimizing this component is expected to lead to significant performance improvements.
 
 \subsubsection{Magic bitboards}
 
-We can create a look up table of all the rook and bishop moves for each square\\
-on the board and for each combination of pieces that blocks the path of the slider\\
-piece (blockers  bitboard). Basically we need a hash table to store rook and bishop\\
-moves indexed by square and bitboard of blockers. The problem is that this table\\
-could be very big.\\
+We can create a look up table of all the rook and bishop moves for each square on the board and for each combination of pieces that blocks the path of the slider piece (blockers  bitboard). Basically we need a hash table to store rook and bishop moves indexed by square and bitboard of blockers. The problem is that this table could be very big.
 
-Magic bitboards technique used to reduce the size of the look up table.  We cut off\\
-unnecesary information in the blockers bitboard, excluding the board borders and the\\
-squares outside its attack pattern. Optimally we could use 11 bits for bishop moves\\
-(2048 > 1428 configurations) and 13 bits for rooks (8196 > 4900 configurations)\\
+\noindent Magic bitboards technique used to reduce the size of the look up table. We cut off unnecesary information in the blockers bitboard, excluding the board borders and the squares outside its attack pattern. Optimally we could use 11 bits for bishop moves (2048 > 1428 configurations) and 13 bits for rooks (8196 > 4900 configurations).
+
+\vspace{1em}
 
 A \textbf{magic number} is a multiplier to the index with the following properties:
 
 \begin{itemize}
-  \item \textbf{Preserves relevant blocker information:} 
+  \item Preserves relevant blocker information: 
   The nearest blockers along a piece’s movement direction are preserved. 
-  \begin{itemize}
-    \item \textit{Example:} Consider a rook with two pawns in its path: \texttt{Rook → → → [Pawn1][Pawn2]}. In this case, only \texttt{Pawn1} blocks the rook's movement, while \texttt{Pawn2} is irrelevant for move generation.
-  \end{itemize}
-  
-  \item \textbf{Compresses the blocker bitboard:} 
-  The multiplication by a magic number followed by a bit shift redundant information and reduces the bitboard to a minimal and near-optimal index size.
+  \item \textit{Example:} Consider a rook with two pawns in its path:
+  \begin{lstlisting}[breaklines=true]
+    Rook -> -> -> [Pawn1][Pawn2]
+  \end{lstlisting}
+  In this case, only `Pawn1` blocks the rook's movement, while `Pawn2` is irrelevant for move generation.
+  \item Compresses the blocker bitboard: The multiplication by a magic number followed by a bit shift redundant information and reduces the bitboard to a minimal and near-optimal index size.
 \end{itemize}
 
 \noindent The final index for the lookup table is computed using the formula:
-\[
-\text{index} = (\text{bitboard\_of\_blockers} \times \text{magic\_number}) \gg (64 - \text{number\_of\_relevant\_moves\_from\_square})
-\]
 
-The magic numbers are found by brute force and better and better magics are\\
-still being found. We store one magic number for each slider\\
-piece (rook, bishop) and for square on the board.\\
+\begin{align*}
+  \text{index} &= (\text{bitboard\_of\_blockers} \times \text{magic\_number}) \\
+  &\gg (64 - \text{number\_of\_relevant\_moves\_from\_square})
+\end{align*}
+
+\noindent The magic numbers are found by brute force and better and better magics are still being found. We store one magic number for each slider piece (rook, bishop) and for square on the board.
 
 \subsubsection{PEXT instructions}
 
@@ -361,7 +271,8 @@ The \texttt{PEXT} (Parallel Bits Extract) instruction is a feature available on 
   \item The use of \texttt{PEXT} simplifies the index calculation and eliminates the need for magic numbers.
 \end{itemize}
 
-To maintain compatibility and performance across different hardware platforms, we provide two implementations:
+\noindent To maintain compatibility and performance across different hardware platforms, we provide two implementations:
+
 \begin{itemize}
   \item If \texttt{PEXT} support is detected at compile time, the engine uses it to compute the index directly.
   \item Otherwise, the engine falls back to the Magic Bitboards approach using multiplication and bit shifts.
@@ -369,14 +280,18 @@ To maintain compatibility and performance across different hardware platforms, w
 
 \subsubsection{Analysis}
 
-To evaluate the improvement in the move generator, we conducted the same\\
-100 game match vs the basic bot version.\\ 
+To evaluate the improvement in the move generator, we conducted the same 
+100 game match vs the basic bot version.
 
-\textbf{Move generator with PEXT instructions bot vs basic bot}\\
+\vspace{1em}
+
+Move generator with PEXT instructions bot vs basic bot\\
 \ResultBar{15cm}{0.5cm}{64}{14}{22}
 \medskip
 
-Huge improvement with 64 wins versus 22 losses.\\
+\vspace{1em}
+
+Huge improvement with 64 wins versus 22 losses.
 
 \ldots
 
@@ -385,24 +300,24 @@ Huge improvement with 64 wins versus 22 losses.\\
 It is often beneficial to evaluate additional aspects of a position beyond simply counting material. We introduce the following positional evaluation parameters:
 
 \begin{enumerate}
-    \item \textbf{King Shield Bonus:} The king is typically safer when protected by friendly pawns in front of it. We assign a bonus in the evaluation score for each allied pawn positioned directly in front of the king.
+    \item King Shield Bonus: The king is typically safer when protected by friendly pawns in front of it. We assign a bonus in the evaluation score for each allied pawn positioned directly in front of the king.
 
-    \item \textbf{King Safety Penalty:} For each square within a $3 \times 3$ area surrounding the king that is attacked by enemy pieces, we apply a penalty to reflect increased vulnerability.
+    \item King Safety Penalty: For each square within a $3 \times 3$ area surrounding the king that is attacked by enemy pieces, we apply a penalty to reflect increased vulnerability.
 
-    \item \textbf{Piece Mobility:} Greater piece mobility is generally indicative of a stronger position. Each piece receives a bonus for every available move to a square that is not attacked by enemy pawns.
+    \item Piece Mobility: Greater piece mobility is generally indicative of a stronger position. Each piece receives a bonus for every available move to a square that is not attacked by enemy pawns.
 \end{enumerate}
-
 
 \subsubsection{Analysis}
 
-To evaluate the improvement in the new evaluation, we conducted the same\\
-100 game match vs the basic bot version.\\ 
+To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version.
 
-\textbf{King Safety and Piece mobility evaluation bot vs basic bot}\\
+\vspace{1em}
+
+King Safety and Piece mobility evaluation bot vs basic bot\\
 \ResultBar{15cm}{0.5cm}{62}{8}{30}
 \medskip
 
-The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
+\noindent The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
 
 \ldots
 
@@ -410,15 +325,15 @@ The results are slightly worse compared to the match using the material-only eva
 
 \subsubsection{Analysis}
 
-To evaluate the improvement in the new evaluation, we conducted the same\\
-100 game match vs the basic bot version.\\ 
+To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version. 
 
-\textbf{Multithread Search bot vs basic bot}\\
+\vspace{1em}
+
+Multithread Search bot vs basic bot\\
 \ResultBar{15cm}{0.5cm}{32}{5}{63}
 \medskip
 
-The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
-
+\noindent The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
 
 \ldots
 
@@ -426,15 +341,15 @@ The results are slightly worse compared to the match using the material-only eva
 
 \subsubsection{Analysis}
 
-To evaluate the improvement in the new evaluation, we conducted the same\\
-100 game match vs the basic bot version.\\ 
+To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version.
 
-\textbf{Reductions Search bot vs basic bot}\\
+\vspace{1em}
+
+Reductions Search bot vs basic bot\\
 \ResultBar{15cm}{0.5cm}{48}{15}{37}
 \medskip
 
-The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
-
+\noindent The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
 
 \ldots
 

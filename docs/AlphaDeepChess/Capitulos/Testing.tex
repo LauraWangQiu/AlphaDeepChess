@@ -1,79 +1,53 @@
 \chapter{Testing}
 \label{cap:testing}
-
-% #1 = tikz options (optional)
-% #2 = total width (e.g. 7cm)
-% #3 = height      (e.g. 0.5cm)
-% #4 = wins
-% #5 = draws
-% #6 = losses
-\newcommand{\ResultBar}[6][]{%
-  \begingroup
-  % compute totals & scaled lengths
-  \pgfmathsetmacro{\TotalGames}{#4 + #5 + #6}%
-  \pgfmathsetlengthmacro{\TotalWidth}{#2}%
-  \pgfmathsetlengthmacro{\BarHeight}{#3}%
-  \pgfmathsetlengthmacro{\WinWidth}{#4/\TotalGames*\TotalWidth}%
-  \pgfmathsetlengthmacro{\DrawWidth}{#5/\TotalGames*\TotalWidth}%
-  \pgfmathsetlengthmacro{\LossWidth}{#6/\TotalGames*\TotalWidth}%
-  %
-  \begin{tikzpicture}[#1]
-    % coloured segments
-    \fill[green!70!black] (0,0) rectangle (\WinWidth,\BarHeight);
-    \fill[gray] (\WinWidth,0) rectangle (\WinWidth+\DrawWidth,\BarHeight);
-    \fill[red!70!black] (\WinWidth+\DrawWidth,0)
-                       rectangle (\WinWidth+\DrawWidth+\LossWidth,\BarHeight);
-    % outer border
-    \draw (0,0) rectangle (\TotalWidth,\BarHeight);
-    % labels above each segment
-    \node[font=\footnotesize] at (\WinWidth/2,1.4*\BarHeight)
-      {\textbf{#4} wins};
-    \node[font=\footnotesize] at (\WinWidth + \DrawWidth/2,1.4*\BarHeight)
-      {\textbf{#5} draws};
-    \node[font=\footnotesize] at (\WinWidth+\DrawWidth + \LossWidth/2,1.4*\BarHeight)
-      {\textbf{#6} losses};
-  \end{tikzpicture}%
-  \endgroup
-}
-
 \section{Introduction}
-In this chapter, we'll measure the strength of the different techniques developed\\
-We run a 100-game tournament with the help of a program called cutechess in\\
-different positions against AlphaDeepChess in its most basic version:\\
-\texttt{search: basic }, \texttt{move generator: basic }, \texttt{evaluation: dynamic }, \texttt{move ordering: MVV\_LVA }\\
 
-\bigskip
+In this chapter, we'll measure the strength of the different techniques developed. We run a 100-game tournament with the help of a program called cutechess in different positions against AlphaDeepChess in its most basic version: \texttt{search: basic}, \texttt{move generator: basic}, \texttt{evaluation: dynamic}, \texttt{move ordering: MVV\_LVA}
+
+\vspace{1em}
 
 % match 1
 First we introduce the transposition table in the search.
 
-\textbf{Transposition Table vs basic bot}\\
+\vspace{1em}
+
+Transposition Table vs basic bot\\
 \ResultBar{15cm}{0.5cm}{46}{22}{32}
 \medskip
 
+\vspace{1em}
+
 On top of that we add the improved move generator that uses magic bitboards move generator.
 
+\vspace{1em}
+
 % match 2
-\textbf{Magic bitboards move generator vs basic bot}\\
+Magic bitboards move generator vs basic bot\\
 \ResultBar{15cm}{0.5cm}{64}{14}{22}
 \medskip
 
 Now evaluation measuring the king Safety and the mobility of the pieces.
 
+\vspace{1em}
+
 % match 3
-\textbf{King Safety and piece mobilty vs basic bot}\\
+King Safety and piece mobilty vs basic bot\\
 \ResultBar{15cm}{0.5cm}{62}{8}{30}
 \medskip
 
 Let's try a risky technique of late move reductions
 
+\vspace{1em}
+
 % match 4
-\textbf{Late move reductions vs basic bot}\\
+Late move reductions vs basic bot\\
 \ResultBar{15cm}{0.5cm}{48}{15}{37}
 \medskip
 
 Search multithread
 
+\vspace{1em}
+
 % match 5
-\textbf{Search multithread vs basic bot}\\
+Search multithread vs basic bot\\
 \ResultBar{15cm}{0.5cm}{32}{5}{63}
