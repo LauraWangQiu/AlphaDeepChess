@@ -194,6 +194,21 @@ give a bonus to piece promotions.\\
 
 TO DO: insert move ordering image\\
 
+\subsubsection{Killer moves}
+
+A \textbf{Killer Move} is a non-capturing (quiet) move that previously caused a beta-cutoff during the search in a sibling node or any other branch at the same depth in the game tree.
+
+\begin{itemize}
+  \item These moves are often strong candidates, as they have previously led to pruning in similar positions.
+  \item Promoting them early in the move ordering increases the chances of early cutoffs, which improves search efficiency.
+\end{itemize}
+
+To take advantage of this heuristic:
+\begin{itemize}
+  \item We store up to two killer moves for each search depth.
+  \item During move ordering, these killer moves are given a bonus score, allowing them to be explored before other quiet moves.
+\end{itemize}
+
 \ldots
 
 \section{Improvements}
@@ -362,9 +377,6 @@ To evaluate the improvement in the move generator, we conducted the same\\
 \medskip
 
 Huge improvement with 64 wins versus 22 losses.\\
-
-
-\subsection{Move Ordering with killer moves}
 
 \ldots
 
