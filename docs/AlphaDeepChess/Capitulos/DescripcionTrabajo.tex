@@ -106,8 +106,7 @@ TODO: insert diagram of pawn PST in middlegame and in the endgame to compare
 \ldots
 
 \subsection{Move generator}
-
-TODO: add citation https://peterellisjones.com/posts/generating-legal-chess-moves-efficiently/
+~\cite{GenerateLegalMovesEfficiently}
 
 \vspace{1em}
 
@@ -167,6 +166,8 @@ TODO insert transposition image.
 \noindent Taking advantage of the concept of dynamic programming, we are going to create a look-up table of chess positions and its evaluation. So if we encounter the same position again, the evaluation is already precalculated. However, we ask ourselves the following question: how much space does the look-up table take up if there are an astronomical amount of chess positions? What we can do is assign a hash to each position and make the table index the last bits of the hash. The larger the table, the less likely access collisions will be. We also want a hash that is fast to calculate and has collision-reducing properties; for this, we'll use the Zobrist hashing technique.
 
 \subsubsection{Zobrist Hashing}
+
+~\cite{ZobristHashing}
 
 Zobrist Hashing is a technique to transform a board position of arbitrary size into a number of a set length, with an equal distribution over all possible numbers, invented by Albert Zobrist.
 
