@@ -14,13 +14,18 @@ Chess, one of the oldest and most strategic games in human history, has long bee
 
 \noindent Since then, the development of chess engines has advanced rapidly, moving from rule-based systems to AI-driven models. However, classical search algorithms, such as alpha-beta pruning, continue to be fundamental to understanding the basics of efficient search and evaluation of game trees.
 
-%\section{Motivation}
+\section{Objectives}
+\label{sec:objectives}
 
-\section{Where to begin?}
+\noindent The objectives of this projects are the following:
+\begin{itemize}
+    \item Develop a chess engine based on alpha-beta pruning that follows the UCI protocol(~\cite{UciProtocol}). The engine will be a console application capable of playing chess against humans or other engines, as well as analyzing and evaluating positions to determine the best legal move.
+    \item Implement various optimization techniques, including move ordering, quiescence search, iterative deepening, transposition tables, multithreading, and a move generator based on magic bitboards.
+    \item Measure the impact of these optimization techniques and profile the engine to identify performance bottlenecks.
+    \item Upload the engine to \texttt{lichess.org} and compete against other chess engines.
+\end{itemize}
 
-Let's start from the beginning. What is chess? Chess is a board game where two players who take white pieces and black pieces respectively compete to first checkmate the opponent. Checkmate occurs when the king is under thread of capture (known as check) by a piece or pieces of the enemy, and there is no legal way to escape or remove the threat.
-
-\vspace{1em}
+\noindent Chess is a board game where two players who take white pieces and black pieces respectively compete to first checkmate the opponent. Checkmate occurs when the king is under thread of capture (known as check) by a piece or pieces of the enemy, and there is no legal way to escape or remove the threat.
 
 \noindent What about a chess engine? A chess engine consists of a software program that analyzes chess positions and returns optimal moves depending on its configuration. In order to help users to use these engines, chess community agreed on creating an open communication protocol called \textbf{Universal Chess Interface} or commonly referred to as UCI, that provides the interaction with chess engines through user interfaces.
 
@@ -570,21 +575,6 @@ This notation is mostly used for keeping information about the game and a header
 \end{lstlisting}
 
 \noindent For more information about PGN, refer to the Wikipedia page: \url{https://en.wikipedia.org/wiki/Portable_Game_Notation}.
-
-\section{Objectives}
-\label{sec:objectives}
-
-The main objective of this project is to develop a robust and efficient chess engine capable of competing with classical engines and players by leveraging advanced search algorithms and optimization techniques. The specific objectives are as follows:
-
-\begin{itemize}
-    \item Develop a functional chess engine using alpha-beta pruning as the core search algorithm.
-    \item Optimize search efficiency by implementing move ordering, quiescence search, and iterative deepening to improve pruning effectiveness.
-    \item Implement transposition tables using Zobrist hashing to store and retrieve previously evaluated board positions efficiently.
-    \item Implement multithreading to enable parallel search.
-    \item Ensure modularity and efficiency so that the engine can be tested, improved, and integrated into chess-playing applications.
-    \item Profile the engine to identify performance bottlenecks and optimize critical sections of the code.
-    \item Compare performance metrics against other classical engines to evaluate the impact of implemented optimizations.
-\end{itemize}
 
 \section{Work plan}
 
