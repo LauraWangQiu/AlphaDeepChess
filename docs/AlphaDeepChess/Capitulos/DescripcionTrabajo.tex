@@ -169,6 +169,8 @@ TODO insert transposition image.
 
 ~\cite{ZobristHashing}
 
+~\cite{ZobristHashing}
+
 Zobrist Hashing is a technique to transform a board position of arbitrary size into a number of a set length, with an equal distribution over all possible numbers, invented by Albert Zobrist.
 
 \vspace{1em}
@@ -235,6 +237,8 @@ To identify potential performance bottlenecks, we performed profiling on the eng
 
 \subsubsection{Magic bitboards}
 
+~\cite{MagicBitboards}
+
 We can create a look up table of all the rook and bishop moves for each square on the board and for each combination of pieces that blocks the path of the slider piece (blockers  bitboard). Basically we need a hash table to store rook and bishop moves indexed by square and bitboard of blockers. The problem is that this table could be very big.
 
 \noindent Magic bitboards technique used to reduce the size of the look up table. We cut off unnecesary information in the blockers bitboard, excluding the board borders and the squares outside its attack pattern. Optimally we could use 11 bits for bishop moves (2048 > 1428 configurations) and 13 bits for rooks (8196 > 4900 configurations).
@@ -264,6 +268,8 @@ A \textbf{magic number} is a multiplier to the index with the following properti
 \noindent The magic numbers are found by brute force and better and better magics are still being found. We store one magic number for each slider piece (rook, bishop) and for square on the board.
 
 \subsubsection{PEXT instructions}
+
+~\cite{PextInstruction}
 
 The \texttt{PEXT} (Parallel Bits Extract) instruction is a feature available on newer CPU architectures. It extracts specific bits from a source operand, as determined by a mask, and packs them into contiguous lower bits of the destination operand.
 
