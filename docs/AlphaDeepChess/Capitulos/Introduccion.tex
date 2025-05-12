@@ -4,16 +4,14 @@
 
 \chapterquote{The most powerful weapon in chess is to have the next move}{David Bronstein}
 
-Chess, one of the oldest and most strategic games in human history, has long been a domain for both intellectual competition and computational research. The pursuit of creating a machine that could compete with the best human players, chess Grandmasters (GM), was present. It was only a matter of time before computation surpassed human computational capabilities.
+Chess, one of the oldest strategy games in human history, has long been a domain for both intellectual competition and computational research. The pursuit of creating a machine that could compete with the best human players, chess Grandmasters, was present. It was only a matter of time before computation surpassed human capabilities.
 
 \vspace{1em}
 
-\noindent In 1997, the chess engine Deep Blue made history by defeating the world champion at the time, Garry Kasparov, marking the first time a computer had defeated a reigning world champion in a six-game match under standard chess tournament time controls.
-
+\noindent In 1997, the chess engine \texttt{Deep Blue} made history by defeating the reigning world champion at the time, Garry Kasparov, marking the first time a computer had defeated a sitting world chess champion.
 \vspace{1em}
 
-\noindent Since then, the development of chess engines has advanced rapidly, moving from rule-based systems to AI-driven models. However, classical search algorithms, such as alpha-beta pruning, continue to be fundamental to understanding the basics of efficient search and evaluation of game trees.
-
+\noindent Today, we find ourselves in an era where chess engines have reached unprecedented strength. This has been achieved through a combination of classical techniques like alpha-beta pruning, and modern advancements such as deep learning and neural networks.
 \section{Objectives}
 \label{sec:objectives}
 
@@ -25,9 +23,19 @@ Chess, one of the oldest and most strategic games in human history, has long bee
     \item Upload the engine to \texttt{lichess.org} and compete against other chess engines.
 \end{itemize}
 
-\noindent Chess is a board game where two players who take white pieces and black pieces respectively compete to first checkmate the opponent. Checkmate occurs when the king is under thread of capture (known as check) by a piece or pieces of the enemy, and there is no legal way to escape or remove the threat.
+\section{Work plan}
 
-\noindent What about a chess engine? A chess engine consists of a software program that analyzes chess positions and returns optimal moves depending on its configuration. In order to help users to use these engines, chess community agreed on creating an open communication protocol called \textbf{Universal Chess Interface} or commonly referred to as UCI, that provides the interaction with chess engines through user interfaces.
+The project will be divided into several phases, each focusing on specific aspects of the engine's development. The timeline for each phase is as follows:
+
+\begin{enumerate}
+    \item Research phase and basic implementation: understand the fundamentals of alpha-beta pruning with minimax and position evaluation. Familiarize with the UCI (Universal Chess Interface)~\cite{UciProtocol} and implement the move generator with its specific exceptions and rules.
+    \item Optimization: implement quiescence search and iterative deepening to improve pruning effectiveness.
+    \item Optimization: improve search efficiency using transposition tables and Zobrist hashing.
+    \item Optimization: implement multithreading to enable parallel search.
+    \item Profiling: use a profiler to identify performance bottlenecks and optimize critical sections of the code.
+    \item Testing: use Stockfish to compare efficiency generating tournaments between chess engines and estimate the performance of the engine. Also, compare different versions of the engine to evaluate the impact of optimizations.
+    \item Analyze the results and write the final report.
+\end{enumerate}
 
 \vspace{1em}
 
@@ -36,7 +44,11 @@ Chess, one of the oldest and most strategic games in human history, has long bee
 \section{Basic concepts}
 \label{sec:basicConcepts}
 
-Chess is a game of strategy that takes place on a chessboard with specific rules governing the movement and interaction of the pieces. This section introduces the fundamental concepts necessary to understand how chess is played.
+\noindent Chess is a board game where two players who take white pieces and black pieces respectively compete to first checkmate the opponent. Checkmate occurs when the king is under thread of capture (known as check) by a piece or pieces of the enemy, and there is no legal way to escape or remove the threat.
+
+\noindent What about a chess engine? A chess engine consists of a software program that analyzes chess positions and returns optimal moves depending on its configuration. In order to help users to use these engines, chess community agreed on creating an open communication protocol called \textbf{Universal Chess Interface} or commonly referred to as UCI, that provides the interaction with chess engines through user interfaces.
+
+\noindent Chess is a game of strategy that takes place on a chessboard with specific rules governing the movement and interaction of the pieces. This section introduces the fundamental concepts necessary to understand how chess is played.
 
 \subsection{Chessboard}
 \label{sec:chessboard}
@@ -575,20 +587,6 @@ This notation is mostly used for keeping information about the game and a header
 \end{lstlisting}
 
 \noindent For more information about PGN, refer to the Wikipedia page: \url{https://en.wikipedia.org/wiki/Portable_Game_Notation}.
-
-\section{Work plan}
-
-The project will be divided into several phases, each focusing on specific aspects of the engine's development. The timeline for each phase is as follows:
-
-\begin{enumerate}
-    \item Research phase and basic implementation: understand the fundamentals of alpha-beta pruning with minimax and position evaluation. Familiarize with the UCI (Universal Chess Interface)~\cite{UciProtocol} and implement the move generator with its specific exceptions and rules.
-    \item Optimization: implement quiescence search and iterative deepening to improve pruning effectiveness.
-    \item Optimization: improve search efficiency using transposition tables and Zobrist hashing.
-    \item Optimization: implement multithreading to enable parallel search.
-    \item Profiling: use a profiler to identify performance bottlenecks and optimize critical sections of the code.
-    \item Testing: use Stockfish to compare efficiency generating tournaments between chess engines and estimate the performance of the engine. Also, compare different versions of the engine to evaluate the impact of optimizations.
-    \item Analyze the results and write the final report.
-\end{enumerate}
 
 %\section{Explicaciones adicionales sobre el uso de esta plantilla}
 %Si quieres cambiar el \textbf{estilo del título} de los capítulos del documento, edita el fichero \verb|TeXiS\TeXiS_pream.tex| y comenta la línea \verb|\usepackage[Lenny]{fncychap}| para dejar el estilo básico de \LaTeX.
