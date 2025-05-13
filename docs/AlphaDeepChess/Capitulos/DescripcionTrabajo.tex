@@ -254,9 +254,136 @@ It contains a circular array (\texttt{uint64\_t positions[HISTORY\_MAX\_SIZE]} w
 
 TODO
 
-\subsubsection{Precomputed data}
+\subsubsection{Precomputed Data}
 
-TODO
+Precomputed data refers to information that is calculated and stored in advance to accelerate runtime operations. It reduces the need for repetitive calculations during gameplay. This approach allows the engine to focus on more computationally intensive tasks, such as search and evaluation.
+
+The following types of precomputed data are used in AlphaDeepChess:
+
+\begin{itemize}
+    \item Piece-Square Tables: These tables assign a static value to each piece on every square of the board, reflecting its positional strength. For example, pawns are more valuable in the center of the board, while knights are stronger when placed near the middle. These are used for evaluation.
+    
+\begin{lstlisting}[breaklines=true, caption={Initialization of knight piece-square table}]
+static constexpr int KNIGHT_PIECE_SQUARE_TABLE[64] = {
+    -50, -40, -30, -30, -30, -30, -40, -50,
+    -40, -20, 0,   0,   0,   0,   -20, -40,
+    -30, 0,   10,  15,  15,  10,  0,   -30,
+    -30, 5,   15,  20,  20,  15,  5,   -30,
+    -30, 0,   15,  20,  20,  15,  0,   -30,
+    -30, 5,   10,  15,  15,  10,  5,   -30,
+    -40, -20, 0,   5,   5,   0,   -20, -40,
+    -50, -40, -30, -30, -30, -30, -40, -50
+};
+\end{lstlisting}
+    
+    \item Piece Attack Tables: Precomputed bitboards that represent the attack patterns of each piece type from every square on the board. These masks are used to quickly determine legal moves and attacked squares and they are also used in evaluation.
+    
+\begin{lstlisting}[breaklines=true, caption={Initialization of bishop attack tables}]
+constexpr uint64_t calculate_bishop_moves(Square square, uint64_t blockers)
+{
+    assert(square.is_valid());
+
+    uint64_t moves_mask = 0ULL;
+
+    const Direction dirs[4] = {NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST};
+
+    for (const Direction dir : dirs) {
+
+        Square aux_sq = square;
+        aux_sq.to_direction(dir);
+
+        while (aux_sq.is_valid()) {
+
+            moves_mask |= aux_sq.mask();
+
+            if (blockers & aux_sq.mask()) {
+                break;   // if there is a blocker in the square we stop in this direction
+            }
+            else {
+                aux_sq.to_direction(dir);
+            }
+        }
+    }
+
+    return moves_mask;
+}
+\end{lstlisting}
+
+    \item Ray Directions: Precomputed arrays that store the sliding attack directions for each square. These are used to efficiently calculate moves for sliding pieces during move generation.
+    
+\begin{lstlisting}[breaklines=true, caption={Initialization of directions masks}]
+static constexpr const std::array<std::array<uint64_t, 64>, 64> init_direction_mask()
+{
+    std::array<std::array<uint64_t, 64>, 64> PRECOMPUTED_DIR_MASK = {};
+
+    for (Square sq1 = Square::A1; sq1.is_valid(); sq1++) {
+        for (Square sq2 = Square::A1; sq2.is_valid(); sq2++) {
+
+            if (sq1.row() == sq2.row()) {
+                PRECOMPUTED_DIR_MASK[sq1][sq2] = get_row_mask(sq1.row());
+            }
+            else if (sq1.col() == sq2.col()) {
+                PRECOMPUTED_DIR_MASK[sq1][sq2] = get_col_mask(sq1.col());
+            }
+            else if (squares_in_same_diagonal(sq1, sq2)) {
+                PRECOMPUTED_DIR_MASK[sq1][sq2] = get_diagonal_mask(sq1.diagonal());
+            }
+            else if (squares_in_same_antidiagonal(sq1, sq2)) {
+                PRECOMPUTED_DIR_MASK[sq1][sq2] = get_antidiagonal_mask(sq1.antidiagonal());
+            }
+            else {
+                PRECOMPUTED_DIR_MASK[sq1][sq2] = 0ULL;
+            }
+        }
+    }
+
+    return PRECOMPUTED_DIR_MASK;
+}
+\end{lstlisting}
+    
+    \item Zobrist Hash Seeds: Randomly generated 64-bit numbers used for Zobrist hashing. Each piece-square combination, castling right, en passant square, and side to move is assigned a unique random value.
+    
+\begin{lstlisting}[breaklines=true, caption={Initialization of seeds}]
+static void init_random_numbers_only_once()
+{
+    static bool initialized = false;
+
+    if (initialized) {
+        return;
+    }
+
+#ifndef NDEBUG
+    const uint64_t SEED = 123456789ULL;
+    std::mt19937_64 gen(SEED);   // Use constant seed in debug mode
+#else
+    std::random_device rd;
+    std::mt19937_64 gen(rd());   // Use random seed in release mode
+#endif
+
+    std::uniform_int_distribution<uint64_t> dis;
+
+    for (Square sq = Square::A1; sq.is_valid(); sq++) {
+        for (int p = 0; p < 12; p++) {
+            square_piece_seed[sq.value()][p] = dis(gen);
+        }
+    }
+
+    for (auto& elem : en_passant_seed) {
+        elem = dis(gen);
+    }
+
+    king_white_castle_seed = dis(gen);
+    queen_white_castle_seed = dis(gen);
+    king_black_castle_seed = dis(gen);
+    queen_black_castle_seed = dis(gen);
+
+    black_to_move_seed = dis(gen);
+
+    initialized = true;
+}
+\end{lstlisting}
+
+\end{itemize}
 
 \subsection{Evaluation}
 
