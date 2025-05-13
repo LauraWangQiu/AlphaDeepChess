@@ -265,8 +265,7 @@ jobs:
 
     - name: Run tests
       run: |
-        cd test/manual_tests
-        python tests.py \
+        python test/manual_tests/tests.py \
           --test-id $TEST_ID \
           --games $GAMES \
           --st $ST \

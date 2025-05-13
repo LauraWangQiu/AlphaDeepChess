@@ -348,6 +348,10 @@ What happens if, upon reaching maximum depth, we evaluate the position in the mi
 
 TODO: insert code of quiescence search
 
+\subsection{UCI}
+
+TODO: mention the commands
+
 \section{Improvements}
 
 Some improvements and new structures were later added for different versions: transposition tables, Zobrist hashing, table entries, PEXT instructions, search multithread and search reductions that will be discussed and analysed below.
@@ -392,10 +396,10 @@ TODO: insert code of zobrist hashing
 Each entry in the transposition table stores the following information:
 
 \begin{itemize}
-  \item \textbf{Zobrist Hash}: The full 64-bit hash of the position. This is used to verify that the entry corresponds to the current position and to detect possible index collisions in the table.
-  \item \textbf{Evaluation}: The numerical evaluation of the position, as computed by the evaluation function.
-  \item \textbf{Depth}: The depth at which the evaluation was calculated. A deeper search could potentially yield a more accurate evaluation, so this value helps determine whether a new evaluation should overwrite the existing one.
-  \item \textbf{Node Type}: Indicates the type of node stored:
+  \item Zobrist Hash: The full 64-bit hash of the position. This is used to verify that the entry corresponds to the current position and to detect possible index collisions in the table.
+  \item Evaluation: The numerical evaluation of the position, as computed by the evaluation function.
+  \item Depth: The depth at which the evaluation was calculated. A deeper search could potentially yield a more accurate evaluation, so this value helps determine whether a new evaluation should overwrite the existing one.
+  \item Node Type: Indicates the type of node stored:
   \begin{itemize}
     \item \texttt{EXACT} the evaluation is precise for this position.
     \item \texttt{UPPERBOUND} the evaluation is an upper bound, typically resulting from an alpha cutoff.
@@ -463,7 +467,17 @@ A \textbf{magic number} is a multiplier to the bitboard of blockers with the fol
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Imagenes/magics_position.png}
+    \begin{minipage}{0.6\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            showmover=false,
+            setfen=n1bk3r/3p4/1p1p2p1/8/3R1p2/8/3p4/7n w - - 0 1,
+            markstyle=circle,
+            color=red, markfields={d6,f4,d2},
+            color=green, markfields={c4,b4,a4,e4,d5,d3}
+        ]
+    \end{minipage}
     \caption{Initial chess position with white rook and blockers}
     \label{fig:magics_position}
 \end{figure}
@@ -518,16 +532,29 @@ A \textbf{magic number} is a multiplier to the bitboard of blockers with the fol
     \label{fig:magic_multiplication}
 \end{figure}
 
-\noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square; Figure~\ref{fig:magics_relevant_squares} shows this for the rook:
+\noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square; Listing~\ref{lst:rook_relevant_squares} shows this for the rook:
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{Imagenes/magics_relevant_squares.png}
-    \caption{Number of relevant squares for each rook square}
-    \label{fig:magics_relevant_squares}
-\end{figure}
+\begin{lstlisting}[breaklines=true, caption={Number of relevant squares for each rook square}, label={lst:rook_relevant_squares}]
+/**
+ * @brief ROOK_RELEVANT_SQUARES
+ * 
+ * number of squares where the rook could move from each square minus the board border squares.
+ */
+static constexpr int ROOK_RELEVANT_SQUARES[NUM_SQUARES] = {
+    12, 11, 11, 11, 11, 11, 11, 12,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    12, 11, 11, 11, 11, 11, 11, 12
+};
+\end{lstlisting}
 
-\noindent The final index is thus computed as
+\vspace{1em}
+
+\noindent The final index is thus computed as:
 
 \begin{align*}
     \text{index}
@@ -605,8 +632,6 @@ Move generator with PEXT instructions bot vs basic bot\\
 
 \noindent Huge improvement with 64 wins versus 22 losses.
 
-\ldots
-
 \subsection{Evaluation with King Safety and piece mobility}
 
 It is often beneficial to evaluate additional aspects of a position beyond simply counting material. We introduce the following positional evaluation parameters:
@@ -633,8 +658,51 @@ King Safety and Piece mobility evaluation bot vs basic bot\\
 
 \subsection{Search Multithread}
 
-TODO: mention YBWC\\
-TODO: insert code of search multithread
+This version of search follows YBWC mentioned in Section~\ref{sec:alphabetaEnhancements}. It searches the first move sequentially after ordering the moves and launches the remaining moves in parallel using a thread. If it turns out that the first move was the best and pruning was applied, directly return the final node evaluation without the additional thread.
+
+\begin{lstlisting}[breaklines=true]
+template<SearchType searchType>
+static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context, Board board)
+{
+    // ...
+    // Check if it is in transposition table
+    // If it is, return previously calculated evaluation
+
+    generate_legal_moves<ALL_MOVES>(moves, board, &isCheck);
+    // ...
+    order_moves(moves, board, ply);
+    // ...
+    
+    constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
+
+    // Search the first move sequentially
+    board.make_move(moves[0]);
+    int eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, context, board);
+    board.unmake_move(moves[0], game_state);
+    // ...
+
+    // Alpha-Beta pruning with first move
+    if (/*prunned*/) goto end_search;
+
+    // Search remaining moves in parallel
+    thread = std::thread([&]() {
+        for (int i = 1; i < moves.size(); i++) {
+            // ...
+            // Alpha-Beta pruning with the remaining moves
+            if (/*prunned*/) break;
+        }
+    });
+    
+    if (thread.joinable()) {
+        thread.join();
+    }
+
+end_search:
+    // Store entry in tranposition table
+
+    return final_node_evaluation;
+}
+\end{lstlisting}
 
 \subsubsection{Analysis}
 
@@ -668,12 +736,72 @@ Reductions Search bot vs basic bot\\
 \section{Additional tools and work}
 \label{sec:tools}
 
-TODO: mention gui (customtkinter), cutechess, stockfish, github actions and workflows
+As it was mentioned in Section~\ref{sec:how}, some additional work apart from the engine implementation was done to ensure quality of the final product. This section includes some important specifications and features for the interactive board visualizer and testing worflow.
 
-\subsection{Board visualizer using Python}
+\subsection{Interactive board visualizer using CustomTkinter}
 
-TODO: explain
+The board is implemented as a grid of squares, with each square capable of displaying a piece image. Piece images are loaded dynamically from the \texttt{assets} directory, which contains PNG files for each piece.
 
-\subsection{Testing engine strength with cutechess, stockfish, and actions}
+\vspace{1em}
 
-TODO: explain
+\noindent The visualizer employs an event-driven architecture, where user actions, such as clicks, trigger events handled by the \texttt{EventManager} class. When the Python script is executed, it ensures that an instance of the engine in release version executable exists, starts a new subprocess with the engine, and launches a window displaying the chessboard and interface.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Imagenes/gui.png}
+    \caption{AlphaDeepChess GUI}
+    \label{fig:gui}
+\end{figure}
+
+On the right panel, there is a switch button to activate and deactivate the evaluation and suggested move in an specific depth. Also, current position's fen on the bottom panel can be modified by exchanging it to a new one.
+
+\subsection{Testing engine strength with Cutechess, Stockfish, and GitHub Actions}
+
+Cutechess and Stockfish can be downloaded from their respective webpages. Then, a JSON file must be provided to Cutechess to configure the available engines. An example of this \texttt{engines.json} file could be:
+
+\vspace{1em}
+
+\begin{lstlisting}[breaklines=true, frame=single]
+[
+    {
+        "name": "AlphaDeepChess",
+        "command": "../build/release/AlphaDeepChess",
+        "protocol": "uci",
+        "options": {}
+    },
+    {
+        "name": "Stockfish",
+        "command": "./stockfish/stockfish/stockfish-windows-x86-64",
+        "protocol": "uci",
+        "options": {
+            "UCI_LimitStrength": "true",
+            "UCI_Elo": "1500"
+        }
+    }
+]
+\end{lstlisting}
+
+\noindent By simply calling the Cutechess CLI with the names of the engines and additional specifications such as search time (\texttt{--st}), the number of games (\texttt{--games}), or depth (\texttt{--depth}), the matches can be executed.
+
+\vspace{1em}
+
+\noindent Finally, automating this process of selecting the versions of the engine and Stockfish we created a workflow using a YAML file.
+
+\vspace{1em}
+
+\noindent This workflow is triggered manually. It includes the following steps:
+
+\begin{itemize}
+    \item Setup environment: Install dependencies such as Python packages, Cutechess and Stockfish.
+    \item Build the engine: Compile the chess engine from source code.
+    \item Run tests: Execute previously designed tests to validate the functionality of the engine using Cutechess CLI.
+    \item Export generated data from Cutechess for later analysis.
+\end{itemize}
+
+This generated data are the results of the run games that includes:
+
+\begin{itemize}
+    \item A \texttt{results.epd} with all the final positions in FEN format.
+    \item A \texttt{results.log} with Cutechess additional detailed information like the beginning and end of a game, the summary of the game, and ELO stadistics.
+    \item A \texttt{results.pgn} with all the played moves and games.
+\end{itemize}
