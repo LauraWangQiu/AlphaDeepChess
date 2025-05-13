@@ -25,7 +25,7 @@ Each module is responsible for a specific aspect of the chess engine's functiona
 
 \subsection{Evaluation}
 
-This module returns the final evaluation, a positive or negative number, depending on the board.
+This module returns the final evaluation, a positive, 0, or negative number, depending on the current position.
 
 \subsubsection{Move Generator}
 
@@ -58,28 +58,28 @@ There are 64 possible squares on a chessboard so the first thought is to use a 6
 
 \noindent Moreover, masks are extremely useful for efficiently identifying and manipulating the squares on a chessboard using bitwise operations. Some of these masks are defined as constants in the code and others are calculated during compilation time. For example, they can be used to identify the column of a square or simply placing a new piece on board.
 
-\begin{lstlisting}
-    class Square {
-        uint8_t sq_value;
+\begin{lstlisting}[breaklines=true, frame=single, caption={Square class.}]
+class Square {
+    uint8_t sq_value;
 
-        constexpr bool is_valid() const {
-            return sq_value < 64U;
-        }
-
-        constexpr uint64_t mask() const {
-            return is_valid() ? 1ULL << sq_value : 0ULL;
-        }
-
-        // Calculating the column of a square (sq_value % 8)
-        constexpr int col() const {
-            return is_valid() ? sq_value & 7U : COL_INVALID;
-        }
+    constexpr bool is_valid() const {
+        return sq_value < 64U;
     }
 
-    // Placing a piece by setting the bit corresponding to the
-    // square to 1
-    const uint64_t mask = square.mask();
-    bitboard_all |= mask;
+    constexpr uint64_t mask() const {
+        return is_valid() ? 1ULL << sq_value : 0ULL;
+    }
+
+    // Calculating the column of a square (sq_value % 8)
+    constexpr int col() const {
+        return is_valid() ? sq_value & 7U : COL_INVALID;
+    }
+}
+
+// Placing a piece by setting the bit corresponding to the
+// square to 1
+const uint64_t mask = square.mask();
+bitboard_all |= mask;
 \end{lstlisting}
 
 \noindent Just to clarify, \texttt{sq\_value} must be a value between $0$ and $63$, inclusive, for the 64 squares on a chessboard. To calculate the column of a square, an AND operation is applied: \texttt{sq\_value \& 7U} extracts the 3 least significant bits, which correspond to the column of the square. Columns are enumerated from $0$ (A) to $7$ (H).
@@ -88,44 +88,44 @@ There are 64 possible squares on a chessboard so the first thought is to use a 6
 
 They are simply enumerations where each piece and piece type correspond to an integer number to improve code readability.
 
-\begin{lstlisting}
-    enum class Piece : int
-    {
-        W_PAWN = 0,
-        W_KNIGHT = 1,
-        W_BISHOP = 2,
-        ...
-        B_QUEEN = 10,
-        B_KING = 11,
-        EMPTY = 12,
-        NUM_PIECES = 13
-    };
+\begin{lstlisting}[breaklines=true, frame=single, caption={Piece and PieceType enumerators.}]
+enum class Piece : int
+{
+    W_PAWN = 0,
+    W_KNIGHT = 1,
+    W_BISHOP = 2,
+    ...
+    B_QUEEN = 10,
+    B_KING = 11,
+    EMPTY = 12,
+    NUM_PIECES = 13
+};
 
-    enum class PieceType : int
-    {
-        PAWN = 0,
-        KNIGHT = 1,
-        BISHOP = 2,
-        ROOK = 3,
-        QUEEN = 4,
-        KING = 5,
-        EMPTY = 6,
-        NUM_PIECES = 7
-    };
+enum class PieceType : int
+{
+    PAWN = 0,
+    KNIGHT = 1,
+    BISHOP = 2,
+    ROOK = 3,
+    QUEEN = 4,
+    KING = 5,
+    EMPTY = 6,
+    NUM_PIECES = 7
+};
 \end{lstlisting}
 
 \subsubsection{Move and MoveType}
 
 There are four types of moves: normal, promotion, en passant, and castling. These are represented using an integer-based enumeration:
 
-\begin{lstlisting}
-    enum class MoveType
-    {
-        NORMAL = 0,
-        PROMOTION = 1,
-        EN_PASSANT = 2,
-        CASTLING = 3
-    };
+\begin{lstlisting}[breaklines=true, frame=single, caption={MoveType enumerator.}]
+enum class MoveType
+{
+    NORMAL = 0,
+    PROMOTION = 1,
+    EN_PASSANT = 2,
+    CASTLING = 3
+};
 \end{lstlisting}
 
 \noindent Meanwhile, moves are represented as a combination of two squares (the origin square and the destination square), 2 bits for the promotion piece, and 2 bits for the move type, all encoded in a \texttt{uint16\_t}. In this case, each square is represented using 6 bits, resulting in a total of 16 bits $(6 + 6 + 2 + 2 = 16~\mathrm{bits})$. Each bit field has a unique mask and its specific shift, which must remain unchanged throughout the development.
@@ -138,27 +138,23 @@ The game state must store important information during the game, including the Z
 
 \noindent There are two \texttt{uint64\_t} variables: one for the Zobrist hash key and the other for the remaining bit fields:
 
-\begin{lstlisting}
-    class GameState {
-        uint64_t zobrist_key;
+\begin{lstlisting}[breaklines=true, frame=single, caption={GameState class.}]
+class GameState {
+    uint64_t zobrist_key;
 
-        // 50 : attacks_updated : 1 if updated, 0 if not
-        // 43-49 : num_pieces : 0 to 64 pieces
-        // 35-42 : fifty_move_rule_counter : if counter gets to 
-        // 100 then game is a draw.
-        // 32-34 : last_captured_piece : PieceType::Empty if last
-        // move was not a capture.
-        // 31 : side_to_move : 0 if white, 1 if black.
-        // 30 : castle_king_white : 1 if available, 0 if not.
-        // 29 : castle_queen_white : 1 if available, 0 if not.
-        // 28 : castle_king_black : 1 if available, 0 if not.
-        // 27 : castle_queen_black : 1 if available, 0 if not.
-        // 26-20 : en_passant_square : 0-63 if available, >=64 if
-        // not available
-        // 19-0 : move_number : 0-1048575 number of moves in the 
-        // game.
-        uint64_t state_register;
-    }
+    // 50 : attacks_updated : 1 if updated, 0 if not
+    // 43-49 : num_pieces : 0 to 64 pieces
+    // 35-42 : fifty_move_rule_counter : if counter gets to 100 then game is a draw.
+    // 32-34 : last_captured_piece : PieceType::Empty if last move was not a capture.
+    // 31 : side_to_move : 0 if white, 1 if black.
+    // 30 : castle_king_white : 1 if available, 0 if not.
+    // 29 : castle_queen_white : 1 if available, 0 if not.
+    // 28 : castle_king_black : 1 if available, 0 if not.
+    // 27 : castle_queen_black : 1 if available, 0 if not.
+    // 26-20 : en_passant_square : 0-63 if available, >=64 if not available
+    // 19-0 : move_number : 0-1048575 number of moves in the game.
+    uint64_t state_register;
+}
 \end{lstlisting}
 
 \subsubsection{Board}
@@ -263,7 +259,7 @@ The following types of precomputed data are used in AlphaDeepChess:
 \begin{itemize}
     \item Piece-Square Tables: These tables assign a static value to each piece on every square of the board, reflecting its positional strength. For example, pawns are more valuable in the center of the board, while knights are stronger when placed near the middle. These are used for evaluation.
     
-\begin{lstlisting}[breaklines=true, caption={Initialization of knight piece-square table}]
+\begin{lstlisting}[breaklines=true, frame=single, caption={Initialization of knight piece-square table}]
 static constexpr int KNIGHT_PIECE_SQUARE_TABLE[64] = {
     -50, -40, -30, -30, -30, -30, -40, -50,
     -40, -20, 0,   0,   0,   0,   -20, -40,
@@ -278,7 +274,7 @@ static constexpr int KNIGHT_PIECE_SQUARE_TABLE[64] = {
     
     \item Piece Attack Tables: Precomputed bitboards that represent the attack patterns of each piece type from every square on the board. These masks are used to quickly determine legal moves and attacked squares and they are also used in evaluation.
     
-\begin{lstlisting}[breaklines=true, caption={Initialization of bishop attack tables}]
+\begin{lstlisting}[breaklines=true, frame=single, caption={Initialization of bishop attack tables}]
 constexpr uint64_t calculate_bishop_moves(Square square, uint64_t blockers)
 {
     assert(square.is_valid());
@@ -311,7 +307,7 @@ constexpr uint64_t calculate_bishop_moves(Square square, uint64_t blockers)
 
     \item Ray Directions: Precomputed arrays that store the sliding attack directions for each square. These are used to efficiently calculate moves for sliding pieces during move generation.
     
-\begin{lstlisting}[breaklines=true, caption={Initialization of directions masks}]
+\begin{lstlisting}[breaklines=true, frame=single, caption={Initialization of directions masks}]
 static constexpr const std::array<std::array<uint64_t, 64>, 64> init_direction_mask()
 {
     std::array<std::array<uint64_t, 64>, 64> PRECOMPUTED_DIR_MASK = {};
@@ -343,7 +339,7 @@ static constexpr const std::array<std::array<uint64_t, 64>, 64> init_direction_m
     
     \item Zobrist Hash Seeds: Randomly generated 64-bit numbers used for Zobrist hashing. Each piece-square combination, castling right, en passant square, and side to move is assigned a unique random value.
     
-\begin{lstlisting}[breaklines=true, caption={Initialization of seeds}]
+\begin{lstlisting}[breaklines=true, frame=single, caption={Initialization of seeds}]
 static void init_random_numbers_only_once()
 {
     static bool initialized = false;
@@ -395,8 +391,114 @@ In addition to the basic information that is mentioned in Section~\ref{sec:evalu
 
 \vspace{1em}
 
-TODO: insert diagram of pawn PST in middlegame and in the endgame to compare\\
-TODO: insert code only with piece counting evaluation and adding king safety and mobility
+\begin{lstlisting}[breaklines=true, frame=single, caption={Counting pieces and depending on game phase evaluation.}]
+int evaluate_position(Board& board)
+{
+    board.update_attacks_bb();
+
+    int middlegame_eval = 0;
+    int endgame_eval = 0;
+
+    const int middlegame_percentage = calculate_middlegame_percentage(board);
+    const int endgame_percentage = 24 - calculate_middlegame_percentage(board);
+
+    uint64_t pieces = board.get_bitboard_all();
+
+    while (pieces) {
+
+        const Square square(pop_lsb(pieces));
+        const Piece piece = board.get_piece(square);
+        const ChessColor color = get_color(piece);
+        const int piece_raw_value = raw_value(piece);
+        const int bonus_middlegame = PrecomputedEvalData::get_piece_square_table<PST_TYPE_MIDDLEGAME>(piece, square);
+        const int bonus_endgame = PrecomputedEvalData::get_piece_square_table<PST_TYPE_ENDGAME>(piece, square);
+
+        const int piece_value_middlegame = piece_raw_value + bonus_middlegame;
+        const int piece_value_endgame = piece_raw_value + bonus_endgame;
+
+        middlegame_eval += is_white(color) ? piece_value_middlegame : -piece_value_middlegame;
+        endgame_eval += is_white(color) ? piece_value_endgame : -piece_value_endgame;
+    }
+    const int blended_eval = (middlegame_eval * middlegame_percentage + endgame_eval * endgame_percentage) / 24;
+
+    return blended_eval;
+}
+\end{lstlisting}
+
+\begin{lstlisting}[breaklines=true, frame=single, caption={King safety, piece mobility, depending on game phase evaluation.}]
+int evaluate_position(Board& board)
+{
+    board.update_attacks_bb();
+
+    int middlegame_eval = 0;
+    int endgame_eval = 0;
+
+    const int middlegame_percentage = calculate_middlegame_percentage(board);
+    const int endgame_percentage = 24 - calculate_middlegame_percentage(board);
+
+    const Square white_king_sq = lsb(board.get_bitboard_piece(Piece::W_KING));
+    const Square black_king_sq = lsb(board.get_bitboard_piece(Piece::B_KING));
+
+    uint64_t pieces = board.get_bitboard_all();
+
+    while (pieces) {
+
+        const Square square(pop_lsb(pieces));
+        const Piece piece = board.get_piece(square);
+        const ChessColor color = get_color(piece);
+        const int piece_raw_value = raw_value(piece);
+        const int bonus_middlegame = PrecomputedEvalData::get_piece_square_table<PST_TYPE_MIDDLEGAME>(piece, square);
+        const int bonus_endgame = PrecomputedEvalData::get_piece_square_table<PST_TYPE_ENDGAME>(piece, square);
+        const int mobility = mobility_piece_score(square, piece, board);
+
+        const int piece_value_middlegame = piece_raw_value + bonus_middlegame + mobility;
+        const int piece_value_endgame = piece_raw_value + bonus_endgame + mobility;
+
+        middlegame_eval += is_white(color) ? piece_value_middlegame : -piece_value_middlegame;
+        endgame_eval += is_white(color) ? piece_value_endgame : -piece_value_endgame;
+    }
+
+    const int king_safety_penality_white = king_safety_penalization<ChessColor::WHITE>(white_king_sq, board);
+    const int king_safety_penality_black = king_safety_penalization<ChessColor::BLACK>(black_king_sq, board);
+    const int king_safety_penality = king_safety_penality_black - king_safety_penality_white;
+
+    const int king_shield_bonus_white = king_shield<ChessColor::WHITE>(white_king_sq, board);
+    const int king_shield_bonus_black = king_shield<ChessColor::BLACK>(black_king_sq, board);
+    const int king_shield_bonus = king_shield_bonus_white - king_shield_bonus_black;
+
+    middlegame_eval += king_shield_bonus + king_safety_penality;
+
+    const int blended_eval = (middlegame_eval * middlegame_percentage + endgame_eval * endgame_percentage) / 24;
+
+    return blended_eval;
+}
+\end{lstlisting}
+
+\begin{lstlisting}[breaklines=true, frame=single, caption={Different pawn square values depending on game phase.}]
+// Opening and Middlegame pawn square values
+static constexpr int PAWN_PIECE_SQUARE_TABLE[64] = {
+    0,   0,   0,   0,   0,   0,   0,   0,
+    50,  50,  50,  50,  50,  50,  50,  50,
+    10,  10,  20,  30,  30,  20,  10,  10,
+    5,   5,   10,  25,  25,  10,  5,   5,
+    0,   0,  0,   20,  20,  0,   -5,  0,
+    5,   -5,  -10, 0,   0,   -10, -5,  5,
+    5,   10,  10,  -20, -20, 10,  10,  5,
+    0,   0,   0,   0,   0,   0,   0,   0
+};
+
+// Endgame pawn square values
+static constexpr int PAWN_ENDGAME_SQUARE_TABLE[64] = {
+    0,   0,   0,   0,   0,   0,   0,   0,
+    80,  80,  80,  80,  80,  80,  80,  80,
+    50,  50,  50,  50,  50,  50,  50,  50,
+    30,  30,  30,  30,  30,  30,  30,  30,
+    20,  20,  20,  20,  20,  20,  20,  20,
+    10,  10,  10,  10,  10,  10,  10,  10,
+    10,  10,  10,  10,  10,  10,  10,  10,
+    0,   0,   0,   0,   0,   0,   0,   0
+};
+\end{lstlisting}
 
 \subsection{Move generator}
 
@@ -453,7 +555,58 @@ The core of the chess engine is its search algorithm, in this case alpha-beta pr
 
 \vspace{1em}
 
-TODO: insert code of alpha beta pruning
+\begin{lstlisting}[breaklines=true, frame=single, caption={Alpha-Beta search.}]
+template<SearchType searchType>
+static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context)
+{
+    // ...
+
+    MoveList moves;
+    bool isCheck;
+    generate_legal_moves<ALL_MOVES>(moves, board, &isCheck);
+    // Verify ending position: checkmate, stalemate, fifty-move rule counter...
+
+    int final_node_evaluation = MAXIMIZING_WHITE ? -INF_EVAL : +INF_EVAL;
+    const GameState game_state = board.state();
+
+    order_moves(moves, board, ply);
+
+    for (int i = 0; i < moves.size(); i++) {
+        // ...
+        constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
+
+        board.make_move(moves[i]);
+        int eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, context);
+        board.unmake_move(moves[i], game_state);
+        History::pop_position();
+
+        if constexpr (MAXIMIZING_WHITE) {
+            // ...
+
+            final_node_evaluation = std::max(final_node_evaluation, eval);
+            alpha = std::max(alpha, eval);
+
+            if (final_node_evaluation >= beta) {
+                // ...
+                break;   // beta cutoff
+            }
+        }
+        else if (MINIMIZING_BLACK) {
+            // ...
+
+            final_node_evaluation = std::min(final_node_evaluation, eval);
+            beta = std::min(beta, eval);
+
+            if (final_node_evaluation <= alpha) {
+                // ...
+                break;   // alpha cutoff
+            }
+        }
+    }
+
+    return final_node_evaluation;
+}
+\end{lstlisting}
 
 \subsubsection{Search: iterative deepening}
 
@@ -461,7 +614,77 @@ At what depth do we decide to search? Actually, the simplest thing is to perform
 
 \vspace{1em}
 
-TODO: insert code of iterative deepening
+\begin{lstlisting}[breaklines=true, frame=single, caption={Iterative deepening.}]
+static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results, int max_depth, SearchContext& context)
+{
+    // ...
+
+    int alpha = -INF_EVAL;
+    int beta = +INF_EVAL;
+
+    for (int depth = 1; depth <= max_depth; depth++) {
+        context.bestMoveInIteration = Move::null();
+        context.bestEvalInIteration = is_white(side_to_move) ? -INF_EVAL : +INF_EVAL;
+
+        // ...
+
+        is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, context)
+                               : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, context);
+
+        // ...
+
+        context.bestMoveFound = context.bestMoveInIteration;
+        context.bestEvalFound = context.bestEvalInIteration;
+
+        assert(context.bestMoveFound.is_valid());
+
+        insert_new_result(results, depth, context.bestEvalFound, context.bestMoveFound);
+
+        if (abs(context.bestEvalFound) > MATE_THRESHOLD) {
+            break;   // We found a checkmate, we stop because we cant find a shorter checkMate
+        }
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Search: aspiration window}
+
+Aspiration window's main objetive is to reduce the number of nodes to explore by simply restricting the range of alpha and beta values (window). A search is performed with this narrow window. If the position evaluation falls within the window, it is accepted as valid and additional node exploration is avoided. However, if the evaluation is outside the limits of the window (when a fail-low or fail-high occurs), the window is expanded to the extreme values (-INF and +INF) and a new search is performed to obtain an accurate evaluation:
+
+\begin{lstlisting}[breaklines=true, frame=single, caption={Aspiration window.}]
+static void iterative_deepening(std::atomic<bool>& stop, SearchResults& results, int max_depth, SearchContext& context)
+{
+    // ...
+
+    int alpha = -INF_EVAL;
+    int beta = +INF_EVAL;
+
+    for (int depth = 1; depth <= max_depth; depth++) {
+        context.bestMoveInIteration = Move::null();
+        context.bestEvalInIteration = is_white(side_to_move) ? -INF_EVAL : +INF_EVAL;
+
+        // if it is not the first iteration, adjust alpha and beta
+        if (depth > 1) {
+            alpha = context.bestEvalFound - ASPIRATION_MARGIN;
+            beta  = context.bestEvalFound + ASPIRATION_MARGIN;
+        }
+
+        is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, context)
+                               : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, context);
+
+        // if the evaluation is out of bounds of the window, redo the search with -INF_EVAL and +INF_EVAL
+        if (context.bestEvalInIteration <= alpha || context.bestEvalInIteration >= beta) {
+            alpha = -INF_EVAL;
+            beta  = +INF_EVAL;
+
+            is_white(side_to_move) ? alpha_beta_search<MAXIMIZE_WHITE>(stop, depth, 0, alpha, beta, context)
+                                   : alpha_beta_search<MINIMIZE_BLACK>(stop, depth, 0, alpha, beta, context);
+        }
+
+        // ...
+    }
+}
+\end{lstlisting}
 
 \subsubsection{Search: horizon effect, quiescence search}
 
@@ -473,95 +696,115 @@ What happens if, upon reaching maximum depth, we evaluate the position in the mi
 
 \vspace{1em}
 
-\begin{lstlisting}[breaklines=true, frame=single]
-[
-    template<SearchType searchType>
-    static int quiescence_search(bool& stop, int ply, int alpha, int beta, SearchContext& context)
-    {
-        constexpr bool MAXIMIZING_WHITE = searchType == MAXIMIZE_WHITE;
-        constexpr bool MINIMIZING_BLACK = searchType == MINIMIZE_BLACK;
-    
-        Board& board = context.board;
-        const uint64_t zobrist_key = board.state().get_zobrist_key();
-    
-        const uint8_t fifty_move_rule_counter = board.state().fifty_move_rule_counter();
-        const bool fify_move_rule_draw = fifty_move_rule_counter >= 100U;
-    
-        if (History::threefold_repetition_detected(fifty_move_rule_counter) || fify_move_rule_draw) {
+\begin{lstlisting}[breaklines=true, frame=single, caption={Quiescence search implementation.}]
+template<SearchType searchType>
+static int quiescence_search(bool& stop, int ply, int alpha, int beta, SearchContext& context)
+{
+    constexpr bool MAXIMIZING_WHITE = searchType == MAXIMIZE_WHITE;
+    constexpr bool MINIMIZING_BLACK = searchType == MINIMIZE_BLACK;
+
+    Board& board = context.board;
+    const uint64_t zobrist_key = board.state().get_zobrist_key();
+
+    const uint8_t fifty_move_rule_counter = board.state().fifty_move_rule_counter();
+    const bool fify_move_rule_draw = fifty_move_rule_counter >= 100U;
+
+    if (History::threefold_repetition_detected(fifty_move_rule_counter) || fify_move_rule_draw) {
+        return 0;
+    }
+
+    int static_evaluation = evaluate_position(board);
+
+    if (ply >= MAX_PLY) {
+        return static_evaluation;
+    }
+
+    if constexpr (MAXIMIZING_WHITE) {
+        if (static_evaluation >= beta) {
+            return beta;   // beta cutoff
+        }
+        alpha = std::max(alpha, static_evaluation);
+    }
+    else if constexpr (MINIMIZING_BLACK) {
+        if (static_evaluation <= alpha) {
+            return alpha;   // Alpha cutoff
+        }
+        beta = std::min(beta, static_evaluation);
+    }
+
+    MoveList capture_moves;
+    generate_legal_moves<ONLY_CAPTURES>(capture_moves, board);
+
+    if (capture_moves.size() == 0) {
+        return static_evaluation;   // No captures: return static evaluation
+    }
+
+    order_moves(capture_moves, board, ply);
+
+    const GameState game_state = board.state();
+    int final_node_evaluation = static_evaluation;
+
+    for (int i = 0; i < capture_moves.size(); i++) {
+
+        if (stop) {
             return 0;
         }
-    
-        int static_evaluation = evaluate_position(board);
-    
-        if (ply >= MAX_PLY) {
-            return static_evaluation;
-        }
-    
+
+        constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
+
+        History::push_position(zobrist_key);
+        board.make_move(capture_moves[i]);
+        int eval = quiescence_search<nextSearchType>(stop, ply + 1, alpha, beta, context);
+        board.unmake_move(capture_moves[i], game_state);
+        History::pop_position();
+
         if constexpr (MAXIMIZING_WHITE) {
-            if (static_evaluation >= beta) {
-                return beta;   // beta cutoff
+            final_node_evaluation = std::max(final_node_evaluation, eval);
+            alpha = std::max(alpha, eval);
+
+            if (final_node_evaluation >= beta) {
+                break;   // Beta cutoff
             }
-            alpha = std::max(alpha, static_evaluation);
         }
         else if constexpr (MINIMIZING_BLACK) {
-            if (static_evaluation <= alpha) {
-                return alpha;   // Alpha cutoff
-            }
-            beta = std::min(beta, static_evaluation);
-        }
-    
-        MoveList capture_moves;
-        generate_legal_moves<ONLY_CAPTURES>(capture_moves, board);
-    
-        if (capture_moves.size() == 0) {
-            return static_evaluation;   // No captures: return static evaluation
-        }
-    
-        order_moves(capture_moves, board, ply);
-    
-        const GameState game_state = board.state();
-        int final_node_evaluation = static_evaluation;
-    
-        for (int i = 0; i < capture_moves.size(); i++) {
-    
-            if (stop) {
-                return 0;
-            }
-    
-            constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
-    
-            History::push_position(zobrist_key);
-            board.make_move(capture_moves[i]);
-            int eval = quiescence_search<nextSearchType>(stop, ply + 1, alpha, beta, context);
-            board.unmake_move(capture_moves[i], game_state);
-            History::pop_position();
-    
-            if constexpr (MAXIMIZING_WHITE) {
-                final_node_evaluation = std::max(final_node_evaluation, eval);
-                alpha = std::max(alpha, eval);
-    
-                if (final_node_evaluation >= beta) {
-                    break;   // Beta cutoff
-                }
-            }
-            else if constexpr (MINIMIZING_BLACK) {
-                final_node_evaluation = std::min(final_node_evaluation, eval);
-                beta = std::min(beta, eval);
-    
-                if (final_node_evaluation <= alpha) {
-                    break;   // Alpha cutoff
-                }
+            final_node_evaluation = std::min(final_node_evaluation, eval);
+            beta = std::min(beta, eval);
+
+            if (final_node_evaluation <= alpha) {
+                break;   // Alpha cutoff
             }
         }
-    
-        return final_node_evaluation;
     }
-]
+
+    return final_node_evaluation;
+}
 \end{lstlisting}
 
 \subsection{UCI}
 
-TODO: mention the commands
+Universal Chess Interface specifications are independent of the operating system. To ensure the synchronization of the engine with the GUI, a \texttt{isready} command is sent and engine should respond with \texttt{readyok}.
+
+\vspace{1em}
+
+\noindent The engine must be capable of continuously processing input from standard input, even during evaluation. Moreover, if an unknown command is received, it should be ignored.
+
+\vspace{1em}
+
+\noindent The move format is in long algebraic notation which means sending two squares coordinates like \texttt{e2e4} or \texttt{b1c3} independently of the type of piece because the engine must be the one checking that the movement is legal.
+
+\vspace{1em}
+
+\noindent Some of the most important commands are the following:
+
+\begin{itemize}
+    \item \parbox{\textwidth}{\texttt{position [fen <fenstring> | startpos | actualpos] moves <move1> \ldots <movei>}}: sets the current position of the board to the FEN string or make the list of moves from starting position or current position.
+    \item \texttt{go}: starts evaluating the current position. Some important subparameters are:
+    \begin{itemize}
+        \item \texttt{depth <x>}: specifies the number of \texttt{x} plies to search.
+        \item \texttt{movetime <x>}: specifies the number of \texttt{x} seconds to search. 
+    \end{itemize}
+    \item \texttt{stop}: stops evaluation if it is running.
+\end{itemize}
 
 \section{Improvements}
 
@@ -618,53 +861,53 @@ Zobrist Hashing is a technique to transform a board position of arbitrary size i
 \end{itemize}
 
 \begin{lstlisting}[breaklines=true, frame=single, caption={Code example to calculate zobrist hash of position}, label={lst:zobrist_calculate_hash}]
-    /**
-     * @brief Calculate zobrist hash of position
-     * 
-     * @param[in] position board containing the chess position
-     * 
-     * @return the hash key of the chess position
-     * 
-     */
-    static uint64_t hash(const Board& position)
-    {
-        // initialize the random numbers only once
-        init_random_numbers_only_once();   
+/**
+ * @brief Calculate zobrist hash of position
+ * 
+ * @param[in] position board containing the chess position
+ * 
+ * @return the hash key of the chess position
+ * 
+ */
+static uint64_t hash(const Board& position)
+{
+    // initialize the random numbers only once
+    init_random_numbers_only_once();   
 
-        uint64_t hash = 0ULL;
+    uint64_t hash = 0ULL;
 
-        for (Square square = Square::A1; square.is_valid(); square++) {
-            const Piece piece = position.get_piece(square);
-            if (piece != Piece::EMPTY) {
-                hash ^= get_seed(square, piece);
-            }
+    for (Square square = Square::A1; square.is_valid(); square++) {
+        const Piece piece = position.get_piece(square);
+        if (piece != Piece::EMPTY) {
+            hash ^= get_seed(square, piece);
         }
-        const GameState state = position.state();
-
-        const Square eps_square = state.en_passant_square();
-        if (eps_square.is_valid()) {
-            hash ^= get_en_passant_seed(eps_square.col());
-        }
-
-        if (state.castle_king_white()) {
-            hash ^= get_king_white_castle_seed();
-        }
-        if (state.castle_queen_white()) {
-            hash ^= get_queen_white_castle_seed();
-        }
-        if (state.castle_king_black()) {
-            hash ^= get_king_black_castle_seed();
-        }
-        if (state.castle_queen_black()) {
-            hash ^= get_queen_black_castle_seed();
-        }
-
-        if (state.side_to_move() == ChessColor::BLACK) {
-            hash ^= get_black_to_move_seed();
-        }
-
-        return hash;
     }
+    const GameState state = position.state();
+
+    const Square eps_square = state.en_passant_square();
+    if (eps_square.is_valid()) {
+        hash ^= get_en_passant_seed(eps_square.col());
+    }
+
+    if (state.castle_king_white()) {
+        hash ^= get_king_white_castle_seed();
+    }
+    if (state.castle_queen_white()) {
+        hash ^= get_queen_white_castle_seed();
+    }
+    if (state.castle_king_black()) {
+        hash ^= get_king_black_castle_seed();
+    }
+    if (state.castle_queen_black()) {
+        hash ^= get_queen_black_castle_seed();
+    }
+
+    if (state.side_to_move() == ChessColor::BLACK) {
+        hash ^= get_black_to_move_seed();
+    }
+
+    return hash;
+}
 \end{lstlisting}
 
 \subsubsection{Table Entry}
@@ -685,19 +928,19 @@ Each entry in the transposition table stores the following information:
 \end{itemize}
 
 \begin{lstlisting}[breaklines=true, frame=single, caption={Code example transposition table entry}, label={lst:transposition_table_entry}]
-    class TranspositionTable::Entry
-    {
-        uint64_t key; // full Zobrist key of the chess position
+class TranspositionTable::Entry
+{
+    uint64_t key; // full Zobrist key of the chess position
 
-        int evaluation; // Score of the chess position
+    int evaluation; // Score of the chess position
 
-        Move move; // Best move found for the position.
+    Move move; // Best move found for the position.
 
-        NodeType type; // FAILED, EXACT, LOWERBOUND, UPPERBOUND
+    NodeType type; // FAILED, EXACT, LOWERBOUND, UPPERBOUND
 
-        int8_t depth; // At which the position was evaluated
-    ...
-    }
+    int8_t depth; // At which the position was evaluated
+...
+}
 \end{lstlisting}
 
 \subsubsection{Collisions}
@@ -829,7 +1072,7 @@ A \textbf{magic number} is a multiplier to the bitboard of blockers with the fol
 
 \noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square; Listing~\ref{lst:rook_relevant_squares} shows this for the rook:
 
-\begin{lstlisting}[breaklines=true, caption={Number of relevant squares for each rook square}, label={lst:rook_relevant_squares}]
+\begin{lstlisting}[breaklines=true, frame=single, caption={Number of relevant squares for each rook square}, label={lst:rook_relevant_squares}]
 /**
  * @brief ROOK_RELEVANT_SQUARES
  * 
@@ -967,7 +1210,7 @@ To evaluate the improvement in the new evaluation, we conducted the same 100 gam
 
 This version of search follows YBWC mentioned in Section~\ref{sec:alphabetaEnhancements}. It searches the first move sequentially after ordering the moves and launches the remaining moves in parallel using a thread. If it turns out that the first move was the best and pruning was applied, directly return the final node evaluation without the additional thread.
 
-\begin{lstlisting}[breaklines=true]
+\begin{lstlisting}[breaklines=true, frame=single]
 template<SearchType searchType>
 static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context, Board board)
 {
