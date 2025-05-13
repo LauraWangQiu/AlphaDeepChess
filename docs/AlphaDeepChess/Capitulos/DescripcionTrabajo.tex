@@ -246,10 +246,6 @@ It contains a circular array (\texttt{uint64\_t positions[HISTORY\_MAX\_SIZE]} w
 
 \noindent The detection of threefold repetition is performed by comparing the hash of the current position with the hashes stored in the history. If the same hash appears at least twice, it indicates that the position has been repeated three times.
 
-\subsubsection{Move generator information}
-
-TODO
-
 \subsubsection{Precomputed Data}
 
 Precomputed data refers to information that is calculated and stored in advance to accelerate runtime operations. It reduces the need for repetitive calculations during gameplay. This approach allows the engine to focus on more computationally intensive tasks, such as search and evaluation.
@@ -515,15 +511,11 @@ Calculating the legal moves in a chess position is a more difficult and tedious 
   \item Generate the special legal moves like en passant and castling.
 \end{itemize}
 
-TODO: insert some of the code of move generator
-
 \subsection{Move ordering}
 
 Order the legal moves from most to least likely to be the best move in the position. The sooner we explore the best move, the more branches of the tree will be pruned. To do this, we use the MVV-LVA heuristic (most valuable victim, least valuable aggressor). We give higher scores to capturing a low-value piece over a higher-value piece. Capturing a queen with a pawn scores highly. We also give a bonus to piece promotions.
 
 \vspace{1em}
-
-TO DO: insert code of move ordering
 
 \subsubsection{Killer moves}
 
@@ -534,8 +526,6 @@ A killer move is a non-capturing (quiet) move that previously caused a beta-cuto
 \noindent To take advantage of this heuristic we store up to two killer moves for each search depth. During move ordering, these killer moves are given a bonus score, allowing them to be explored before other quiet moves.
 
 \vspace{1em}
-
-TODO: insert code of killer moves
 
 \subsection{The Core: Search Algorithm}
 
