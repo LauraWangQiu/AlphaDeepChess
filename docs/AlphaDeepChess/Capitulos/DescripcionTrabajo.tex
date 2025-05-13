@@ -359,7 +359,25 @@ Some improvements and new structures were later added for different versions: tr
 \subsection{Transposition Table}
 \label{sec:tt}
 
-The basic implementation of the chess engine generates a large amount of redundant calculations due to transpositions: situations in which the same board position is reached through different sequences of moves in the game tree.
+\noindent The basic implementation of the chess engine generates a large amount of redundant calculations due to transpositions: situations in which the same board position is reached through different sequences of moves in the game tree.
+\noindent Figure~\ref{fig:transposition_example} illustrates a position that can arise through multiple move orders. Where the white king could go to the g3 square from multiple paths.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.6\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            showmover=false,
+            setfen=8/2k5/3p4/p2P1p2/P2P1P2/8/8/2K5 w - - 0 1,
+            pgfstyle=straightmove, color=blue,
+            markmoves={c1-e3,e3-g3,c1-g1,g1-g3},
+            arrow=to
+        ]
+    \end{minipage}
+    \caption{Lasker-Reichhelm Position, transposition example}
+    \label{fig:transposition_example}
+\end{figure}
 
 \vspace{1em}
 
@@ -367,11 +385,9 @@ The basic implementation of the chess engine generates a large amount of redunda
 
 \vspace{1em}
 
-TODO: insert code of transposition table
-
 \subsubsection{Zobrist Hashing}
 
-Zobrist Hashing (\cite{ZobristHashing}) is a technique to transform a board position of arbitrary size into a number of a set length, with an equal distribution over all possible numbers invented by Albert Zobrist.
+Zobrist Hashing is a technique to transform a board position of arbitrary size into a number of a set length, with an equal distribution over all possible numbers invented by Albert Zobrist. (\cite{ZobristHashing})
 
 \vspace{1em}
 
@@ -382,14 +398,63 @@ Zobrist Hashing (\cite{ZobristHashing}) is a technique to transform a board posi
   \item The hash value for a given position is computed by performing the XOR operation between the hash accumulator and the random value corresponding to each piece on its square.
   \item In addition to the pieces, we also include:
   \begin{itemize}
-    \item A random value for the side to move (white or black),
-    \item One random value per square to account for the possibility of an \textit{en passant} capture.
+    \item A random value for the side to move.
+    \item One random value to account for the possibility of an en passant capture.
+    \item One random value per possible castling move.
   \end{itemize}
-  \item These random values are carefully chosen so that even slightly different positions produce very different hash values. This greatly reduces the chance of collisions.
+  \item These random values are useful so that even slightly different positions produce very different hash values. This greatly reduces the chance of collisions.
   \item The XOR operation is used not only because it is computationally inexpensive, but also because it is reversible. This means that when a move is made or undone, we can update the hash incrementally by applying XOR only to the affected squares, without needing to recompute the entire hash.
 \end{itemize}
 
-TODO: insert code of zobrist hashing
+\begin{lstlisting}[breaklines=true, caption={Code example to calculate zobrist hash of position}, label={lst:zobrist_calculate_hash}]
+    /**
+     * @brief Calculate zobrist hash of position
+     * 
+     * @param[in] position board containing the chess position
+     * 
+     * @return the hash key of the chess position
+     * 
+     */
+    static uint64_t hash(const Board& position)
+    {
+        // initialize the random numbers only once
+        init_random_numbers_only_once();   
+
+        uint64_t hash = 0ULL;
+
+        for (Square square = Square::A1; square.is_valid(); square++) {
+            const Piece piece = position.get_piece(square);
+            if (piece != Piece::EMPTY) {
+                hash ^= get_seed(square, piece);
+            }
+        }
+        const GameState state = position.state();
+
+        const Square eps_square = state.en_passant_square();
+        if (eps_square.is_valid()) {
+            hash ^= get_en_passant_seed(eps_square.col());
+        }
+
+        if (state.castle_king_white()) {
+            hash ^= get_king_white_castle_seed();
+        }
+        if (state.castle_queen_white()) {
+            hash ^= get_queen_white_castle_seed();
+        }
+        if (state.castle_king_black()) {
+            hash ^= get_king_black_castle_seed();
+        }
+        if (state.castle_queen_black()) {
+            hash ^= get_queen_black_castle_seed();
+        }
+
+        if (state.side_to_move() == ChessColor::BLACK) {
+            hash ^= get_black_to_move_seed();
+        }
+
+        return hash;
+    }
+\end{lstlisting}
 
 \subsubsection{Table Entry}
 
@@ -404,10 +469,25 @@ Each entry in the transposition table stores the following information:
     \item \texttt{EXACT} the evaluation is precise for this position.
     \item \texttt{UPPERBOUND} the evaluation is an upper bound, typically resulting from an alpha cutoff.
     \item \texttt{LOWERBOUND} the evaluation is a lower bound, typically resulting from a beta cutoff.
+    \item \texttt{FAILED} entry is empty or with invalid information.
   \end{itemize}
 \end{itemize}
 
-TODO: insert code of table entry
+\begin{lstlisting}[breaklines=true, caption={Code example transposition table entry}, label={lst:transposition_table_entry}]
+    class TranspositionTable::Entry
+    {
+        uint64_t key; // full Zobrist key of the chess position
+
+        int evaluation; // Score of the chess position
+
+        Move move; // Best move found for the position.
+
+        NodeType type; // FAILED, EXACT, LOWERBOUND, UPPERBOUND
+
+        int8_t depth; // At which the position was evaluated
+    ...
+    }
+\end{lstlisting}
 
 \subsubsection{Collisions}
 
@@ -538,9 +618,11 @@ A \textbf{magic number} is a multiplier to the bitboard of blockers with the fol
 /**
  * @brief ROOK_RELEVANT_SQUARES
  * 
- * number of squares where the rook could move from each square minus the board border squares.
+ * Number of squares where the rook could move
+ * from each square minus the board border squares.
  */
-static constexpr int ROOK_RELEVANT_SQUARES[NUM_SQUARES] = {
+static constexpr int ROOK_RELEVANT_SQUARES[NUM_SQUARES] =
+{
     12, 11, 11, 11, 11, 11, 11, 12,
     11, 10, 10, 10, 10, 10, 10, 11,
     11, 10, 10, 10, 10, 10, 10, 11,
@@ -571,7 +653,7 @@ Figure~\ref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: i
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{Imagenes/pext.png}
-    \caption{Example of the \texttt{PEXT} instruction: extracting bits from \texttt{r2} using \texttt{r3} as a mask, and storing the result in \texttt{r1}}
+    \caption{Example of the \texttt{PEXT} instruction: extracting bits from \texttt{r2} using \texttt{r3} as a mask, and storing the result in \texttt{r1}. ~\cite{PextInstruction}}
     \label{fig:pext_instruction_example}
 \end{figure}
 
