@@ -436,6 +436,7 @@ Procedure AlphaBeta(Node position, Integer depth, Integer alpha, Integer beta, B
 \end{figure}
 
 \subsubsection{Alpha-Beta Enhancements}
+\label{sec:alphabetaEnhancements}
 
 The alpha-beta algorithm has been further improved over time with various enhancements to increase the overall efficiency. Some of these are: transposition tables, iterative deepening, aspiration windows, quiescence search, move ordering\ldots
 
@@ -673,8 +674,9 @@ For each position, a numerical value is assigned representing how favorable the 
 \noindent All these ensures that positions with exposed kings are evaluated as less favorable. If there are open (no pawns of either color) or semi-open (no pawns of one color but at least one pawn of the opposite color) files near the king, the position is penalized further, as these files provide attacking opportunities for enemy rooks and queens.
 
 \section{How can we determine the strength of our engine?}
+\label{sec:how}
 
-This can be answered by playing against other engines and analyzing the results. The most common way to do this is by using the Computer Chess Rating Lists which ranks chess engines based on their performance in various tournaments and matches. By the time being, we have chosen to compare different versions of the engine with Stockfish, currently ranked as the number one on the list. Continue reading to learn about the used tools and read about the work behind it in Section~\ref{sec:tools}.
+This can be answered by playing against other engines and analyzing the results. The most common way to do this is by using the Computer Chess Rating Lists which ranks chess engines based on their performance in various tournaments and matches. By the time being, we have chosen to compare different versions of the engine with Stockfish, currently ranked as the number one on the list. Continue reading to learn about the used tools or directly read about the work behind it in Section~\ref{sec:tools}.
 
 \subsection{Profiler}
 
@@ -694,18 +696,34 @@ sudo perf report -g --no-children
 
 \noindent After recording, \texttt{perf report} opens an interactive terminal interface where functions are sorted by CPU overhead.
 
-\subsection{CustomTkinter: Python UI-library}
+\subsection{CustomTkinter}
 
-TODO: explain
+CustomTkinter is a modern UI-library for Python that extends from Tkinter module and considers both OOP (Object Oriented Programming) and simple implementations.
+
+\vspace{1em}
+
+\noindent Although UCI implements a command that draws the current position through standard output, making moves and showing the evaluation is somewhat a time-consuming task when debugging and testing while programming. We resorted to using an interface to help us do this job and a really fast solution was to use Python to make a GUI. In this case, one of the most used UI libraries was CustomTkinter and it was used to build a friendly interface from scratch for bridging between executable and command sending.
 
 \subsection{Cutechess}
 
-TODO: explain
+Cutechess is an open-source tool designed to perform automated games between chess engines. It is widely used in the chess programming community to test and compare engines, evaluate their performance, and analyze games.
+
+\vspace{1em}
+
+\noindent It provides both command-line interface (CLI) and a graphic user interface (GUI), with cross-platform compatibility for Windows, macOS, and Linux. For our purposes, we utilized the CLI version to automate the tests with Python scripts and commands, integrating it into a CI/CD workflow.
 
 \subsection{Stockfish}
 
-TODO: explain
+Stockfish is also an open-source tool and command-line program and chess engine with which we will compare with our engine. It is available for multiple platforms (Windows, macOS, Linux, Android, and iOS).
+
+\vspace{1em}
+
+\noindent It is necessary to highlight that it provides multiple versions optimized for different hardware structures. These versions leverage specific CPU instruction sets to improve performance. For instance, the AVX2 version is recommended for most users with Intel processors from 2013 onwards or AMD processors from 2015 onwards, as it utilizes advanced vectorization instructions.
 
 \subsection{GitHub Actions and workflows}
 
-TODO: explain
+GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to automate tasks such as building, testing, and deploying code. Workflows are defined in YAML files and specify the tasks to be executed, the jobs or events that trigger them, and the environment in which they run.
+
+\vspace{1em}
+
+\noindent In this project, since it is public in a GitHub repository, GitHub Actions was used to automate the testing and evaluation of the chess engine using the last two mentioned tools. A workflow was configured to compile the engine, run automated games using Cutechess between different versions of the engine or our engine versus Stockfish.

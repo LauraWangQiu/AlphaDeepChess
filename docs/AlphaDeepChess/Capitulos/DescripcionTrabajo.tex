@@ -348,6 +348,10 @@ What happens if, upon reaching maximum depth, we evaluate the position in the mi
 
 TODO: insert code of quiescence search
 
+\subsection{UCI}
+
+TODO: mention the commands
+
 \section{Improvements}
 
 Some improvements and new structures were later added for different versions: transposition tables, Zobrist hashing, table entries, PEXT instructions, search multithread and search reductions that will be discussed and analysed below.
@@ -605,8 +609,6 @@ Move generator with PEXT instructions bot vs basic bot\\
 
 \noindent Huge improvement with 64 wins versus 22 losses.
 
-\ldots
-
 \subsection{Evaluation with King Safety and piece mobility}
 
 It is often beneficial to evaluate additional aspects of a position beyond simply counting material. We introduce the following positional evaluation parameters:
@@ -633,8 +635,7 @@ King Safety and Piece mobility evaluation bot vs basic bot\\
 
 \subsection{Search Multithread}
 
-TODO: mention YBWC\\
-TODO: insert code of search multithread
+This version of search follows YBWC mentioned in Section~\ref{sec:alphabetaEnhancements}. 
 
 \subsubsection{Analysis}
 
@@ -668,12 +669,72 @@ Reductions Search bot vs basic bot\\
 \section{Additional tools and work}
 \label{sec:tools}
 
-TODO: mention gui (customtkinter), cutechess, stockfish, github actions and workflows
+As it was mentioned in Section~\ref{sec:how}, some additional work apart from the engine implementation was done to ensure quality of the final product. This section includes some important specifications and features for the interactive board visualizer and testing worflow.
 
-\subsection{Board visualizer using Python}
+\subsection{Interactive board visualizer using CustomTkinter}
 
-TODO: explain
+The board is implemented as a grid of squares, with each square capable of displaying a piece image. Piece images are loaded dynamically from the \texttt{assets} directory, which contains PNG files for each piece.
 
-\subsection{Testing engine strength with cutechess, stockfish, and actions}
+\vspace{1em}
 
-TODO: explain
+\noindent The visualizer employs an event-driven architecture, where user actions, such as clicks, trigger events handled by the \texttt{EventManager} class. When the Python script is executed, it ensures that an instance of the engine in release version executable exists, starts a new subprocess with the engine, and launches a window displaying the chessboard and interface.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Imagenes/gui.png}
+    \caption{AlphaDeepChess GUI}
+    \label{fig:gui}
+\end{figure}
+
+On the right panel, there is a switch button to activate and deactivate the evaluation and suggested move in an specific depth. Also, current position's fen on the bottom panel can be modified by exchanging it to a new one.
+
+\subsection{Testing engine strength with Cutechess, Stockfish, and GitHub Actions}
+
+Cutechess and Stockfish can be downloaded from their respective webpages. Then, a JSON file must be provided to Cutechess to configure the available engines. An example of this \texttt{engines.json} file could be:
+
+\vspace{1em}
+
+\begin{lstlisting}[breaklines=true, frame=single]
+[
+    {
+        "name": "AlphaDeepChess",
+        "command": "../build/release/AlphaDeepChess",
+        "protocol": "uci",
+        "options": {}
+    },
+    {
+        "name": "Stockfish",
+        "command": "./stockfish/stockfish/stockfish-windows-x86-64",
+        "protocol": "uci",
+        "options": {
+            "UCI_LimitStrength": "true",
+            "UCI_Elo": "1500"
+        }
+    }
+]
+\end{lstlisting}
+
+\noindent By simply calling the Cutechess CLI with the names of the engines and additional specifications such as search time (\texttt{--st}), the number of games (\texttt{--games}), or depth (\texttt{--depth}), the matches can be executed.
+
+\vspace{1em}
+
+\noindent Finally, automating this process of selecting the versions of the engine and Stockfish we created a workflow using a YAML file.
+
+\vspace{1em}
+
+\noindent This workflow is triggered manually. It includes the following steps:
+
+\begin{itemize}
+    \item Setup environment: Install dependencies such as Python packages, Cutechess and Stockfish.
+    \item Build the engine: Compile the chess engine from source code.
+    \item Run tests: Execute previously designed tests to validate the functionality of the engine using Cutechess CLI.
+    \item Export generated data from Cutechess for later analysis.
+\end{itemize}
+
+This generated data are the results of the run games that includes:
+
+\begin{itemize}
+    \item A \texttt{results.epd} with all the final positions in FEN format.
+    \item A \texttt{results.log} with Cutechess additional detailed information like the beginning and end of a game, the summary of the game, and ELO stadistics.
+    \item A \texttt{results.pgn} with all the played moves and games.
+\end{itemize}
