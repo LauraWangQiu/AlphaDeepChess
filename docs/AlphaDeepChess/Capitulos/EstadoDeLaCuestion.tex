@@ -678,7 +678,21 @@ This can be answered by playing against other engines and analyzing the results.
 
 \subsection{Profiler}
 
-TODO: explain
+To analyze the performance of our chess engine and identify potential bottlenecks, we used the \texttt{perf} tool available on Linux systems. \texttt{perf} provides robust profiling capabilities by recording CPU events, sampling function execution, and collecting stack traces.
+
+Our profiling goal is to identify which parts of the code consume the most execution time.
+
+We run the engine under \texttt{perf} using the following commands:
+
+\begin{lstlisting}[language=bash, caption={Profiling AlphaDeepChess with perf}]
+# Record performance data with function stack traces
+sudo perf record -g ./build/release/AlphaDeepChess
+
+# Display interactive report
+sudo perf report -g --no-children
+\end{lstlisting}
+
+\noindent After recording, \texttt{perf report} opens an interactive terminal interface where functions are sorted by CPU overhead.
 
 \subsection{CustomTkinter: Python UI-library}
 

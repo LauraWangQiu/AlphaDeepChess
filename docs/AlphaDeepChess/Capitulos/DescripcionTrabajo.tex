@@ -459,7 +459,7 @@ A \textbf{magic number} is a multiplier to the bitboard of blockers with the fol
   \item The final multiplication must produce a unique index for each possible blocker configuration. The way to ensure the uniqueness is by brute force testing.
 \end{itemize}
 
-\noindent As illustrated in Figure~\ref{fig:magics_position}, we aim to compute the legal moves of the white rook in the given position. In practice, the only pieces that truly block the rook’s path are those marked with a red circle.
+\noindent As illustrated in Figure~\ref{fig:magics_position}, we aim to compute the legal moves of the white rook in the given position. In practice, the only pieces that truly block the rook's path are those marked with a red circle.
 
 \begin{figure}[H]
     \centering
@@ -468,7 +468,7 @@ A \textbf{magic number} is a multiplier to the bitboard of blockers with the fol
     \label{fig:magics_position}
 \end{figure}
 
-\noindent First, we mask out all pieces outside the rook’s attack pattern or on the board borders, as shown in Figure~\ref{fig:magic_preprocessing}.
+\noindent First, we mask out all pieces outside the rook's attack pattern or on the board borders, as shown in Figure~\ref{fig:magic_preprocessing}.
 
 \begin{figure}[H]
     \centering
@@ -492,7 +492,7 @@ A \textbf{magic number} is a multiplier to the bitboard of blockers with the fol
     \label{fig:magic_preprocessing}
 \end{figure}
 
-\noindent As illustrated in Figure~\ref{fig:magic_multiplication}, the masked blockers bitboard is then multiplied by the magic number. The result retains only the three relevant pawns that obstruct the rook’s movement, pushing them toward the most significant bits.
+\noindent As illustrated in Figure~\ref{fig:magic_multiplication}, the masked blockers bitboard is then multiplied by the magic number. The result retains only the three relevant pawns that obstruct the rook's movement, pushing them toward the most significant bits.
 
 \begin{figure}[H]
     \centering
@@ -548,22 +548,33 @@ Figure~\ref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: i
     \label{fig:pext_instruction_example}
 \end{figure}
 
-\noindent For our previous example ~\ref{fig:magics_position} we just need the full bitboard of blockers and the attack pattern of the rook.~\ref{fig:pext_bitboards}
+\noindent For our previous example (see Figure~\ref{fig:magics_position}), we only need the full bitboard of blockers and the rook’s attack pattern (excluding the borders to reduce space), as illustrated in Figure~\ref{fig:pext_bitboards}.
 
 \begin{figure}[H]
     \centering
-    \begin{minipage}[c]{0.45\textwidth}
+    \begin{minipage}[c]{0.3\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/magics_blockers.png}
         \caption*{Blockers bitboard}
     \end{minipage}
     \hfill
-    \begin{minipage}[c]{0.45\textwidth}
+    \begin{minipage}[c]{0.3\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/magics_rook_attacks.png}
         \caption*{Rook attack mask}
     \end{minipage}
-    \caption{Blockers and attack mask for PEXT extraction}
+    \hfill
+    \begin{minipage}[c]{0.05\textwidth}
+        \centering
+        \Huge\texttt{->}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[c]{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/pext_final_index.png}
+        \caption*{Final extracted index}
+    \end{minipage}
+    \caption{index extraction with Pext example}
     \label{fig:pext_bitboards}
 \end{figure}
 
