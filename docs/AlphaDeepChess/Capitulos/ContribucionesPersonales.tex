@@ -79,76 +79,30 @@ TODO
         \item Explain.
         \item Explain.
     \end{itemize}
-
-    ...
 \end{itemize}
 
 \section*{Yi Wang Qiu}
 
-Al menos dos páginas con las contribuciones del estudiante 2.
-
-TODO
-
 \begin{itemize}
-    \item \textbf{Multithread search}
-    \begin{itemize}
-        \item Explain.
-        \item Explain.
-    \end{itemize}
-    
-    \item \textbf{Alpha beta pruning}
-    \begin{itemize}
-        \item Explain.
-        \item Explain.
-    \end{itemize}
+    \item Responsible for the architectural design and full implementation of the alpha-beta pruning algorithm, established as the foundational search technique of the engine. This algorithm was enhanced through iterative refinement, such as aspiration windows, and theoretical benchmarking, enabling effective traversal of the game tree while significantly reducing the computational overhead associated with brute-force minimax strategies.
 
-    \item \textbf{Aspiration Window}
-    \begin{itemize}
-        \item Explain.
-        \item Explain.
-    \end{itemize}
+    \item Developed an optimized multithreaded search version incorporating the Young Brothers Wait Concept (YBWC), a parallelization paradigm specifically tailored for game tree evaluation. This technique allows the principal variation to be explored first in a sequential way, deferring sibling node evaluations to parallel workers only after the most promising path has been examined. The principal variation refers to the first move after generated legal moves were ordered.
 
-    \item \textbf{Evaluation}
-    \begin{itemize}
-        \item King safety, mobility\ldots 
-        \item Explain.
-    \end{itemize}
+    \item Engineered the parsing and command interpretation system compliant with the Universal Chess Interface (UCI) protocol. This subsystem ensures seamless bidirectional communication between the chess engine and external graphical user interfaces, testing suites, and benchmarking frameworks.
 
-    \item \textbf{Chess position bitboard representation:}
-    \begin{itemize}
-        \item Explain.
-        \item Explain.
-    \end{itemize}
+    \item Designed and implemented the core engine abstractions, \texttt{Square} and \texttt{Board} classes, which supports the representation and manipulation of chess positions. These classes encapsulate critical logic such as coordinate translation or position translation from FEN, piece tracking, castling rights, and en passant possibilities, all integrated with a bitboard backend. This design allows high-level readability while preserving low-level computational performance.
 
-    \item \textbf{UCI Protocol Support:}
-    \begin{itemize}
-        \item Explain.
-        \item Explain.
-    \end{itemize}
-  
-    \item \textbf{Testing of incremental features with Cutechess}
-    \begin{itemize}
-        \item Explain.
-        \item Explain.
-    \end{itemize}
+    \item Constructed the internal board representation model using 64-bit bitboards. This representation supports highly efficient binary operations such as masking, shifting, and logical conjunctions to simulate piece movement and board updates. Bitboards were used extensively to implement both legal move generation and tactical evaluation routines, leading to a compact and performant engine state.
 
-    \item \textbf{Unit testing}
-    \begin{itemize}
-        \item Explain.
-        \item Explain.
-    \end{itemize}
-    
-    \item \textbf{Github Actions}
-    \begin{itemize}
-        \item Explain.
-        \item Explain.
-    \end{itemize}
+    \item Developed a modular and extensible evaluation system capable of quantifying chess positions through multiple heuristic lenses. The implemented strategies range from basic material balance (expressed in centipawns) to more sophisticated models that incorporate positional features such as game phase, piece activity, mobility scoring, and king vulnerability or safety. These heuristics were designed to be dynamically weighted depending on the stage of the game (opening, middlegame, or endgame).
 
-    \item \textbf{Python GUI chess board}
-    \begin{itemize}
-        \item Explain.
-        \item Explain.
-    \end{itemize}
+    \item Integrated and calibrated precomputed positional data structures, including piece-square tables to accelerate the static evaluation of positions.
 
-    ...
+    \item Designed and authored a suite of automated Python scripts for orchestrating engine versus engine tournaments and performance benchmarking using Cutechess CLI. These scripts included configurable match parameters like search time, depth of search, number of games, book of openings or initial positions. They were essential in enabling the reproducibility of experiments, comparison of successive versions of the engine, and quantification of the impact of algorithmic refinements.
+
+    \item Established a robust continuous integration and delivery (CI/CD) pipeline using GitHub Actions. This infrastructure automated the build, deployment, and testing stages of the engine. Used the above python scripts to automate the tournaments in an independent machine to avoid wasting time and computation capacity while still developing.
+
+    \item Contributed to the frontend layer of the project by prototyping a graphical user interface (GUI) in Python, designed to allow interactive execution of the engine in a visual environment. The GUI included subprocess communication features, move display, and optional positional evaluations. Although later iterations focused on headless execution, this interface was key during early debugging and demonstration phases.
+
+    \item Authored detailed and structured online documentation describing the engine's internal architecture, modular hierarchy, function-level responsibilities, and usage guidelines. The documentation was designed not only as an educational resource for future contributors, but also as a formal exposition of the system's logic for academic evaluation purposes like this exact document. It includes illustrative diagrams or graphs, code references, and configuration examples to support transparency and reproducibility.
 \end{itemize}
