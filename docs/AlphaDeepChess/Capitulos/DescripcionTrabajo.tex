@@ -490,7 +490,7 @@ Zobrist Hashing is a technique to transform a board position of arbitrary size i
   \item The XOR operation is used not only because it is computationally inexpensive, but also because it is reversible. This means that when a move is made or undone, we can update the hash incrementally by applying XOR only to the affected squares, without needing to recompute the entire hash.
 \end{itemize}
 
-\begin{lstlisting}[breaklines=true, caption={Code example to calculate zobrist hash of position}, label={lst:zobrist_calculate_hash}]
+\begin{lstlisting}[breaklines=true, frame=single, caption={Code example to calculate zobrist hash of position}, label={lst:zobrist_calculate_hash}]
     /**
      * @brief Calculate zobrist hash of position
      * 
@@ -557,7 +557,7 @@ Each entry in the transposition table stores the following information:
   \end{itemize}
 \end{itemize}
 
-\begin{lstlisting}[breaklines=true, caption={Code example transposition table entry}, label={lst:transposition_table_entry}]
+\begin{lstlisting}[breaklines=true, frame=single, caption={Code example transposition table entry}, label={lst:transposition_table_entry}]
     class TranspositionTable::Entry
     {
         uint64_t key; // full Zobrist key of the chess position
@@ -586,8 +586,12 @@ As discussed earlier, index collisions in the transposition table are handled by
 To evaluate the improvement introduced by the transposition table, we conducted a 100-game tournament against the basic version of the engine. We selected 50 random starting positions from an opening book and played each position twice, alternating colors to ensure fairness. Each bot has 4 seconds to think per move.
 
 \begin{center}
-64MB Transposition Table bot vs basic bot\\
-\ResultBar{15cm}{0.5cm}{46}{22}{32}
+\begin{figure}[H]
+    \centering
+    \ResultBar{15cm}{0.5cm}{46}{22}{32}
+    \caption{64MB Transposition Table bot vs basic bot}
+    \label{fig:results_transposition_table_bot}
+\end{figure}
 \medskip
 \end{center}
 
@@ -791,8 +795,12 @@ To evaluate the improvement in the move generator, we conducted the same
 100 game match vs the basic bot version.
 
 \begin{center}
-Move generator with PEXT instructions bot vs basic bot\\
-\ResultBar{15cm}{0.5cm}{64}{14}{22}
+    \begin{figure}[H]
+        \centering
+        \ResultBar{15cm}{0.5cm}{64}{14}{22}
+        \caption{Move generator with PEXT instructions bot vs basic bot}
+        \label{fig:results_pext_move_generator_bot}
+    \end{figure}
 \medskip
 \end{center}
 
@@ -816,11 +824,17 @@ To evaluate the improvement in the new evaluation, we conducted the same 100 gam
 
 \vspace{1em}
 
-King Safety and Piece mobility evaluation bot vs basic bot\\
-\ResultBar{15cm}{0.5cm}{62}{8}{30}
+\begin{center}
+    \begin{figure}[H]
+        \centering
+        \ResultBar{15cm}{0.5cm}{62}{8}{30}
+        \caption{King Safety and Piece mobility evaluation bot vs basic bot}
+        \label{fig:results_safety_mobility_bot}
+    \end{figure}
 \medskip
+\end{center}
 
-\noindent The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
+\noindent The results are slightly worse compared to the match using the material-only evaluation,~\ref{fig:results_pext_move_generator_bot} with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
 
 \subsection{Search Multithread}
 
@@ -875,29 +889,36 @@ end_search:
 To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version. 
 
 \begin{center}
-Multithread Search bot vs basic bot\\
-\ResultBar{15cm}{0.5cm}{32}{5}{63}
+    \begin{figure}[H]
+        \centering
+        \ResultBar{15cm}{0.5cm}{32}{5}{63}
+        \caption{Multithread Search bot vs basic bot}
+        \label{fig:results_multithread_search_bot}
+    \end{figure}
 \medskip
 \end{center}
 
 \noindent The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
 
-\subsection{Search reductions}
+\subsection{Late Move Reductions}
 
-TODO: mention reductions\\
-TODO: insert code of search reductions
+We experiment with the use of late move pruning, under the assumption that if our move ordering is good, the best move in the position should be among the first explored moves. We reduce the depth by one unit starting from the tenth movement.
 
 \subsubsection{Analysis}
 
 To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version.
 
 \begin{center}
-Reductions Search bot vs basic bot\\
-\ResultBar{15cm}{0.5cm}{48}{15}{37}
+    \begin{figure}[H]
+        \centering
+        \ResultBar{15cm}{0.5cm}{48}{15}{37}
+        \caption{Reductions Search bot vs basic bot}
+        \label{fig:results_reductions_search_bot}
+    \end{figure}
 \medskip
 \end{center}
 
-\noindent The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
+\noindent The results are worse, with 15 more losses than the version without this aggresive pruning.~\ref{fig:results_pext_move_generator_bot} This could be because our move ordering is not that strong, and the best move in the position sometimes is in the last positions.
 
 \section{Additional tools and work}
 \label{sec:tools}
