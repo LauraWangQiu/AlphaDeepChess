@@ -1,7 +1,7 @@
 \chapter{State of the art}
 \label{cap:estadoDeLaCuestion}
 
-In this chapter, we will explore the fundamental concepts and techniques on which our chess engine is based. This includes board representation, move generation, game trees, etc. Each section will provide an overview of the concepts and techniques used by our engine.
+In this chapter, we will explore the fundamental concepts and techniques on which our chess engine is based. This includes board representation, move generation, game trees, etc. Each section will provide an overview of the concepts and techniques used by our engine, and additional tools.
 
 \section{Board representation}
 \label{sec:board}
@@ -64,9 +64,39 @@ There are different approaches to find the best move from a position. Some of th
 
 \noindent Note that these search algorithms are the foundation of more advanced and practical algorithms used today. However, explaining them is essential to understand the underlying principles.
 
-\paragraph{Depth-First Search} refers to the process of exploring each branch of a tree or graph to its deepest level before backtracking. Unfortunately, in chess, this cannot be possible because the number of possible moves grows exponentially with the depth of the search tree, leading to the so-called combinatorial explosion. To address this, depth-first search is often combined with techniques like alpha-beta pruning (discussed below) to reduce the number of nodes evaluated, making the search more efficient while still exploring the tree deeply.
+\paragraph{Depth-First Search} refers to the process of exploring each branch of a tree or graph to its deepest level before backtracking. Unfortunately, in chess, this cannot be possible because the number of possible moves grows exponentially with the depth of the search tree, leading to the so-called combinatorial explosion. To address this, depth-first search is often combined with techniques like alpha-beta pruning (discussed below) to reduce the number of nodes evaluated, making the search more efficient while still exploring the tree deeply. The following pseudocode illustrates the working of the DFS algorithm:
+
+\begin{lstlisting}[caption={Pseudocode of the Depth-First Search algorithm.}, frame=single, numbers=left, xleftmargin=15pt]
+Procedure DepthFirstSearch(Graph G, Node v):
+    Mark v as visited
+    For each neighbor w of v in G.adjacentEdges(v):
+        If w is not visited:
+            Recursively call DFS(G, w)
+\end{lstlisting}
+
+DFS visits nodes by marking them as visited (line 2) and recursively explores all adjacent nodes until no unvisited nodes remain (lines 3 to 5). It has a worst-case performance of $O(|V| + |E|)$ and worst-case space complexity of $O(|V|)$, with $|V| = \text{number of nodes}$ and $|E| = \text{number of edges}$.
 
 \paragraph{Best-First Search} refers to the way of exploring the most promising nodes first. It is similar to a breadth-first search but prioritizes some nodes before others. They typically require significant memory resources, as they must store a search space (the collection of all potential solutions in search algorithms) that grows exponentially.
+
+\begin{lstlisting}[caption={Pseudocode of the Best-First Search algorithm.}, frame=single, numbers=left, xleftmargin=10pt, breaklines=true]
+Procedure BestFirstSearch(Graph G, Node start, Node goal):
+    Create an empty priority queue PQ
+    Add start to PQ with priority 0
+    Mark start as visited
+
+    While PQ is not empty:
+        Node current = Remove the node with the highest priority from PQ
+        If current is the goal:
+            Return the path to the goal
+
+        For each neighbor w of current in G.adjacentEdges(current):
+            If w is not visited:
+                Calculate priority for w (e.g., using a heuristic)
+                Add w to PQ with the calculated priority
+                Mark w as visited
+\end{lstlisting}
+
+In this case, the priority queue contains nodes along with their associated priorities, which are determined by a heuristic function.
 
 \paragraph{Parallel Search} refers to mulithreaded search, a technique used to accelerate search processes by leveraging multiple processors.
 
@@ -74,9 +104,30 @@ There are different approaches to find the best move from a position. Some of th
 
 \noindent Next, we will explore some of the most used search algorithms in chess engines.
 
+\clearpage
+
 \subsection{Minimax algorithm}
 
 The \textbf{minimax} algorithm is a decision making algorithm that follows DFS principles. It is based on the assumption that both players play optimally, with one player (the maximizer) trying to maximize his score and the other player (the minimizer) trying to minimize his score. It explores the game tree to evaluate all possible moves and determines the best move for the current player.
+
+\begin{lstlisting}[caption={Pseudocode of the Minimax algorithm.}, frame=single, numbers=left, xleftmargin=15pt, breaklines=true]
+Procedure Minimax(Node position, Integer depth, Boolean maximizingPlayer):
+    If depth == 0 or position is a terminal node:
+        Return the evaluation of the position
+
+    If maximizingPlayer:
+        Integer maxEval = -Infinity
+        For each child of position:
+            Integer eval = Minimax(child, depth - 1, False)
+            maxEval = max(maxEval, eval)
+        Return maxEval
+    Else: // minimizingPlayer
+        Integer minEval = +Infinity
+        For each child of position:
+            Integer eval = Minimax(child, depth - 1, True)
+            minEval = min(minEval, eval)
+        Return minEval
+\end{lstlisting}
 
 \begin{figure}[H]
     \centering
@@ -116,9 +167,33 @@ The \textbf{minimax} algorithm is a decision making algorithm that follows DFS p
 
 \noindent In this example, white is represented by square nodes and black by circle nodes. Note that this example is a binary tree, but there might be more moves or nodes in a real scenario. Each of them wants to maximize or minimize their respective final value in each position. For the leftmost pair of leaf nodes with values of 3 and 5, 3 is chosen because black tries to get the lowest score between them. Then, the other pair of leaf nodes with values of 2 and 9, 2 is chosen for the same reason. Lastly, at the root node, white selects 3 as the maximum number between 3 and 2.
 
-\paragraph{Negamax} is a variant of minimax that simplifies the implementation by assuming that the gain of one player is the loss of the other. This allows the use of a single evaluation function with inverted values. In this project, this variant is not used.
+\subsection{Alpha-beta pruning}
 
-\paragraph{Alpha-beta pruning} is an optimization of minimax that reduces significantly the number of evaluated nodes in the game tree. It uses two values, alpha and beta, to discard branches that cannot influence the final decision, improving the efficiency.
+Alpha-beta pruning is an optimization of minimax that reduces significantly the number of evaluated nodes in the game tree. It uses two values, alpha and beta, to discard branches that cannot influence the final decision, improving the efficiency.
+
+\begin{lstlisting}[caption={Pseudocode of the Alpha-Beta Pruning algorithm.}, frame=single, numbers=left, xleftmargin=15pt, breaklines=true]
+Procedure AlphaBeta(Node position, Integer depth, Integer alpha, Integer beta, Boolean maximizingPlayer):
+    If depth == 0 or position is a terminal node:
+        Return the evaluation of the position
+    If maximizingPlayer:
+        Integer maxEval = -Infinity
+        For each child of position:
+            Integer eval = AlphaBeta(child, depth - 1, alpha, beta, False)
+            maxEval = max(maxEval, eval)
+            alpha = max(alpha, eval)
+            If beta <= alpha:
+                Break // Beta cutoff
+        Return maxEval
+    Else: // minimizingPlayer
+        Integer minEval = +Infinity
+        For each child of position:
+            Integer eval = AlphaBeta(child, depth - 1, alpha, beta, True)
+            minEval = min(minEval, eval)
+            beta = min(beta, eval)
+            If beta <= alpha:
+                Break // Alpha cutoff
+        Return minEval
+\end{lstlisting}
 
 \begin{figure}[H]
     \centering
@@ -156,11 +231,7 @@ The \textbf{minimax} algorithm is a decision making algorithm that follows DFS p
     \label{fig:alpha-beta-pruning}
 \end{figure}
 
-\noindent In this other example, the red dashed node is pruned because it cannot influence the final decision independently of its value. If its value is less than or equal to 2, it will never improve the previously analyzed value of 3. On the other hand, if its value is greater than 2, black will still choose 2 to minimize the score.
-
-\vspace{1em}
-
-\noindent Another formal way to explain this is by using $alpha$ and $beta$ values:
+\noindent In this other example, the red dashed node is pruned because it cannot influence the final decision independently of its value. If its value is less than or equal to 2, it will never improve the previously analyzed value of 3. On the other hand, if its value is greater than 2, black will still choose 2 to minimize the score. Another formal way to explain this is by using $alpha$ and $beta$ values:
 
 \newpage
 
@@ -451,6 +522,7 @@ The alpha-beta algorithm has been further improved over time with various enhanc
 \end{figure}
 
 \section{Evaluation}
+\label{sec:evaluation}
 
 For each position, a numerical value is assigned representing how favorable the position is for one side: positive (+) for white and negative (-) for black. These symmetric values were first formulated by~\cite{Shannon1950} and which guide the engine in selecting the best moves during the search process. Generally, this value is expressed in centipawns (cp) that represents one hundredth of a pawn's value. There are two ways to implement it:
 
@@ -600,8 +672,26 @@ For each position, a numerical value is assigned representing how favorable the 
 
 \noindent All these ensures that positions with exposed kings are evaluated as less favorable. If there are open (no pawns of either color) or semi-open (no pawns of one color but at least one pawn of the opposite color) files near the king, the position is penalized further, as these files provide attacking opportunities for enemy rooks and queens.
 
-\vspace{1em}
-
 \section{How can we determine the strength of our engine?}
 
-This can be answered by playing against other engines and analyzing the results. The most common way to do this is by using the Computer Chess Rating Lists which ranks chess engines based on their performance in various tournaments and matches. By the time being, we have chosen to compare different versions of the engine with Stockfish, currently ranked as the number one on the list. This analysis will be explained in Chapter~\ref{cap:testing}. You can continue reading the next chapter to learn about the tools and the work behind it.
+This can be answered by playing against other engines and analyzing the results. The most common way to do this is by using the Computer Chess Rating Lists which ranks chess engines based on their performance in various tournaments and matches. By the time being, we have chosen to compare different versions of the engine with Stockfish, currently ranked as the number one on the list. Continue reading to learn about the used tools and read about the work behind it in Section~\ref{sec:tools}.
+
+\subsection{Profiler}
+
+TODO: explain
+
+\subsection{CustomTkinter: Python UI-library}
+
+TODO: explain
+
+\subsection{Cutechess}
+
+TODO: explain
+
+\subsection{Stockfish}
+
+TODO: explain
+
+\subsection{GitHub Actions and workflows}
+
+TODO: explain
