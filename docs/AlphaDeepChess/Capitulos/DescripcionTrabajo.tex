@@ -5,12 +5,12 @@
  modules:
 
 \begin{itemize}
-    \item \texttt{board}: Data structures to represent the chess board.
-    \item \texttt{evaluation}: Assign a score to a chess position
-    \item \texttt{move\_generator}: Create a list of all the legal moves in a position.
-    \item \texttt{move\_ordering}: in charge of sort moves by estimated quality.
-    \item \texttt{search}: Contains the algorithm to search the best move.
-    \item \texttt{uci}: Universal Chess Interface implementation.
+    \item \textit{Board}: Data structures to represent the chess board.
+    \item \textit{Evaluation}: Assign a score to a chess position
+    \item \textit{Move\_generator}: Create a list of all the legal moves in a position.
+    \item \textit{Move\_ordering}: in charge of sort moves by estimated quality.
+    \item \textit{Search}: Contains the algorithm to search the best move.
+    \item \textit{UCI}: Universal Chess Interface implementation.
 \end{itemize}
 \vspace{1em}
 
@@ -477,7 +477,7 @@ In this section we present how our evaluation function works. For each position,
 
 \subsection*{Piece Square Tables (PST's)}
 
-\noindent The basic material evaluation described earlier has a significant limitatio,  it doesnt consider the fact that a piece could have more power in different squares of the board. For instance, as illustrated in Figure~\ref{fig:knight-movement-corner-and-center}, a knight placed in the center can control up to eight squares, while a knight positioned in the corner can reach only two.
+\noindent The basic material evaluation described earlier has a significant limitation,  it doesnt consider the fact that a piece could have more power in different squares of the board. For instance, as illustrated in Figure~\ref{fig:knight-movement-corner-and-center}, a knight placed in the center can control up to eight squares, while a knight positioned in the corner can reach only two.
 
 \begin{figure}[H]
     \centering
@@ -549,7 +549,9 @@ An example PST for the bishop is shown in Figure~\ref{fig:piece-square-values-bi
 
 \noindent A chess game typically consists of three phases: the opening, where pieces are developed to more effective squares; the middlegame, where tactical and strategic battles take place; and the endgame, where usually the pawns aim to promote and the side that has the advantage tries to corner the enemy king to mate it.
 
-It is clearly suboptimal to assign the same piece-square table (PST) bonuses to pieces like the pawn or king during both the middlegame and the endgame. To address this, we implement \textit{tapered evaluation}, a technique that computes two separate evaluations, one for the middlegame/opening and another for the endgame, then interpolates between the two scores to produce a final evaluation.~\cite{TaperedEvaluation}
+\vspace{1em}
+
+\noindent It is clearly suboptimal to assign the same piece-square table (PST) bonuses to pieces like the pawn or king during both the middlegame and the endgame. To address this, we implement \textit{tapered evaluation}, a technique that computes two separate evaluations, one for the middlegame/opening and another for the endgame, then interpolates between the two scores to produce a final evaluation.~\cite{TaperedEvaluation}
 
 \vspace{1em}
 \noindent First we calculate the percentage of middlegame and the percentage of endgame:
@@ -732,7 +734,7 @@ Figure~\ref{fig:killer_move_example} shows an example of a killer move.
         ]
     \end{minipage}
 
-    \caption{Killer move example. The queen moves to h5, threatening checkmate on f7. This prunes all other moves that do not respond to the threat.}
+    \caption{Killer move example. The queen moves to h5, threatening checkmate on f7. This quiet move prunes all other moves that do not respond to the threat.}
     \label{fig:killer_move_example}
 \end{figure}
 
@@ -779,7 +781,8 @@ Figure~\ref{fig:killer_move_example} shows an example of a killer move.
 
 \vspace{1em}
 
-\noindent Taking advantage of the concept of dynamic programming, we create a look-up table of chess positions and its evaluation. So if we encounter the same position again, the evaluation is already precalculated. However, we ask ourselves the following question: how much space does the look-up table take up if there are an astronomical amount of chess positions? What we can do is assign a hash to each position and make the table index the last bits of the hash. The larger the table, the less likely access collisions will be. We also want a hash that is fast to calculate and has collision-reducing properties; for this, we will use the Zobrist hashing technique in the following subsection.
+\noindent Taking advantage of the concept of dynamic programming, we create a look-up table of chess positions and its evaluation. So if we encounter the same position again, the evaluation is already precalculated. However, we ask ourselves the following question: how much space does the look-up table take up if there are an astronomical amount of chess positions? What we can do is assign a hash to each position and make the table index the last bits of the hash. The larger the table, the less likely access collisions will be. We also want a hash that is fast to calculate and has collision-reducing properties.
+~\cite{TranspositionTable}
 
 \vspace{1em}
 
@@ -789,103 +792,91 @@ Zobrist Hashing is a technique to transform a board position of arbitrary size i
 
 \vspace{1em}
 
-\noindent To generate a 64-bit hash for a position, the following steps are followed:
+To generate a 64-bit hash for a position, the following steps are followed:
 
-\begin{itemize}
-  \item There are 12 different types of chess pieces. For each of the 64 squares on the board, we generate 12 random 64-bit integers. That is, each piece-square combination is assigned a unique random value. This initialization step is performed only once when the program starts.
-  \item The hash value for a given position is computed by performing the XOR operation between the hash accumulator and the random value corresponding to each piece on its square.
-  \item In addition to the pieces, we also include:
-  \begin{itemize}
-    \item A random value for the side to move.
-    \item One random value to account for the possibility of an en passant capture.
-    \item One random value per possible castling move.
-  \end{itemize}
-  \item These random values are useful so that even slightly different positions produce very different hash values. This greatly reduces the chance of collisions.
-  \item The XOR operation is used not only because it is computationally inexpensive, but also because it is reversible. This means that when a move is made or undone, we can update the hash incrementally by applying XOR only to the affected squares, without needing to recompute the entire hash.
-\end{itemize}
+\begin{enumerate}
+  \item Pseudorandom 64-bit numbers are generated for each possible feature of a position:
+  \begin{enumerate}
+    \item One number for each piece type on each square — 12 pieces x 64 squares = 768 numbers.
+    \item One number to indicate the side to move is black.
+    \item Four numbers to represent castling rights (kingside and queenside for both white and black).
+    \item Eight numbers to represent the file of an available en passant square.
+  \end{enumerate}
+  \item The final hash is computed by XOR-ing together all the random numbers corresponding to the features present in the current position.
+\end{enumerate}
 
-\begin{lstlisting}[breaklines=true, frame=single, caption={Code example to calculate zobrist hash of position}, label={lst:zobrist_calculate_hash}]
-/**
- * @brief Calculate zobrist hash of position
- * 
- * @param[in] position board containing the chess position
- * 
- * @return the hash key of the chess position
- * 
- */
-static uint64_t hash(const Board& position)
-{
-    // initialize the random numbers only once
-    init_random_numbers_only_once();   
+\vspace{1em}
 
-    uint64_t hash = 0ULL;
+\noindent These random values ensure that even slightly different positions produce very different hash values. This greatly reduces the chance of collisions.
 
-    for (Square square = Square::A1; square.is_valid(); square++) {
-        const Piece piece = position.get_piece(square);
-        if (piece != Piece::EMPTY) {
-            hash ^= get_seed(square, piece);
-        }
-    }
-    const GameState state = position.state();
+\vspace{1em}
 
-    const Square eps_square = state.en_passant_square();
-    if (eps_square.is_valid()) {
-        hash ^= get_en_passant_seed(eps_square.col());
-    }
+\noindent The XOR operation is used not only because it is computationally inexpensive, but also because it is reversible. This means that when a move is made or undone, we can update the hash incrementally by applying XOR only to the affected squares, without needing to recompute the entire hash.
 
-    if (state.castle_king_white()) {
-        hash ^= get_king_white_castle_seed();
-    }
-    if (state.castle_queen_white()) {
-        hash ^= get_queen_white_castle_seed();
-    }
-    if (state.castle_king_black()) {
-        hash ^= get_king_black_castle_seed();
-    }
-    if (state.castle_queen_black()) {
-        hash ^= get_queen_black_castle_seed();
-    }
+\vspace{1em}
 
-    if (state.side_to_move() == ChessColor::BLACK) {
-        hash ^= get_black_to_move_seed();
-    }
+The position shown in Figure~\ref{fig:zobristExamplePosition} illustrates an example of how the Zobrist hash is computed.  
+The hash value is calculated by XORing the random values associated with each element of the position.  
+Since the side to move is White, we do not XOR the value associated with Black to move.  
+The resulting hash is computed as follows:
 
-    return hash;
-}
-\end{lstlisting}
+\[
+111 \oplus 69 \oplus 909 \oplus 10 \oplus 67 \oplus 12 \oplus 555 \oplus 3 = 458
+\]
+
+\begin{figure}[H]
+    \begin{minipage}{0.4\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            showmover=true,
+            setfen=7r/8/k7/1pP5/8/4Q3/1P6/1K6 w - b6 0 1,
+            markstyle=circle,
+            color=blue, markfields={b6},
+            pgfstyle=straightmove, color=red,
+            markmoves={b7-b5},
+            arrow=to
+        ]
+        \caption*{Side to move is white. The last move was a pawn advancing from b7 to b5, making en passant available on the b6 square.}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.4\textwidth}
+        \begin{tikzpicture}[scale=0.8]
+
+            \foreach \x in {0,1,...,7} {
+                \foreach \y in {0,1,...,7} {
+                    \pgfmathparse{mod(\x+\y,2) ? "black!20" : "white"}
+                    \edef\col{\pgfmathresult}
+                    \fill[\col] (\x,\y) rectangle (\x+1,\y+1);
+                }
+            }
+
+            \node at (1.5,0.5) {111}; \node at (1.5,1.5) {69}; \node at (4.5,2.5) {909}; \node at (1.5,4.5) {10};
+            \node at (2.5,4.5) {67}; \node at (0.5,5.5) {12}; \node at (1.5,5.5) {555}; \node at (7.5,7.5) {3};
+
+            \draw[thick] (0,0) grid (8,8);
+        \end{tikzpicture}
+        \caption*{Random values corresponding to each piece and the en passant square. The value for Black to move is 62319.}    \end{minipage}
+    \caption{Zobrist hash calculation example}
+    \label{fig:zobristExamplePosition}
+\end{figure}
 
 \subsubsection{Table Entry}
 
 Each entry in the transposition table stores the following information:
 
-\begin{itemize}
+\begin{enumerate}
   \item Zobrist Hash: The full 64-bit hash of the position. This is used to verify that the entry corresponds to the current position and to detect possible index collisions in the table.
   \item Evaluation: The numerical evaluation of the position, as computed by the evaluation function.
   \item Depth: The depth at which the evaluation was calculated. A deeper search could potentially yield a more accurate evaluation, so this value helps determine whether a new evaluation should overwrite the existing one.
   \item Node Type: Indicates the type of node stored:
-  \begin{itemize}
-    \item \texttt{EXACT} the evaluation is precise for this position.
-    \item \texttt{UPPERBOUND} the evaluation is an upper bound, typically resulting from an alpha cutoff.
-    \item \texttt{LOWERBOUND} the evaluation is a lower bound, typically resulting from a beta cutoff.
-    \item \texttt{FAILED} entry is empty or with invalid information.
-  \end{itemize}
-\end{itemize}
-
-\begin{lstlisting}[breaklines=true, frame=single, caption={Code example transposition table entry}, label={lst:transposition_table_entry}]
-class TranspositionTable::Entry
-{
-    uint64_t key; // full Zobrist key of the chess position
-
-    int evaluation; // Score of the chess position
-
-    Move move; // Best move found for the position.
-
-    NodeType type; // FAILED, EXACT, LOWERBOUND, UPPERBOUND
-
-    int8_t depth; // At which the position was evaluated
-...
-}
-\end{lstlisting}
+  \begin{enumerate}
+    \item \textit{EXACT} the evaluation is precise for this position.
+    \item \textit{UPPERBOUND} the evaluation is an upper bound, typically resulting from an alpha cutoff.
+    \item \textit{LOWERBOUND} the evaluation is a lower bound, typically resulting from a beta cutoff.
+    \item \textit{FAILED} entry is empty or with invalid information.
+  \end{enumerate}
+\end{enumerate}
 
 \subsubsection{Collisions}
 
@@ -913,7 +904,7 @@ To evaluate the improvement introduced by the transposition table, we conducted 
 
 \subsection{Move generator with Magic Bitboards and PEXT instructions}
 
-To identify potential performance bottlenecks, we performed profiling on the engine.
+To identify potential performance bottlenecks, we performed profiling on the engine, as shown in Figure~\ref{fig:profiling}.
 
 \begin{center}
     \begin{figure}[H]
@@ -925,8 +916,7 @@ To identify potential performance bottlenecks, we performed profiling on the eng
     \medskip
 \end{center}
 
-
-\noindent Profiling results show that most part of the total execution time is spent in the generate legal moves function. Therefore, optimizing this component is expected to lead to significant performance improvements.
+\noindent The profiling results indicate that the majority of the total execution time is spent in the legal move generation function. Therefore, optimizing this component is expected to yield significant performance improvements.
 
 \subsubsection{Magic bitboards}
 
@@ -1021,27 +1011,51 @@ A \textbf{magic number} is a multiplier to the bitboard of blockers with the fol
     \label{fig:magic_multiplication}
 \end{figure}
 
-\noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square; Listing~\ref{lst:rook_relevant_squares} shows this for the rook:
+\noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square; Listing~\ref{fig:rook_relevant_squares} shows this for the rook:
 
-\begin{lstlisting}[breaklines=true, frame=single, caption={Number of relevant squares for each rook square}, label={lst:rook_relevant_squares}]
-/**
- * @brief ROOK_RELEVANT_SQUARES
- * 
- * Number of squares where the rook could move
- * from each square minus the board border squares.
- */
-static constexpr int ROOK_RELEVANT_SQUARES[NUM_SQUARES] =
-{
-    12, 11, 11, 11, 11, 11, 11, 12,
-    11, 10, 10, 10, 10, 10, 10, 11,
-    11, 10, 10, 10, 10, 10, 10, 11,
-    11, 10, 10, 10, 10, 10, 10, 11,
-    11, 10, 10, 10, 10, 10, 10, 11,
-    11, 10, 10, 10, 10, 10, 10, 11,
-    11, 10, 10, 10, 10, 10, 10, 11,
-    12, 11, 11, 11, 11, 11, 11, 12
-};
-\end{lstlisting}
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[scale=0.8]
+        % Draw the chessboard
+        \foreach \x in {0,1,...,7} {
+            \foreach \y in {0,1,...,7} {
+                \pgfmathparse{mod(\x+\y,2) ? "black!20" : "white"}
+                \edef\col{\pgfmathresult}
+                \fill[\col] (\x,\y) rectangle (\x+1,\y+1);
+            }
+        }
+
+        % Add the values to the squares
+        \node at (0.5,7.5) {12}; \node at (1.5,7.5) {11}; \node at (2.5,7.5) {11}; \node at (3.5,7.5) {11};
+        \node at (4.5,7.5) {11}; \node at (5.5,7.5) {11}; \node at (6.5,7.5) {11}; \node at (7.5,7.5) {12};
+
+        \node at (0.5,6.5) {11}; \node at (1.5,6.5) {10}; \node at (2.5,6.5) {10}; \node at (3.5,6.5) {10};
+        \node at (4.5,6.5) {10}; \node at (5.5,6.5) {10}; \node at (6.5,6.5) {10}; \node at (7.5,6.5) {11};
+
+        \node at (0.5,5.5) {11}; \node at (1.5,5.5) {10}; \node at (2.5,5.5) {10}; \node at (3.5,5.5) {10};
+        \node at (4.5,5.5) {10}; \node at (5.5,5.5) {10}; \node at (6.5,5.5) {10}; \node at (7.5,5.5) {11};
+
+        \node at (0.5,4.5) {11}; \node at (1.5,4.5) {10}; \node at (2.5,4.5) {10}; \node at (3.5,4.5) {10};
+        \node at (4.5,4.5) {10}; \node at (5.5,4.5) {10}; \node at (6.5,4.5) {10}; \node at (7.5,4.5) {11};
+
+        \node at (0.5,3.5) {11}; \node at (1.5,3.5) {10}; \node at (2.5,3.5) {10}; \node at (3.5,3.5) {10};
+        \node at (4.5,3.5) {10}; \node at (5.5,3.5) {10}; \node at (6.5,3.5) {10}; \node at (7.5,3.5) {11};
+
+        \node at (0.5,2.5) {11}; \node at (1.5,2.5) {10}; \node at (2.5,2.5) {10}; \node at (3.5,2.5) {10};
+        \node at (4.5,2.5) {10}; \node at (5.5,2.5) {10}; \node at (6.5,2.5) {10}; \node at (7.5,2.5) {11};
+
+        \node at (0.5,1.5) {11}; \node at (1.5,1.5) {10}; \node at (2.5,1.5) {10}; \node at (3.5,1.5) {10};
+        \node at (4.5,1.5) {10}; \node at (5.5,1.5) {10}; \node at (6.5,1.5) {10}; \node at (7.5,1.5) {11};
+
+        \node at (0.5,0.5) {12}; \node at (1.5,0.5) {11}; \node at (2.5,0.5) {11}; \node at (3.5,0.5) {11};
+        \node at (4.5,0.5) {11}; \node at (5.5,0.5) {11}; \node at (6.5,0.5) {11}; \node at (7.5,0.5) {12};
+
+        % Draw the grid
+        \draw[thick] (0,0) grid (8,8);
+    \end{tikzpicture}
+    \caption{Relevant squares for rook piece.}
+    \label{fig:rook_relevant_squares}
+\end{figure}
 
 \vspace{1em}
 
