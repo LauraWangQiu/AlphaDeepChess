@@ -425,7 +425,7 @@ Aspiration window's main objetive is to reduce the number of nodes to explore by
 
 \newpage
 
-\section{Evaluation}
+\section{Evaluation: materialistic approach}
 \label{sec:evaluation}
 
 In this section we present how our evaluation function works. For each position, a numerical value is assigned representing how favorable the position is for one side: positive (+) for white and negative (-) for black. The values are typically expressed in centipawns (cp), where one centipawn equals one hundredth of a pawn. ~\cite{Shannon1950}
@@ -666,9 +666,218 @@ An example PST for the bishop is shown in Figure~\ref{fig:piece-square-values-bi
 
 \newpage
 
-\section{Move Ordering}
+\section{Move Generator}
 
-\noindent Having explained the evaluation function, in this chapter we detail the implementation of the move ordering heuristic.
+\noindent Calculating the legal moves in a chess position is a more difficult and tedious task
+than it might seem, mainly due to the unintuitive rules of en passant and castling,
+and it is also difficult to restrict the moves of pinned pieces. ~\cite{GenerateLegalMovesEfficiently}
+
+\vspace{1em}
+
+The full implementation of the move generator can be found in the following file:\\
+\scriptsize\url{https://github.com/LauraWangQiu/AlphaDeepChess/blob/main/src/move_generator/move_generator_basic.cpp}\normalsize.
+
+\vspace{2em}
+
+\noindent Our move generator is based on bitboard operations, with the goal of efficiently producing a list of all legal moves in a given position.
+
+\subsection*{Precomputed Attacks}
+
+\noindent The first step is to precompute attack patterns for each piece type on every square of the board. These patterns are stored as bitboards, typically in arrays indexed by both piece type and square.
+
+\vspace{1em}
+
+For instance, Figure~\ref{fig:PrecomputedAttackBishop} illustrates the precomputed attack bitboard for a bishop positioned on the d4 square.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.6\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            showmover=false,
+            setfen=8/8/8/8/3B4/8/8/8 w - - 0 1,
+            markstyle=border,
+            color=blue, markfields={a1,b2,c3,e5,f6,g7,h8,g1,f2,e3,c5,b6,a7}
+        ]
+    \end{minipage}
+
+    \caption{Precomputed attack for the bishop on the d4 square.}
+    \label{fig:PrecomputedAttackBishop}
+\end{figure}
+
+\subsection*{Bitboard of Danger Squares}
+
+\noindent
+Using the previously precomputed attack patterns, we generate a bitboard representing all the squares currently attacked by the waiting side (the side not having the move). This bitboard is referred to as the danger bitboard. It includes all squares that are unsafe for the king of the side to move, as moving the king to any of these squares would result in an illegal position. Figure ~\ref{fig:BitboardDangers} illustrates an example of this concept.
+
+\begin{figure}[H]
+    \begin{minipage}{0.4\textwidth}
+        \newchessgame
+        \chessboard[
+            showmover=true,
+            setfen=n7/2p5/5kP1/5P2/1R3K2/r7/8/8 w - - 0 1
+        ]
+        \caption*{White is the side to move.}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.4\textwidth}
+
+        \includegraphics[width=1.0\textwidth]{Imagenes/bitboardDangers.png}
+        \caption*{Danger bitboard for the black (waiting) side.}        
+    \end{minipage}
+    \caption{Example of a danger bitboard squares attacked by the black side.}
+    \label{fig:BitboardDangers}
+\end{figure}
+
+\vspace{1em}
+
+\noindent
+The danger bitboard is constructed by performing a bitwise OR operation across all legal attacks from the opponent's pieces. For non-sliding pieces such as pawns, knights, and kings, their legal attack bitboards match exactly with their precomputed attack patterns.
+
+\vspace{1em}
+
+\noindent
+However, sliding pieces as rooks, bishops, and queens require additional handling. Their attacks depend on the presence of blockers in their movement paths. Figure~\ref{fig:blockerExample} shows an example where the attacks of sliding pieces are limited due to blocking pawns.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.6\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            showmover=true,
+            setfen=8/8/3r2p1/8/3P4/8/8/8 w - - 0 1,
+            markstyle=border,
+            color=blue, markfields={d7,d8,d5,c6,b6,a6,e6,f6},
+            color=red, markfields={d4,g6}
+        ]
+    \end{minipage}
+
+    \caption{Example of blocking pieces: the rook sliding attack is being blocked by the pawns.}
+    \label{fig:blockerExample}
+
+\end{figure}
+
+\noindent
+Currently, calculating legal attacks for sliding pieces involves iterating along orthogonal and diagonal directions until a blocking piece is encountered. This approach is relatively inefficient. In subsequent sections, we present optimization techniques that address this issue.
+
+\subsection*{Bitboard of Pinned pieces}
+
+\noindent
+The next challenging aspect of legal move generation is handling pinned pieces. A pinned piece cannot move freely, as doing so would expose its king to check, making the move illegal. An example of a pinned piece is shown in Figure~\ref{fig:pinnedPiece}.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.6\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            showmover=true,
+            setfen=3r4/8/8/8/3N4/8/3K4/8 w - - 0 11
+        ]
+    \end{minipage}
+
+    \caption{The black rook pins the white knight. If the knight moves, the white king could be captured, making the move illegal.}    
+    \label{fig:pinnedPiece}
+
+\end{figure}
+
+\noindent
+We must compute a bitboard that contains all pinned pieces on the board. This allows us to restrict their movement accordingly during move generation. However, identifying pinned pieces is computationally expensive, as it requires iterating through the attack patterns of sliding pieces and checking for alignment with the king and potential blockers.
+
+\subsection*{Capture and push mask}
+
+\noindent
+The final bitboards required for handling checks are the \textit{capture mask} and the \textit{push mask}. The capture mask identifies the squares occupied by the checking pieces, while the push mask includes the squares in between the king and the checking piece along the line of attack. These are illustrated in Figure~\ref{fig:CapturePushMask}.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.6\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            showmover=true,
+            setfen=8/8/5N2/2K4r/8/8/8/8 w - - 0 1,
+            markstyle=border,
+            color=blue, markfields={d5,e5,f5,g5},
+            color=red, markfields={h5}
+        ]
+    \end{minipage}
+
+    \caption{The capture mask is shown in red, and the push mask is shown in blue.}   
+
+    \label{fig:CapturePushMask}
+
+\end{figure}
+
+These masks are applied during check situations. In such cases, the only legal responses are:
+\begin{itemize}
+    \item Capturing the checking piece (a move to a square in the capture mask).
+    \item Blocking the check (a move to a square in the push mask).
+    \item Moving the king to a safe square outside the danger bitboard.
+\end{itemize}
+
+\subsection*{Legal Move Computation}
+
+\noindent \noindent The final step is to calculate the legal moves of the side to move using the previously calculated information: bitboard of attacks, dangers, pinned pieces, push and capture mask.
+
+\vspace{1em}
+
+\noindent
+We begin by determining the number of checking pieces, which can be deduced from the number of set bits in the capture mask. Based on this, three main scenarios must be handled:
+
+
+\begin{itemize}
+
+    \item \textit{Double check:} If there are two or more checkers, the only legal option is to move the king to a square that is not under attack, outside the danger bitboard. No other piece can legally move in this case.
+
+    \item \textit{No check:} In the absence of any checks, we iterate through all the pieces belonging to the side to move and generate their legal moves. If a piece is pinned (inside pinned piece bitboard), its movement is constrained to the direction of the pin.
+
+    \item \textit{Single check:} If exactly one checker is present, we again iterate over all pieces, but the only moves available are to capture the checker(captures inside the capture mask) or to block the check (moves inside the push mask).
+
+\end{itemize}
+
+\noindent Finally, the special moves of castling and en passant are handled explicitly by looking for the castling rights and the en passant target square in the game state.
+
+\subsection*{Testing the move generator: Perft test}
+
+\noindent To ensure the correctness of our move generator, we perform what is known as a \textit{Perft test} (performance test, move path enumeration)~\cite{Perft}.
+
+\vspace{1em}
+
+
+\noindent Perft is a debugging function in which we generate the entire game tree for a specific position up to a given depth and count all the resulting nodes. We can then compare our results with those of other engines, such as Stockfish. Since Stockfish is widely regarded as highly accurate, it serves as a reliable reference for validating move generation.
+
+\vspace{1em}
+
+\noindent In Table~\ref{tab:perftResults}, we present our Perft results alongside those of Stockfish for seven well-known test positions at depth 6. The identical node counts in all cases confirm the correctness of our move generator.
+
+\vspace{1em}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l}
+    \hline
+    \textit{FEN NAME} & \textit{Stockfish Nodes} & \textit{AlphaDeepChess Nodes} \\
+    \hline
+    \texttt{FEN KIWIPETE}       &  8031647685 &  8031647685   \\
+    \texttt{FEN EDWARDS2}       &  6923051137 &  6923051137   \\
+    \texttt{FEN STRANGEMOVES}   &  5160619771 &  5160619771   \\
+    \texttt{FEN TALKCHESS}      &  3048196529 &  3048196529   \\
+    \texttt{FEN TEST4}          &  706045033  &  706045033    \\
+    \texttt{FEN TEST4 MIRROR}   &  706045033  &  706045033    \\
+    \texttt{FEN START POS}      &  119060324  &  119060324    \\
+    \hline
+    \end{tabular}
+    \caption{Perft results at depth 6: comparison between Stockfish and AlphaDeepChess~\cite{PerftResults}.}
+    \label{tab:perftResults}
+\end{table}
+
+\newpage
+\section{Move Ordering: MVV-LVA}
+ 
+\noindent Having explained the move generator function, in this chapter we detail the implementation of the move ordering heuristic.
 
 \vspace{1em}
 
@@ -746,593 +955,80 @@ Figure~\ref{fig:killer_move_example} shows an example of a killer move.
 
 \noindent If a quiet move being evaluated matches one of the killer moves stored at the current search depth, we increase its score by 70 points.
 
-\newpage
 
-\section{Improvements}
 
-\noindent Some improvements and new structures were later added for different versions: transposition tables, Zobrist hashing, table entries, PEXT instructions, search multithread and search reductions that will be discussed and analysed below.
 
-\vspace{1em}
 
-\noindent At the end of each section, we present the results of the 100-game match between the engine with the implemented technique and a baseline version, which includes only the fundamental techniques described in the previous chapters. The objective of these tests are to evaluate the difference in playing strength introduced by the new implementation.
-
-\subsection{Transposition Table}
-\label{sec:tt}
-
-\noindent As discused in the previous chapter (see Section~\ref{chap:iterativeDeepening}), the basic implementation of the chess engine generates a large amount of redundant calculations due to the iterative deepening approach and also the concept of transpositions: situations in which the same board position is reached through different sequences of moves in the game tree.
-\noindent Figure~\ref{fig:transposition_example} illustrates a position that can arise through multiple move orders. Where the white king could go to the g3 square from multiple paths.
-
-\begin{figure}[H]
-    \centering
-    \begin{minipage}{0.6\textwidth}
-        \centering
-        \newchessgame
-        \chessboard[
-            showmover=false,
-            setfen=8/2k5/3p4/p2P1p2/P2P1P2/8/8/2K5 w - - 0 1,
-            pgfstyle=straightmove, color=blue,
-            markmoves={c1-e3,e3-g3,c1-g1,g1-g3},
-            arrow=to
-        ]
-    \end{minipage}
-    \caption{Lasker-Reichhelm Position, transposition example}
-    \label{fig:transposition_example}
-\end{figure}
-
-\vspace{1em}
-
-\noindent Taking advantage of the concept of dynamic programming, we create a look-up table of chess positions and its evaluation. So if we encounter the same position again, the evaluation is already precalculated. However, we ask ourselves the following question: how much space does the look-up table take up if there are an astronomical amount of chess positions? What we can do is assign a hash to each position and make the table index the last bits of the hash. The larger the table, the less likely access collisions will be. We also want a hash that is fast to calculate and has collision-reducing properties.
-~\cite{TranspositionTable}
-
-\vspace{1em}
-
-\subsubsection{Zobrist Hashing}
-
-Zobrist Hashing is a technique to transform a board position of arbitrary size into a number of a set length, with an equal distribution over all possible numbers invented by Albert Zobrist. (\cite{ZobristHashing})
-
-\vspace{1em}
-
-To generate a 64-bit hash for a position, the following steps are followed:
-
-\begin{enumerate}
-  \item Pseudorandom 64-bit numbers are generated for each possible feature of a position:
-  \begin{enumerate}
-    \item One number for each piece type on each square — 12 pieces x 64 squares = 768 numbers.
-    \item One number to indicate the side to move is black.
-    \item Four numbers to represent castling rights (kingside and queenside for both white and black).
-    \item Eight numbers to represent the file of an available en passant square.
-  \end{enumerate}
-  \item The final hash is computed by XOR-ing together all the random numbers corresponding to the features present in the current position.
-\end{enumerate}
-
-\vspace{1em}
-
-\noindent These random values ensure that even slightly different positions produce very different hash values. This greatly reduces the chance of collisions.
-
-\vspace{1em}
-
-\noindent The XOR operation is used not only because it is computationally inexpensive, but also because it is reversible. This means that when a move is made or undone, we can update the hash incrementally by applying XOR only to the affected squares, without needing to recompute the entire hash.
-
-\vspace{1em}
-
-The position shown in Figure~\ref{fig:zobristExamplePosition} illustrates an example of how the Zobrist hash is computed.  
-The hash value is calculated by XORing the random values associated with each element of the position.  
-Since the side to move is White, we do not XOR the value associated with Black to move.  
-The resulting hash is computed as follows:
-
-\[
-111 \oplus 69 \oplus 909 \oplus 10 \oplus 67 \oplus 12 \oplus 555 \oplus 3 = 458
-\]
-
-\begin{figure}[H]
-    \begin{minipage}{0.4\textwidth}
-        \centering
-        \newchessgame
-        \chessboard[
-            showmover=true,
-            setfen=7r/8/k7/1pP5/8/4Q3/1P6/1K6 w - b6 0 1,
-            markstyle=circle,
-            color=blue, markfields={b6},
-            pgfstyle=straightmove, color=red,
-            markmoves={b7-b5},
-            arrow=to
-        ]
-        \caption*{Side to move is white. The last move was a pawn advancing from b7 to b5, making en passant available on the b6 square.}
-    \end{minipage}
-    \hfill
-    \begin{minipage}{0.4\textwidth}
-        \begin{tikzpicture}[scale=0.8]
-
-            \foreach \x in {0,1,...,7} {
-                \foreach \y in {0,1,...,7} {
-                    \pgfmathparse{mod(\x+\y,2) ? "black!20" : "white"}
-                    \edef\col{\pgfmathresult}
-                    \fill[\col] (\x,\y) rectangle (\x+1,\y+1);
-                }
-            }
-
-            \node at (1.5,0.5) {111}; \node at (1.5,1.5) {69}; \node at (4.5,2.5) {909}; \node at (1.5,4.5) {10};
-            \node at (2.5,4.5) {67}; \node at (0.5,5.5) {12}; \node at (1.5,5.5) {555}; \node at (7.5,7.5) {3};
-
-            \draw[thick] (0,0) grid (8,8);
-        \end{tikzpicture}
-        \caption*{Random values corresponding to each piece and the en passant square. The value for Black to move is 62319.}    \end{minipage}
-    \caption{Zobrist hash calculation example}
-    \label{fig:zobristExamplePosition}
-\end{figure}
-
-\subsubsection{Table Entry}
-
-Each entry in the transposition table stores the following information:
-
-\begin{enumerate}
-  \item Zobrist Hash: The full 64-bit hash of the position. This is used to verify that the entry corresponds to the current position and to detect possible index collisions in the table.
-  \item Evaluation: The numerical evaluation of the position, as computed by the evaluation function.
-  \item Depth: The depth at which the evaluation was calculated. A deeper search could potentially yield a more accurate evaluation, so this value helps determine whether a new evaluation should overwrite the existing one.
-  \item Node Type: Indicates the type of node stored:
-  \begin{enumerate}
-    \item \textit{EXACT} the evaluation is precise for this position.
-    \item \textit{UPPERBOUND} the evaluation is an upper bound, typically resulting from an alpha cutoff.
-    \item \textit{LOWERBOUND} the evaluation is a lower bound, typically resulting from a beta cutoff.
-    \item \textit{FAILED} entry is empty or with invalid information.
-  \end{enumerate}
-\end{enumerate}
-
-\subsubsection{Collisions}
-
-As discussed earlier, index collisions in the transposition table are handled by verifying the full Zobrist hash stored in the entry. However, it is still theoretically possible for a full hash collision to occur, that is two different positions producing the same hash.
-
-\vspace{1em}
-
-\noindent This scenario is extremely rare. With 64-bit hashes, there are $2^{64}$ possible unique values, which is more than sufficient for practical purposes. In the unlikely event of a true hash collision, it could result in an incorrect evaluation being reused for a different position.
-
-\subsubsection{Analysis}
-
-To evaluate the improvement introduced by the transposition table, we conducted a 100-game tournament against the basic version of the engine. We selected 50 random starting positions from an opening book and played each position twice, alternating colors to ensure fairness. Each bot has 4 seconds to think per move.
-
-\begin{center}
-\begin{figure}[H]
-    \centering
-    \ResultBar{15cm}{0.5cm}{46}{22}{32}
-    \caption{64MB Transposition Table bot vs basic bot}
-    \label{fig:results_transposition_table_bot}
-\end{figure}
-\medskip
-\end{center}
-
-\noindent We see a substantial improvement by adding the transposition table with 46 wins versus 32 losses.
-
-\subsection{Move generator with Magic Bitboards and PEXT instructions}
-
-To identify potential performance bottlenecks, we performed profiling on the engine, as shown in Figure~\ref{fig:profiling}.
-
-\begin{center}
-    \begin{figure}[H]
-    \centering
-        \includegraphics[width=1.0\textwidth]{Imagenes/basic_move_generator_profiling.png}
-        \caption{Profiling results}
-        \label{fig:profiling}
-    \end{figure}
-    \medskip
-\end{center}
-
-\noindent The profiling results indicate that the majority of the total execution time is spent in the legal move generation function. Therefore, optimizing this component is expected to yield significant performance improvements.
-
-\subsubsection{Magic bitboards}
-
-We can create a look up table of all the rook and bishop moves for each square on the board and for each combination of pieces that blocks the path of the slider piece (blockers  bitboard). Basically we need a hash table to store rook and bishop moves indexed by square and bitboard of blockers. The problem is that this table could be very big.~\cite{MagicBitboards}
-
-\vspace{1em}
-
-\noindent Magic bitboards technique used to reduce the size of the look up table. We cut off unnecesary information in the blockers bitboard, excluding the board borders and the squares outside its attack pattern.
-
-\vspace{1em}
-
-A \textbf{magic number} is a multiplier to the bitboard of blockers with the following properties:
-
-\begin{itemize}
-  \item Preserves relevant blocker information: 
-  The nearest blockers along a piece's movement direction are preserved. 
-  \textit{Example:} Consider a rook with two pawns in its path:
-  \begin{lstlisting}[breaklines=true]
-    Rook -> -> -> [Pawn1][Pawn2]
-  \end{lstlisting}
-  In this case, only `Pawn1` blocks the rook's movement, while `Pawn2` is irrelevant.
-  \item Compresses the blocker bitboard, pushing the important bits near the most significant bit.
-  \item The final multiplication must produce a unique index for each possible blocker configuration. The way to ensure the uniqueness is by brute force testing.
-\end{itemize}
-
-\noindent As illustrated in Figure~\ref{fig:magics_position}, we aim to compute the legal moves of the white rook in the given position. In practice, the only pieces that truly block the rook's path are those marked with a red circle.
-
-\begin{figure}[H]
-    \centering
-    \begin{minipage}{0.6\textwidth}
-        \centering
-        \newchessgame
-        \chessboard[
-            showmover=false,
-            setfen=n1bk3r/3p4/1p1p2p1/8/3R1p2/8/3p4/7n w - - 0 1,
-            markstyle=circle,
-            color=red, markfields={d6,f4,d2},
-            color=green, markfields={c4,b4,a4,e4,d5,d3}
-        ]
-    \end{minipage}
-    \caption{Initial chess position with white rook and blockers}
-    \label{fig:magics_position}
-\end{figure}
-
-\noindent First, we mask out all pieces outside the rook's attack pattern or on the board borders, as shown in Figure~\ref{fig:magic_preprocessing}.
-
-\begin{figure}[H]
-    \centering
-    \begin{minipage}[c]{0.4\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/magics_blockers.png}
-        \caption*{Original blockers bitboard}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[c]{0.1\textwidth}
-        \centering
-        \small$\to$
-    \end{minipage}
-    \hfill
-    \begin{minipage}[c]{0.4\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/magics_processed_blockers.png}
-        \caption*{Masked blockers bitboard}
-    \end{minipage}
-    \caption{Pre-processing of the blockers bitboard}
-    \label{fig:magic_preprocessing}
-\end{figure}
-
-\noindent As illustrated in Figure~\ref{fig:magic_multiplication}, the masked blockers bitboard is then multiplied by the magic number. The result retains only the three relevant pawns that obstruct the rook's movement, pushing them toward the most significant bits.
-
-\begin{figure}[H]
-    \centering
-    \begin{minipage}[c]{0.4\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/magics_processed_blockers.png}
-        \caption*{Masked blockers bitboard}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[c]{0.1\textwidth}
-        \centering
-        \Huge$\times$ \\[0.5em]
-        \small Magic number \\[0.5em]
-        \Huge$=$
-    \end{minipage}
-    \hfill
-    \begin{minipage}[c]{0.4\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/magics_multiplied_blockers.png}
-        \caption*{Multiplied blockers bitboard}
-    \end{minipage}
-    \caption{Multiplication by magic number to produce an index}
-    \label{fig:magic_multiplication}
-\end{figure}
-
-\noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square; Listing~\ref{fig:rook_relevant_squares} shows this for the rook:
-
-\begin{figure}[H]
-    \centering
-    \begin{tikzpicture}[scale=0.8]
-        % Draw the chessboard
-        \foreach \x in {0,1,...,7} {
-            \foreach \y in {0,1,...,7} {
-                \pgfmathparse{mod(\x+\y,2) ? "black!20" : "white"}
-                \edef\col{\pgfmathresult}
-                \fill[\col] (\x,\y) rectangle (\x+1,\y+1);
-            }
-        }
-
-        % Add the values to the squares
-        \node at (0.5,7.5) {12}; \node at (1.5,7.5) {11}; \node at (2.5,7.5) {11}; \node at (3.5,7.5) {11};
-        \node at (4.5,7.5) {11}; \node at (5.5,7.5) {11}; \node at (6.5,7.5) {11}; \node at (7.5,7.5) {12};
-
-        \node at (0.5,6.5) {11}; \node at (1.5,6.5) {10}; \node at (2.5,6.5) {10}; \node at (3.5,6.5) {10};
-        \node at (4.5,6.5) {10}; \node at (5.5,6.5) {10}; \node at (6.5,6.5) {10}; \node at (7.5,6.5) {11};
-
-        \node at (0.5,5.5) {11}; \node at (1.5,5.5) {10}; \node at (2.5,5.5) {10}; \node at (3.5,5.5) {10};
-        \node at (4.5,5.5) {10}; \node at (5.5,5.5) {10}; \node at (6.5,5.5) {10}; \node at (7.5,5.5) {11};
-
-        \node at (0.5,4.5) {11}; \node at (1.5,4.5) {10}; \node at (2.5,4.5) {10}; \node at (3.5,4.5) {10};
-        \node at (4.5,4.5) {10}; \node at (5.5,4.5) {10}; \node at (6.5,4.5) {10}; \node at (7.5,4.5) {11};
-
-        \node at (0.5,3.5) {11}; \node at (1.5,3.5) {10}; \node at (2.5,3.5) {10}; \node at (3.5,3.5) {10};
-        \node at (4.5,3.5) {10}; \node at (5.5,3.5) {10}; \node at (6.5,3.5) {10}; \node at (7.5,3.5) {11};
-
-        \node at (0.5,2.5) {11}; \node at (1.5,2.5) {10}; \node at (2.5,2.5) {10}; \node at (3.5,2.5) {10};
-        \node at (4.5,2.5) {10}; \node at (5.5,2.5) {10}; \node at (6.5,2.5) {10}; \node at (7.5,2.5) {11};
-
-        \node at (0.5,1.5) {11}; \node at (1.5,1.5) {10}; \node at (2.5,1.5) {10}; \node at (3.5,1.5) {10};
-        \node at (4.5,1.5) {10}; \node at (5.5,1.5) {10}; \node at (6.5,1.5) {10}; \node at (7.5,1.5) {11};
-
-        \node at (0.5,0.5) {12}; \node at (1.5,0.5) {11}; \node at (2.5,0.5) {11}; \node at (3.5,0.5) {11};
-        \node at (4.5,0.5) {11}; \node at (5.5,0.5) {11}; \node at (6.5,0.5) {11}; \node at (7.5,0.5) {12};
-
-        % Draw the grid
-        \draw[thick] (0,0) grid (8,8);
-    \end{tikzpicture}
-    \caption{Relevant squares for rook piece.}
-    \label{fig:rook_relevant_squares}
-\end{figure}
-
-\vspace{1em}
-
-\noindent The final index is thus computed as:
-
-\begin{align*}
-    \text{index}
-    &= (\texttt{bitboard\_of\_blockers} \times \texttt{magic\_number})
-       \;\gg\;(64 - \texttt{relevant\_squares})\,.
-\end{align*}
-
-\subsubsection{PEXT instruction}
-
-\noindent The \texttt{PEXT} (Parallel Bits Extract) instruction—available on modern x86\_64 CPUs—extracts bits from a source operand according to a mask and packs them into the lower bits of the destination operand.~\cite{PextInstruction} It is ideally suited for computing our table index.
-
-Figure~\ref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: it selects specific bits from register \texttt{r2}, as specified by the mask in \texttt{r3}, and packs the result into the lower bits of the destination register \texttt{r1}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{Imagenes/pext.png}
-    \caption{Example of the \texttt{PEXT} instruction: extracting bits from \texttt{r2} using \texttt{r3} as a mask, and storing the result in \texttt{r1}. ~\cite{PextInstruction}}
-    \label{fig:pext_instruction_example}
-\end{figure}
-
-\noindent For our previous example (see Figure~\ref{fig:magics_position}), we only need the full bitboard of blockers and the rook’s attack pattern (excluding the borders to reduce space), as illustrated in Figure~\ref{fig:pext_bitboards}.
-
-\begin{figure}[H]
-    \centering
-    \begin{minipage}[c]{0.3\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/magics_blockers.png}
-        \caption*{Blockers bitboard}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[c]{0.3\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/magics_rook_attacks.png}
-        \caption*{Rook attack mask}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[c]{0.05\textwidth}
-        \centering
-        \Huge\texttt{->}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[c]{0.3\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/pext_final_index.png}
-        \caption*{Final extracted index}
-    \end{minipage}
-    \caption{index extraction with Pext example}
-    \label{fig:pext_bitboards}
-\end{figure}
-
-\noindent The final index used to access the lookup table is calculated using the \texttt{pext} instruction as follows:
-
-\begin{align*}
-    \text{index}
-    &= \texttt{\_pext\_u64}(\texttt{blockers},\,\texttt{attack\_pattern})\,.
-\end{align*}
-
-\noindent To maintain compatibility and performance across different hardware platforms, we provide two implementations:
-
-\begin{itemize}
-  \item If \texttt{PEXT} support is detected at compile time, the engine uses it to compute the index directly.
-  \item Otherwise, the engine falls back to the Magic Bitboards approach using multiplication and bit shifts.
-\end{itemize}
-
-\subsubsection{Analysis}
-
-To evaluate the improvement in the move generator, we conducted the same 
-100 game match vs the basic bot version.
-
-\begin{center}
-    \begin{figure}[H]
-        \centering
-        \ResultBar{15cm}{0.5cm}{64}{14}{22}
-        \caption{Move generator with PEXT instructions bot vs basic bot}
-        \label{fig:results_pext_move_generator_bot}
-    \end{figure}
-\medskip
-\end{center}
-
-\noindent Huge improvement with 64 wins versus 22 losses.
-
-\subsection{Evaluation with King Safety and piece mobility}
-
-It is often beneficial to evaluate additional aspects of a position beyond simply counting material. We introduce the following positional evaluation parameters:
-
-\begin{enumerate}
-    \item King Shield Bonus: The king is typically safer when protected by friendly pawns in front of it. We assign a bonus in the evaluation score for each allied pawn positioned directly in front of the king.
-
-    \item King Safety Penalty: For each square within a $3 \times 3$ area surrounding the king that is attacked by enemy pieces, we apply a penalty to reflect increased vulnerability.
-
-    \item Piece Mobility: Greater piece mobility is generally indicative of a stronger position. Each piece receives a bonus for every available move to a square that is not attacked by enemy pawns.
-\end{enumerate}
-
-\subsubsection{Analysis}
-
-To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version.
-
-\vspace{1em}
-
-\begin{center}
-    \begin{figure}[H]
-        \centering
-        \ResultBar{15cm}{0.5cm}{62}{8}{30}
-        \caption{King Safety and Piece mobility evaluation bot vs basic bot}
-        \label{fig:results_safety_mobility_bot}
-    \end{figure}
-\medskip
-\end{center}
-
-\noindent The results are slightly worse compared to the match using the material-only evaluation,~\ref{fig:results_pext_move_generator_bot} with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
-
-\subsection{Search Multithread}
-
-This version of search follows YBWC mentioned in Section~\ref{sec:alphabetaEnhancements}. It searches the first move sequentially after ordering the moves and launches the remaining moves in parallel using a thread. If it turns out that the first move was the best and pruning was applied, directly return the final node evaluation without the additional thread.
-
-\paragraph{Young Brothers Wait Concept} is a parallel search algorithm designed to optimize the distribution of work among multiple threads. This is particularly effective in alpha-beta pruning, where the search tree is explored selectively. It is divided into two phases: the principal variation move and the wait concept. The principal variation is searched sequentially by the main thread which ensures that the most promising move is evaluated first. Then, once the first move is evaluated, the remaining moves are distributed among multiple threads for parallel evaluation.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{Imagenes/Bitmap/pvsplitting.png}
-    \caption{Principal variation splitting.~\cite{PVSplitting}}
-    \label{fig:pv-splitting}
-\end{figure}
-
-\begin{lstlisting}[breaklines=true, frame=single]
-template<SearchType searchType>
-static int alpha_beta_search(std::atomic<bool>& stop, int depth, int ply, int alpha, int beta, SearchContext& context, Board board)
-{
-    // ...
-    // Check if it is in transposition table
-    // If it is, return previously calculated evaluation
-
-    generate_legal_moves<ALL_MOVES>(moves, board, &isCheck);
-    // ...
-    order_moves(moves, board, ply);
-    // ...
-    
-    constexpr SearchType nextSearchType = MAXIMIZING_WHITE ? MINIMIZE_BLACK : MAXIMIZE_WHITE;
-
-    // Search the first move sequentially
-    board.make_move(moves[0]);
-    int eval = alpha_beta_search<nextSearchType>(stop, depth - 1, ply + 1, alpha, beta, context, board);
-    board.unmake_move(moves[0], game_state);
-    // ...
-
-    // Alpha-Beta pruning with first move
-    if (/*prunned*/) goto end_search;
-
-    // Search remaining moves in parallel
-    thread = std::thread([&]() {
-        for (int i = 1; i < moves.size(); i++) {
-            // ...
-            // Alpha-Beta pruning with the remaining moves
-            if (/*prunned*/) break;
-        }
-    });
-    
-    if (thread.joinable()) {
-        thread.join();
-    }
-
-end_search:
-    // Store entry in tranposition table
-
-    return final_node_evaluation;
-}
-\end{lstlisting}
-
-\subsubsection{Analysis}
-
-To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version. 
-
-\begin{center}
-    \begin{figure}[H]
-        \centering
-        \ResultBar{15cm}{0.5cm}{32}{5}{63}
-        \caption{Multithread Search bot vs basic bot}
-        \label{fig:results_multithread_search_bot}
-    \end{figure}
-\medskip
-\end{center}
-
-\noindent The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
-
-\subsection{Late Move Reductions}
-
-We experiment with the use of late move pruning, under the assumption that if our move ordering is good, the best move in the position should be among the first explored moves. We reduce the depth by one unit starting from the tenth movement.
-
-\subsubsection{Analysis}
-
-To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version.
-
-\begin{center}
-    \begin{figure}[H]
-        \centering
-        \ResultBar{15cm}{0.5cm}{48}{15}{37}
-        \caption{Reductions Search bot vs basic bot}
-        \label{fig:results_reductions_search_bot}
-    \end{figure}
-\medskip
-\end{center}
-
-\noindent The results are worse, with 15 more losses than the version without this aggresive pruning.~\ref{fig:results_pext_move_generator_bot} This could be because our move ordering is not that strong, and the best move in the position sometimes is in the last positions.
-
-\section{Additional tools and work}
-\label{sec:tools}
-
-As it was mentioned in Section~\ref{sec:how}, some additional work apart from the engine implementation was done to ensure quality of the final product. This section includes some important specifications and features for the interactive board visualizer and testing worflow.
-
-\subsection{Interactive board visualizer using CustomTkinter}
-
-The board is implemented as a grid of squares, with each square capable of displaying a piece image. Piece images are loaded dynamically from the \texttt{assets} directory, which contains PNG files for each piece.
-
-\vspace{1em}
-
-\noindent The visualizer employs an event-driven architecture, where user actions, such as clicks, trigger events handled by the \texttt{EventManager} class. When the Python script is executed, it ensures that an instance of the engine in release version executable exists, starts a new subprocess with the engine, and launches a window displaying the chessboard and interface.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{Imagenes/gui.png}
-    \caption{AlphaDeepChess GUI}
-    \label{fig:gui}
-\end{figure}
-
-On the right panel, there is a switch button to activate and deactivate the evaluation and suggested move in an specific depth. Also, current position's fen on the bottom panel can be modified by exchanging it to a new one.
-
-\subsection{Testing engine strength with Cutechess, Stockfish, and GitHub Actions}
-
-Cutechess and Stockfish can be downloaded from their respective webpages. Then, a JSON file must be provided to Cutechess to configure the available engines. An example of this \texttt{engines.json} file could be:
-
-\vspace{1em}
-
-\begin{lstlisting}[breaklines=true, frame=single]
-[
-    {
-        "name": "AlphaDeepChess",
-        "command": "../build/release/AlphaDeepChess",
-        "protocol": "uci",
-        "options": {}
-    },
-    {
-        "name": "Stockfish",
-        "command": "./stockfish/stockfish/stockfish-windows-x86-64",
-        "protocol": "uci",
-        "options": {
-            "UCI_LimitStrength": "true",
-            "UCI_Elo": "1500"
-        }
-    }
-]
-\end{lstlisting}
-
-\noindent By simply calling the Cutechess CLI with the names of the engines and additional specifications such as search time (\texttt{--st}), the number of games (\texttt{--games}), or depth (\texttt{--depth}), the matches can be executed.
-
-\vspace{1em}
-
-\noindent Finally, automating this process of selecting the versions of the engine and Stockfish we created a workflow using a YAML file.
-
-\vspace{1em}
-
-\noindent This workflow is triggered manually. It includes the following steps:
-
-\begin{itemize}
-    \item Setup environment: Install dependencies such as Python packages, Cutechess and Stockfish.
-    \item Build the engine: Compile the chess engine from source code.
-    \item Run tests: Execute previously designed tests to validate the functionality of the engine using Cutechess CLI.
-    \item Export generated data from Cutechess for later analysis.
-\end{itemize}
-
-This generated data are the results of the run games that includes:
-
-\begin{itemize}
-    \item A \texttt{results.epd} with all the final positions in FEN format.
-    \item A \texttt{results.log} with Cutechess additional detailed information like the beginning and end of a game, the summary of the game, and ELO stadistics.
-    \item A \texttt{results.pgn} with all the played moves and games.
-\end{itemize}
+%
+%\section{Additional tools and work}
+%\label{sec:tools}
+%
+%As it was mentioned in Section~\ref{sec:how}, some additional work apart from the engine implementation was done to ensure quality of the final product. This section includes some important specifications and features for the interactive board visualizer and testing worflow.
+%
+%\subsection{Interactive board visualizer using CustomTkinter}
+%
+%The board is implemented as a grid of squares, with each square capable of displaying a piece image. Piece images are loaded dynamically from the \texttt{assets} directory, which contains PNG files for each piece.
+%
+%\vspace{1em}
+%
+%\noindent The visualizer employs an event-driven architecture, where user actions, such as clicks, trigger events handled by the \texttt{EventManager} class. When the Python script is executed, it ensures that an instance of the engine in release version executable exists, starts a new subprocess with the engine, and launches a window displaying the chessboard and interface.
+%
+%\begin{figure}[H]
+%    \centering
+%    \includegraphics[width=\textwidth]{Imagenes/gui.png}
+%    \caption{AlphaDeepChess GUI}
+%    \label{fig:gui}
+%\end{figure}
+%
+%On the right panel, there is a switch button to activate and deactivate the evaluation and suggested move in an specific depth. Also, current position's fen on the bottom panel can be modified by exchanging it to a new one.
+%
+%\subsection{Testing engine strength with Cutechess, Stockfish, and GitHub Actions}
+%
+%Cutechess and Stockfish can be downloaded from their respective webpages. Then, a JSON file must be provided to Cutechess to configure the available engines. An example of this \texttt{engines.json} file could be:
+%
+%\vspace{1em}
+%
+%\begin{lstlisting}[breaklines=true, frame=single]
+%[
+%    {
+%        "name": "AlphaDeepChess",
+%        "command": "../build/release/AlphaDeepChess",
+%        "protocol": "uci",
+%        "options": {}
+%    },
+%    {
+%        "name": "Stockfish",
+%        "command": "./stockfish/stockfish/stockfish-windows-x86-64",
+%        "protocol": "uci",
+%        "options": {
+%            "UCI_LimitStrength": "true",
+%            "UCI_Elo": "1500"
+%        }
+%    }
+%]
+%\end{lstlisting}
+%
+%\noindent By simply calling the Cutechess CLI with the names of the engines and additional specifications such as search time (\texttt{--st}), the number of games (\texttt{--games}), or depth (\texttt{--depth}), the matches can be executed.
+%
+%\vspace{1em}
+%
+%\noindent Finally, automating this process of selecting the versions of the engine and Stockfish we created a workflow using a YAML file.
+%
+%\vspace{1em}
+%
+%\noindent This workflow is triggered manually. It includes the following steps:
+%
+%\begin{itemize}
+%    \item Setup environment: Install dependencies such as Python packages, Cutechess and Stockfish.
+%    \item Build the engine: Compile the chess engine from source code.
+%    \item Run tests: Execute previously designed tests to validate the functionality of the engine using Cutechess CLI.
+%    \item Export generated data from Cutechess for later analysis.
+%\end{itemize}
+%
+%This generated data are the results of the run games that includes:
+%
+%\begin{itemize}
+%    \item A \texttt{results.epd} with all the final positions in FEN format.
+%    \item A \texttt{results.log} with Cutechess additional detailed information like the beginning and end of a game, the summary of the game, and ELO stadistics.
+%    \item A \texttt{results.pgn} with all the played moves and games.
+%\end{itemize}
