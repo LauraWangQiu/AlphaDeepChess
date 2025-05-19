@@ -1,17 +1,46 @@
 \chapter{Conclusions and Future Work}
 \label{cap:conclusiones}
 
-AlphaDeepChess has proven to be an effective implementation of classical techniques focused on alpha-beta pruning. Despite the rise of neural network-based engines, this project demonstrates that well-optimized traditional approaches remain competitive.
+\noindent We have successfully developed a competitive chess engine based on an enhanced minimax search with alpha-beta pruning, a straightforward materialistic evaluation, and a Most Valuable Victim-Least Valuable Aggressor (MVV-LVA) move-ordering heuristic.
 
 \vspace{1em}
 
-\noindent The engine achieved an ELO score of 1900 on Lichess, running on a Raspberry Pi 5 with a 2TB transposition table, confirming its efficiency even on limited hardware.
-Link to the lichess engine profile: \url{https://lichess.org/@/AlphaDeepChess}
+Building on this basic implementation, we have researched and analyzed the following algorithmic techniques to further improve the bot's playing strength:
+
+\begin{itemize}
+    \item \textbf{Transposition tables with Zobrist hashing:} provided an increase in performance by avoiding redundant position evaluations.
+    \item \textbf{Move generator with magic bitboards and PEXT instructions:} substantial improvement in move generation.
+    
+    \item \textbf{Evaluation with king safety and piece mobility parameters:} showed no clear improvement, likely due to the added computational cost and the difficulty of correlating these factors directly with positional strength.
+    \item \textbf{Multithreaded search:} requires further optimization of data structures and algorithms for concurrent access to yield tangible gains.
+    \item \textbf{Search with Late Move Reductions:} did not improve performance, as our current move-ordering heuristic is not strong enough to support such aggressive pruning.
+\end{itemize}
 
 \vspace{1em}
 
-\noindent Incorporating techniques such as transposition tables, iterative deepening, move ordering heuristics, and magic bitboards contributed significantly to the engine's performance. The use of Cutechess testing and comparisons with Stockfish allowed this impact to be measured.
+\noindent The engine achieved an ELO rating of 1900 on Lichess while running on a Raspberry Pi 5 with a 2GB transposition table, demonstrating its efficiency even on resource-constrained hardware.\\
 
 \vspace{1em}
 
-\noindent The next steps to be implemented would be the application of neural networks (NNUE) which, although intended for CPUs, could be thought of as a streamlined evaluation with GPUs as performed by Leela Chess Zero.
+\noindent The engine's Lichess profile can be found at:\\
+\url{https://lichess.org/@/AlphaDeepChess}
+
+\vspace{1em}
+
+\newpage
+
+\section*{Future Work}
+
+\noindent
+Potential avenues for further improvement include:
+
+\begin{itemize}
+    \item \textbf{Neural-network evaluation and move ordering:}  
+    Application of neural networks for the evaluation function and the move ordering heuristic, following the steps of Stockfish, the actual best chess engine. This could unlock more aggressive pruning strategies.
+
+    \item \textbf{Advanced pruning techniques:}  
+    With a stronger evaluation and ordering heuristic, revisit and tune the actual Late Move Reductions, and implement null move pruning technique.
+
+    \item \textbf{Multithreading optimizations:}  
+    Refine concurrent search algorithm and redesign shared data structures like transposition tables to support concurrent access.
+\end{itemize}
