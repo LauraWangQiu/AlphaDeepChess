@@ -10,21 +10,21 @@ The following section details the individual contributions made by each team mem
 
     \item Contributed to the alpha-beta pruning algorithm. Taking part in the research and implementation of the iterative deepening and the algorithm core.
 
-    \item Designed and implemented The bitboard-based move generator, then optimized the calculation of the slider pieces moves with magic bitboards technique and the PEXT hardware instruction. In addition to the integration of the move generator in the search algorithm.
+    \item Designed and implemented the bitboard-based move generator, then optimized the calculation of the slider pieces moves with magic bitboards technique and the PEXT hardware instruction. Additionally, integrated of the move generator in the search algorithm.
 
     \item Involved in the implementation of the board data structure, with emphasis on the game state bit field design.
 
     \item Design and Developed the move data structure, which was also optimized as a bit field to reduce space consumption.    
 
-    \item Designed and implemented auxiliary data structures for rows, columns, diagonals, and directions. These structures played a key role in simplifying and optimizing bitboard masking operations, enabling more efficient move generation and attack pattern calculations.
+    \item Designed and implemented the auxiliary data structures for rows, columns, diagonals, and directions. These structures played a key role in simplifying and optimizing bitboard masking operations, enabling more efficient move generation and attack pattern calculations.
     
-    \item Research, designed and implemented the transposition table using Zobrist hashing, with total integration in the alpha-beta search.
+    \item Researched, designed and implemented the transposition table using Zobrist hashing, with total integration in the alpha-beta search.
 
     \item Introduced MVV-LVA (Most Valuable Victim, Least Valuable Aggressor), then research and enhanced the algorithm with killer-move heuristics.
 
-    \item Research and developed the quiescence search enhancement to avoid the horizon effect in the alpha-beta pruning.
+    \item Researched and developed the quiescence search enhancement to avoid the horizon effect in the alpha-beta pruning.
 
-    \item Developed and test the search with late move reductions technique.
+    \item Developed and tested the search with the late move reductions technique.
 
     \item Developed the tampering evaluation, adjusting the weight for the middlegame and endgame evaluations, also contributed to optimizations in the implementation for king safety and piece mobility.
 
@@ -34,11 +34,11 @@ The following section details the individual contributions made by each team mem
 
     \item Conducted multiple 100-game matches using CuteChess between engine versions to measure the impact of each optimization.
 
-    \item Creation of hundreds of unit tests, which have been a fundamental part of finding bugs and ensuring code quality. In addition to Perft testing of the move generator to ensure correctness of the chess engine.
+    \item Created of hundreds of unit tests, which have been a fundamental part of finding bugs and ensuring code quality. This includes Perft testing of the move generator, a standard technique that counts all possible legal positions up to a certain depth to ensure the correctness of move generation in the chess engine.
 
     \item Contributed to the development of a helper GUI in Python to facilitate interactive testing of the engine, with support for the UCI protocol.    
 
-    \item Using Linux's \texttt{perf} tool, analyze the CPU overhead of the different parts of the chess engine.
+    \item Used Linux's \texttt{perf} tool, analyzed the CPU overhead of the different parts of the chess engine.
 
     \item Compiled and deployed the engine on a Raspberry Pi 5, configuring it as a Lichess.org bot.  Running under limited hardware resources, the engine achieved competitive ELO ratings while demonstrating our code's efficiency and portability.
 
