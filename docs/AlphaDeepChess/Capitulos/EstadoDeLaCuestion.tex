@@ -1,27 +1,38 @@
 \chapter{State of the art}
 \label{cap:estadoDeLaCuestion}
 
-In this chapter, we will explore the fundamental concepts and techniques on which our chess engine is based. This includes board representation, move generation, game trees, etc. Each section will provide an overview of the concepts and techniques used by our engine, and additional tools.
+In this chapter, we will explore the fundamental concepts and classical techniques on which our chess engine is based. This includes game trees and search algorithms. Each section will provide an overview of the concepts and techniques used by our engine, and additionally we will explain the workflow we followed to get better versions of our engine.
 
 \section{Game trees}
 
-Sequential games, such as chess or tic-tac-toe, where players take turns alternately, unlike simultaneous games, can be represented in a game tree or graph. In this representation, the root node is the main position from which we look for the best move, and each subsequent node is a possible option or game state, forming a tree-like structure. This tree has a height or depth that refers to the number of levels or layers in the tree, starting from the root node (the initial game state) and extending to the leaf nodes.
+Sequential games, such as chess or tic-tac-toe, where players take turns alternately, unlike simultaneous games, can be represented in a game tree or graph. In this representation, the root node corresponds to the initial position from which we search for the best move, and each subsequent node represents a possible option or game state, forming a tree-like structure. The tree has a height or depth, which refers to the number of turns alternating between black and white from the root node to the leaf nodes.
 
-\vspace{1em}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.35\textwidth]{Imagenes/chess-game-tree.jpg}
+    \caption{Computers, chess and long-range planning by Botvinnik, M. M. (Mikhail Moiseevich), 1911--1995}
+    \label{fig:game-tree}
+\end{figure}
 
 \noindent The depth of a chess game tree is important because it determines the extent to which it will be analysed and evaluated. A depth of 1 represents all possible moves for the current player or side to move, while a depth of 2 includes the opponent's responses to those moves. As the depth increases, the tree grows exponentially, making it computationally expensive to explore all possible states.
 
+\vspace{1em}
+
+\noindent In Figure~\ref{fig:game-tree}, the shaded cluster of lines on the left represents the part of the game tree corresponding to previous moves leading up to the current position. From there, only a subset of possible continuations is drawn, illustrating the immense complexity of chess. Claude Shannon estimated that the number of possible chess games is around $10^{120}$, a value known as the \textit{Shannon number}. This astronomical figure makes it computationally infeasible to represent or analyze the entire game tree, motivating the use of search algorithms and pruning techniques to explore only the most relevant branches, which are explained in the following section.
+
 \section{Search algorithms}
 
-There are different approaches to find the best move from a position. Some of these search algorithms are: Depth-First Search (DFS), Best-First Search (not to be confused with Breadth-First Search or BFS but they are related) and Parallel Search.
+There are different approaches to analyze and find the best move from a position. Some of these search algorithms are: Depth-First Search (DFS), Best-First Search (not to be confused with Breadth-First Search or BFS but they are related) and Parallel Search.
 
 \vspace{1em}
 
 \noindent Note that these search algorithms are the foundation of more advanced and practical algorithms used today. However, explaining them is essential to understand the underlying principles.
 
-\paragraph{Depth-First Search} refers to the process of exploring each branch of a tree or graph to its deepest level before backtracking. Unfortunately, in chess, this cannot be possible because the number of possible moves grows exponentially with the depth of the search tree, leading to the so-called combinatorial explosion. To address this, depth-first search is often combined with techniques like alpha-beta pruning (discussed below) to reduce the number of nodes evaluated, making the search more efficient while still exploring the tree deeply. The following pseudocode illustrates the working of the DFS algorithm:
+\paragraph{Depth-First Search} refers to the process of exploring each branch of a tree or graph to its deepest level before backtracking. Unfortunately, in chess, this cannot be possible as mentioned in the last section. This is because the number of possible moves grows exponentially with the depth of the search tree, leading to the so-called combinatorial explosion. To address this, depth-first search is often combined with techniques like alpha-beta pruning to reduce the number of nodes evaluated, making the search more efficient while still exploring the tree deeply. The following pseudocode illustrates the working of the DFS algorithm:
 
-\begin{lstlisting}[caption={Pseudocode of the Depth-First Search algorithm.}, frame=single, numbers=left, xleftmargin=15pt]
+\vspace{1em}
+
+\begin{lstlisting}[caption={Pseudocode of the Depth-First Search algorithm.}, captionpos=b, frame=single, numbers=left, xleftmargin=15pt]
 Procedure DepthFirstSearch(Graph G, Node v):
     Mark v as visited
     For each neighbor w of v in G.adjacentEdges(v):
@@ -33,14 +44,14 @@ DFS visits nodes by marking them as visited (line 2) and recursively explores al
 
 \paragraph{Best-First Search} refers to the way of exploring the most promising nodes first. It is similar to a breadth-first search but prioritizes some nodes before others. They typically require significant memory resources, as they must store a search space (the collection of all potential solutions in search algorithms) that grows exponentially.
 
-\begin{lstlisting}[caption={Pseudocode of the Best-First Search algorithm.}, frame=single, numbers=left, xleftmargin=10pt, breaklines=true]
+\begin{lstlisting}[caption={Pseudocode of the Best-First Search algorithm.}, captionpos=b, frame=single, numbers=left, xleftmargin=10pt, breaklines=true]
 Procedure BestFirstSearch(Graph G, Node start, Node goal):
     Create an empty priority queue PQ
     Add start to PQ with priority 0
     Mark start as visited
 
     While PQ is not empty:
-        Node current = Remove the node with the highest priority from PQ
+        Node current = PQ.pop()
         If current is the goal:
             Return the path to the goal
 
@@ -57,15 +68,13 @@ In this case, the priority queue contains nodes along with their associated prio
 
 \vspace{1em}
 
-\noindent Next, we will explore some of the most used search algorithms in chess engines.
-
-\clearpage
+\noindent Next, we will discuss one of the most widely used search algorithms in chess engines: the minimax algorithm.
 
 \subsection{Minimax algorithm}
 
-The \textbf{minimax} algorithm is a decision making algorithm that follows DFS principles. It is based on the assumption that both players play optimally, with one player (the maximizer) trying to maximize his score and the other player (the minimizer) trying to minimize his score. It explores the game tree to evaluate all possible moves and determines the best move for the current player.
+The \textbf{minimax} algorithm is a decision making algorithm that follows Depth-First Search (DFS) principles. It is based on the assumption that both players play optimally, with one player (the maximizer) trying to maximize his score and the other player (the minimizer) trying to minimize his score. It explores the game tree to evaluate all possible moves and determines the best move for the current player. Here it is the psecudocode of the algorithm:
 
-\begin{lstlisting}[caption={Pseudocode of the Minimax algorithm.}, frame=single, numbers=left, xleftmargin=15pt, breaklines=true]
+\begin{lstlisting}[caption={Pseudocode of the Minimax algorithm.}, captionpos=b, frame=single, numbers=left, xleftmargin=15pt, breaklines=true]
 Procedure Minimax(Node position, Integer depth, Boolean maximizingPlayer):
     If depth == 0 or position is a terminal node:
         Return the evaluation of the position
@@ -83,6 +92,8 @@ Procedure Minimax(Node position, Integer depth, Boolean maximizingPlayer):
             minEval = min(minEval, eval)
         Return minEval
 \end{lstlisting}
+
+The following is an example of the algorithm:
 
 \begin{figure}[H]
     \centering
@@ -120,22 +131,29 @@ Procedure Minimax(Node position, Integer depth, Boolean maximizingPlayer):
     \label{fig:minimax}
 \end{figure}
 
-\noindent In this example, white is represented by square nodes and black by circle nodes. Note that this example is a binary tree, but there might be more moves or nodes in a real scenario. Each of them wants to maximize or minimize their respective final value in each position. For the leftmost pair of leaf nodes with values of 3 and 5, 3 is chosen because black tries to get the lowest score between them. Then, the other pair of leaf nodes with values of 2 and 9, 2 is chosen for the same reason. Lastly, at the root node, white selects 3 as the maximum number between 3 and 2.
+\noindent Let's say that white always wants the highest value (maximizing the result) while black wants the lowest value (minimizing the result). In Figure~\ref{fig:minimax}, white is represented by square nodes and black by circle nodes. Note that this example is a binary tree, but in a real scenario there would likely be more moves or nodes, because in chess each position usually allows a wide range of legal moves, not just two as in a binary tree. For the leftmost pair of leaf nodes with values of 3 and 5, 3 is chosen because black tries to get the lowest score between them. Then, for the other pair of leaf nodes with values of 2 and 9, 2 is chosen for the same reason. Lastly, at the root node, white selects 3 as the maximum value between 3 and 2.
 
-\section{How can we determine the strength of our engine?}
-\label{sec:how}
+\vspace{1em}
 
-This can be answered by playing against other engines and analyzing the results. The most common way to do this is by using the Computer Chess Rating Lists which ranks chess engines based on their performance in various tournaments and matches. By the time being, we have chosen to compare different versions of the engine with Stockfish, currently ranked as the number one on the list. Continue reading to learn about the used tools or directly read about the work behind it in Section~\ref{sec:tools}.
+\noindent The effectiveness of search algorithms such as minimax, and their optimizations (which are carefully explained in the next chapter) is crucial for the playing strength of a chess engine. The deeper and more efficiently the engine can search the game tree, the better its move selection and overall performance. In order to deliver the best quality of the code and execution performance, it is important to maintain an optimal workflow and organization.
+
+\section{Workflow}
+
+Once the basic foundations are established with an initial version of the essential components or modules (which will be described later), our workflow follows an iterative process: first, we search for existing information on each topic, analyze it, implement a solution, and then profile the implementation to identify bottlenecks. After locating performance issues, we optimize the relevant parts, and finally, compare the new version with the previous one to assess improvements.
+
+\vspace{1em}
+
+\noindent Then, at a given moment, we can decide to take action and try to determine the strength of the engine with the last functional version.
 
 \subsection{Profiler}
 
-To analyze the performance of our chess engine and identify potential bottlenecks, we used the \texttt{perf} tool available on Linux systems. \texttt{perf} provides robust profiling capabilities by recording CPU events, sampling function execution, and collecting stack traces.
+First, in order to analyze the performance of our chess engine and identify potential bottlenecks, we used the \texttt{perf} tool available on Linux systems. \texttt{perf} provides robust profiling capabilities by recording CPU events, sampling function execution, and collecting stack traces.
 
-Our profiling goal is to identify which parts of the code consume the most execution time.
+\vspace{1em}
 
-We run the engine under \texttt{perf} using the following commands:
+\noindent Our profiling goal is to identify which parts of the code consume the most execution time. We run the engine under \texttt{perf} using the following commands:
 
-\begin{lstlisting}[language=bash, caption={Profiling AlphaDeepChess with perf}]
+\begin{lstlisting}[language=bash, caption={Profiling AlphaDeepChess with perf}, captionpos=b, frame=single, breaklines=true]
 # Record performance data with function stack traces
 sudo perf record -g ./build/release/AlphaDeepChess
 
@@ -143,55 +161,135 @@ sudo perf record -g ./build/release/AlphaDeepChess
 sudo perf report -g --no-children
 \end{lstlisting}
 
-\noindent After recording, \texttt{perf report} opens an interactive terminal interface where functions are sorted by CPU overhead.
+\noindent After recording, \texttt{perf report} opens an interactive terminal interface where functions are sorted by CPU overhead. This allows us to prioritize which functions to optimize.
 
-\noindent The engine must be capable of continuously processing input from standard input, even during evaluation. Moreover, if an unknown command is received, it should be ignored.
+\section{How can we determine the strength of our engine?}
+\label{sec:how}
+
+Once the profiling and optimization steps have been completed with the last decided version, we are ready to try to determine the strength or level of our engine.
 
 \vspace{1em}
 
+\noindent The most common way to measure the strength of a chess engine is by playing games against other engines and analyzing the results. To quantify this strength, the Elo rating system is used. Elo is a statistical rating system originally developed for chess, which assigns a numerical value to each player (or engine) based on their game results against opponents of known strength. When an engine wins games against higher-rated opponents, its Elo increases; if it loses, its Elo decreases. This allows for an objective comparison of playing strength between different engines.
+
+\vspace{1em}
+
+\noindent But which engine should we use as a reference for comparison? One approach is to consult the Computer Chess Rating Lists, which rank chess engines based on their performance in various tournaments and matches. We have chosen to compare different versions of our engine with \textit{Stockfish}, currently ranked as the number one engine on the list. In addition, we have also competed against other engines online to further evaluate our engine's performance in diverse environments.
+
+\subsection{Stockfish}
+
+\textit{Stockfish} is an open-source chess engine and command-line program available for multiple platforms, including Windows, macOS, Linux, Android, and iOS. It provides a wide range of versions optimized for different hardware configurations, such as specific CPU instruction sets, to maximize performance. For instance, the AVX2 version is recommended for most users with Intel processors from 2013 onwards or AMD processors from 2015 onwards, as it utilizes advanced vectorization instructions.
+
+\vspace{1em}
+
+\noindent Although it is not strictly mandatory for chess engines to follow a communication standard, adopting one greatly facilitates interoperability and development. In this case, \textit{Stockfish} uses the Universal Chess Interface communication protocol, which we have also implemented in our engine.
+
 \subsection{UCI}
 
-Universal Chess Interface specifications are independent of the operating system. To ensure the synchronization of the engine with the GUI, a \texttt{isready} command is sent and engine should respond with \texttt{readyok}.
+Universal Chess Interface, also known as UCI, is an open communication protocol whose specifications are independent of the operating system and which enables chess engines to communicate with graphical user interfaces and with each other.
+
+\vspace{1em}
 
 \noindent The move format is in long algebraic notation which means sending two squares coordinates like \texttt{e2e4} or \texttt{b1c3} independently of the type of piece because the engine must be the one checking that the movement is legal.
 
 \vspace{1em}
 
-\noindent Some of the most important commands are the following:
+\noindent Some of the most important and most used commands are the following:
 
 \begin{itemize}
-    \item \parbox{\textwidth}{\texttt{position [fen <fenstring> | startpos | actualpos] moves <move1> \ldots <movei>}}: sets the current position of the board to the FEN string or make the list of moves from starting position or current position.
+    \item \texttt{position [fen <fenstring> | startpos | actualpos] moves <move1> \ldots \\<movei>}: sets the current position of the board to the FEN string, or applies the list of moves from the starting position or current position.
+
     \item \texttt{go}: starts evaluating the current position. Some important subparameters are:
     \begin{itemize}
         \item \texttt{depth <x>}: specifies the number of \texttt{x} plies to search.
         \item \texttt{movetime <x>}: specifies the number of \texttt{x} seconds to search. 
     \end{itemize}
+
     \item \texttt{stop}: stops evaluation if it is running.
+    \item \texttt{diagram}: shows a basic terminal chessboard with the current position.
 \end{itemize}
 
-\subsection{CustomTkinter}
-
-CustomTkinter is a modern UI-library for Python that extends from Tkinter module and considers both OOP (Object Oriented Programming) and simple implementations.
+\noindent A ply consists of a single move made by one player in a turn-based game like chess. In chess terminology, one ply refers to one move by either White or Black, not both. Therefore, a full turn (when both White and Black have moved) consists of two plies.
 
 \vspace{1em}
 
-\noindent Although UCI implements a command that draws the current position through standard output, making moves and showing the evaluation is somewhat a time-consuming task when debugging and testing while programming. We resorted to using an interface to help us do this job and a really fast solution was to use Python to make a GUI. In this case, one of the most used UI libraries was CustomTkinter and it was used to build a friendly interface from scratch for bridging between executable and command sending.
+\noindent These commands are considered the most important because they form the core of the interaction between the chess engine and the user interface or testing tools. The \texttt{position} command allows setting up any board state, which is essential for starting games, analyzing specific positions, or resuming play. The \texttt{go} command initiates the engine's search for the best move, with parameters like \texttt{depth} and \texttt{movetime} providing control over the search process. The \texttt{stop} command is necessary to halt the engine's calculation when required, ensuring responsiveness. Finally, the \texttt{diagram} command provides a quick visual representation of the current position, which is especially useful for debugging and analysis. Together, these commands enable flexible, efficient, and interactive communication with the chess engine.
+
+\vspace{1em}
+
+\noindent Then, to conduct fair and automated matches between Stockfish and our engine, it is necessary to use a tool that can arbitrate the games, ensuring consistent conditions and accurate results.
 
 \subsection{Cutechess}
 
-Cutechess is an open-source tool designed to perform automated games between chess engines. It is widely used in the chess programming community to test and compare engines, evaluate their performance, and analyze games.
+\noindent After considering different options, \textit{Cutechess} proved to be the best fit for our needs.
+
+\vspace{1em}
+
+\noindent \textit{Cutechess} is an open-source tool designed to perform automated games between chess engines. It is widely used in the chess programming community to test and compare engines, evaluate their performance, and analyze games.
 
 \vspace{1em}
 
 \noindent It provides both command-line interface (CLI) and a graphic user interface (GUI), with cross-platform compatibility for Windows, macOS, and Linux. For our purposes, we utilized the CLI version to automate the tests with Python scripts and commands, integrating it into a CI/CD workflow.
 
-\subsection{Stockfish}
+\vspace{1em}
 
-Stockfish is also an open-source tool and command-line program and chess engine with which we will compare with our engine. It is available for multiple platforms (Windows, macOS, Linux, Android, and iOS).
+\noindent Mainly, this tool is responsible for sending commands to both selected engines. For example, when both Stockfish and our engine implement UCI, \textit{Cutechess} knows in advance the commands to send, as well as parameters such as the search time and depth for each engine, the number of games to play, the time control, or even specific openings to use. Providing specific openings introduces randomization between games, which is beneficial for later evaluation.
 
 \vspace{1em}
 
-\noindent It is necessary to highlight that it provides multiple versions optimized for different hardware structures. These versions leverage specific CPU instruction sets to improve performance. For instance, the AVX2 version is recommended for most users with Intel processors from 2013 onwards or AMD processors from 2015 onwards, as it utilizes advanced vectorization instructions.
+\noindent Then, it checks the active status of each engine and manages the start of the games by setting up the board on both engines with the \texttt{position} command. Afterwards, it sends the \texttt{go} command and stops the search with \texttt{stop} when the search time or depth is reached, extracting the best move provided by the engine whose turn it is. This move is then passed to the other engine, alternating turns so that both engines play against each other automatically. In the following \textit{Cutechess} log file, we directly configured the starting positions from a list of FENs in the \texttt{positions.fen} file:
+
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize, captionpos=b,breaklines=true, frame=single, caption={Example of \textit{Cutechess}}, label={fig:cutechess-example}]
+Running test (8) with the following configuration:
+Games: 1, Search Time: 5, Depth: 5
+PGN File: results.pgn, EPD File: results.epd, Log File: results.log
+Engines: ['AlphaDeepChess', 'Stockfish']
+Options: {'Stockfish': {'UCI_LimitStrength': 'true', 'UCI_Elo': '2000'}}
+Book: 
+Positions: positions.fen
+...
+ <Stockfish(1): uciok
+ >Stockfish(1): setoption name UCI_Elo value 2000
+ >Stockfish(1): setoption name UCI_LimitStrength value true
+ >Stockfish(1): isready
+ <Stockfish(1): readyok
+Started game 1 of 1 (AlphaDeepChess vs Stockfish)
+ >AlphaDeepChess(0): ucinewgame
+ >AlphaDeepChess(0): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6
+ >Stockfish(1): ucinewgame
+ >Stockfish(1): setoption name Ponder value false
+ >Stockfish(1): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6
+ >AlphaDeepChess(0): isready
+ <AlphaDeepChess(0): readyok
+ >AlphaDeepChess(0): go movetime 5000 depth 5
+ <AlphaDeepChess(0): info depth 1 score cp 130 bestMove c1e3
+ <AlphaDeepChess(0): info depth 2 score cp 85 bestMove c1e3
+ <AlphaDeepChess(0): info depth 3 score cp 80 bestMove c1e3
+ <AlphaDeepChess(0): info depth 4 score cp 62 bestMove c1g5
+ <AlphaDeepChess(0): info depth 5 score cp 79 bestMove c1g5
+ <AlphaDeepChess(0): bestmove c1g5
+ >Stockfish(1): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6 moves c1g5
+ >Stockfish(1): isready
+ <Stockfish(1): readyok
+ >Stockfish(1): go movetime 5000 depth 5
+ <Stockfish(1): info depth 1 seldepth 6 multipv 1 score cp -52 ...
+ <Stockfish(1): info depth 2 seldepth 3 multipv 1 score cp -45 ...
+ <Stockfish(1): info depth 3 seldepth 3 multipv 1 score cp -39 ...
+ <Stockfish(1): info depth 4 seldepth 3 multipv 1 score cp -39 ...
+ <Stockfish(1): info depth 5 seldepth 3 multipv 1 score cp -27 ...
+ <Stockfish(1): bestmove e7e6
+ >AlphaDeepChess(0): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6 moves c1g5 e7e6
+\end{lstlisting}
+
+\noindent In Figure~\ref{fig:cutechess-example}, in addition to setting the number of games to $1$, the search time to $5$ seconds, and the search depth to $5$, we provided a list of starting positions, from which one is chosen at random. Each line starting with \texttt{position fen \ldots} establishes the FEN position and continues by adding the moves played.
+
+\vspace{1em}
+
+\noindent Note that both engines stop searching when depth of $5$ is reached and are verified to be ready after \texttt{isready} command.
+
+\vspace{1em}
+
+\noindent Depending on the number of games, search time, and time control, these tournaments between engines can take a long time to process. For this reason, we decided to use GitHub Actions and workflows to separate our development environment from the execution of performance and strength tests.
 
 \subsection{GitHub Actions and workflows}
 
@@ -199,4 +297,30 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
 
 \vspace{1em}
 
-\noindent In this project, since it is public in a GitHub repository, GitHub Actions was used to automate the testing and evaluation of the chess engine using the last two mentioned tools. A workflow was configured to compile the engine, run automated games using Cutechess between different versions of the engine or our engine versus Stockfish.
+\noindent In this project, since it is public in a GitHub repository, GitHub Actions was used to automate the testing and evaluation of the chess engine using the last two mentioned tools. A workflow was configured to compile the engine, run automated games using \textit{Cutechess} between different versions of the engine or our engine versus \textit{Stockfish}.
+
+\vspace{1em}
+
+\noindent However, during development, it can be tedious to debug and view positions directly from the terminal. For this reason, we also created a tool that allows us to observe positions in a more visual way using Python and the CustomTkinter package.
+
+\subsection{CustomTkinter}
+
+CustomTkinter is a modern UI-library for Python that extends from Tkinter module and considers both OOP (Object Oriented Programming) and simple implementations.
+
+\vspace{1em}
+
+\noindent Although UCI implements the \texttt{diagram} command that draws the current position through standard output, making moves and showing the evaluation is somewhat a time-consuming task when debugging and testing while programming. We resorted to using an interface to help us do this job and a really fast solution was to use Python to make a GUI. In this case, one of the most used UI libraries was CustomTkinter and it was used to build a friendly interface from scratch for bridging between executable and command sending. This tool can be used after compiling the engine and executing \texttt{AlphaDeepChessGUI.py} with Python.
+
+\begin{center}
+    \begin{figure}[H]
+    \centering
+        \includegraphics[width=1.0\textwidth]{Imagenes/gui.png}
+        \caption{AlphaDeepChess GUI}
+    \end{figure}
+\end{center}
+
+\noindent In the figure above, the engine evaluation is enabled and displays the current evaluation value, the best move found, and the calculated search depth. In this way, we also ensure a more user-friendly experience.
+
+\vspace{1em}
+
+\noindent In the following chapter, we will present more extensive and detailed information on building the engine.

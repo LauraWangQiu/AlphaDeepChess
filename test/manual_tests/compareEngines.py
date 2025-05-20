@@ -44,19 +44,28 @@ def fen_to_pgn_lines(fens):
     return lines
 
 def generate_pgn_from_fens(input_file, output_file="positions.pgn"):
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    comparator_dir = os.path.join(script_dir, "..", "..", default_comparator_dir)
+    comparator_dir = os.path.abspath(comparator_dir)
 
+    if not os.path.isabs(input_file):
+        input_file = os.path.join(script_dir, input_file)
+
+    if not os.path.exists(comparator_dir):
+        raise FileNotFoundError(f"Directory does not exist: {comparator_dir}")
+    if not os.path.exists(input_file):
+        raise FileNotFoundError(f"Input file does not exist: {input_file}")
+    
     with open(input_file, "r") as fin:
         fens = fin.readlines()
 
     pgn_lines = fen_to_pgn_lines(fens)
 
-    os.chdir(default_comparator_dir)
-    
-    with open(output_file, "w") as fout:
+    output_path = os.path.join(comparator_dir, output_file)
+    with open(output_path, "w") as fout:
         fout.write("\n".join(pgn_lines))
 
-    print(f"PGN file generated: {output_file}")
+    print(f"PGN file generated: {output_path}")
 
 def main(pgn_path, edp_path, log_path, build_type, games, tc, st, depth, timemargin, concurrency, engines, options, book, positions):
     if is_windows:

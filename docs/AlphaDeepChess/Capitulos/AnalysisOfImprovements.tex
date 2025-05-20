@@ -1,7 +1,7 @@
 \chapter{Analysis of Improvement Techniques}
 \label{cap:analysisOfImprovements}
 
-\noindent This chapter documents the implementation of the following techniques used to improve the chess engine:
+This chapter documents the implementation of the following techniques used to improve the chess engine:
 
 \begin{itemize}
     \item Transposition tables with zobrist hashing.
@@ -10,8 +10,6 @@
     \item Multithread search.
     \item Search with Late move Reductions.
 \end{itemize}
-
-\vspace{2em}
 
 \noindent At the end of each section, we provide the results of a 100-game match between the improved engine and a baseline version. The baseline includes only the core techniques discussed in the previous chapter on engine development. The purpose of these matches is to measure the improvement in playing strength introduced by each new implementation.
 
@@ -58,18 +56,15 @@
 
 \vspace{1em}
 
-\noindent The complete implementation can be found in the following file:\\
-\scriptsize\url{https://github.com/LauraWangQiu/AlphaDeepChess/blob/main/include/utilities/transposition_table.hpp}\normalsize.
+\noindent \parbox{\textwidth}{The complete implementation can be found in \texttt{include\textbackslash{}utilities\textbackslash{}transposition\_table.hpp}.}
 
-\vspace{2em}
-
-\subsection*{Zobrist Hashing}
+\subsection{Zobrist Hashing}
 
 Zobrist Hashing is a technique to transform a board position of arbitrary size into a number of a set length, with an equal distribution over all possible numbers invented by Albert Zobrist. (\cite{ZobristHashing})
 
 \vspace{1em}
 
-To generate a 64-bit hash for a position, the following steps are followed:
+\noindent To generate a 64-bit hash for a position, the following steps are followed:
 
 \begin{enumerate}
   \item Pseudorandom 64-bit numbers are generated for each possible feature of a position:
@@ -77,12 +72,10 @@ To generate a 64-bit hash for a position, the following steps are followed:
     \item One number for each piece type on each square — 12 pieces x 64 squares = 768 numbers.
     \item One number to indicate the side to move is black.
     \item Four numbers to represent castling rights (kingside and queenside for both white and black).
-    \item Eight numbers to represent the file of an available en passant square.
+    \item Eight numbers to represent the file of an available \textit{en passant} square.
   \end{enumerate}
   \item The final hash is computed by XOR-ing together all the random numbers corresponding to the features present in the current position.
 \end{enumerate}
-
-\vspace{1em}
 
 \noindent These random values ensure that even slightly different positions produce very different hash values. This greatly reduces the chance of collisions.
 
@@ -92,7 +85,7 @@ To generate a 64-bit hash for a position, the following steps are followed:
 
 \vspace{1em}
 
-The position shown in Figure~\ref{fig:zobristExamplePosition} illustrates an example of how the Zobrist hash is computed.  
+\noindent The position shown in Figure~\ref{fig:zobristExamplePosition} illustrates an example of how the Zobrist hash is computed.  
 The hash value is calculated by XORing the random values associated with each element of the position.  
 Since the side to move is White, we do not XOR the value associated with Black to move.  
 The resulting hash is computed as follows:
@@ -100,6 +93,8 @@ The resulting hash is computed as follows:
 \[
 111 \oplus 69 \oplus 909 \oplus 10 \oplus 67 \oplus 12 \oplus 555 \oplus 3 = 458
 \]
+
+\newpage
 
 \begin{figure}[H]
     \begin{minipage}{0.4\textwidth}
@@ -114,11 +109,11 @@ The resulting hash is computed as follows:
             markmoves={b7-b5},
             arrow=to
         ]
-        \caption*{Side to move is white. The last move was a pawn advancing from b7 to b5, making en passant available on the b6 square.}
+        \caption{Side to move is white. The last move was a pawn advancing from b7 to b5, making \text{en passant} available on the b6 square.}
     \end{minipage}
     \hfill
     \begin{minipage}{0.4\textwidth}
-        \begin{tikzpicture}[scale=0.8]
+        \begin{tikzpicture}[scale=0.7]
 
             \foreach \x in {0,1,...,7} {
                 \foreach \y in {0,1,...,7} {
@@ -133,12 +128,13 @@ The resulting hash is computed as follows:
 
             \draw[thick] (0,0) grid (8,8);
         \end{tikzpicture}
-        \caption*{Random values corresponding to each piece and the en passant square. The value for Black to move is 62319.}    \end{minipage}
+        \caption{Random values corresponding to each piece and the en passant square. The value for Black to move is 62319.}
+    \end{minipage}
     \caption{Zobrist hash calculation example}
     \label{fig:zobristExamplePosition}
 \end{figure}
 
-\subsection*{Table Entry}
+\subsection{Table Entry}
 
 Each entry in the transposition table stores the following information:
 
@@ -155,7 +151,7 @@ Each entry in the transposition table stores the following information:
   \end{enumerate}
 \end{enumerate}
 
-\subsection*{Collisions}
+\subsection{Collisions}
 
 As discussed earlier, index collisions in the transposition table are handled by verifying the full Zobrist hash stored in the entry. However, it is still theoretically possible for a full hash collision to occur, that is two different positions producing the same hash.
 
@@ -163,15 +159,13 @@ As discussed earlier, index collisions in the transposition table are handled by
 
 \noindent This scenario is extremely rare. With 64-bit hashes, there are $2^{64}$ possible unique values, which is more than sufficient for practical purposes. In the unlikely event of a true hash collision, it could result in an incorrect evaluation being reused for a different position.
 
-\subsection*{Analysis}
+\subsection{Analysis}
 
 \noindent To evaluate the impact of introducing the transposition table, we conducted the 100-game tournament against the baseline version of the engine. The Table ~\ref{tab:tt_vs_basic} details the implementation used for each bot.
 
 \begin{table}[H]
     \centering
-    \caption{Match configuration: Transposition Table Bot vs Basic Bot}
-    \label{tab:tt_vs_basic}
-    \begin{tabular}{|l|c|c|}
+    \begin{tabular}{|p{4cm}|p{4cm}|p{4cm}|}
     \hline
     \textbf{Component}         & \textbf{Transposition Table Bot}  & \textbf{Basic Bot}     \\ \hline
     Search                     & Alpha-beta With Transposition Table          & Basic Alpha-beta           \\ \hline
@@ -179,6 +173,8 @@ As discussed earlier, index collisions in the transposition table are handled by
     Move Generator             & Basic implementation              & Basic implementation   \\ \hline
     Move Ordering              & MVV-LVA                           & MVV-LVA                \\ \hline
     \end{tabular}
+    \caption{Match configuration: Transposition Table Bot vs Basic Bot}
+    \label{tab:tt_vs_basic}
 \end{table}
 
 \noindent As illustrated in Figure~\ref{fig:results_transposition_table_bot}, We see a substantial improvement by adding the transposition table with 46 wins versus 32 losses. The remaining 22 games ended in a draw.
@@ -209,9 +205,9 @@ To identify potential performance bottlenecks, we performed profiling on the eng
 
 \noindent The profiling results indicate that the majority of the total execution time is spent in the legal move generation function. Therefore, optimizing this component is expected to yield significant performance improvements.
 
-\subsection*{Magic bitboards}
+\subsection{Magic bitboards}
 
-We can create a look up table of all the rook and bishop moves for each square on the board and for each combination of pieces that blocks the path of the slider piece (blockers  bitboard). Basically we need a hash table to store rook and bishop moves indexed by square and bitboard of blockers. The problem is that this table could be very big.~\cite{MagicBitboards}
+We can create a look up table of all the rook and bishop moves for each square on the board and for each combination of pieces that blocks the path of the slider piece (blockers  bitboard). Basically we need a hash table to store rook and bishop moves indexed by square and bitboard of blockers. The problem is that this table could be very big~\cite{MagicBitboards}.
 
 \vspace{1em}
 
@@ -219,7 +215,7 @@ We can create a look up table of all the rook and bishop moves for each square o
 
 \vspace{1em}
 
-A \textbf{magic number} is a multiplier to the bitboard of blockers with the following properties:
+\noindent A \textbf{magic number} is a multiplier to the bitboard of blockers with the following properties:
 
 \begin{itemize}
   \item Preserves relevant blocker information: 
@@ -259,7 +255,7 @@ A \textbf{magic number} is a multiplier to the bitboard of blockers with the fol
     \begin{minipage}[c]{0.4\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/magics_blockers.png}
-        \caption*{Original blockers bitboard}
+        \caption{Original blockers bitboard}
     \end{minipage}
     \hfill
     \begin{minipage}[c]{0.1\textwidth}
@@ -270,7 +266,7 @@ A \textbf{magic number} is a multiplier to the bitboard of blockers with the fol
     \begin{minipage}[c]{0.4\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/magics_processed_blockers.png}
-        \caption*{Masked blockers bitboard}
+        \caption{Masked blockers bitboard}
     \end{minipage}
     \caption{Pre-processing of the blockers bitboard}
     \label{fig:magic_preprocessing}
@@ -283,7 +279,7 @@ A \textbf{magic number} is a multiplier to the bitboard of blockers with the fol
     \begin{minipage}[c]{0.4\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/magics_processed_blockers.png}
-        \caption*{Masked blockers bitboard}
+        \caption{Masked blockers bitboard}
     \end{minipage}
     \hfill
     \begin{minipage}[c]{0.1\textwidth}
@@ -296,7 +292,7 @@ A \textbf{magic number} is a multiplier to the bitboard of blockers with the fol
     \begin{minipage}[c]{0.4\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/magics_multiplied_blockers.png}
-        \caption*{Multiplied blockers bitboard}
+        \caption{Multiplied blockers bitboard}
     \end{minipage}
     \caption{Multiplication by magic number to produce an index}
     \label{fig:magic_multiplication}
@@ -358,11 +354,11 @@ A \textbf{magic number} is a multiplier to the bitboard of blockers with the fol
        \;\gg\;(64 - \texttt{relevant\_squares})\,.
 \end{align*}
 
-\subsection*{PEXT instruction}
+\subsection{PEXT instruction}
 
-\noindent The \texttt{PEXT} (Parallel Bits Extract) instruction—available on modern x86\_64 CPUs—extracts bits from a source operand according to a mask and packs them into the lower bits of the destination operand.~\cite{PextInstruction} It is ideally suited for computing our table index.
+\noindent The \texttt{PEXT} (Parallel Bits Extract) instruction—available on modern x86\_64 CPUs—extracts bits from a source operand according to a mask and packs them into the lower bits of the destination operand~\cite{PextInstruction}. It is ideally suited for computing our table index.
 
-Figure~\ref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: it selects specific bits from register \texttt{r2}, as specified by the mask in \texttt{r3}, and packs the result into the lower bits of the destination register \texttt{r1}.
+\noindent Figure~\ref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: it selects specific bits from register \texttt{r2}, as specified by the mask in \texttt{r3}, and packs the result into the lower bits of the destination register \texttt{r1}.
 
 \begin{figure}[H]
     \centering
@@ -378,13 +374,13 @@ Figure~\ref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: i
     \begin{minipage}[c]{0.3\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/magics_blockers.png}
-        \caption*{Blockers bitboard}
+        \caption{Blockers bitboard}
     \end{minipage}
     \hfill
     \begin{minipage}[c]{0.3\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/magics_rook_attacks.png}
-        \caption*{Rook attack mask}
+        \caption{Rook attack mask}
     \end{minipage}
     \hfill
     \begin{minipage}[c]{0.05\textwidth}
@@ -395,7 +391,7 @@ Figure~\ref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: i
     \begin{minipage}[c]{0.3\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/pext_final_index.png}
-        \caption*{Final extracted index}
+        \caption{Final extracted index}
     \end{minipage}
     \caption{index extraction with Pext example}
     \label{fig:pext_bitboards}
@@ -415,15 +411,13 @@ Figure~\ref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: i
   \item Otherwise, the engine falls back to the Magic Bitboards approach using multiplication and bit shifts.
 \end{itemize}
 
-\subsection*{Analysis}
+\subsection{Analysis}
 
-\noindent To evaluate the impact of introducing the move generator accelerated with pext instructions, we conducted the 100-game tournament against the baseline version of the engine. The Table ~\ref{tab:pext_vs_basic} details the implementation used for each bot.
+\noindent To evaluate the impact of introducing the move generator accelerated with pext instructions, we conducted the 100-game tournament against the baseline version of the engine. The Table~\ref{tab:pext_vs_basic} details the implementation used for each bot.
 
 \begin{table}[H]
     \centering
-    \caption{Match configuration: PEXT instructions Bot vs Basic Bot}
-    \label{tab:pext_vs_basic}
-    \begin{tabular}{|l|c|c|}
+    \begin{tabular}{|p{4cm}|p{4cm}|p{4cm}|}
     \hline
     \textbf{Component}         & \textbf{PEXT instructions Bot}  & \textbf{Basic Bot}     \\ \hline
     Search                     & Alpha-beta With Transposition Table          & Basic Alpha-beta           \\ \hline
@@ -431,6 +425,8 @@ Figure~\ref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: i
     Move Generator             & PEXT implementation              & Basic implementation   \\ \hline
     Move Ordering              & MVV-LVA                           & MVV-LVA                \\ \hline
     \end{tabular}
+    \caption{Match configuration: PEXT instructions Bot vs Basic Bot}
+    \label{tab:pext_vs_basic}
 \end{table}
 
 \noindent As illustrated in Figure~\ref{fig:results_pext_move_generator_bot}, We achieved a significant performance improvement by adding the PEXT instructions with 46 wins versus 22 losses. The remaining 14 games ended in a draw.
@@ -457,15 +453,13 @@ It is often beneficial to evaluate additional aspects of a position beyond simpl
     \item Piece Mobility: Greater piece mobility is generally indicative of a stronger position. Each piece receives a bonus for every available move to a square that is not attacked by enemy pawns.
 \end{enumerate}
 
-\subsection*{Analysis}
+\subsection{Analysis}
 
-\noindent To evaluate the impact of introducing the new parameters in the evaluation, we conducted the 100-game tournament against the baseline version of the engine. The Table ~\ref{tab:safety_mobility_vs_basic} details the implementation used for each bot.
+To evaluate the impact of introducing the new parameters in the evaluation, we conducted the 100-game tournament against the baseline version of the engine. The Table~\ref{tab:safety_mobility_vs_basic} details the implementation used for each bot.
 
 \begin{table}[H]
     \centering
-    \caption{Match configuration: King Safety and Piece mobility eval Bot vs Basic Bot}
-    \label{tab:safety_mobility_vs_basic}
-    \begin{tabular}{|l|c|c|}
+    \begin{tabular}{|p{4cm}|p{4cm}|p{4cm}|}
     \hline
     \textbf{Component}         & \textbf{PEXT instructions Bot}  & \textbf{Basic Bot}     \\ \hline
     Search                     & Alpha-beta With Transposition Table          & Basic Alpha-beta           \\ \hline
@@ -473,11 +467,11 @@ It is often beneficial to evaluate additional aspects of a position beyond simpl
     Move Generator             & PEXT implementation              & Basic implementation   \\ \hline
     Move Ordering              & MVV-LVA                           & MVV-LVA                \\ \hline
     \end{tabular}
+    \caption{Match configuration: King Safety and Piece mobility eval Bot vs Basic Bot}
+    \label{tab:safety_mobility_vs_basic}
 \end{table}
 
 \noindent As illustrated in Figure~\ref{fig:results_safety_mobility_bot}, the results are slightly worse compared to the match using the material-only evaluation shown in Figure~\ref{fig:results_pext_move_generator_bot}, with 62 wins and 30 losses. This decline may be attributed to the additional computational overhead introduced by evaluating the new parameters. Moreover, while concepts such as king safety and piece mobility are intuitively valuable to human players, the engine may struggle to consistently associate them with actual positional strength.
-
-\vspace{1em}
 
 \begin{center}
     \begin{figure}[H]

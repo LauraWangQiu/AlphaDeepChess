@@ -2,16 +2,24 @@
 \label{cap:introduction}
 \renewcommand{\figurename}{Figure}
 
-\chapterquote{The most powerful weapon in chess is to have the next move}{David Bronstein}
-
 Chess, one of the oldest strategy games in human history, has long been a domain for both intellectual competition and computational research. The pursuit of creating a machine that could compete with the best human players, chess Grandmasters, was present. It was only a matter of time before computation surpassed human capabilities.
 
 \vspace{1em}
 
-\noindent In 1997, the chess engine \texttt{Deep Blue} made history by defeating the reigning world champion at the time, Garry Kasparov, marking the first time a computer had defeated a sitting world chess champion.
+\noindent In 1997, the chess engine \textit{Deep Blue} made history by defeating the reigning world champion at the time, Garry Kasparov, marking the first time a computer had defeated a sitting world chess champion.
 \vspace{1em}
 
 \noindent Today, we find ourselves in an era where chess engines have reached unprecedented strength. This has been achieved through a combination of classical techniques like alpha-beta pruning, and modern advancements such as deep learning and neural networks.
+
+\vspace{1em}
+
+\noindent We were inspired by \textit{Stockfish}, one of the strongest and most widely used open-source chess engines in the world. It is renowned for its exceptional playing strength, speed, and efficiency. \textit{Stockfish} serves as a reference point for evaluating the performance and progress of our own engine. Unlike some modern engines, our engine does not use artificial intelligence or neural networks, relying solely on classical techniques and human-designed heuristics. The source code of our engine is available at: \url{https://github.com/tu_usuario/AlphaDeepChess}
+
+\vspace{1em}
+
+\noindent Beyond its technical contributions, this project also narrates the process of building a chess engine, evaluating each version along the way. This includes profiling and testing between different versions, as well as implementing improved heuristics and efficiency enhancements based on current knowledgement about chess engines. The project even reaches the point where the engine can be played against on online platforms or observed competing with other live chess engines, making it valuable for any chess enthusiast. Notably, the engine has achieved an ELO rating of 1900 on Lichess, demonstrating its competitive strength among online chess engines.
+
+\noindent 
 
 \section{Objectives}
 \label{sec:objectives}
@@ -27,7 +35,7 @@ Chess, one of the oldest strategy games in human history, has long been a domain
 
 \section{Work plan}
 
-The project will be divided into several phases, each focusing on specific aspects of the engine's development. The timeline for each phase is as follows:
+The project was divided into several phases, each focusing on specific aspects of the engine's development. The timeline for each phase is as follows:
 
 \begin{enumerate}
     \item Research phase and basic implementation: understand the fundamentals of alpha-beta pruning with minimax and position evaluation. Familiarize with the UCI (Universal Chess Interface) and implement the move generator with its specific exceptions and rules.
@@ -35,7 +43,7 @@ The project will be divided into several phases, each focusing on specific aspec
     \item Optimization: improve search efficiency using transposition tables and Zobrist hashing.
     \item Optimization: implement multithreading to enable parallel search.
     \item Profiling: use a profiler to identify performance bottlenecks and optimize critical sections of the code.
-    \item Testing: use Stockfish to compare efficiency generating tournaments between chess engines and estimate the performance of the engine. Also, compare different versions of the engine to evaluate the impact of optimizations.
+    \item Testing: use \textit{Stockfish} to compare efficiency generating tournaments between chess engines and estimate the performance of the engine. Also, compare different versions of the engine to evaluate the impact of optimizations.
     \item Analyze the results and write the final report.
 \end{enumerate}
 
@@ -46,7 +54,7 @@ The project will be divided into several phases, each focusing on specific aspec
 \section{Basic concepts}
 \label{sec:basicConcepts}
 
-\noindent Chess is a board game where two players who take white pieces and black pieces respectively compete to first checkmate the opponent. Checkmate occurs when the king is under threat of capture (known as check) by a piece or pieces of the enemy, and there is no legal way to escape or remove the threat.
+\noindent Chess is a board game where two players who take white pieces and black pieces respectively compete to be the first to checkmate the opponent. Checkmate occurs when the king is under threat of capture (known as check) by a piece or pieces of the enemy, and there is no legal way to escape or remove the threat.
 
 \vspace{1em}
 
@@ -203,7 +211,7 @@ The pawn can move one square forward, but it can only capture pieces one square 
     \end{minipage}
 \end{figure}
 
-\noindent There is a specific capture movement which is \textbf{en passant}. This move allows a pawn that has moved two squares forward from its starting position to be captured by an opponent's pawn as if it had only moved one square. The capturing pawn must be on an adjacent file and can only capture the en passant pawn immediately after it moves.
+\noindent There is a specific capture movement which is \textbf{en passant}. This move allows a pawn that has moved two squares forward from its starting position to be captured by an opponent's pawn as if it had only moved one square. The capturing pawn must be on an adjacent file and can only capture the \textit{en passant} pawn immediately after it moves.
 
 \begin{figure}[H]
     \centering
@@ -338,7 +346,13 @@ The king can move one square in any direction: horizontally, vertically, or diag
    \end{minipage}
 \end{figure}
 
-\noindent In Figure \ref{fig:white-king-movement-game}, the white king cannot move to $e4$ because the black king is attacking that square.
+\noindent In Figure \ref{fig:white-king-movement-game}, the white king cannot move to $c3$, $d4$, $e3$ or $e4$ because those squares are being attacked by black pieces:
+\begin{itemize}
+    \item $c3$ is attacked by the black bishop on $b2$.
+    \item $d4$ is attacked by the black pawn on $c5$ and black king on $e5$.
+    \item $e3$ is attacked by the black pawn on $f4$.
+    \item $e4$ is attacked by the black king on $e5$.
+\end{itemize}
 
 \paragraph{Castling} is a special move which involves moving the king two squares towards a rook and moving the rook to the square next to the king. Castling has specific conditions which are:
 
@@ -348,23 +362,49 @@ The king can move one square in any direction: horizontally, vertically, or diag
     \item The king cannot be in check, move through a square under attack, or end up in check.
 \end{itemize}
 
-\vspace{-2em}
-
 \begin{figure}[H]
     \centering
-    \newchessgame
-    \chessboard[
-        setpieces={Ke1,Ra1,Rh1,ke8,rb8,rh8,bf8},
-        showmover=false,
-        pgfstyle=straightmove, color=blue,
-        markmoves={e1-c1, e1-g1},
-        arrow=to
-    ]
-    \caption{Castling}
-    \label{fig:castling}
+    \begin{minipage}[t]{0.3\textwidth}
+        \centering
+        \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
+        \newchessgame
+        \chessboard[
+            setpieces={Ke1,Ra1,Rh1,ke8,rb8,rh8,bf8},
+            showmover=false,
+            pgfstyle=straightmove, color=blue,
+            markmoves={e1-c1, e1-g1},
+            arrow=to
+        ]
+        \caption{Castling situation.}
+        \label{fig:castling-situation}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.3\textwidth}
+        \centering
+        \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
+        \newchessgame
+        \chessboard[
+            setpieces={Kg1,Ra1,Rf1,ke8,rb8,rh8,bf8},
+            showmover=false
+        ]
+        \caption{White short castling.}
+        \label{fig:white-short-castling}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.3\textwidth}
+        \centering
+        \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
+        \newchessgame
+        \chessboard[
+            setpieces={Kc1,Rd1,Rh1,ke8,rb8,rh8,bf8},
+            showmover=false
+        ]
+        \caption{White long castling.}
+        \label{fig:white-long-castling}
+    \end{minipage}
 \end{figure}
 
-\noindent In Figure \ref{fig:castling}, the white king can castle on either the king's side or the queen's side as long as the rooks have not been moved from their starting position, but the black king cannot castle because there is a bishop on $f8$ interfering with the movement and the rook on the queen's side has been moved to $b8$.
+\noindent In Figure \ref{fig:castling-situation}, the white king can castle on either the king's side (short castling) or the queen's side (long castling) as long as the rooks have not been moved from their starting position, but the black king cannot castle because there is a bishop on $f8$ interfering with the movement and the rook on the queen's side has been moved to $b8$.
 
 \subsubsection{Queen}
 
@@ -396,10 +436,10 @@ The rules of chess follow the official regulations established by FIDE~\cite{Law
 \begin{enumerate}
     \item Stalemate: the player whose turn it is to move has no legal moves, and their king is not in check.
     \item Insufficient material: neither player has enough pieces to checkmate. Those cases are king vs king, king and bishop vs king, king and knight vs king, and king and bishop vs king and bishop with the bishops on the same color.
-    \item Threefold repetition: it occurs when same position happens three times during the game, with the same player to move and the same possible moves (including castling and en passant).
+    \item Threefold repetition: it occurs when same position happens three times during the game, with the same player to move and the same possible moves (including castling and \textit{en passant}).
     \item Fifty-move rule: if 50 consecutive moves are made by both players without a pawn move or a capture, the game can be declared a draw. \label{itm:fifty-move-rule}
     \item Mutual agreement: both players can agree to a draw at any point during the game.
-    \item Dead position: a position where no legal moves can be made, and the game cannot continue. This includes cases like king vs king, king and knight vs king, or king and bishop vs king.
+    \item Dead position: a position in which neither player can achieve checkmate by any series of legal moves, making further progress impossible. This includes cases like king vs king, king and knight vs king, or king and bishop vs king, where it is not possible to checkmate the opponent regardless of the moves played. In these situations, the game is immediately declared a draw because the main objective to checkmate cannot be accomplished.
 \end{enumerate}
 
 \begin{figure}[H]
@@ -542,7 +582,7 @@ are written by adding a $+$ sign for check or $++$ for checkmate, respectively.
     \label{fig:black-queen-checkmates}
 \end{figure}
 
-\noindent In Figure \ref{fig:black-queen-checkmates}, black queen movement checkmates and it is written as $Dh4++$.
+\noindent In Figure \ref{fig:black-queen-checkmates}, black queen movement checkmates and it is written as $Qh4++$.
 
 \paragraph{The end of game notation} indicates the result of the game. It is typically written as:
 
@@ -554,7 +594,7 @@ are written by adding a $+$ sign for check or $++$ for checkmate, respectively.
 
 \subsubsection{Forsyth–Edwards Notation (FEN)}
 
-This is a notation that describes a specific position on a chessboard. It includes 6 fields separated by spaces: the piece placement, whose turn it is to move, castling availability, en passant target square, halfmove clock, and fullmove number.
+This is a notation that describes a specific position on a chessboard. It includes 6 fields separated by spaces: the piece placement, whose turn it is to move, castling availability, \textit{en passant} target square, halfmove clock, and fullmove number.
 For example, the FEN for the starting position is:
 \begin{verbatim}
 rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
@@ -562,33 +602,35 @@ rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 
 \vspace{1em}
 
-\noindent Keep in mind this notation is important for the engine to understand the position of the pieces on the board.
+\noindent Keep in mind this notation is essential for the engine because it provides all the necessary information to reconstruct any chess position, including all the mentioned variables above on the current board without needing to replay all the moves from the beginning of the game. This makes it highly efficient for testing, analysis, and interoperability with other chess software.
 
 \subsubsection{Portable Game Notation (PGN)}
 
-This notation is mostly used for keeping information about the game and a header section with metadata: the name of the event, site, date of play, round, color and name of each player, and result. For example, the PGN for a game could look like this:
+This notation is a widely used text-based format for recording chess games. Its primary purpose is to store complete game records, making it ideal for building large databases of chess games for study, analysis, and sharing. These PGN files not only include the sequence of moves, but also a header section with metadata such as the name of the event, site, date of play, color and name of each player, result and possible comments and variations. For example, PGN for a game could look like this:
 
-\begin{lstlisting}[basicstyle=\ttfamily\small, breaklines=true, frame=single, caption={Example of a PGN file}, label={lst:pgn-example}]
-[Event "XX Gran Torneo Internacional Aficionado"]
-[Site "?"]
-[Date "2024.06.25"]
-[Round "1"]
-[White "Tejedor Barber, Lorenzo"]
-[Black "Giron Herranz, Juan"]
+\begin{lstlisting}[basicstyle=\ttfamily\small, captionpos=b,breaklines=true, frame=single, caption={Example of a PGN file}, label={lst:pgn-example}]
+[Event "Rated blitz game"]
+[Site "https://lichess.org/8USBsBgk"]
+[Date "2025.05.19"]
+[White "Zimbabwean_chessbot"]
+[Black "AlphaDeepChess"]
 [Result "0-1"]
-1. e4 c6 2. d4 d5 3. exd5 cxd5 4. Bd3 Nc6 5. c3 Nf6 6. Bf4 Bg4 7. Qb3 Qd7 8. h3 Bh5 9. Nd2 e6 10. Ngf3 a6 11. O-O Be7 12. Rfe1 O-O 13. Re3 b5 14. Ne5 Qb7 15. Nxc6 Qxc6 16. Nf3 Nd7 17. a3 Bg6 18. Bxg6 hxg6 19. Rae1 a5 20. Qd1 b4 21. axb4 axb4 22. h4 bxc3 23. bxc3 Ra3 24. Qd3 Rc8 25. Rc1 Bb4 26. h5 gxh5 27. Ng5 Nf6 28. Be5 Rxc3 29. Rxc3 Qxc3 30. Qe2 Qc1+ 31. Kh2 Bd2 32. Bxf6 Bxe3 33. fxe3 gxf6 34. Nh3 Qb1 35. Nf4 Rc1 36. Nxh5 Rh1+ 37. Kg3
+[GameId "8USBsBgk"]
+[UTCDate "2025.05.19"]
+[UTCTime "05:41:30"]
+[WhiteElo "2865"]
+[BlackElo "1904"]
+[WhiteRatingDiff "-32"]
+[BlackRatingDiff "+12"]
+[WhiteTitle "BOT"]
+[BlackTitle "BOT"]
+[Variant "Standard"]
+[TimeControl "180+2"]
+[ECO "B12"]
+[Opening "Caro-Kann Defense: Advance Variation, Short Variation"]
+[Termination "Time forfeit"]
+
+1. e4 c6 2. d4 d5 3. e5 Bf5 4. Nf3 e6 5. Be2 Nd7 6. O-O h6 7. a4 Ne7 8. c3 a6 9. Nbd2 g5 10. b4 Bg7 11. Nb3 O-O 12. Ra2 f6 13. exf6 Bxf6 14. h4 g4 15. Ne1 h5 16. g3 Qc7 17. Ng2 e5 18. f3 gxf3 19. Bxf3 exd4 20. Bf4 Ne5 21. Nxd4 Nxf3+ 22. Qxf3 Qb6 23. Qxh5 Bxd4+ 24. cxd4 Qxd4+ 25. Raf2 Bg6 26. Qg5 Qxb4 27. Be5 Rxf2 28. Rxf2 Rf8 29. Qh6 Rf6 30. Rxf6 Qb6+ 0-1
 \end{lstlisting}
 
-%\section{Explicaciones adicionales sobre el uso de esta plantilla}
-%Si quieres cambiar el \textbf{estilo del título} de los capítulos del documento, edita el fichero \verb|TeXiS\TeXiS_pream.tex| y comenta la línea \verb|\usepackage[Lenny]{fncychap}| para dejar el estilo básico de \LaTeX.
-
-%Si no te gusta que no haya \textbf{espacios entre párrafos} y quieres dejar un pequeño espacio en blanco, no metas saltos de línea (\verb|\\|) al final de los párrafos. En su lugar, busca el comando  \verb|\setlength{\parskip}{0.2ex}| en \verb|TeXiS\TeXiS_pream.tex| y aumenta el valor de $0.2ex$ a, por ejemplo, $1ex$.
-
-%TFGTeXiS se ha elaborado a partir de la plantilla de TeXiS\footnote{\url{http://gaia.fdi.ucm.es/research/texis/}}, creada por Marco Antonio y Pedro Pablo Gómez Martín para escribir su tesis doctoral. Para explicaciones más extensas y detalladas sobre cómo usar esta plantilla, recomendamos la lectura del documento \texttt{TeXiS-Manual-1.0.pdf} que acompaña a esta plantilla.
-
-%El siguiente texto se genera con el comando \verb|\lipsum[2-20]| que viene a continuación en el fichero .tex. El único propósito es mostrar el aspecto de las páginas usando esta plantilla. Quita este comando y, si quieres, comenta o elimina el paquete \textit{lipsum} al final de \verb|TeXiS\TeXiS_pream.tex|
-
-%\subsection{Texto de prueba}
-
-
-%\lipsum[2-20]
+These files are generated both during the testing phases of the chess engine and when playing games on online chess platforms.
