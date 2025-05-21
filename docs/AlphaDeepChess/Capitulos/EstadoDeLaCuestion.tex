@@ -1,5 +1,4 @@
-\chapter{State of the art}
-\label{cap:estadoDeLaCuestion}
+\chapter{State of the Art}\label{cap:estadoDeLaCuestion}
 
 In this chapter, we will explore the fundamental concepts and classical techniques on which our chess engine is based. This includes game trees and search algorithms. Each section will provide an overview of the concepts and techniques used by our engine, and additionally we will explain the workflow we followed to get better versions of our engine.
 
@@ -10,15 +9,14 @@ Sequential games, such as chess or tic-tac-toe, where players take turns alterna
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.35\textwidth]{Imagenes/chess-game-tree.jpg}
-    \caption{Computers, chess and long-range planning by Botvinnik, M. M. (Mikhail Moiseevich), 1911--1995}
-    \label{fig:game-tree}
+    \caption{Computers, chess and long-range planning by Botvinnik, M. M. (Mikhail Moiseevich), 1911--1995}\label{fig:game-tree}
 \end{figure}
 
 \noindent The depth of a chess game tree is important because it determines the extent to which it will be analysed and evaluated. A depth of 1 represents all possible moves for the current player or side to move, while a depth of 2 includes the opponent's responses to those moves. As the depth increases, the tree grows exponentially, making it computationally expensive to explore all possible states.
 
 \vspace{1em}
 
-\noindent In Figure~\ref{fig:game-tree}, the shaded cluster of lines on the left represents the part of the game tree corresponding to previous moves leading up to the current position. From there, only a subset of possible continuations is drawn, illustrating the immense complexity of chess. Claude Shannon estimated that the number of possible chess games is around $10^{120}$, a value known as the \textit{Shannon number}. This astronomical figure makes it computationally infeasible to represent or analyze the entire game tree, motivating the use of search algorithms and pruning techniques to explore only the most relevant branches, which are explained in the following section.
+\noindent In~\cref{fig:game-tree}, the shaded cluster of lines on the left represents the part of the game tree corresponding to previous moves leading up to the current position. From there, only a subset of possible continuations is drawn, illustrating the immense complexity of chess. Claude Shannon estimated that the number of possible chess games is around $10^{120}$, a value known as the \textit{Shannon number}~\cite{Shannon1950}. This astronomical figure makes it computationally infeasible to represent or analyze the entire game tree, motivating the use of search algorithms and pruning techniques to explore only the most relevant branches, which are explained in the following section.
 
 \section{Search algorithms}
 
@@ -26,25 +24,27 @@ There are different approaches to analyze and find the best move from a position
 
 \vspace{1em}
 
-\noindent Note that these search algorithms are the foundation of more advanced and practical algorithms used today. However, explaining them is essential to understand the underlying principles.
+\noindent Note that these search algorithms are the foundation of more advanced and practical algorithms used today. That's why explaining them is essential to understand the underlying principles.
 
-\paragraph{Depth-First Search} refers to the process of exploring each branch of a tree or graph to its deepest level before backtracking. Unfortunately, in chess, this cannot be possible as mentioned in the last section. This is because the number of possible moves grows exponentially with the depth of the search tree, leading to the so-called combinatorial explosion. To address this, depth-first search is often combined with techniques like alpha-beta pruning to reduce the number of nodes evaluated, making the search more efficient while still exploring the tree deeply. The following pseudocode illustrates the working of the DFS algorithm:
+\paragraph{Depth-First Search} refers to the process of exploring each branch of a tree or graph to its deepest level before backtracking. Unfortunately, in chess, this cannot be possible as mentioned in the last section. This is because the number of possible moves grows exponentially with the depth of the search tree, leading to the so-called combinatorial explosion. To address this, depth-first search is often combined with techniques like alpha-beta pruning to reduce the number of nodes evaluated, making the search more efficient while still exploring the tree deeply.~\cref{lst:dfs} illustrates the working of the DFS algorithm.
 
 \vspace{1em}
 
-\begin{lstlisting}[caption={Pseudocode of the Depth-First Search algorithm.}, captionpos=b, frame=single, numbers=left, xleftmargin=15pt]
-Procedure DepthFirstSearch(Graph G, Node v):
+\begin{lstlisting}[caption={Pseudocode of the Depth-First Search algorithm.}, label={lst:dfs}, frame=single, numbers=left, xleftmargin=15pt]
+Procedure DFS(Graph G, Node v):
     Mark v as visited
     For each neighbor w of v in G.adjacentEdges(v):
         If w is not visited:
             Recursively call DFS(G, w)
 \end{lstlisting}
 
-DFS visits nodes by marking them as visited (line 2) and recursively explores all adjacent nodes until no unvisited nodes remain (lines 3 to 5). It has a worst-case performance of $O(|V| + |E|)$ and worst-case space complexity of $O(|V|)$, with $|V| = \text{number of nodes}$ and $|E| = \text{number of edges}$.
+\noindent DFS visits nodes by marking them as visited (line 2) and recursively explores all adjacent nodes until no unvisited nodes remain (lines 3 to 5). It has a worst-case performance of $O(|V| + |E|)$ and worst-case space complexity of $O(|V|)$, with $|V| = \text{number of nodes}$ and $|E| = \text{number of edges}$.
 
 \paragraph{Best-First Search} refers to the way of exploring the most promising nodes first. It is similar to a breadth-first search but prioritizes some nodes before others. They typically require significant memory resources, as they must store a search space (the collection of all potential solutions in search algorithms) that grows exponentially.
 
-\begin{lstlisting}[caption={Pseudocode of the Best-First Search algorithm.}, captionpos=b, frame=single, numbers=left, xleftmargin=10pt, breaklines=true]
+\vspace{1em}
+
+\begin{lstlisting}[caption={Pseudocode of the Best-First Search algorithm.}, frame=single, numbers=left, xleftmargin=10pt, breaklines=true]
 Procedure BestFirstSearch(Graph G, Node start, Node goal):
     Create an empty priority queue PQ
     Add start to PQ with priority 0
@@ -62,7 +62,7 @@ Procedure BestFirstSearch(Graph G, Node start, Node goal):
                 Mark w as visited
 \end{lstlisting}
 
-In this case, the priority queue contains nodes along with their associated priorities, which are determined by a heuristic function.
+\noindent In this case, the priority queue contains nodes along with their associated priorities, which are determined by a heuristic function.
 
 \paragraph{Parallel Search} refers to mulithreaded search, a technique used to accelerate search processes by leveraging multiple processors.
 
@@ -70,11 +70,13 @@ In this case, the priority queue contains nodes along with their associated prio
 
 \noindent Next, we will discuss one of the most widely used search algorithms in chess engines: the minimax algorithm.
 
-\subsection{Minimax algorithm}
+\subsection{Minimax algorithm}\label{sec:minimax}
 
-The \textbf{minimax} algorithm is a decision making algorithm that follows Depth-First Search (DFS) principles. It is based on the assumption that both players play optimally, with one player (the maximizer) trying to maximize his score and the other player (the minimizer) trying to minimize his score. It explores the game tree to evaluate all possible moves and determines the best move for the current player. Here it is the psecudocode of the algorithm:
+The \textbf{minimax} algorithm is a decision making algorithm that follows Depth-First Search (DFS) principles. It is based on the assumption that both players play optimally, with one player (the maximizer) trying to maximize his score and the other player (the minimizer) trying to minimize his score. It explores the game tree to evaluate all possible moves and determines the best move for the current player.~\cref{lst:minimax} has the pseudocode of the algorithm:
 
-\begin{lstlisting}[caption={Pseudocode of the Minimax algorithm.}, captionpos=b, frame=single, numbers=left, xleftmargin=15pt, breaklines=true]
+\vspace{1em}
+
+\begin{lstlisting}[caption={Pseudocode of the Minimax algorithm.}, label={lst:minimax}, frame=single, numbers=left, xleftmargin=15pt, breaklines=true]
 Procedure Minimax(Node position, Integer depth, Boolean maximizingPlayer):
     If depth == 0 or position is a terminal node:
         Return the evaluation of the position
@@ -92,8 +94,6 @@ Procedure Minimax(Node position, Integer depth, Boolean maximizingPlayer):
             minEval = min(minEval, eval)
         Return minEval
 \end{lstlisting}
-
-The following is an example of the algorithm:
 
 \begin{figure}[H]
     \centering
@@ -127,15 +127,14 @@ The following is an example of the algorithm:
         \draw[-{Stealth}, draw=red] (f) -- (c);
         \draw[-] (c) -- (g);
     \end{tikzpicture}
-    \caption{Example of minimax.}
-    \label{fig:minimax}
+    \caption{Example of minimax.}\label{fig:minimax}
 \end{figure}
 
-\noindent Let's say that white always wants the highest value (maximizing the result) while black wants the lowest value (minimizing the result). In Figure~\ref{fig:minimax}, white is represented by square nodes and black by circle nodes. Note that this example is a binary tree, but in a real scenario there would likely be more moves or nodes, because in chess each position usually allows a wide range of legal moves, not just two as in a binary tree. For the leftmost pair of leaf nodes with values of 3 and 5, 3 is chosen because black tries to get the lowest score between them. Then, for the other pair of leaf nodes with values of 2 and 9, 2 is chosen for the same reason. Lastly, at the root node, white selects 3 as the maximum value between 3 and 2.
+\noindent For example, let's say that white always wants the highest value (maximizing the result) while black wants the lowest value (minimizing the result). In~\cref{fig:minimax}, white is represented by square nodes and black by circle nodes. Note that this example is a binary tree, but in a real scenario there would likely be more moves or nodes, because in chess each position usually allows a wide range of legal moves, not just two as in a binary tree. For the leftmost pair of leaf nodes with values of 3 and 5, 3 is chosen because black tries to get the lowest score between them. Then, for the other pair of leaf nodes with values of 2 and 9, 2 is chosen for the same reason. Lastly, at the root node, white selects 3 as the maximum value between 3 and 2.
 
 \vspace{1em}
 
-\noindent The effectiveness of search algorithms such as minimax, and their optimizations (which are carefully explained in the next chapter) is crucial for the playing strength of a chess engine. The deeper and more efficiently the engine can search the game tree, the better its move selection and overall performance. In order to deliver the best quality of the code and execution performance, it is important to maintain an optimal workflow and organization.
+\noindent The effectiveness of search algorithms such as minimax, and their optimizations (which are carefully explained in the next chapter), is crucial for the playing strength of a chess engine. The deeper and more efficiently the engine can search the game tree, the better its move selection and overall performance. In order to deliver the best quality of the code and execution performance, it is important to maintain an optimal workflow and organization.
 
 \section{Workflow}
 
@@ -153,7 +152,7 @@ First, in order to analyze the performance of our chess engine and identify pote
 
 \noindent Our profiling goal is to identify which parts of the code consume the most execution time. We run the engine under \texttt{perf} using the following commands:
 
-\begin{lstlisting}[language=bash, caption={Profiling AlphaDeepChess with perf}, captionpos=b, frame=single, breaklines=true]
+\begin{lstlisting}[language=bash, caption={Profiling AlphaDeepChess with perf}, frame=single, breaklines=true]
 # Record performance data with function stack traces
 sudo perf record -g ./build/release/AlphaDeepChess
 
@@ -164,7 +163,6 @@ sudo perf report -g --no-children
 \noindent After recording, \texttt{perf report} opens an interactive terminal interface where functions are sorted by CPU overhead. This allows us to prioritize which functions to optimize.
 
 \section{How can we determine the strength of our engine?}
-\label{sec:how}
 
 Once the profiling and optimization steps have been completed with the last decided version, we are ready to try to determine the strength or level of our engine.
 
@@ -178,7 +176,7 @@ Once the profiling and optimization steps have been completed with the last deci
 
 \subsection{Stockfish}
 
-\textit{Stockfish} is an open-source chess engine and command-line program available for multiple platforms, including Windows, macOS, Linux, Android, and iOS. It provides a wide range of versions optimized for different hardware configurations, such as specific CPU instruction sets, to maximize performance. For instance, the AVX2 version is recommended for most users with Intel processors from 2013 onwards or AMD processors from 2015 onwards, as it utilizes advanced vectorization instructions.
+\textit{Stockfish}~\cite{Stockfish} is an open-source chess engine and command-line program available for multiple platforms, including Windows, macOS, Linux, Android, and iOS. It provides a wide range of versions optimized for different hardware configurations, such as specific CPU instruction sets, to maximize performance. For instance, the AVX2 version is recommended for most users with Intel processors from 2013 onwards or AMD processors from 2015 onwards, as it utilizes advanced vectorization instructions.
 
 \vspace{1em}
 
@@ -194,19 +192,19 @@ Universal Chess Interface, also known as UCI, is an open communication protocol 
 
 \vspace{1em}
 
-\noindent Some of the most important and most used commands are the following:
+\noindent Some of the most important and used commands are the following:
 
-\begin{itemize}
-    \item \texttt{position [fen <fenstring> | startpos | actualpos] moves <move1> \ldots \\<movei>}: sets the current position of the board to the FEN string, or applies the list of moves from the starting position or current position.
+\begin{itemize}[itemsep=1pt]
+    \item \texttt{position [fen <fenstring> | startpos | actualpos] moves <move1> \ldots \\<movei>}: Sets the current position of the board to the FEN string, or applies the list of moves from the starting position or current position.
 
-    \item \texttt{go}: starts evaluating the current position. Some important subparameters are:
-    \begin{itemize}
-        \item \texttt{depth <x>}: specifies the number of \texttt{x} plies to search.
-        \item \texttt{movetime <x>}: specifies the number of \texttt{x} seconds to search. 
+    \item \texttt{go}: Starts evaluating the current position. Some important subparameters are:
+    \begin{itemize}[itemsep=1pt]
+        \item \texttt{depth <x>}: Specifies the number of \texttt{x} plies to search.
+        \item \texttt{movetime <x>}: Specifies the number of \texttt{x} seconds to search. 
     \end{itemize}
 
-    \item \texttt{stop}: stops evaluation if it is running.
-    \item \texttt{diagram}: shows a basic terminal chessboard with the current position.
+    \item \texttt{stop}: Stops evaluation if it is running.
+    \item \texttt{diagram}: Shows a basic terminal chessboard with the current position.
 \end{itemize}
 
 \noindent A ply consists of a single move made by one player in a turn-based game like chess. In chess terminology, one ply refers to one move by either White or Black, not both. Therefore, a full turn (when both White and Black have moved) consists of two plies.
@@ -225,7 +223,7 @@ Universal Chess Interface, also known as UCI, is an open communication protocol 
 
 \vspace{1em}
 
-\noindent \textit{Cutechess} is an open-source tool designed to perform automated games between chess engines. It is widely used in the chess programming community to test and compare engines, evaluate their performance, and analyze games.
+\noindent \textit{Cutechess}~\cite{CuteChess} is an open-source tool designed to perform automated games between chess engines. It is widely used in the chess programming community to test and compare engines, evaluate their performance, and analyze games.
 
 \vspace{1em}
 
@@ -237,9 +235,9 @@ Universal Chess Interface, also known as UCI, is an open communication protocol 
 
 \vspace{1em}
 
-\noindent Then, it checks the active status of each engine and manages the start of the games by setting up the board on both engines with the \texttt{position} command. Afterwards, it sends the \texttt{go} command and stops the search with \texttt{stop} when the search time or depth is reached, extracting the best move provided by the engine whose turn it is. This move is then passed to the other engine, alternating turns so that both engines play against each other automatically. In the following \textit{Cutechess} log file, we directly configured the starting positions from a list of FENs in the \texttt{positions.fen} file:
+\noindent Then, it checks the active status of each engine and manages the start of the games by setting up the board on both engines with the \texttt{position} command. Afterwards, it sends the \texttt{go} command and stops the search with \texttt{stop} when the search time or depth is reached, extracting the best move provided by the engine whose turn it is. This move is then passed to the other engine, alternating turns so that both engines play against each other automatically.~\cref{lst:cutechess-example} we show a \textit{Cutechess} log file, we directly configured the starting positions from a list of FENs in the \texttt{positions.fen} file:
 
-\begin{lstlisting}[basicstyle=\ttfamily\scriptsize, captionpos=b,breaklines=true, frame=single, caption={Example of \textit{Cutechess}}, label={fig:cutechess-example}]
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize, breaklines=true, frame=single, caption={Example of \textit{Cutechess}}, label={lst:cutechess-example}]
 Running test (8) with the following configuration:
 Games: 1, Search Time: 5, Depth: 5
 PGN File: results.pgn, EPD File: results.epd, Log File: results.log
@@ -281,7 +279,7 @@ Started game 1 of 1 (AlphaDeepChess vs Stockfish)
  >AlphaDeepChess(0): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6 moves c1g5 e7e6
 \end{lstlisting}
 
-\noindent In Figure~\ref{fig:cutechess-example}, in addition to setting the number of games to $1$, the search time to $5$ seconds, and the search depth to $5$, we provided a list of starting positions, from which one is chosen at random. Each line starting with \texttt{position fen \ldots} establishes the FEN position and continues by adding the moves played.
+\noindent In~\cref{lst:cutechess-example}, in addition to setting the number of games to $1$, the search time to $5$ seconds, and the search depth to $5$, we provided a list of starting positions, from which one is chosen at random. Each line starting with \texttt{position fen \ldots} establishes the FEN position and continues by adding the moves played.
 
 \vspace{1em}
 
@@ -289,15 +287,7 @@ Started game 1 of 1 (AlphaDeepChess vs Stockfish)
 
 \vspace{1em}
 
-\noindent Depending on the number of games, search time, and time control, these tournaments between engines can take a long time to process. For this reason, we decided to use GitHub Actions and workflows to separate our development environment from the execution of performance and strength tests.
-
-\subsection{GitHub Actions and workflows}
-
-GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to automate tasks such as building, testing, and deploying code. Workflows are defined in YAML files and specify the tasks to be executed, the jobs or events that trigger them, and the environment in which they run.
-
-\vspace{1em}
-
-\noindent In this project, since it is public in a GitHub repository, GitHub Actions was used to automate the testing and evaluation of the chess engine using the last two mentioned tools. A workflow was configured to compile the engine, run automated games using \textit{Cutechess} between different versions of the engine or our engine versus \textit{Stockfish}.
+\noindent Depending on the number of games, search time, and time control, these tournaments between engines can take a long time to process. For this reason, we decided to use GitHub Actions and workflows to separate our development environment from the execution of performance and strength tests. This is explained later in~\cref{cap:analysisOfImprovements}.
 
 \vspace{1em}
 
@@ -305,7 +295,7 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
 
 \subsection{CustomTkinter}
 
-CustomTkinter is a modern UI-library for Python that extends from Tkinter module and considers both OOP (Object Oriented Programming) and simple implementations.
+The CustomTkinter is a modern UI-library for Python that extends from Tkinter module and considers both OOP (Object Oriented Programming) and simple implementations.
 
 \vspace{1em}
 
@@ -315,12 +305,12 @@ CustomTkinter is a modern UI-library for Python that extends from Tkinter module
     \begin{figure}[H]
     \centering
         \includegraphics[width=1.0\textwidth]{Imagenes/gui.png}
-        \caption{AlphaDeepChess GUI}
+        \caption{AlphaDeepChess GUI}\label{fig:gui}
     \end{figure}
 \end{center}
 
-\noindent In the figure above, the engine evaluation is enabled and displays the current evaluation value, the best move found, and the calculated search depth. In this way, we also ensure a more user-friendly experience.
+\noindent In~\cref{fig:gui}, the engine evaluation is enabled and displays the current evaluation value, the best move found, and the calculated search depth. In this way, we also ensure a more user-friendly experience.
 
 \vspace{1em}
 
-\noindent In the following chapter, we will present more extensive and detailed information on building the engine.
+\noindent In the following chapters, we will present more extensive and detailed information on building the engine.

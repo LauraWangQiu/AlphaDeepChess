@@ -1,9 +1,8 @@
-\chapter{Analysis of Improvement Techniques}
-\label{cap:analysisOfImprovements}
+\chapter{Analysis of Improvement Techniques}\label{cap:analysisOfImprovements}
 
 This chapter documents the implementation of the following techniques used to improve the chess engine:
 
-\begin{itemize}
+\begin{itemize}[itemsep=1pt]
     \item Transposition tables with zobrist hashing.
     \item Move generator with magic bitboards and PEXT instructions.
     \item Evaluation with king safety and piece mobility parameters.
@@ -11,28 +10,39 @@ This chapter documents the implementation of the following techniques used to im
     \item Search with Late move Reductions.
 \end{itemize}
 
-\noindent At the end of each section, we provide the results of a 100-game match between the improved engine and a baseline version. The baseline includes only the core techniques discussed in the previous chapter on engine development. The purpose of these matches is to measure the improvement in playing strength introduced by each new implementation.
+All of these improvements have been compared with each other using \textit{CuteChess}, and the best version was also evaluated against \textit{Stockfish}. These comparisons were conducted on machines provided by GitHub Actions.
+
+\section{GitHub Actions and Workflows}
+
+GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to automate tasks such as building, testing, and deploying code. Workflows are defined in YAML files and specify the tasks to be executed, the jobs or events that trigger them, and the environment in which they run.
 
 \vspace{1em}
 
-\noindent All matches are conducted using the tournament manager \textit{CuteChess}~\cite{CuteChess}, with the following configuration:
+\noindent In this project, since it is public in a GitHub repository, we used GitHub Actions to automate the testing and evaluation of the chess engine with \textit{Stockfish} and \textit{CuteChess}. A workflow was configured (located at \texttt{.github\textbackslash{}workflows\textbackslash{}manual-workflow.yml}) to compile the engine and run automated games using \textit{CuteChess} between different versions of the engine or against \textit{Stockfish}.
 
-\begin{itemize}
+\vspace{1em}
+
+\noindent At the end of each section, we provide the results of a 100-game match between the improved engine and a baseline version. The baseline includes only the core techniques discussed in the previous chapter on engine architecture. The purpose of these matches is to measure the improvement in playing strength introduced by each new implementation.
+
+\vspace{1em}
+
+\noindent All matches are conducted using the tournament manager \textit{CuteChess}~\cite{CuteChess} with the following configuration:
+
+\begin{itemize}[itemsep=1pt]
 \item 100 games per match.
 \item 50 unique random starting positions, each played twice with alternating colors.
 \item 4 seconds of thinking time per move.
 \item A 150-move limit per game, after which the game is declared a draw.
 \end{itemize}
 
-\newpage
+\noindent The matches were executed on virtual machines provided by GitHub Actions, using the \texttt{ubuntu-latest} runner. At the time of testing, this environment provided 4 CPUs, 16~GB of RAM, a 14~GB SSD, and a 64-bit architecture.
 
-\section{Transposition Table}
-\label{sec:tt}
+\section{Transposition Table}\label{sec:tt}
 
-\noindent As discused in the previous chapter (see Section~\ref{chap:iterativeDeepening}), the basic implementation of the chess engine generates a large amount of redundant calculations due to the iterative deepening approach and also the concept of transpositions: situations in which the same board position is reached through different sequences of moves in the game tree.
-\noindent Figure~\ref{fig:transposition_example} illustrates a position that can arise through multiple move orders. Where the white king could go to the g3 square from multiple paths.
+\noindent As discused in the previous chapter (see~\cref{sec:iterativeDeepening}), the basic implementation of the chess engine generates a large amount of redundant calculations due to the iterative deepening approach and also the concept of transpositions: situations in which the same board position is reached through different sequences of moves in the game tree.
+\noindent~\cref{fig:transposition_example} illustrates a position that can arise through multiple move orders. Where the white king could go to the g3 square from multiple paths.
 
-\begin{figure}[H]
+\begin{figure}
     \centering
     \begin{minipage}{0.6\textwidth}
         \centering
@@ -45,13 +55,12 @@ This chapter documents the implementation of the following techniques used to im
             arrow=to
         ]
     \end{minipage}
-    \caption{Lasker-Reichhelm Position, transposition example}
-    \label{fig:transposition_example}
+    \caption{Lasker-Reichhelm Position, transposition example}\label{fig:transposition_example}
 \end{figure}
 
 \vspace{1em}
 
-\noindent Taking advantage of the concept of dynamic programming, we create a look-up table of chess positions and its evaluation. So if we encounter the same position again, the evaluation is already precalculated. However, we ask ourselves the following question: how much space does the look-up table take up if there are an astronomical amount of chess positions? What we can do is assign a hash to each position and make the table index the last bits of the hash. The larger the table, the less likely access collisions will be. We also want a hash that is fast to calculate and has collision-reducing properties.
+\noindent Taking advantage of dynamic programming, we create a look-up table of chess positions and its evaluation. So if we encounter the same position again, the evaluation is already precalculated. However, we ask ourselves the following question: how much space does the look-up table take up if there are an astronomical amount of chess positions? What we can do is assign a hash to each position and make the table index the last bits of the hash. The larger the table, the less likely access collisions will be. We also want a hash that is fast to calculate and has collision-reducing properties.
 ~\cite{TranspositionTable}
 
 \vspace{1em}
@@ -60,7 +69,7 @@ This chapter documents the implementation of the following techniques used to im
 
 \subsection{Zobrist Hashing}
 
-Zobrist Hashing is a technique to transform a board position of arbitrary size into a number of a set length, with an equal distribution over all possible numbers invented by Albert Zobrist. (\cite{ZobristHashing})
+Zobrist Hashing is a technique to transform a board position of arbitrary size into a number of a set length, with an equal distribution over all possible numbers invented by Albert Zobrist~\cite{ZobristHashing}.
 
 \vspace{1em}
 
@@ -85,7 +94,7 @@ Zobrist Hashing is a technique to transform a board position of arbitrary size i
 
 \vspace{1em}
 
-\noindent The position shown in Figure~\ref{fig:zobristExamplePosition} illustrates an example of how the Zobrist hash is computed.  
+\noindent The position shown in~\cref{fig:zobristExamplePosition} illustrates an example of how the Zobrist hash is computed.  
 The hash value is calculated by XORing the random values associated with each element of the position.  
 Since the side to move is White, we do not XOR the value associated with Black to move.  
 The resulting hash is computed as follows:
@@ -94,10 +103,11 @@ The resulting hash is computed as follows:
 111 \oplus 69 \oplus 909 \oplus 10 \oplus 67 \oplus 12 \oplus 555 \oplus 3 = 458
 \]
 
-\newpage
+\noindent Where $\oplus$ denotes $XOR$.
 
 \begin{figure}[H]
-    \begin{minipage}{0.4\textwidth}
+    \centering
+    \begin{minipage}[t]{0.4\textwidth}
         \centering
         \newchessgame
         \chessboard[
@@ -109,10 +119,10 @@ The resulting hash is computed as follows:
             markmoves={b7-b5},
             arrow=to
         ]
-        \caption{Side to move is white. The last move was a pawn advancing from b7 to b5, making \text{en passant} available on the b6 square.}
+        \caption*{Side to move is white. The last move was a pawn advancing from b7 to b5, making \text{en passant} available on the b6 square.}
     \end{minipage}
-    \hfill
-    \begin{minipage}{0.4\textwidth}
+    \hspace{1cm}
+    \begin{minipage}[t]{0.4\textwidth}
         \begin{tikzpicture}[scale=0.7]
 
             \foreach \x in {0,1,...,7} {
@@ -128,10 +138,10 @@ The resulting hash is computed as follows:
 
             \draw[thick] (0,0) grid (8,8);
         \end{tikzpicture}
-        \caption{Random values corresponding to each piece and the en passant square. The value for Black to move is 62319.}
+        \vspace{1.5em}
+        \caption*{Random values corresponding to each piece and the en passant square. The value for Black to move is 62319.}
     \end{minipage}
-    \caption{Zobrist hash calculation example}
-    \label{fig:zobristExamplePosition}
+    \caption{Zobrist hash calculation example.}\label{fig:zobristExamplePosition}
 \end{figure}
 
 \subsection{Table Entry}
@@ -161,44 +171,39 @@ As discussed earlier, index collisions in the transposition table are handled by
 
 \subsection{Analysis}
 
-\noindent To evaluate the impact of introducing the transposition table, we conducted the 100-game tournament against the baseline version of the engine. The Table ~\ref{tab:tt_vs_basic} details the implementation used for each bot.
+\noindent To evaluate the impact of introducing the transposition table, we conducted the 100-game tournament against the baseline version of the engine. The~\cref{tab:tt_vs_basic} details the implementation used for each bot.
 
-\begin{table}[H]
+\vspace{1em}
+
+\begin{table}
     \centering
     \begin{tabular}{|p{4cm}|p{4cm}|p{4cm}|}
     \hline
-    \textbf{Component}         & \textbf{Transposition Table Bot}  & \textbf{Basic Bot}     \\ \hline
+    \textit{Component}         & \textit{Transposition Table Bot}  & \textit{Basic Bot}     \\ \hline
     Search                     & Alpha-beta With Transposition Table          & Basic Alpha-beta           \\ \hline
     Evaluation Function        & Materialistic                      & Materialistic       \\ \hline
     Move Generator             & Basic implementation              & Basic implementation   \\ \hline
     Move Ordering              & MVV-LVA                           & MVV-LVA                \\ \hline
     \end{tabular}
-    \caption{Match configuration: Transposition Table Bot vs Basic Bot}
-    \label{tab:tt_vs_basic}
+    \caption{Match configuration: Transposition Table Bot vs Basic Bot}\label{tab:tt_vs_basic}
 \end{table}
 
-\noindent As illustrated in Figure~\ref{fig:results_transposition_table_bot}, We see a substantial improvement by adding the transposition table with 46 wins versus 32 losses. The remaining 22 games ended in a draw.
+\noindent As illustrated in following result bar, we see a substantial improvement by adding the transposition table with 46 wins versus 32 losses. The remaining 22 games ended in a draw.
 
 \begin{center}
-\begin{figure}[H]
-    \centering
-    \ResultBar{15cm}{0.5cm}{46}{22}{32}
-    \caption{64MB Transposition Table bot vs basic bot}
-    \label{fig:results_transposition_table_bot}
-\end{figure}
+\ResultBar{15cm}{0.5cm}{46}{22}{32}
 \medskip
 \end{center}
 
 \section{Move generator with Magic Bitboards and PEXT instructions}
 
-To identify potential performance bottlenecks, we performed profiling on the engine, as shown in Figure~\ref{fig:profiling}.
+To identify potential performance bottlenecks, we performed profiling on the engine, as shown in~\cref{fig:profiling}.
 
 \begin{center}
     \begin{figure}[H]
     \centering
         \includegraphics[width=1.0\textwidth]{Imagenes/basic_move_generator_profiling.png}
-        \caption{Profiling results}
-        \label{fig:profiling}
+        \caption{Profiling results.}\label{fig:profiling}
     \end{figure}
     \medskip
 \end{center}
@@ -217,19 +222,19 @@ We can create a look up table of all the rook and bishop moves for each square o
 
 \noindent A \textbf{magic number} is a multiplier to the bitboard of blockers with the following properties:
 
-\begin{itemize}
+\begin{itemize}[itemsep=1pt]
   \item Preserves relevant blocker information: 
   The nearest blockers along a piece's movement direction are preserved. 
   \textit{Example:} Consider a rook with two pawns in its path:
-  \begin{lstlisting}[breaklines=true]
-    Rook -> -> -> [Pawn1][Pawn2]
-  \end{lstlisting}
+  \begin{center}
+    Rook $\rightarrow \rightarrow \rightarrow$ [Pawn1][Pawn2]
+  \end{center}
   In this case, only `Pawn1` blocks the rook's movement, while `Pawn2` is irrelevant.
   \item Compresses the blocker bitboard, pushing the important bits near the most significant bit.
   \item The final multiplication must produce a unique index for each possible blocker configuration. The way to ensure the uniqueness is by brute force testing.
 \end{itemize}
 
-\noindent As illustrated in Figure~\ref{fig:magics_position}, we aim to compute the legal moves of the white rook in the given position. In practice, the only pieces that truly block the rook's path are those marked with a red circle.
+\noindent As illustrated in~\cref{fig:magics_position}, we aim to compute the legal moves of the white rook in the given position. In practice, the only pieces that truly block the rook's path are those marked with a red circle.
 
 \begin{figure}[H]
     \centering
@@ -244,11 +249,10 @@ We can create a look up table of all the rook and bishop moves for each square o
             color=green, markfields={c4,b4,a4,e4,d5,d3}
         ]
     \end{minipage}
-    \caption{Initial chess position with white rook and blockers}
-    \label{fig:magics_position}
+    \caption{Initial chess position with white rook and blockers}\label{fig:magics_position}
 \end{figure}
 
-\noindent First, we mask out all pieces outside the rook's attack pattern or on the board borders, as shown in Figure~\ref{fig:magic_preprocessing}.
+\noindent First, we mask out all pieces outside the rook's attack pattern or on the board borders, as shown in~\cref{fig:magic_preprocessing}.
 
 \begin{figure}[H]
     \centering
@@ -268,11 +272,10 @@ We can create a look up table of all the rook and bishop moves for each square o
         \includegraphics[width=\textwidth]{Imagenes/magics_processed_blockers.png}
         \caption{Masked blockers bitboard}
     \end{minipage}
-    \caption{Pre-processing of the blockers bitboard}
-    \label{fig:magic_preprocessing}
+    \caption{Pre-processing of the blockers bitboard}\label{fig:magic_preprocessing}
 \end{figure}
 
-\noindent As illustrated in Figure~\ref{fig:magic_multiplication}, the masked blockers bitboard is then multiplied by the magic number. The result retains only the three relevant pawns that obstruct the rook's movement, pushing them toward the most significant bits.
+\noindent As illustrated in~\cref{fig:magic_multiplication}, the masked blockers bitboard is then multiplied by the magic number. The result retains only the three relevant pawns that obstruct the rook's movement, pushing them toward the most significant bits.
 
 \begin{figure}[H]
     \centering
@@ -294,11 +297,10 @@ We can create a look up table of all the rook and bishop moves for each square o
         \includegraphics[width=\textwidth]{Imagenes/magics_multiplied_blockers.png}
         \caption{Multiplied blockers bitboard}
     \end{minipage}
-    \caption{Multiplication by magic number to produce an index}
-    \label{fig:magic_multiplication}
+    \caption{Multiplication by magic number to produce an index}\label{fig:magic_multiplication}
 \end{figure}
 
-\noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square; Listing~\ref{fig:rook_relevant_squares} shows this for the rook:
+\noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square; ~\cref{fig:rook_relevant_squares} shows this for the rook:
 
 \begin{figure}[H]
     \centering
@@ -340,8 +342,7 @@ We can create a look up table of all the rook and bishop moves for each square o
         % Draw the grid
         \draw[thick] (0,0) grid (8,8);
     \end{tikzpicture}
-    \caption{Relevant squares for rook piece.}
-    \label{fig:rook_relevant_squares}
+    \caption{Relevant squares for rook piece.}\label{fig:rook_relevant_squares}
 \end{figure}
 
 \vspace{1em}
@@ -349,25 +350,26 @@ We can create a look up table of all the rook and bishop moves for each square o
 \noindent The final index is thus computed as:
 
 \begin{align*}
-    \text{index}
-    &= (\texttt{bitboard\_of\_blockers} \times \texttt{magic\_number})
-       \;\gg\;(64 - \texttt{relevant\_squares})\,.
+    \text{index} 
+    &= (\text{bitboard\_of\_blockers} \times \text{magic\_number})
+       \;\gg\;(64 - \text{relevant\_squares})\,.
 \end{align*}
 
 \subsection{PEXT instruction}
 
 \noindent The \texttt{PEXT} (Parallel Bits Extract) instruction—available on modern x86\_64 CPUs—extracts bits from a source operand according to a mask and packs them into the lower bits of the destination operand~\cite{PextInstruction}. It is ideally suited for computing our table index.
 
-\noindent Figure~\ref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: it selects specific bits from register \texttt{r2}, as specified by the mask in \texttt{r3}, and packs the result into the lower bits of the destination register \texttt{r1}.
+\vspace{1em}
 
-\begin{figure}[H]
+\noindent~\cref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: it selects specific bits from register \texttt{r2}, as specified by the mask in \texttt{r3}, and packs the result into the lower bits of the destination register \texttt{r1}.
+
+\begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{Imagenes/pext.png}
-    \caption{Example of the \texttt{PEXT} instruction: extracting bits from \texttt{r2} using \texttt{r3} as a mask, and storing the result in \texttt{r1}. ~\cite{PextInstruction}}
-    \label{fig:pext_instruction_example}
+    \caption{Example of the \texttt{PEXT} instruction: extracting bits from \texttt{r2} using \texttt{r3} as a mask, and storing the result in \texttt{r1}~\cite{PextInstruction}.}\label{fig:pext_instruction_example}
 \end{figure}
 
-\noindent For our previous example (see Figure~\ref{fig:magics_position}), we only need the full bitboard of blockers and the rook’s attack pattern (excluding the borders to reduce space), as illustrated in Figure~\ref{fig:pext_bitboards}.
+\noindent For our previous example (see~\cref{fig:magics_position}), we only need the full bitboard of blockers and the rook’s attack pattern (excluding the borders to reduce space), as illustrated in~\cref{fig:pext_bitboards}.
 
 \begin{figure}[H]
     \centering
@@ -393,51 +395,44 @@ We can create a look up table of all the rook and bishop moves for each square o
         \includegraphics[width=\textwidth]{Imagenes/pext_final_index.png}
         \caption{Final extracted index}
     \end{minipage}
-    \caption{index extraction with Pext example}
-    \label{fig:pext_bitboards}
+    \caption{index extraction with Pext example}\label{fig:pext_bitboards}
 \end{figure}
 
 \noindent The final index used to access the lookup table is calculated using the \texttt{pext} instruction as follows:
 
 \begin{align*}
     \text{index}
-    &= \texttt{\_pext\_u64}(\texttt{blockers},\,\texttt{attack\_pattern})\,.
+    &= \text{\_pext\_u64}(\text{blockers},\,\texttt{attack\_pattern})\,.
 \end{align*}
 
 \noindent To maintain compatibility and performance across different hardware platforms, we provide two implementations:
 
-\begin{itemize}
+\begin{itemize}[itemsep=1pt]
   \item If \texttt{PEXT} support is detected at compile time, the engine uses it to compute the index directly.
-  \item Otherwise, the engine falls back to the Magic Bitboards approach using multiplication and bit shifts.
+  \item Otherwise, the engine falls back to the magic bitboards approach using multiplication and bit shifts.
 \end{itemize}
 
 \subsection{Analysis}
 
-\noindent To evaluate the impact of introducing the move generator accelerated with pext instructions, we conducted the 100-game tournament against the baseline version of the engine. The Table~\ref{tab:pext_vs_basic} details the implementation used for each bot.
+\noindent To evaluate the impact of introducing the move generator accelerated with PEXT instructions, we conducted the 100-game tournament against the baseline version of the engine. The~\cref{tab:pext_vs_basic} details the implementation used for each bot.
 
-\begin{table}[H]
+\begin{table}
     \centering
     \begin{tabular}{|p{4cm}|p{4cm}|p{4cm}|}
     \hline
-    \textbf{Component}         & \textbf{PEXT instructions Bot}  & \textbf{Basic Bot}     \\ \hline
+    \textit{Component}         & \textit{PEXT instructions Bot}  & \textit{Basic Bot}     \\ \hline
     Search                     & Alpha-beta With Transposition Table          & Basic Alpha-beta           \\ \hline
     Evaluation Function        & Materialistic                      & Materialistic       \\ \hline
     Move Generator             & PEXT implementation              & Basic implementation   \\ \hline
     Move Ordering              & MVV-LVA                           & MVV-LVA                \\ \hline
     \end{tabular}
-    \caption{Match configuration: PEXT instructions Bot vs Basic Bot}
-    \label{tab:pext_vs_basic}
+    \caption{Match configuration: PEXT instructions Bot vs Basic Bot}\label{tab:pext_vs_basic}
 \end{table}
 
-\noindent As illustrated in Figure~\ref{fig:results_pext_move_generator_bot}, We achieved a significant performance improvement by adding the PEXT instructions with 46 wins versus 22 losses. The remaining 14 games ended in a draw.
+\noindent As illustrated in the following result bar, we achieved a significant performance improvement by adding the PEXT instructions with 46 wins versus 22 losses. The remaining 14 games ended in a draw.
 
 \begin{center}
-    \begin{figure}[H]
-        \centering
-        \ResultBar{15cm}{0.5cm}{64}{14}{22}
-        \caption{Move generator with PEXT instructions bot vs basic bot}
-        \label{fig:results_pext_move_generator_bot}
-    \end{figure}
+\ResultBar{15cm}{0.5cm}{64}{14}{22}
 \medskip
 \end{center}
 
@@ -455,64 +450,49 @@ It is often beneficial to evaluate additional aspects of a position beyond simpl
 
 \subsection{Analysis}
 
-To evaluate the impact of introducing the new parameters in the evaluation, we conducted the 100-game tournament against the baseline version of the engine. The Table~\ref{tab:safety_mobility_vs_basic} details the implementation used for each bot.
+To evaluate the impact of introducing the new parameters in the evaluation, we conducted the 100-game tournament against the baseline version of the engine. The~\cref{tab:safety_mobility_vs_basic} details the implementation used for each bot.
 
 \begin{table}[H]
     \centering
     \begin{tabular}{|p{4cm}|p{4cm}|p{4cm}|}
     \hline
-    \textbf{Component}         & \textbf{PEXT instructions Bot}  & \textbf{Basic Bot}     \\ \hline
+    \textit{Component}         & \textit{PEXT instructions Bot}  & \textit{Basic Bot}     \\ \hline
     Search                     & Alpha-beta With Transposition Table          & Basic Alpha-beta           \\ \hline
     Evaluation Function        & Safety and Mobility                      & Materialistic      \\ \hline
     Move Generator             & PEXT implementation              & Basic implementation   \\ \hline
     Move Ordering              & MVV-LVA                           & MVV-LVA                \\ \hline
     \end{tabular}
-    \caption{Match configuration: King Safety and Piece mobility eval Bot vs Basic Bot}
-    \label{tab:safety_mobility_vs_basic}
+    \caption{Match configuration: King Safety and Piece mobility eval Bot vs Basic Bot}\label{tab:safety_mobility_vs_basic}
 \end{table}
 
-\noindent As illustrated in Figure~\ref{fig:results_safety_mobility_bot}, the results are slightly worse compared to the match using the material-only evaluation shown in Figure~\ref{fig:results_pext_move_generator_bot}, with 62 wins and 30 losses. This decline may be attributed to the additional computational overhead introduced by evaluating the new parameters. Moreover, while concepts such as king safety and piece mobility are intuitively valuable to human players, the engine may struggle to consistently associate them with actual positional strength.
+\noindent As illustrated in the following result bar, the results are slightly worse compared to the match using the material-only evaluation shown in the following result bar, with 62 wins and 30 losses. This decline may be attributed to the additional computational overhead introduced by evaluating the new parameters. Moreover, while concepts such as king safety and piece mobility are intuitively valuable to human players, the engine may struggle to consistently associate them with actual positional strength.
 
 \begin{center}
-    \begin{figure}[H]
-        \centering
-        \ResultBar{15cm}{0.5cm}{62}{8}{30}
-        \caption{King Safety and Piece mobility evaluation bot vs basic bot}
-        \label{fig:results_safety_mobility_bot}
-    \end{figure}
+\ResultBar{15cm}{0.5cm}{62}{8}{30}
 \medskip
 \end{center}
 
-\section{Search Multithread}
-TODO
-%
-%This version of search follows YBWC mentioned in Section~\ref{sec:alphabetaEnhancements}. It searches the first move sequentially after ordering the moves and launches the remaining moves in parallel using a thread. If it turns out that the first move was the best and pruning was applied, directly return the final node evaluation without the additional thread.
-%
-%\paragraph{Young Brothers Wait Concept} is a parallel search algorithm designed to optimize the distribution of work among multiple threads. This is particularly effective in alpha-beta pruning, where the search tree is explored selectively. It is divided into two phases: the principal variation move and the wait concept. The principal variation is searched sequentially by the main thread which ensures that the most promising move is evaluated first. Then, once the first move is evaluated, the remaining moves are distributed among multiple threads for parallel evaluation.
-%
-%\begin{figure}[H]
-%    \centering
-%    \includegraphics[width=0.8\textwidth]{Imagenes/Bitmap/pvsplitting.png}
-%    \caption{Principal variation splitting.~\cite{PVSplitting}}
-%    \label{fig:pv-splitting}
-%\end{figure}
-%
-%\subsection*{Analysis}
+\section{Multithreaded Search}
 
-%To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version. 
-%
-%\begin{center}
-%    \begin{figure}[H]
-%        \centering
-%        \ResultBar{15cm}{0.5cm}{32}{5}{63}
-%        \caption{Multithread Search bot vs basic bot}
-%        \label{fig:results_multithread_search_bot}
-%    \end{figure}
-%\medskip
-%\end{center}
-%
-%\noindent The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
-%
+This version of search follows Young Brothers Wait Concept, which is a parallel search algorithm designed to optimize the distribution of work among multiple threads. This is particularly effective in alpha-beta pruning, where the search tree is explored selectively. It is divided into two phases: the principal variation move and the wait concept. The principal variation is searched sequentially by the main thread which ensures that the most promising move is evaluated first. Then, once the first move is evaluated, the remaining moves are distributed among multiple threads for parallel evaluation. If it turns out that the first move was the best and pruning was applied, it directly returns the final node evaluation without the additional thread.
+
+\begin{figure}[H]
+   \centering
+   \includegraphics[width=0.8\textwidth]{Imagenes/Bitmap/pvsplitting.png}
+   \caption{Principal variation splitting.~\cite{PVSplitting}}\label{fig:pv-splitting}
+\end{figure}
+
+\subsection{Analysis}
+
+To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version. 
+
+\begin{center}
+\ResultBar{15cm}{0.5cm}{32}{5}{63}
+\medskip
+\end{center}
+
+\noindent The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
+
 \section{Late Move Reductions}
 TODO
 %We experiment with the use of late move pruning, under the assumption that if our move ordering is good, the best move in the position should be among the first explored moves. We reduce the depth by one unit starting from the tenth movement.
@@ -522,13 +502,8 @@ TODO
 %To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version.
 %
 %\begin{center}
-%    \begin{figure}[H]
-%        \centering
-%        \ResultBar{15cm}{0.5cm}{48}{15}{37}
-%        \caption{Reductions Search bot vs basic bot}
-%        \label{fig:results_reductions_search_bot}
-%    \end{figure}
+% \ResultBar{15cm}{0.5cm}{48}{15}{37}
 %\medskip
 %\end{center}
 %
-%\noindent The results are worse, with 15 more losses than the version without this aggresive pruning.~\ref{fig:results_pext_move_generator_bot} This could be because our move ordering is not that strong, and the best move in the position sometimes is in the last positions.
+%\noindent The results are worse, with 15 more losses than the version without this aggresive pruning.~\cref{fig:results_pext_move_generator_bot} This could be because our move ordering is not that strong, and the best move in the position sometimes is in the last positions.

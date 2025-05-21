@@ -197,7 +197,7 @@
 % más  información en  el comentario  de babel  y  en TeXiS_bib.tex
 % http://chico.rediris.es/cgi-bin/wa?A2=ind0601&L=es-tex&D=0&P=1989
 
-\usepackage[round]{natbib}
+% \usepackage[round]{natbib}
 
 % Activa el  uso de  español. Babel es  un paquete bastante  gordo que
 % afecta a  otros paquetes de  LaTeX que antes tenían  cableadas cosas
@@ -784,6 +784,14 @@
 \usepackage{amsmath}
 
 \usepackage{xurl}
+\usepackage{cleveref}
+\crefname{figure}{Figure}{Figures}
+\crefname{section}{Section}{Sections}
+\crefname{chapter}{Chapter}{Chapters}
+\crefname{table}{Table}{Tables}
+\crefname{listing}{Listing}{Listings}
+
+\usepackage{enumitem}
 
 % Variable local para emacs, para  que encuentre el fichero maestro de
 % compilación y funcionen mejor algunas teclas rápidas de AucTeX
