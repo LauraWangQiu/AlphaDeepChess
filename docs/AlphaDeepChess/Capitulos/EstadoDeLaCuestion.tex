@@ -170,6 +170,44 @@ sudo perf report -g --no-children
 
 \noindent After recording, \texttt{perf report} opens an interactive terminal interface where functions are sorted by CPU overhead. This allows us to prioritize which functions to optimize.
 
+\section{ELO rating system}
+
+The Elo rating system, developed by Arpad Elo in the 1960s, is a method used to calculate the relative skill levels of players in two-player games such as chess~\cite{Elo}. It was adopted by the FIDE in 1970 as the main rating system for all federated players.
+
+\vspace{1em}
+
+Each player has a numerical rating, which increases or decreases based on the outcome of games against other rated players. The core idea is that the difference in ratings between two players predicts the expected outcome of a match.
+
+The expected score for player \( A \) against player \( B \) is calculated using the formula:
+
+\[
+E_A = \frac{1}{1 + 10^{(R_B - R_A)/400}}
+\]
+
+where:
+\begin{itemize}
+  \item \( R_A \) is the rating of player \( A \),
+  \item \( R_B \) is the rating of player \( B \),
+  \item \( E_A \) is the expected score for player \( A \) (between 0 and 1).
+\end{itemize}
+
+Similarly, the expected score for player \( B \) is \( E_B = 1 - E_A \).
+
+After a game, the players' ratings are updated using the formula:
+
+\[
+R'_A = R_A + K (S_A - E_A)
+\]
+
+where:
+\begin{itemize}
+  \item \( R'_A \) is the new rating of player \( A \),
+  \item \( S_A \) is the actual score achieved by player \( A \) (1 for a win, 0.5 for a draw, 0 for a loss),
+  \item \( K \) is the development coefficient (often set to 10, 20, or 40 depending on the player's level and federation rules).
+\end{itemize}
+
+This system ensures that a player gains more rating points for defeating a higher-rated opponent and loses fewer points when losing to a stronger player.
+
 \section{How can we determine the strength of our engine?}
 
 Once the profiling and optimization steps have been completed with the last decided version, we are ready to try to determine the strength or level of our engine.
