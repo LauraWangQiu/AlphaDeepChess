@@ -27,9 +27,9 @@ This chapter documents the development process of the chess engine. The project 
 
 \vspace{1em}
 
-\noindent A list of twelve bitboards is used, one for each type of chess piece.~\cref{fig:bitboardPositionExample} illustrates this concept with a chess position example:
+\noindent A list of twelve bitboards is used, one for each type of chess piece.~\cref{fig:bitboardPositionExample} illustrates this concept with a chess position example.
 
-\begin{figure}[H]
+\begin{figure}
     \centering
     \newchessgame
     \chessboard[
@@ -41,24 +41,24 @@ This chapter documents the development process of the chess engine. The project 
 
     \begin{minipage}[c]{0.30\textwidth}
         \includegraphics[width=\textwidth]{Imagenes/bitboard_white_pawns.png}
-        \caption*{Bitboard of white pawns}
+        \caption*{Bitboard of white pawns.}
     \end{minipage}
     \hfill
     \begin{minipage}[c]{0.30\textwidth}
         \includegraphics[width=\textwidth]{Imagenes/bitboard_black_pawns.png}
-        \caption*{Bitboard of black pawns}
+        \caption*{Bitboard of black pawns.}
     \end{minipage}
     \hfill
     \begin{minipage}[c]{0.30\textwidth}
         \includegraphics[width=\textwidth]{Imagenes/bitboard_white_rooks.png}
-        \caption*{Bitboard of white rooks}
+        \caption*{Bitboard of white rooks.}
     \end{minipage}
-    \caption{List of bitboards data structure example}\label{fig:bitboardPositionExample}
+    \caption{List of bitboards data structure example.}\label{fig:bitboardPositionExample}
 \end{figure}
 
 \noindent The main advantages of bitboards is that we can operate on multiple squares simultaneously using bitwise operations. For example, we can determine if there are any black pawns on the fifth rank by performing a bitwise AND operation with the corresponding mask.~\cref{fig:bitboardMaskOperation} illustrates this concept.
 
-\begin{figure}[H]
+\begin{figure}
     \centering
     \begin{minipage}[c]{0.30\textwidth}
         \centering
@@ -77,7 +77,7 @@ This chapter documents the development process of the chess engine. The project 
         \includegraphics[width=\textwidth]{Imagenes/bitboardMaskResult.png}
         \caption*{Pawn's bitboard \& mask}
     \end{minipage}
-    \caption{Bitboard mask operation example}\label{fig:bitboardMaskOperation}
+    \caption{Bitboard mask operation example.}\label{fig:bitboardMaskOperation}
     \vspace{-\baselineskip}
 \end{figure}
 
@@ -120,11 +120,7 @@ The search algorithm implemented is an enhanced minimax with alpha-beta pruning 
     \item Move exploration: Iterate through each of the legal moves from the position in order, update the position evaluation, the value of alpha and beta, and performing pruning when possible.
 \end{enumerate}
 
-\noindent The following figure demonstrates the alpha-beta search process by using $alpha$ ($\alpha$) and $beta$ ($\beta$) values:
-
-\newpage
-
-\begin{figure}[H]
+\begin{figure}
     \centering
     \begin{tikzpicture}[
         level distance=1.5cm,
@@ -322,7 +318,11 @@ The search algorithm implemented is an enhanced minimax with alpha-beta pruning 
     \caption{Example of alpha-beta pruning with $\alpha$ and $\beta$ values.}\label{fig:alphaBetaExample}
 \end{figure}
 
-\noindent In~\cref{fig:alphaBetaExample}, we first obtain the leftmost and deepest number, which is $3$, and $\beta$ is set to this number on the node above, representing the current lowest bound. Then, $3$ is compared with the following node on the same depth, $5$, and the MIN node selects the minimum value between $3$ and $5$, which is $3$.
+\noindent\cref{fig:alphaBetaExample} demonstrates the alpha-beta search process by using $alpha$ ($\alpha$) and $beta$ ($\beta$) values.
+
+\vspace{1em}
+
+\noindent First, we obtain the leftmost and deepest number, which is $3$, and $\beta$ is set to this number on the node above, representing the current lowest bound. Then, $3$ is compared with the following node on the same depth, $5$, and the MIN node selects the minimum value between $3$ and $5$, which is $3$.
 
 \vspace{1em}
 
@@ -338,7 +338,7 @@ The search algorithm implemented is an enhanced minimax with alpha-beta pruning 
 
 \vspace{1em}
 
-\noindent Therefore, one might think to what extent or depth should the search be carried out.This is where iterative deepening comes into play.
+\noindent Therefore, one might think to what extent or depth should the search be carried out. This is where iterative deepening comes into play.
 
 \subsection{Iterative deepening}\label{sec:iterativeDeepening}
 
@@ -346,13 +346,13 @@ What is the optimal depth at which to stop the search? In practice, the most str
 
 \vspace{1em}
 
-\noindent It is important to note that, in each iteration, all computations from the previous depth are repeated from scratch. This approach is inherently inefficient so in subsequent sections,~\cref{sec:horizon-effect-quiescence-search} and~\cref{sec:aspiration-window}, we will introduce techniques to tackle this inefficiency.
+\noindent It is important to note that, in each iteration, all computations from the previous depth are repeated from scratch. This approach is inherently inefficient so in subsequent sections, we will introduce techniques to tackle this inefficiency.
 
 \subsection{Horizon effect problem, quiescence search}\label{sec:horizon-effect-quiescence-search}
 
 What happens if, upon reaching maximum depth, we evaluate the position in the middle of a piece exchange? For example, the~\cref{fig:horizonEffectExample} illustrates a position where if the search is stopped when the queen captures the pawn, it will seem like we have won a pawn, but on the next move, another pawn captures the queen, and now we lose a queen. This is known as the horizon effect~\cite{HorizonEffect}.
 
-\begin{figure}[H]
+\begin{figure}
     \begin{minipage}{0.4\textwidth}
         \newchessgame
         \chessboard[
@@ -375,7 +375,7 @@ What happens if, upon reaching maximum depth, we evaluate the position in the mi
         ]
     \end{minipage}
 
-    \caption{Horizon effect position example}\label{fig:horizonEffectExample}
+    \caption{Horizon effect position example.}\label{fig:horizonEffectExample}
 \end{figure}
 
 \vspace{1em}
@@ -392,16 +392,16 @@ What happens if, upon reaching maximum depth, we evaluate the position in the mi
 \noindent The following events occur in a quiescence node:
 
 \begin{enumerate}
-    \item Terminal node verification: Check for game termination conditions due to checkmate, threefold repetition, the fifty-move rule or reaching a maximum ply.
-    \item Standing pat evaluation: Also known as static evaluation, this step assigns a preliminary score to the position. This score can serve as a lower bound and is immediately used to determine whether alpha-beta pruning can be applied.
-    \item Selective legal move generation: Create a list of every possible legal move excluding moves that are not captures.
-    \item Move ordering: Sort capture moves by estimated quality (best to worst).
-    \item Move exploration: Iterate through each of the capture legal moves from the position in order, update the position evaluation, the value of alpha and beta, and check if we can perform pruning.
+    \item \textit{Terminal node verification}: Check for game termination conditions due to checkmate, threefold repetition, the fifty-move rule or reaching a maximum ply.
+    \item \textit{Standing pat evaluation}: Also known as static evaluation, this step assigns a preliminary score to the position. This score can serve as a lower bound and is immediately used to determine whether alpha-beta pruning can be applied.
+    \item \textit{Selective legal move generation}: Create a list of every possible legal move excluding moves that are not captures.
+    \item \textit{Move ordering}: Sort capture moves by estimated quality (best to worst).
+    \item \textit{Move exploration}: Iterate through each of the capture legal moves from the position in order, update the position evaluation, the value of alpha and beta, and check if we can perform pruning.
 \end{enumerate}
 
 \subsection{Aspiration Window}\label{sec:aspiration-window}
 
-Continuing with another improvement, aspiration window's main objetive is to reduce the number of nodes to explore by simply restricting the range of $alpha$ and $beta$ values (window). A search is performed with this narrow window. If the position evaluation falls within the window, it is accepted as valid and additional node exploration is avoided. However, if the evaluation is outside the limits of the window (when a fail-low or fail-high occurs), the window is expanded to the extreme values (-$infinity$ and +$infinity$) and a new search is performed to obtain an accurate evaluation~\cite{AspirationWindow}.
+Continuing with another improvement, aspiration window's main objetive is to reduce the number of nodes to explore by simply restricting the range of $alpha$ and $beta$ values (window). A search is performed with this narrow window. If the position evaluation falls within the window, it is accepted as valid and additional node exploration is avoided. However, if the evaluation is outside the limits of the window (when a fail-low or fail-high occurs), the window is expanded to the extreme values (-$\infty$ and +$\infty$) and a new search is performed to obtain an accurate evaluation~\cite{AspirationWindow}.
 
 \section{Evaluation: Materialistic approach}\label{sec:evaluation}
 
@@ -413,9 +413,11 @@ In this section we present how our evaluation function works. For each position,
 
 \vspace{1em}
 
-\noindent The following table shows the standard centipawn values assigned to each piece type:
+\noindent\cref{tab:values} shows the standard centipawn values assigned to each piece type
 
-\begin{table}[H]
+\vspace{1em}
+
+\begin{table}
     \centering
     \begin{tabular}{|c|c|}
         \hline
@@ -427,11 +429,10 @@ In this section we present how our evaluation function works. For each position,
         Queen & 950 \\ \hline
         King & 500 \\ \hline
     \end{tabular}
-    \caption{Standard values assigned to chess pieces in centipawns.}
+    \caption{Standard values assigned to chess pieces in centipawns.}\label{tab:values}
 \end{table}
 
 \noindent The evaluation of a position can be computed by summing the values of all white pieces on the board and subtracting the values of all black pieces, as shown in the next equation:
-
 \begin{equation*}
     \text{Evaluation(position)} = \sum_{w \in \text{WhitePieces}} V(w) - \sum_{b \in \text{BlackPieces}} V(b)
 \end{equation*}
@@ -442,7 +443,9 @@ In this section we present how our evaluation function works. For each position,
 
 \noindent The basic material evaluation described earlier has a significant limitation, it does not consider the fact that a piece could have more power in different squares of the board. For instance, as illustrated in~\cref{fig:knight-movement-corner-and-center}, a knight placed in the center can control up to eight squares, while a knight positioned in the corner can reach only two.
 
-\begin{figure}[H]
+\vspace{1em}
+
+\begin{figure}
     \centering
     \newchessgame
     \chessboard[
@@ -461,7 +464,7 @@ In this section we present how our evaluation function works. For each position,
 
 \noindent An example PST for the bishop is shown in~\cref{fig:piece-square-values-bishop}, where the bishop receives a positional bonus for occupying central squares and a penalty for being placed in the edges of the board.
 
-\begin{figure}[H]
+\begin{figure}
     \centering
     \begin{tikzpicture}[scale=0.6]
         % Draw the chessboard
@@ -522,14 +525,9 @@ A chess game typically consists of three phases: the opening, where pieces are d
 \end{enumerate}
 
 \noindent The final tapered evaluation score is computed as a weighted average of the middlegame and endgame evaluations. This is formalized in the following equation:
-
-\begin{minipage}{0.8\linewidth}
-    \centering
-    \begin{equation*}
-        \text{Eval(position)} = \alpha \cdot \text{middlegameEval} + (1 - \alpha) \cdot \text{endgameEval}
-    \end{equation*}
-    \vspace{-1em}
-\end{minipage}
+\begin{equation*}
+    \text{Eval(position)} = \alpha \cdot \text{middlegameEval} + (1 - \alpha) \cdot \text{endgameEval}
+\end{equation*}
 
 \noindent Where $\alpha$ represents the proportion of middlegame.
 
@@ -537,7 +535,8 @@ A chess game typically consists of three phases: the opening, where pieces are d
 
 \noindent We now need two PST's for each piece, in the following~\cref{fig:taperedPSTpawns} there is an example of the middlegame bonus and the endgame bonus for the pawn, as we can see, the pawns in the endgame receive a bonus for being near the promotion squares.
 
-\begin{figure}[H]
+\begin{figure}
+    \centering
     \begin{minipage}{0.4\textwidth}
         \centering
         \begin{tikzpicture}[scale=0.6]
@@ -580,6 +579,7 @@ A chess game typically consists of three phases: the opening, where pieces are d
     \end{minipage}
     \hfill
     \begin{minipage}{0.4\textwidth}
+        \centering
         \begin{tikzpicture}[scale=0.6]
 
             \foreach \x in {0,1,...,7} {
@@ -641,9 +641,9 @@ and it is also difficult to restrict the moves of pinned pieces~\cite{GenerateLe
 
 \vspace{1em}
 
-\noindent For instance,~\cref{fig:precomputedAttackBishop} illustrates the precomputed attack bitboard for a bishop positioned on the d4 square.
+\noindent For instance,~\cref{fig:precomputedAttackBishop} illustrates the precomputed attack bitboard for a bishop positioned on the $d4$ square.
 
-\begin{figure}[H]
+\begin{figure}
     \centering
     \begin{minipage}{0.6\textwidth}
         \centering
@@ -661,10 +661,12 @@ and it is also difficult to restrict the moves of pinned pieces~\cite{GenerateLe
 
 \subsection{Bitboard of Danger Squares}
 
-Using the previously precomputed attack patterns, we generate a bitboard representing all the squares currently attacked by the waiting side (the side not having the move). This bitboard is referred to as the danger bitboard. It includes all squares that are unsafe for the king of the side to move, as moving the king to any of these squares would result in an illegal position.~\cref{fig:BitboardDangers} illustrates an example of this concept:
+Using the previously precomputed attack patterns, we generate a bitboard representing all the squares currently attacked by the waiting side (the side not having the move). This bitboard is referred to as the danger bitboard. It includes all squares that are unsafe for the king of the side to move, as moving the king to any of these squares would result in an illegal position.~\cref{fig:BitboardDangers} illustrates an example of this concept.
 
-\begin{figure}[H]
+\begin{figure}
+    \centering
     \begin{minipage}{0.4\textwidth}
+        \centering
         \newchessgame
         \chessboard[
             showmover=true,
@@ -674,6 +676,7 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
     \end{minipage}
     \hfill
     \begin{minipage}{0.4\textwidth}
+        \centering
         \includegraphics[width=1.0\textwidth]{Imagenes/bitboardDangers.png}
         \caption*{Danger bitboard for the black (waiting) side.}        
     \end{minipage}
@@ -686,9 +689,11 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 
 \vspace{1em}
 
-\noindent However, sliding pieces as rooks, bishops, and queens require additional handling. Their attacks depend on the presence of blockers in their movement paths.~\cref{fig:blockerExample} shows an example where the attacks of sliding pieces are limited due to blocking pawns:
+\noindent However, sliding pieces as rooks, bishops, and queens require additional handling. Their attacks depend on the presence of blockers in their movement paths.~\cref{fig:blockerExample} shows an example where the attacks of sliding pieces are limited due to blocking pawns.
 
-\begin{figure}[H]
+\vspace{1em}
+
+\begin{figure}
     \centering
     \begin{minipage}{0.6\textwidth}
         \centering
@@ -702,9 +707,13 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
         ]
     \end{minipage}
 
-    \caption{Example of blocking pieces: the rook sliding attack is being blocked by the pawns.}\label{fig:blockerExample}
+    \caption{Example of blocking pieces.}\label{fig:blockerExample}
 
 \end{figure}
+
+\noindent In~\cref{fig:blockerExample}, the rook sliding attack is being blocked by the pawns.
+
+\vspace{1em}
 
 \noindent Currently, calculating legal attacks for sliding pieces involves iterating along orthogonal and diagonal directions until a blocking piece is encountered. This approach is relatively inefficient. In subsequent sections, we present optimization techniques that address this issue.
 
@@ -712,7 +721,9 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 
 \noindent The next challenging aspect of legal move generation is handling pinned pieces. A pinned piece cannot move freely, as doing so would expose its king to check, making the move illegal. An example of a pinned piece is shown in~\cref{fig:pinnedPiece}.
 
-\begin{figure}[H]
+\vspace{1em}
+
+\begin{figure}
     \centering
     \begin{minipage}{0.6\textwidth}
         \centering
@@ -723,14 +734,18 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
         ]
     \end{minipage}
 
-    \caption{The black rook pins the white knight. If the knight moves, the white king could be captured, making the move illegal.}\label{fig:pinnedPiece}
+    \caption{Pinned piece.}\label{fig:pinnedPiece}
 \end{figure}
+
+\noindent In~\cref{fig:pinnedPiece}, the black rook pins the white knight. If the knight moves, the white king could be captured, making the move illegal.
+
+\vspace{1em}
 
 \noindent We must compute a bitboard that contains all pinned pieces on the board. This allows us to restrict their movement accordingly during move generation. However, identifying pinned pieces is computationally expensive, as it requires iterating through the attack patterns of sliding pieces and checking for alignment with the king and potential blockers.
 
 \subsection{Capture and push mask}
 
-\noindent The final bitboards required for handling checks are the \textit{capture mask} and the \textit{push mask}. The capture mask identifies the squares occupied by the checking pieces, while the push mask includes the squares in between the king and the checking piece along the line of attack. These are illustrated below.
+\noindent The final bitboards required for handling checks are the \textit{capture mask} and the \textit{push mask}. The capture mask identifies the squares occupied by the checking pieces, while the push mask includes the squares in between the king and the checking piece along the line of attack.
 
 \begin{center}
 \begin{minipage}{0.6\textwidth}
@@ -767,9 +782,9 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 \noindent We begin by determining the number of checking pieces, which can be deduced from the number of bits set in the capture mask. Based on this, three main scenarios must be handled:
 
 \begin{itemize}[itemsep=1pt]
-    \item Double check: If there are two or more checkers, the only legal option is to move the king to a square that is not under attack, outside the danger bitboard. No other piece can legally move in this case.
-    \item No check: In the absence of any checks, we iterate through all the pieces belonging to the side to move and generate their legal moves. If a piece is pinned (inside pinned piece bitboard), its movement is constrained to the direction of the pin.
-    \item Single check: If exactly one checker is present, we again iterate over all pieces, but the only moves available are to capture the checker(captures inside the capture mask) or to block the check (moves inside the push mask).
+    \item \textit{Double check}: If there are two or more checkers, the only legal option is to move the king to a square that is not under attack, outside the danger bitboard. No other piece can legally move in this case.
+    \item \textit{No check}: In the absence of any checks, we iterate through all the pieces belonging to the side to move and generate their legal moves. If a piece is pinned (inside pinned piece bitboard), its movement is constrained to the direction of the pin.
+    \item \textit{Single check}: If exactly one checker is present, we again iterate over all pieces, but the only moves available are to capture the checker (captures inside the capture mask) or to block the check (moves inside the push mask).
 \end{itemize}
 
 \noindent Finally, the special moves of castling and \textit{en passant} are handled explicitly by looking for the castling rights and the \textit{en passant} target square in the game state.
@@ -786,7 +801,7 @@ To ensure the correctness of our move generator, we perform what is known as a \
 
 \noindent In~\cref{tab:perftResults}, we present our Perft results alongside those of Stockfish for seven well-known test positions at depth 6. The identical node counts in all cases confirm the correctness of our move generator.
 
-\begin{table}[H]
+\begin{table}
     \centering
     \begin{tabular}{|l|r|l|}
     \hline
@@ -810,7 +825,7 @@ Once having explained the move generator function, in this chapter we detail the
 
 \vspace{1em}
 
-\noindent \parbox{\textwidth}{The complete implementation can be found in \texttt{src\textbackslash{}move\_ordering\textbackslash{}move\_ordering\_MVV\_LVA.cpp}.}
+\noindent \parbox{\textwidth}{The complete implementation can be found in\\\texttt{src\textbackslash{}move\_ordering\textbackslash{}move\_ordering\_MVV\_LVA.cpp}.}
 
 \vspace{1em}
 
@@ -852,8 +867,6 @@ The main limitation of MVV-LVA is that it only applies to capture moves. In fact
 
 \vspace{1em}
 
-\noindent~\cref{fig:killer_move_example} shows an example of a killer move.
-
 \begin{figure}
     \centering
     \begin{minipage}{0.6\textwidth}
@@ -870,8 +883,10 @@ The main limitation of MVV-LVA is that it only applies to capture moves. In fact
         ]
     \end{minipage}
 
-    \caption{Killer move example. The queen moves to h5, threatening checkmate on f7. This quiet move prunes all other moves that do not respond to the threat.}\label{fig:killer_move_example}
+    \caption{Killer move example.}\label{fig:killer_move_example}
 \end{figure}
+
+\noindent In~\cref{fig:killer_move_example}, the queen moves to h5, threatening checkmate on f7. This quiet move prunes all other moves that do not respond to the threat.
 
 \noindent These moves are remembered and prioritized during move ordering, as they have proven effective in position at the same depth in the search tree. We implemented a table where we store two moves that causes a cutoff per search depth. There could be more than two killer moves, our replacement policy is to always maintain the older killer move found in one slot, and in the other slot store the least recently found.
 

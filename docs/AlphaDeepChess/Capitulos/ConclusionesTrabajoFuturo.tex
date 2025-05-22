@@ -7,12 +7,12 @@ We have successfully developed a competitive chess engine based on an enhanced m
 \noindent Building on this basic implementation, we have researched and analyzed the following algorithmic techniques to further improve the bot's playing strength:
 
 \begin{itemize}[itemsep=1pt]
-    \item Transposition tables with Zobrist hashing: provided an increase in performance by avoiding redundant position evaluations.
-    \item Move generator with magic bitboards and PEXT instructions: substantial improvement in move generation.
+    \item \textit{Transposition tables with Zobrist hashing}: provided an increase in performance by avoiding redundant position evaluations.
+    \item \textit{Move generator with magic bitboards and PEXT instructions}: substantial improvement in move generation.
     
-    \item Evaluation with king safety and piece mobility parameters: showed no clear improvement, likely due to the added computational cost and the difficulty of correlating these factors directly with positional strength.
-    \item Multithreaded search: requires further optimization of data structures and algorithms for concurrent access to yield tangible gains.
-    \item Search with Late Move Reductions: did not improve performance, as our current move-ordering heuristic is not strong enough to support such aggressive pruning.
+    \item \textit{Evaluation with king safety and piece mobility parameters}: showed no clear improvement, likely due to the added computational cost and the difficulty of correlating these factors directly with positional strength.
+    \item \textit{Multithreaded search}: requires further optimization of data structures and algorithms for concurrent access to yield tangible gains.
+    \item \textit{Search with Late Move Reductions}: did not improve performance, as our current move-ordering heuristic is not strong enough to support such aggressive pruning.
 \end{itemize}
 
 \noindent The engine achieved an ELO rating of 1900 on Lichess while running on a Raspberry Pi 5 with a 2GB transposition table, demonstrating its efficiency even on resource-constrained hardware.
@@ -29,10 +29,10 @@ We have successfully developed a competitive chess engine based on an enhanced m
 \noindent Potential avenues for further improvement include:
 
 \begin{itemize}[itemsep=1pt]
-    \item Neural-network evaluation and move ordering:  
+    \item \textit{Neural-network evaluation and move ordering}:  
     Application of neural networks for the evaluation function and the move ordering heuristic, following the steps of \textit{Stockfish}, the actual best chess engine. This could unlock more aggressive pruning strategies.
-    \item Advanced pruning techniques:  
+    \item \textit{Advanced pruning techniques}:  
     With a stronger evaluation and ordering heuristic, revisit and tune the actual Late Move Reductions, and implement null move pruning technique.
-    \item Multithreading optimizations:  
+    \item \textit{Multithreading optimizations}:  
     Refine concurrent search algorithm and redesign shared data structures like transposition tables to support concurrent access.
 \end{itemize}

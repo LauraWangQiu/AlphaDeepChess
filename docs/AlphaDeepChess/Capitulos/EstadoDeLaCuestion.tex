@@ -1,6 +1,6 @@
 \chapter{State of the Art}\label{cap:estadoDeLaCuestion}
 
-In this chapter, we will explore the fundamental concepts and classical techniques on which our chess engine is based. This includes game trees and search algorithms. Each section will provide an overview of the concepts and techniques used by our engine, and additionally we will explain the workflow we followed to get better versions of our engine.
+In this chapter, we will explore the fundamental concepts and classical techniques on which our chess engine is based. This includes game trees and search algorithms. Each section will provide an overview of the concepts and tools used by our engine, and additionally we will explain the workflow we followed to get better versions of our engine.
 
 \section{Game trees}
 
@@ -9,7 +9,7 @@ Sequential games, such as chess or tic-tac-toe, where players take turns alterna
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.35\textwidth]{Imagenes/chess-game-tree.jpg}
-    \caption{Computers, chess and long-range planning by Botvinnik, M. M. (Mikhail Moiseevich), 1911--1995}\label{fig:game-tree}
+    \caption{Illustration of a game tree for a chess position~\cite{BotvinnikLongRangePlanning}.}\label{fig:game-tree}
 \end{figure}
 
 \noindent The depth of a chess game tree is important because it determines the extent to which it will be analysed and evaluated. A depth of 1 represents all possible moves for the current player or side to move, while a depth of 2 includes the opponent's responses to those moves. As the depth increases, the tree grows exponentially, making it computationally expensive to explore all possible states.
@@ -20,7 +20,7 @@ Sequential games, such as chess or tic-tac-toe, where players take turns alterna
 
 \section{Search algorithms}
 
-There are different approaches to analyze and find the best move from a position. Some of these search algorithms are: Depth-First Search (DFS), Best-First Search (not to be confused with Breadth-First Search or BFS but they are related) and Parallel Search.
+There are different approaches to analyze and find the best move from a position. Some of these search algorithms are: Depth-First Search (DFS), Best-First Search (not to be confused with Breadth-First Search or BFS but they are related), and Parallel Search.
 
 \vspace{1em}
 
@@ -39,6 +39,10 @@ Procedure DFS(Graph G, Node v):
 \end{lstlisting}
 
 \noindent DFS visits nodes by marking them as visited (line 2) and recursively explores all adjacent nodes until no unvisited nodes remain (lines 3 to 5). It has a worst-case performance of $O(|V| + |E|)$ and worst-case space complexity of $O(|V|)$, with $|V| = \text{number of nodes}$ and $|E| = \text{number of edges}$.
+
+\vspace{1em}
+
+\noindent In practice, especially in chess, a bounded or depth-limited version of DFS is often used. In bounded DFS, the search is restricted to a maximum depth, preventing the algorithm from exploring the entire tree. This approach allows the algorithm to focus on the most relevant positions.
 
 \paragraph{Best-First Search} refers to the way of exploring the most promising nodes first. It is similar to a breadth-first search but prioritizes some nodes before others. They typically require significant memory resources, as they must store a search space (the collection of all potential solutions in search algorithms) that grows exponentially.
 
@@ -62,7 +66,7 @@ Procedure BestFirstSearch(Graph G, Node start, Node goal):
                 Mark w as visited
 \end{lstlisting}
 
-\noindent In this case, the priority queue contains nodes along with their associated priorities, which are determined by a heuristic function.
+\noindent In this case, the priority queue contains nodes along with their associated priorities, which are determined by a heuristic function. This process is commonly referred to as branch and bound, where the algorithm explores branches of the search tree according to their heuristic value.
 
 \paragraph{Parallel Search} refers to mulithreaded search, a technique used to accelerate search processes by leveraging multiple processors.
 
@@ -130,13 +134,17 @@ Procedure Minimax(Node position, Integer depth, Boolean maximizingPlayer):
     \caption{Example of minimax.}\label{fig:minimax}
 \end{figure}
 
-\noindent For example, let's say that white always wants the highest value (maximizing the result) while black wants the lowest value (minimizing the result). In~\cref{fig:minimax}, white is represented by square nodes and black by circle nodes. Note that this example is a binary tree, but in a real scenario there would likely be more moves or nodes, because in chess each position usually allows a wide range of legal moves, not just two as in a binary tree. For the leftmost pair of leaf nodes with values of 3 and 5, 3 is chosen because black tries to get the lowest score between them. Then, for the other pair of leaf nodes with values of 2 and 9, 2 is chosen for the same reason. Lastly, at the root node, white selects 3 as the maximum value between 3 and 2.
+\noindent For example, let's say that white always wants the highest value (maximizing the result), while black wants the lowest value (minimizing the result). In~\cref{fig:minimax}, white is represented by square nodes and black by circle nodes. Note that this example is a binary tree, but in a real scenario there would likely be more moves or nodes, because in chess each position usually allows a wide range of legal moves, not just two as in a binary tree. For the leftmost pair of leaf nodes with values of 3 and 5, 3 is chosen because black tries to get the lowest score between them. Then, for the other pair of leaf nodes with values of 2 and 9, 2 is chosen for the same reason. Lastly, at the root node, white selects 3 as the maximum value between 3 and 2.
 
 \vspace{1em}
 
-\noindent The effectiveness of search algorithms such as minimax, and their optimizations (which are carefully explained in the next chapter), is crucial for the playing strength of a chess engine. The deeper and more efficiently the engine can search the game tree, the better its move selection and overall performance. In order to deliver the best quality of the code and execution performance, it is important to maintain an optimal workflow and organization.
+\noindent The effectiveness of search algorithms such as minimax, and their optimizations (which are carefully explained in~\cref{cap:descripcionTrabajo}), is crucial for the playing strength of a chess engine. The deeper and more efficiently the engine can search the game tree, the better its move selection and overall performance.
 
-\section{Workflow}
+\vspace{1em}
+
+\noindent Achieving this level of efficiency and quality requires a well-structured development process. For this reason, we adopted a systematic methodology to guide the implementation and continuous improvement of our engine.
+
+\section{Methodology}
 
 Once the basic foundations are established with an initial version of the essential components or modules (which will be described later), our workflow follows an iterative process: first, we search for existing information on each topic, analyze it, implement a solution, and then profile the implementation to identify bottlenecks. After locating performance issues, we optimize the relevant parts, and finally, compare the new version with the previous one to assess improvements.
 
@@ -291,23 +299,13 @@ Started game 1 of 1 (AlphaDeepChess vs Stockfish)
 
 \vspace{1em}
 
-\noindent However, during development, it can be tedious to debug and view positions directly from the terminal. For this reason, we also created a tool that allows us to observe positions in a more visual way using Python and the CustomTkinter package.
+\noindent Although UCI implements the \texttt{diagram} command that draws the current position through standard output, making moves and showing the evaluation is somewhat a time-consuming task when debugging and testing while programming. We resorted to using an interface to help us do this job and a really fast solution was to use Python to make a GUI. In this case, one of the most used UI libraries was \textit{CustomTkinter} and it was used to build a friendly interface from scratch for bridging between executable and command sending. This tool can be used after compiling the engine and executing \texttt{AlphaDeepChessGUI.py} with Python.
 
-\subsection{CustomTkinter}
-
-The CustomTkinter is a modern UI-library for Python that extends from Tkinter module and considers both OOP (Object Oriented Programming) and simple implementations.
-
-\vspace{1em}
-
-\noindent Although UCI implements the \texttt{diagram} command that draws the current position through standard output, making moves and showing the evaluation is somewhat a time-consuming task when debugging and testing while programming. We resorted to using an interface to help us do this job and a really fast solution was to use Python to make a GUI. In this case, one of the most used UI libraries was CustomTkinter and it was used to build a friendly interface from scratch for bridging between executable and command sending. This tool can be used after compiling the engine and executing \texttt{AlphaDeepChessGUI.py} with Python.
-
-\begin{center}
-    \begin{figure}[H]
+\begin{figure}
     \centering
-        \includegraphics[width=1.0\textwidth]{Imagenes/gui.png}
-        \caption{AlphaDeepChess GUI}\label{fig:gui}
-    \end{figure}
-\end{center}
+    \includegraphics[width=1.0\textwidth]{Imagenes/gui.png}
+    \caption{AlphaDeepChess GUI}\label{fig:gui}
+\end{figure}
 
 \noindent In~\cref{fig:gui}, the engine evaluation is enabled and displays the current evaluation value, the best move found, and the calculated search depth. In this way, we also ensure a more user-friendly experience.
 

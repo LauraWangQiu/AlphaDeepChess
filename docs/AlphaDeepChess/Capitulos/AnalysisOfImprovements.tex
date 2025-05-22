@@ -65,7 +65,7 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
 
 \vspace{1em}
 
-\noindent \parbox{\textwidth}{The complete implementation can be found in \texttt{include\textbackslash{}utilities\textbackslash{}transposition\_table.hpp}.}
+\noindent \parbox{\textwidth}{The complete implementation can be found in\\\texttt{include\textbackslash{}utilities\textbackslash{}transposition\_table.hpp}.}
 
 \subsection{Zobrist Hashing}
 
@@ -105,7 +105,7 @@ The resulting hash is computed as follows:
 
 \noindent Where $\oplus$ denotes $XOR$.
 
-\begin{figure}[H]
+\begin{figure}
     \centering
     \begin{minipage}[t]{0.4\textwidth}
         \centering
@@ -149,10 +149,10 @@ The resulting hash is computed as follows:
 Each entry in the transposition table stores the following information:
 
 \begin{enumerate}
-  \item Zobrist Hash: The full 64-bit hash of the position. This is used to verify that the entry corresponds to the current position and to detect possible index collisions in the table.
-  \item Evaluation: The numerical evaluation of the position, as computed by the evaluation function.
-  \item Depth: The depth at which the evaluation was calculated. A deeper search could potentially yield a more accurate evaluation, so this value helps determine whether a new evaluation should overwrite the existing one.
-  \item Node Type: Indicates the type of node stored:
+  \item \textit{Zobrist Hash}: The full 64-bit hash of the position. This is used to verify that the entry corresponds to the current position and to detect possible index collisions in the table.
+  \item \textit{Evaluation}: The numerical evaluation of the position, as computed by the evaluation function.
+  \item \textit{Depth}: The depth at which the evaluation was calculated. A deeper search could potentially yield a more accurate evaluation, so this value helps determine whether a new evaluation should overwrite the existing one.
+  \item \textit{Node Type}: Indicates the type of node stored:
   \begin{enumerate}
     \item \textit{EXACT} the evaluation is precise for this position.
     \item \textit{UPPERBOUND} the evaluation is an upper bound, typically resulting from an alpha cutoff.
@@ -199,14 +199,13 @@ As discussed earlier, index collisions in the transposition table are handled by
 
 To identify potential performance bottlenecks, we performed profiling on the engine, as shown in~\cref{fig:profiling}.
 
-\begin{center}
-    \begin{figure}[H]
+\vspace{1em}
+
+\begin{figure}
     \centering
-        \includegraphics[width=1.0\textwidth]{Imagenes/basic_move_generator_profiling.png}
-        \caption{Profiling results.}\label{fig:profiling}
-    \end{figure}
-    \medskip
-\end{center}
+    \includegraphics[width=1.0\textwidth]{Imagenes/basic_move_generator_profiling.png}
+    \caption{Profiling results.}\label{fig:profiling}
+\end{figure}
 
 \noindent The profiling results indicate that the majority of the total execution time is spent in the legal move generation function. Therefore, optimizing this component is expected to yield significant performance improvements.
 
@@ -236,7 +235,9 @@ We can create a look up table of all the rook and bishop moves for each square o
 
 \noindent As illustrated in~\cref{fig:magics_position}, we aim to compute the legal moves of the white rook in the given position. In practice, the only pieces that truly block the rook's path are those marked with a red circle.
 
-\begin{figure}[H]
+\vspace{1em}
+
+\begin{figure}
     \centering
     \begin{minipage}{0.6\textwidth}
         \centering
@@ -254,7 +255,9 @@ We can create a look up table of all the rook and bishop moves for each square o
 
 \noindent First, we mask out all pieces outside the rook's attack pattern or on the board borders, as shown in~\cref{fig:magic_preprocessing}.
 
-\begin{figure}[H]
+\vspace{1em}
+
+\begin{figure}
     \centering
     \begin{minipage}[c]{0.4\textwidth}
         \centering
@@ -277,7 +280,9 @@ We can create a look up table of all the rook and bishop moves for each square o
 
 \noindent As illustrated in~\cref{fig:magic_multiplication}, the masked blockers bitboard is then multiplied by the magic number. The result retains only the three relevant pawns that obstruct the rook's movement, pushing them toward the most significant bits.
 
-\begin{figure}[H]
+\vspace{1em}
+
+\begin{figure}
     \centering
     \begin{minipage}[c]{0.4\textwidth}
         \centering
@@ -302,7 +307,9 @@ We can create a look up table of all the rook and bishop moves for each square o
 
 \noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square; ~\cref{fig:rook_relevant_squares} shows this for the rook:
 
-\begin{figure}[H]
+\vspace{1em}
+
+\begin{figure}
     \centering
     \begin{tikzpicture}[scale=0.8]
         % Draw the chessboard
@@ -345,8 +352,6 @@ We can create a look up table of all the rook and bishop moves for each square o
     \caption{Relevant squares for rook piece.}\label{fig:rook_relevant_squares}
 \end{figure}
 
-\vspace{1em}
-
 \noindent The final index is thus computed as:
 
 \begin{align*}
@@ -361,17 +366,21 @@ We can create a look up table of all the rook and bishop moves for each square o
 
 \vspace{1em}
 
-\noindent~\cref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: it selects specific bits from register \texttt{r2}, as specified by the mask in \texttt{r3}, and packs the result into the lower bits of the destination register \texttt{r1}.
+\noindent\cref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: it selects specific bits from register \texttt{r2}, as specified by the mask in \texttt{r3}, and packs the result into the lower bits of the destination register \texttt{r1}.
+
+\vspace{1em}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{Imagenes/pext.png}
-    \caption{Example of the \texttt{PEXT} instruction: extracting bits from \texttt{r2} using \texttt{r3} as a mask, and storing the result in \texttt{r1}~\cite{PextInstruction}.}\label{fig:pext_instruction_example}
+    \caption{Example of the \texttt{PEXT} instruction.}\label{fig:pext_instruction_example}
 \end{figure}
 
 \noindent For our previous example (see~\cref{fig:magics_position}), we only need the full bitboard of blockers and the rook’s attack pattern (excluding the borders to reduce space), as illustrated in~\cref{fig:pext_bitboards}.
 
-\begin{figure}[H]
+\vspace{1em}
+
+\begin{figure}
     \centering
     \begin{minipage}[c]{0.3\textwidth}
         \centering
@@ -399,7 +408,6 @@ We can create a look up table of all the rook and bishop moves for each square o
 \end{figure}
 
 \noindent The final index used to access the lookup table is calculated using the \texttt{pext} instruction as follows:
-
 \begin{align*}
     \text{index}
     &= \text{\_pext\_u64}(\text{blockers},\,\texttt{attack\_pattern})\,.
@@ -415,6 +423,8 @@ We can create a look up table of all the rook and bishop moves for each square o
 \subsection{Analysis}
 
 \noindent To evaluate the impact of introducing the move generator accelerated with PEXT instructions, we conducted the 100-game tournament against the baseline version of the engine. The~\cref{tab:pext_vs_basic} details the implementation used for each bot.
+
+\vspace{1em}
 
 \begin{table}
     \centering
@@ -441,18 +451,20 @@ We can create a look up table of all the rook and bishop moves for each square o
 It is often beneficial to evaluate additional aspects of a position beyond simply counting material. We introduce the following positional evaluation parameters:
 
 \begin{enumerate}
-    \item King Shield Bonus: The king is typically safer when protected by friendly pawns in front of it. We assign a bonus in the evaluation score for each allied pawn positioned directly in front of the king.
+    \item \textit{King Shield Bonus}: The king is typically safer when protected by friendly pawns in front of it. We assign a bonus in the evaluation score for each allied pawn positioned directly in front of the king.
 
-    \item King Safety Penalty: For each square within a $3 \times 3$ area surrounding the king that is attacked by enemy pieces, we apply a penalty to reflect increased vulnerability.
+    \item \textit{King Safety Penalty}: For each square within a $3 \times 3$ area surrounding the king that is attacked by enemy pieces, we apply a penalty to reflect increased vulnerability.
 
-    \item Piece Mobility: Greater piece mobility is generally indicative of a stronger position. Each piece receives a bonus for every available move to a square that is not attacked by enemy pawns.
+    \item \textit{Piece Mobility}: Greater piece mobility is generally indicative of a stronger position. Each piece receives a bonus for every available move to a square that is not attacked by enemy pawns.
 \end{enumerate}
 
 \subsection{Analysis}
 
 To evaluate the impact of introducing the new parameters in the evaluation, we conducted the 100-game tournament against the baseline version of the engine. The~\cref{tab:safety_mobility_vs_basic} details the implementation used for each bot.
 
-\begin{table}[H]
+\vspace{1em}
+
+\begin{table}
     \centering
     \begin{tabular}{|p{4cm}|p{4cm}|p{4cm}|}
     \hline
@@ -474,12 +486,24 @@ To evaluate the impact of introducing the new parameters in the evaluation, we c
 
 \section{Multithreaded Search}
 
-This version of search follows Young Brothers Wait Concept, which is a parallel search algorithm designed to optimize the distribution of work among multiple threads. This is particularly effective in alpha-beta pruning, where the search tree is explored selectively. It is divided into two phases: the principal variation move and the wait concept. The principal variation is searched sequentially by the main thread which ensures that the most promising move is evaluated first. Then, once the first move is evaluated, the remaining moves are distributed among multiple threads for parallel evaluation. If it turns out that the first move was the best and pruning was applied, it directly returns the final node evaluation without the additional thread.
+This version of search follows Young Brothers Wait Concept, which is a parallel search algorithm designed to optimize the distribution of work among multiple threads.
 
-\begin{figure}[H]
+\vspace{1em}
+
+\noindent This is particularly effective in alpha-beta pruning, where the search tree is explored selectively. It is divided into two phases: the principal variation move and the wait concept.
+
+\vspace{1em}
+
+\noindent The principal variation is searched sequentially by the main thread, ensuring that the most promising move is evaluated first. If this move turns out to be the best and pruning is applied, the search can directly return the final node evaluation. Otherwise, once the first move has been evaluated, the remaining moves are distributed among multiple threads for parallel evaluation. The wait concept refers to these threads that remain idle until the main thread finishes searching the principal variation.
+
+\vspace{1em}
+
+\noindent In~\cref{fig:pvsplitting}, the gray circle and square nodes are considered part of the principal variation, while the remaining white nodes are processed in parallel by multiple threads.
+
+\begin{figure}
    \centering
    \includegraphics[width=0.8\textwidth]{Imagenes/Bitmap/pvsplitting.png}
-   \caption{Principal variation splitting.~\cite{PVSplitting}}\label{fig:pv-splitting}
+   \caption{Principal variation splitting~\cite{PVSplitting}.}\label{fig:pvsplitting}
 \end{figure}
 
 \subsection{Analysis}
