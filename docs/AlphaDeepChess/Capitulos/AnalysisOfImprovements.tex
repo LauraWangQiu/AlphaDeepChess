@@ -147,4 +147,19 @@ To evaluate the improvement in the new evaluation, we conducted the same 100 gam
 \medskip
 \end{center}
 
-\noindent The results are worse, with 15 more losses than the version without this aggresive pruning.~\cref{fig:results_pext_move_generator_bot} This could be because our move ordering is not that strong, and the best move in the position sometimes is in the last positions.
+\noindent The results are worse, with 15 more losses than the version without this aggresive pruning. This could be because our move ordering is not that strong, and the best move in the position sometimes is in the last positions.
+
+\section{Engine Final Evaluation}
+
+\noindent Figure~\cref{fig:eloDistribution} shows the Elo rating distribution of players on Lichess as of May 2025, where the median rating is approximately 1500.
+
+\vspace{1em}
+
+\noindent AlphaDeepChess has achieved a rating of 1900 on Lichess~\cite{AlphaDeepChessElo}, placing it well above the median and within the top percentiles of the player base. For comparison, the highest-rated human player on the platform has a rating of 3003, while the chess engine Stockfish has been benchmarked at approximately 3644 Elo~\cite{StockfishElo}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\linewidth]{Imagenes/eloDistribution.png}
+    \caption{Lichess Elo distribution~\cite{LichessEloDistribution}.}
+    \label{fig:eloDistribution}
+\end{figure}
