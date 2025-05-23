@@ -7,7 +7,7 @@ on:
         description: "Select the test to run"
         type: choice
         options:
-          - "0: CUSTOM TEST vs Stockfish"
+          - "0: CUSTOM TEST"
           - "1: search_basic vs search_multithread"
           - "2: search_basic vs search_transposition_table"
           - "3: search_transposition_table vs search_tt_reductions"
@@ -17,7 +17,7 @@ on:
           - "7: Elo Performance Test vs Stockfish (1800 Elo)"
           - "8: Elo Performance Test vs Stockfish (2000 Elo)"
           - "9: Elo Performance Test vs Stockfish (2200 Elo)"
-        default: "0: CUSTOM TEST vs Stockfish"
+        default: "0: CUSTOM TEST"
       game_settings:
         description: "Game settings in the format 'games=100,st=5,depth=5'"
         required: false
