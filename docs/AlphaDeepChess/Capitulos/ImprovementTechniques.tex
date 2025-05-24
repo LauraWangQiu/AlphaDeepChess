@@ -400,6 +400,30 @@ This version of search follows Young Brothers Wait Concept, which is a parallel 
    \caption{Principal variation splitting~\cite{PVSplitting}.}\label{fig:pvsplitting}
 \end{figure}
 
+\newpage
 \section{Late Move Reductions}
-TODO
-%We experiment with the use of late move pruning, under the assumption that if our move ordering is good, the best move in the position should be among the first explored moves. We reduce the depth by one unit starting from the tenth movement.
+
+\noindent We experiment with the use of late move reductions, a search optimization technique that selectively reduces the search depth for moves that appear late in the move ordering and are therefore considered less promising~\cite{LateMoveReductions}. The technique is based on the assumption that a strong move ordering heuristic will place the best move in the position earlier in the list. As a result, moves evaluated later can be searched at a reduced depth to save computation time.
+
+\vspace{1em}
+
+\par
+In our implementation, a reduction of one ply is applied to non-capturing moves when the side to move is not in check, the remaining search depth is at least three plies, and the move index is beyond a threshold of the 10th move. The reduction condition is formally defined in Equation~\ref{eq:lmr}:
+
+\vspace{1em}
+
+\begin{equation}
+\text{reduction} = 
+\begin{cases}
+1, & \text{if } \text{isNotCheck} \wedge \text{depth} \geq 3 \wedge moveIndex \geq 10 \\
+0, & \text{otherwise}
+\end{cases}
+\label{eq:lmr}
+\end{equation}
+
+\vspace{1em}
+
+\par
+If the reduced-depth search returns a score within the alpha-beta window ($\alpha < \text{eval} < \beta$), indicating that the move may be stronger than initially assumed, a full-depth re-search is triggered to ensure it is not mistakenly pruned.
+
+

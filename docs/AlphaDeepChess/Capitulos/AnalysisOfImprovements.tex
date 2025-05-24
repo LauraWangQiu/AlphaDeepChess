@@ -10,6 +10,12 @@ This chapter documents the implementation of the following techniques used to im
     \item Search with Late move Reductions.
 \end{itemize}
 
+
+\vspace{1em}
+
+\noindent We created a benchmark to measure the effectiveness of each technique by playing matches with 100 games versus a baseline engine implementation, and we analyze the results of these games at the end of the process to assess the impact of each improvement.
+
+
 All of these improvements have been compared with each other using \textit{CuteChess}, and the best version was also evaluated against \textit{Stockfish}. These comparisons were conducted on machines provided by GitHub Actions.
 
 \section{GitHub Actions and Workflows}
@@ -135,8 +141,6 @@ To evaluate the improvement in the new evaluation, we conducted the same 100 gam
 \noindent The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
 
 \section{Late Move Reductions}
-
-We experiment with the use of late move pruning, under the assumption that if our move ordering is good, the best move in the position should be among the first explored moves. We reduce the depth by one unit starting from the tenth movement.
 
 \subsection*{Analysis}
 
