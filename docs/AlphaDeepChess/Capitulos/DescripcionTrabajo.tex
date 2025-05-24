@@ -1,4 +1,4 @@
-\chapter{Engine Architecture}\label{cap:descripcionTrabajo}
+\chapter{Basic engine architecture}\label{cap:descripcionTrabajo}
 
 This chapter documents the development process of the chess engine. The project is organized into the following modules:
 
@@ -17,7 +17,7 @@ This chapter documents the development process of the chess engine. The project 
 
 \noindent We begin by examining the fundamental data structure used for chess position representation.
 
-\section{Chessboard Representation: Bitboards}
+\section{Chessboard representation: bitboards}
 
 \noindent The chessboard is represented using a list of \textit{bitboards}. A bitboard is a 64-bit variable in which each bit corresponds to a square on the board. A bit is set to \texttt{1} if a piece occupies the corresponding square and \texttt{0} otherwise. The least significant bit (LSB) represents the \texttt{a1} square, while the most significant bit (MSB) corresponds to \texttt{h8}~\cite{Bitboards}.
  
@@ -81,7 +81,7 @@ This chapter documents the development process of the chess engine. The project 
     \vspace{-\baselineskip}
 \end{figure}
 
-\subsection{Game State}
+\subsection*{Game state}
 
 \noindent In addition, we need to store the game state information. We designed a compact 64-bit structure to encapsulate all relevant data, enabling efficient copying of the complete game state through a single memory operation. The structure contains the following key fields:
 
@@ -100,7 +100,7 @@ This chapter documents the development process of the chess engine. The project 
 
 \noindent Having described the data structures that represent chess positions, we can now present the engine's core component: the search algorithm.
 
-\section{Search Algorithm}
+\section{Search algorithm}
 
 The search algorithm implemented is an enhanced minimax with alpha-beta pruning (see~\cref{sec:minimax}) where white acts as the maximizing player and black as the minimizing player. The entire game tree is generated up to a selected maximum depth. At each node, the active player evaluates the position, while the alpha and beta values are dynamically updated during execution. Pruning is performed when a branch of the tree is detected as irrelevant because the evaluation being examined is worse than the current value of alpha (for MAX) or beta (for MIN).
 
@@ -340,7 +340,7 @@ The search algorithm implemented is an enhanced minimax with alpha-beta pruning 
 
 \noindent Therefore, one might think to what extent or depth should the search be carried out. This is where iterative deepening comes into play.
 
-\subsection{Iterative deepening}\label{sec:iterativeDeepening}
+\subsection*{Iterative deepening}\label{sec:iterativeDeepening}
 
 What is the optimal depth at which to stop the search? In practice, the most straightforward approach is to perform an iterative deepening search, first searching at depth 1, then 2, then 3\ldots to infinity~\cite{IterativeDeepening}. The engine will update the evaluation and the best move for the position in each iteration and the search can be halted at any point by issuing the \textit{stop} command. In our implementation, this is handled using two threads: one dedicated to reading input from the command line, and the other performing the search. When the \texttt{stop} command is received, the input thread sets an atomic stop flag, which the search thread checks to terminate its execution.
 
@@ -348,7 +348,7 @@ What is the optimal depth at which to stop the search? In practice, the most str
 
 \noindent It is important to note that, in each iteration, all computations from the previous depth are repeated from scratch. This approach is inherently inefficient so in subsequent sections, we will introduce techniques to tackle this inefficiency.
 
-\subsection{Horizon effect problem, quiescence search}\label{sec:horizon-effect-quiescence-search}
+\subsection*{Horizon effect problem, quiescence search}\label{sec:horizon-effect-quiescence-search}
 
 What happens if, upon reaching maximum depth, we evaluate the position in the middle of a piece exchange? For example, the~\cref{fig:horizonEffectExample} illustrates a position where if the search is stopped when the queen captures the pawn, it will seem like we have won a pawn, but on the next move, another pawn captures the queen, and now we lose a queen. This is known as the horizon effect~\cite{HorizonEffect}.
 
@@ -399,11 +399,11 @@ What happens if, upon reaching maximum depth, we evaluate the position in the mi
     \item \textit{Move exploration}: Iterate through each of the capture legal moves from the position in order, update the position evaluation, the value of alpha and beta, and check if we can perform pruning.
 \end{enumerate}
 
-\subsection{Aspiration Window}\label{sec:aspiration-window}
+\subsection*{Aspiration window}\label{sec:aspiration-window}
 
 Continuing with another improvement, aspiration window's main objetive is to reduce the number of nodes to explore by simply restricting the range of $alpha$ and $beta$ values (window). A search is performed with this narrow window. If the position evaluation falls within the window, it is accepted as valid and additional node exploration is avoided. However, if the evaluation is outside the limits of the window (when a fail-low or fail-high occurs), the window is expanded to the extreme values (-$\infty$ and +$\infty$) and a new search is performed to obtain an accurate evaluation~\cite{AspirationWindow}.
 
-\section{Evaluation: Materialistic approach}\label{sec:evaluation}
+\section{Evaluation: materialistic approach}\label{sec:evaluation}
 
 In this section we present how our evaluation function works. For each position, a numerical value is assigned representing how favorable the position is for one side: positive ($+$) for white and negative ($-$) for black. The values are typically expressed in centipawns (cp), where one centipawn equals one hundredth of a pawn~\cite{Shannon1950}.
 
@@ -439,7 +439,7 @@ In this section we present how our evaluation function works. For each position,
 
 \noindent Where $V(x)$ denotes the value of piece $x$.
 
-\subsection{Piece Square Tables (PST's)}
+\subsection*{Piece square tables (PST's)}
 
 \noindent The basic material evaluation described earlier has a significant limitation, it does not consider the fact that a piece could have more power in different squares of the board. For instance, as illustrated in~\cref{fig:knight-movement-corner-and-center}, a knight placed in the center can control up to eight squares, while a knight positioned in the corner can reach only two.
 
@@ -507,7 +507,7 @@ In this section we present how our evaluation function works. For each position,
     \caption{Piece Square Table for the bishop.}\label{fig:piece-square-values-bishop}
 \end{figure}
 
-\subsection{Tapered evaluation}
+\subsection*{Tapered evaluation}
 
 A chess game typically consists of three phases: the opening, where pieces are developed to more effective squares; the middlegame, where tactical and strategic battles take place; and the endgame, where usually the pawns aim to promote and the side that has the advantage tries to corner the enemy king to mate it.
 
@@ -621,7 +621,7 @@ A chess game typically consists of three phases: the opening, where pieces are d
     \caption{Tapered Piece Square Tables for pawn.}\label{fig:taperedPSTpawns}
 \end{figure}
 
-\section{Move Generator}
+\section{Move generator}
 
 Calculating the legal moves in a chess position is a more difficult and tedious task
 than it might seem, mainly due to the unintuitive rules of \textit{en passant} and castling,
@@ -635,7 +635,7 @@ and it is also difficult to restrict the moves of pinned pieces~\cite{GenerateLe
 
 \noindent Our move generator uses bitboard operations to quickly and efficiently compute all legal moves available in any given chess position.
 
-\subsection{Precomputed Attacks}
+\subsection*{Precomputed attacks}
 
 \noindent The first step is to precompute attack patterns for each piece type on every square of the board. These patterns are stored as bitboards, typically in arrays indexed by both piece type and square.
 
@@ -659,7 +659,7 @@ and it is also difficult to restrict the moves of pinned pieces~\cite{GenerateLe
     \caption{Precomputed attack for the bishop on the d4 square.}\label{fig:precomputedAttackBishop}
 \end{figure}
 
-\subsection{Bitboard of Danger Squares}
+\subsection*{Bitboard of danger squares}
 
 Using the previously precomputed attack patterns, we generate a bitboard representing all the squares currently attacked by the waiting side (the side not having the move). This bitboard is referred to as the danger bitboard. It includes all squares that are unsafe for the king of the side to move, as moving the king to any of these squares would result in an illegal position.~\cref{fig:BitboardDangers} illustrates an example of this concept.
 
@@ -717,7 +717,7 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 
 \noindent Currently, calculating legal attacks for sliding pieces involves iterating along orthogonal and diagonal directions until a blocking piece is encountered. This approach is relatively inefficient. In subsequent sections, we present optimization techniques that address this issue.
 
-\subsection{Bitboard of Pinned pieces}
+\subsection*{Bitboard of pinned pieces}
 
 \noindent The next challenging aspect of legal move generation is handling pinned pieces. A pinned piece cannot move freely, as doing so would expose its king to check, making the move illegal. An example of a pinned piece is shown in~\cref{fig:pinnedPiece}.
 
@@ -743,7 +743,7 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 
 \noindent We must compute a bitboard that contains all pinned pieces on the board. This allows us to restrict their movement accordingly during move generation. However, identifying pinned pieces is computationally expensive, as it requires iterating through the attack patterns of sliding pieces and checking for alignment with the king and potential blockers.
 
-\subsection{Capture and push mask}
+\subsection*{Capture and push mask}
 
 \noindent The final bitboards required for handling checks are the \textit{capture mask} and the \textit{push mask}. The capture mask identifies the squares occupied by the checking pieces, while the push mask includes the squares in between the king and the checking piece along the line of attack.
 
@@ -773,7 +773,7 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
     \item Moving the king to a safe square outside the danger bitboard.
 \end{itemize}
 
-\subsection{Legal Move Computation}
+\subsection*{Legal move computation}
 
 \noindent The final step is to calculate the legal moves of the side to move using the previously calculated information: bitboard of attacks, dangers, pinned pieces, and push and capture masks.
 
@@ -789,7 +789,7 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 
 \noindent Finally, the special moves of castling and \textit{en passant} are handled explicitly by looking for the castling rights and the \textit{en passant} target square in the game state.
 
-\subsection{Testing the move generator: Perft test}
+\subsection*{Testing the move generator: perft test}
 
 To ensure the correctness of our move generator, we perform what is known as a \textit{Perft test} (performance test, move path enumeration)~\cite{Perft}.
 
@@ -819,7 +819,7 @@ To ensure the correctness of our move generator, we perform what is known as a \
     \caption{Perft results at depth 6: comparison between Stockfish and AlphaDeepChess~\cite{PerftResults}.}\label{tab:perftResults}
 \end{table}
 
-\section{Move Ordering: MVV-LVA}
+\section{Move ordering}
  
 Once having explained the move generator function, in this chapter we detail the implementation of the move ordering heuristic.
 
@@ -831,7 +831,7 @@ Once having explained the move generator function, in this chapter we detail the
 
 \noindent During the search process, the earlier we explore the best move in a position, the better the algorithm performs. In the best-case scenario, if the first move explored is indeed the optimal one, the remaining branches of the tree can be pruned. To achieve this, we sort the legal moves by estimated quality, from best to worst~\cite{MoveOrdering}.
 
-\subsection{Most Valuable Victim - Least Valuable Aggressor}
+\subsection*{Most valuable victim - least valuable aggressor}
 
 The heuristic we implemented is the Most Valuable Victim - Least Valuable Aggressor (MVV-LVA). In this approach, a move receives a high score if it captures a valuable piece using a less valuable one. For example, capturing a queen with a pawn is considered a very strong move~\cite{MVVLVA}.
 
@@ -857,7 +857,7 @@ The heuristic we implemented is the Most Valuable Victim - Least Valuable Aggres
     \caption{MVV-LVA heuristic table: Rows = Victims, Columns = Attackers.}\label{tab:mvv-lva-table}
 \end{table}
 
-\subsection{Killer moves}
+\subsection*{Killer moves}
 
 The main limitation of MVV-LVA is that it only applies to capture moves. In fact, assigning meaningful scores to non-capturing (quiet) moves is a challenging task. To address this, we implemented the \textit{killer move} heuristic, which assigns high scores to certain quiet moves.
 

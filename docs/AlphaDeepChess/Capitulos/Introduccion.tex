@@ -33,7 +33,7 @@ Chess, one of the oldest strategy games in human history, has long been a domain
     \item Upload the engine to \texttt{lichess.org} and compete against other chess engines.
 \end{itemize}
 
-\section{Work Plan}
+\section{Work plan}
 
 The project was divided into several phases, each focusing on a specific aspect of the engine's development. The timeline for each phase is as follows:
 
@@ -51,7 +51,7 @@ The project was divided into several phases, each focusing on a specific aspect 
 
 \noindent In the following~\cref{sec:basicConcepts}, we will explain about the basic concepts of chess, but if you already have the knowledge we recommend you to advance directly to the next~\cref{cap:estadoDeLaCuestion}.
 
-\section{Chess Fundamentals}\label{sec:basicConcepts}
+\section{Chess fundamentals}\label{sec:basicConcepts}
 
 \noindent Chess is a board game where two players, taking white pieces and black pieces respectively, compete to be the first to checkmate the opponent. In chess, to \textit{capture} means to move one of your pieces to a square occupied by an opponent's piece, thereby removing it from the board. Checkmate occurs when the king is under threat of capture (known as check) by a piece or pieces of the enemy, and there is no legal way to escape or remove the threat.
 
@@ -63,7 +63,7 @@ The project was divided into several phases, each focusing on a specific aspect 
 
 \noindent A chess game takes place on a chessboard with specific rules governing the movements and interactions of the pieces. This section introduces the fundamental concepts necessary to understand how chess is played.
 
-\subsection{Chessboard}\label{sec:chessboard}
+\subsection*{Chessboard}\label{sec:chessboard}
 
 A chessboard is a game board of 64 squares arranged in 8 rows and 8 columns, as shown in~\cref{fig:chessboard}. To refer to each of the squares we mostly use \textbf{algebraic notation} using the numbers from 1 to 8 and the letters from ``a'' to ``h''. There are also other notations like descriptive notation (now obsolete) or ICCF numeric notation, which solves the problem of chess pieces having different abbreviations depending on the language.
 
@@ -92,7 +92,7 @@ A chessboard is a game board of 64 squares arranged in 8 rows and 8 columns, as 
 
 \newpage
 
-\subsection{Chess pieces}
+\subsection*{Chess pieces}
 
 There are 6 types of chess pieces: king, queen, rook, bishop, knight, and pawn, and each side has 16 pieces, as shown in~\cref{tab:number-of-pieces}.
 
@@ -142,11 +142,11 @@ There are 6 types of chess pieces: king, queen, rook, bishop, knight, and pawn, 
 
 \noindent The smaller white square next to the board indicates which side is to move in the current position. If the square is white, it means it is white's turn to move; if the square is black, it means it is black's turn to move. Notice that the queen and king are placed in the center columns. The queen is placed on a square of its color, while the king is placed on the remaining central column. The rest of the pieces are positioned symmetrically, as shown in~\cref{fig:start-pos}. This means that the chessboard is divided into two sides relative to the positions of the king and queen at the start of the game. Red is queen's side and blue is king's side.
 
-\subsection{Movement of the pieces}\label{sec:movement-pieces}
+\subsection*{Movement of the pieces}\label{sec:movement-pieces}
 
 In the following sections, we describe the movement rules for each type of piece, including their unique abilities and special moves. These are fundamental to understand playing and analyzing the game.
 
-\subsubsection{Pawn}
+\subsubsection*{Pawn}
 
 The pawn can move one square forward, but it can only capture pieces one square diagonally, as shown in the top right chessboard in~\cref{fig:pawn}. On its first move, the pawn has the option to move two squares forward. If a pawn reaches the last row of the opponent's side, it promotes to any other piece (except for a king). Promotion is a term to indicate the mandatory replacement of a pawn with another piece, usually providing a significant advantage to the player who promotes. This is also illustrated in the two lower boards of~\cref{fig:pawn}.
 
@@ -242,7 +242,7 @@ The pawn can move one square forward, but it can only capture pieces one square 
     \caption{\textit{En passant}.}\label{fig:en-passant}
 \end{figure}
 
-\subsubsection{Rook}
+\subsubsection*{Rook}
 
 The rook can move any number of squares horizontally or vertically. It can also capture pieces in the same way, as shown in~\cref{fig:rook-movement}.
 
@@ -259,7 +259,7 @@ The rook can move any number of squares horizontally or vertically. It can also 
     \caption{Rook's movement.}\label{fig:rook-movement}
 \end{figure}
 
-\subsubsection{Knight}
+\subsubsection*{Knight}
 
 The knight moves in an L-shape: two squares in one direction and then one square perpendicular to that direction. The knight can jump over other pieces, making it a unique piece in terms of movement. It can also capture pieces in the same way.
 
@@ -276,7 +276,7 @@ The knight moves in an L-shape: two squares in one direction and then one square
     \caption{Knight's movement.}\label{fig:knight-movement}
 \end{figure}
 
-\subsubsection{Bishop}
+\subsubsection*{Bishop}
 
 The bishop can move any number of squares diagonally, as shown in~\cref{fig:bishop-movement}. It can also capture pieces in the same way. Considering that each side has two bishops, one bishop moves on light squares and the other on dark squares.
 
@@ -293,7 +293,7 @@ The bishop can move any number of squares diagonally, as shown in~\cref{fig:bish
     \caption{Bishop's movement.}\label{fig:bishop-movement}
 \end{figure}
 
-\subsubsection{King}
+\subsubsection*{King}
 
 The king can move one square in any direction: horizontally, vertically, or diagonally. As shown in~\cref{fig:king-movement}, the king cannot move to a square that is under attack by an opponent's piece. The king can also capture pieces in the same way. The king is a crucial piece in chess, as the game ends when one player checkmates the opponent's king.
 
@@ -380,7 +380,7 @@ The king can move one square in any direction: horizontally, vertically, or diag
 
 \noindent In~\cref{fig:castling-situation}, the white king can castle on either the king's side (short castling) or the queen's side (long castling) as long as the rooks have not been moved from their starting position, but the black king cannot castle because there is a bishop on $f8$ interfering with the movement and the rook on the queen's side has been moved to $b8$.
 
-\subsubsection{Queen}
+\subsubsection*{Queen}
 
 The queen can move any number of squares in any direction: horizontally, vertically, or diagonally, as shown in~\cref{fig:queen-movement}. It can also capture pieces in the same way.
 
@@ -397,7 +397,7 @@ The queen can move any number of squares in any direction: horizontally, vertica
     \caption{Queen's movement.}\label{fig:queen-movement}
 \end{figure}
 
-\subsection{Rules}\label{sec:rules}
+\subsection*{Rules}\label{sec:rules}
 
 The rules of chess follow the official regulations established by FIDE~\cite{LawsOfChess}. As we have already said, the objective of each player is to checkmate the opponent's king, meaning the king is under attack and cannot escape.
 
@@ -451,11 +451,11 @@ The rules of chess follow the official regulations established by FIDE~\cite{Law
 
 \noindent Players can also resign at any time, conceding victory to the opponent. Also, if a player runs out of time in a timed game, they lose unless the opponent does not have enough material to checkmate, in which case the game is drawn.
 
-\subsection{Notation}
+\subsection*{Notation}
 
 Notation is important in chess to record moves and analyze games.
 
-\subsubsection{Algebraic notation}
+\subsubsection*{Algebraic notation}
 
 In addition to the algebraic notation of the squares in~\cref{sec:chessboard}, each piece is identified by an uppercase letter, which may vary across different languages, as shown in~\cref{tab:chess-notation}.
 
@@ -553,7 +553,7 @@ are written by adding a $+$ sign for check or $++$ for checkmate, respectively. 
     \item \textit{1/2-1/2}: The game ends in a draw.
 \end{itemize}
 
-\subsubsection{Forsyth–Edwards Notation (FEN)}
+\subsubsection*{Forsyth–Edwards notation (FEN)}
 
 This notation describes a specific position on a chessboard. It includes 6 fields separated by spaces: the piece placement, whose turn it is to move, castling availability, \textit{en passant} target square, halfmove clock, and fullmove number.
 For example, the FEN for the starting position is:
@@ -574,7 +574,7 @@ rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 
 \noindent Keep in mind this notation is very important for chess engines, including AlphaDeepChess, because it provides all the necessary information to reconstruct any chess position, including all the mentioned variables above on the current board without needing to replay all the moves from the beginning of the game. This makes it highly efficient for testing, analysis, and interoperability with other chess software.
 
-\subsubsection{Portable Game Notation (PGN)}
+\subsubsection*{Portable game notation (PGN)}
 
 This notation is a widely used text-based format for recording chess games. Its primary purpose is to store complete game records, making it ideal for building large databases of chess games for study, analysis, and sharing. These PGN files not only include the sequence of moves, but also a header section with metadata such as the name of the event, site, date of play, color and name of each player, result and possible comments and variations. For example, PGN for a game could look like this:
 

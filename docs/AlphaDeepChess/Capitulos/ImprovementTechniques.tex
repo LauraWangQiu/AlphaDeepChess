@@ -1,4 +1,4 @@
-\chapter{Improvement Techniques}\label{cap:ImprovementTechniques}
+\chapter{Improvement techniques}\label{cap:ImprovementTechniques}
 
 This chapter documents the implementation of the following techniques used to improve the chess engine:
 
@@ -9,7 +9,7 @@ This chapter documents the implementation of the following techniques used to im
     \item Multithread search.
     \item Search with Late move Reductions.
 \end{itemize}
-\section{Transposition Table}\label{sec:tt}
+\section{Transposition table}\label{sec:tt}
 
 \noindent As discused in the previous chapter (see~\cref{sec:iterativeDeepening}), the basic implementation of the chess engine generates a large amount of redundant calculations due to the iterative deepening approach and also the concept of transpositions: situations in which the same board position is reached through different sequences of moves in the game tree.
 \noindent~\cref{fig:transposition_example} illustrates a position that can arise through multiple move orders. Where the white king could go to the g3 square from multiple paths.
@@ -39,7 +39,7 @@ This chapter documents the implementation of the following techniques used to im
 
 \noindent \parbox{\textwidth}{The complete implementation can be found in\\\texttt{include\textbackslash{}utilities\textbackslash{}transposition\_table.hpp}.}
 
-\subsection{Zobrist Hashing}
+\subsection*{Zobrist hashing}
 
 Zobrist Hashing is a technique to transform a board position of arbitrary size into a number of a set length, with an equal distribution over all possible numbers invented by Albert Zobrist~\cite{ZobristHashing}.
 
@@ -116,7 +116,7 @@ The resulting hash is computed as follows:
     \caption{Zobrist hash calculation example.}\label{fig:zobristExamplePosition}
 \end{figure}
 
-\subsection{Table Entry}
+\subsection*{Table entry}
 
 Each entry in the transposition table stores the following information:
 
@@ -133,7 +133,7 @@ Each entry in the transposition table stores the following information:
   \end{enumerate}
 \end{enumerate}
 
-\subsection{Collisions}
+\subsection*{Collisions}
 
 As discussed earlier, index collisions in the transposition table are handled by verifying the full Zobrist hash stored in the entry. However, it is still theoretically possible for a full hash collision to occur, that is two different positions producing the same hash.
 
@@ -141,7 +141,7 @@ As discussed earlier, index collisions in the transposition table are handled by
 
 \noindent This scenario is extremely rare. With 64-bit hashes, there are $2^{64}$ possible unique values, which is more than sufficient for practical purposes. In the unlikely event of a true hash collision, it could result in an incorrect evaluation being reused for a different position.
 
-\section{Move generator with Magic Bitboards and PEXT instructions}
+\section{Move generator with magic bitboards and pext instructions}
 
 To identify potential performance bottlenecks, we performed profiling on the engine, as shown in~\cref{fig:profiling}.
 
@@ -155,7 +155,7 @@ To identify potential performance bottlenecks, we performed profiling on the eng
 
 \noindent The profiling results indicate that the majority of the total execution time is spent in the legal move generation function. Therefore, optimizing this component is expected to yield significant performance improvements.
 
-\subsection{Magic bitboards}
+\subsection*{Magic bitboards}
 
 We can create a look up table of all the rook and bishop moves for each square on the board and for each combination of pieces that blocks the path of the slider piece (blockers  bitboard). Basically we need a hash table to store rook and bishop moves indexed by square and bitboard of blockers. The problem is that this table could be very big~\cite{MagicBitboards}.
 
@@ -314,7 +314,7 @@ Magic numbers are generated through a trial and error process. For each square o
        \;\gg\;(64 - \text{relevant\_squares})\,.
 \end{align*}
 
-\subsection{PEXT instruction}
+\subsection*{PEXT instruction}
 
 \noindent The \texttt{PEXT} (Parallel Bits Extract) instruction—available on modern x86\_64 CPUs—extracts bits from a source operand according to a mask and packs them into the lower bits of the destination operand~\cite{PextInstruction}. It is ideally suited for computing our table index.
 
@@ -378,7 +378,7 @@ Magic numbers are generated through a trial and error process. For each square o
 
 \newpage
 
-\section{Evaluation with King Safety and piece mobility}
+\section{Evaluation with king safety and piece mobility}
 
 While material count is the fundamental part for evaluating a chess position, human players also consider strategic and positional factors such as pawn structure, piece activity and king safety. We extend the evaluation function by incorporating additional parameters. These enhancements aim to produce a more accurate assessment of the position.
 
@@ -397,7 +397,7 @@ The king is typically safer when protected by friendly pawns in front of it. We 
     ]
 \end{center}
 
-\subsection*{King Safety Penalty}
+\subsection*{King safety penalty}
 
 To evaluate the safety of the king, we analyze the $3 \times 3$ area surrounding the king, counting how many enemy pieces attack any of those squares. Each type of attacking piece contributes a different \textit{threat weight}:
 
@@ -456,7 +456,7 @@ To implement this feature, we first compute a bitboard representing all legal mo
     ]
 \end{center}
 
-\section{Multithreaded Search}
+\section{Multithreaded search}
 
 This version of search follows Young Brothers Wait Concept, which is a parallel search algorithm designed to optimize the distribution of work among multiple threads.
 
@@ -479,7 +479,7 @@ This version of search follows Young Brothers Wait Concept, which is a parallel 
 \end{figure}
 
 \newpage
-\section{Late Move Reductions}
+\section{Late move reductions}
 
 \noindent We experiment with the use of late move reductions, a search optimization technique that selectively reduces the search depth for moves that appear late in the move ordering and are therefore considered less promising~\cite{LateMoveReductions}. The technique is based on the assumption that a strong move ordering heuristic will place the best move in the position earlier in the list. As a result, moves evaluated later can be searched at a reduced depth to save computation time.
 

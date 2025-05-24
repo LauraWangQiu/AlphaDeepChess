@@ -18,7 +18,7 @@ This chapter documents the implementation of the following techniques used to im
 
 All of these improvements have been compared with each other using \textit{CuteChess}, and the best version was also evaluated against \textit{Stockfish}. These comparisons were conducted on machines provided by GitHub Actions.
 
-\section{GitHub Actions and Workflows}
+\section{Github actions and workflows}
 
 GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to automate tasks such as building, testing, and deploying code. Workflows are defined in YAML files and specify the tasks to be executed, the jobs or events that trigger them, and the environment in which they run.
 
@@ -43,9 +43,9 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
 
 \noindent The matches were executed on virtual machines provided by GitHub Actions, using the \texttt{ubuntu-latest} runner. At the time of testing, this environment provided 4 CPUs, 16~GB of RAM, a 14~GB SSD, and a 64-bit architecture.
 
-\section{Transposition Table}\label{sec:tt}
+\section{Transposition table}\label{sec:tt}
 
-\subsection{Analysis}
+\subsection*{Analysis}
 
 \noindent To evaluate the impact of introducing the transposition table, we conducted the 100-game tournament against the baseline version of the engine. The~\cref{tab:tt_vs_basic} details the implementation used for each bot.
 
@@ -71,9 +71,9 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
 \medskip
 \end{center}
 
-\section{Move generator with Magic Bitboards and PEXT instructions}
+\section{Move generator with magic bitboards and pext instructions}
 
-\subsection{Analysis}
+\subsection*{Analysis}
 
 \noindent To evaluate the impact of introducing the move generator accelerated with PEXT instructions, we conducted the 100-game tournament against the baseline version of the engine. The~\cref{tab:pext_vs_basic} details the implementation used for each bot.
 
@@ -99,9 +99,9 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
 \medskip
 \end{center}
 
-\section{Evaluation with King Safety and piece mobility}
+\section{Evaluation with king safety and piece mobility}
 
-\subsection{Analysis}
+\subsection*{Analysis}
 
 To evaluate the impact of introducing the new parameters in the evaluation, we conducted the 100-game tournament against the baseline version of the engine. The~\cref{tab:safety_mobility_vs_basic} details the implementation used for each bot.
 
@@ -127,9 +127,9 @@ To evaluate the impact of introducing the new parameters in the evaluation, we c
 \medskip
 \end{center}
 
-\section{Multithreaded Search}
+\section{Multithreaded search}
 
-\subsection{Analysis}
+\subsection*{Analysis}
 
 To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version. 
 
@@ -140,7 +140,7 @@ To evaluate the improvement in the new evaluation, we conducted the same 100 gam
 
 \noindent The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
 
-\section{Late Move Reductions}
+\section{Late move reductions}
 
 \subsection*{Analysis}
 
@@ -155,7 +155,7 @@ To evaluate the improvement in the new evaluation, we conducted the same 100 gam
 
 \newpage
 
-\section{Evaluation versus Stockfish}
+\section{Evaluation versus stockfish}
 
 \begin{center}
  \ResultBar{15cm}{0.5cm}{0}{0}{100}
@@ -164,7 +164,7 @@ To evaluate the improvement in the new evaluation, we conducted the same 100 gam
 
 \noindent AlphaDeepChess lost all games against Stockfish. This outcome was expected, as Stockfish has an estimated Elo rating of around 3644~\cite{StockfishElo}, making it orders of magnitude stronger than the best human players. In contrast, as we will show in the next section, AlphaDeepChess plays at a level comparable to a strong human player.
 
-\section{Engine Final Evaluation}
+\section{Engine final evaluation}
 
 \noindent Figure~\cref{fig:eloDistribution} shows the Elo rating distribution of players on Lichess, where the median rating is approximately 1500.
 

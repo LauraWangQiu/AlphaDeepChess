@@ -74,7 +74,7 @@ Procedure BestFirstSearch(Graph G, Node start, Node goal):
 
 \noindent Next, we will discuss one of the most widely used search algorithms in chess engines: the minimax algorithm.
 
-\subsection{Minimax algorithm}\label{sec:minimax}
+\subsection*{Minimax algorithm}\label{sec:minimax}
 
 The \textbf{minimax} algorithm is a decision making algorithm that follows Depth-First Search (DFS) principles. It is based on the assumption that both players play optimally, with one player (the maximizer) trying to maximize his score and the other player (the minimizer) trying to minimize his score. It explores the game tree to evaluate all possible moves and determines the best move for the current player.~\cref{lst:minimax} has the pseudocode of the algorithm:
 
@@ -152,7 +152,7 @@ Once the basic foundations are established with an initial version of the essent
 
 \noindent Then, at a given moment, we can decide to take action and try to determine the strength of the engine with the last functional version.
 
-\subsection{Profiler}
+\subsection*{Profiler}
 
 First, in order to analyze the performance of our chess engine and identify potential bottlenecks, we used the \texttt{perf} tool available on Linux systems. \texttt{perf} provides robust profiling capabilities by recording CPU events, sampling function execution, and collecting stack traces.
 
@@ -220,7 +220,7 @@ Once the profiling and optimization steps have been completed with the last deci
 
 \noindent But which engine should we use as a reference for comparison? One approach is to consult the Computer Chess Rating Lists, which rank chess engines based on their performance in various tournaments and matches. We have chosen to compare different versions of our engine with \textit{Stockfish}, currently ranked as the number one engine on the list. In addition, we have also competed against other engines online to further evaluate our engine's performance in diverse environments.
 
-\subsection{Stockfish}
+\subsection*{Stockfish}
 
 \textit{Stockfish}~\cite{Stockfish} is an open-source chess engine and command-line program available for multiple platforms, including Windows, macOS, Linux, Android, and iOS. It provides a wide range of versions optimized for different hardware configurations, such as specific CPU instruction sets, to maximize performance. For instance, the AVX2 version is recommended for most users with Intel processors from 2013 onwards or AMD processors from 2015 onwards, as it utilizes advanced vectorization instructions.
 
@@ -228,7 +228,7 @@ Once the profiling and optimization steps have been completed with the last deci
 
 \noindent Although it is not strictly mandatory for chess engines to follow a communication standard, adopting one greatly facilitates interoperability and development. In this case, \textit{Stockfish} uses the Universal Chess Interface communication protocol, which we have also implemented in our engine.
 
-\subsection{UCI}
+\subsection*{UCI}
 
 Universal Chess Interface, also known as UCI, is an open communication protocol whose specifications are independent of the operating system and which enables chess engines to communicate with graphical user interfaces and with each other.
 
@@ -263,7 +263,7 @@ Universal Chess Interface, also known as UCI, is an open communication protocol 
 
 \noindent Then, to conduct fair and automated matches between Stockfish and our engine, it is necessary to use a tool that can arbitrate the games, ensuring consistent conditions and accurate results.
 
-\subsection{Cutechess}
+\subsection*{Cutechess}
 
 \noindent After considering different options, \textit{Cutechess} proved to be the best fit for our needs.
 
