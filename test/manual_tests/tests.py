@@ -63,8 +63,8 @@ def get_engines_and_options(test_id, engine2, stockfish_options2):
         exit(1)
 
     return engines, options
-
-def run_test(test_id, games, st, depth, pgn, epd, log, engine2, stockfish_options2, book, positions):
+    
+def run_test(test_id, games, pgn, epd, log, engine2, stockfish_options2, st=None, depth=None, book=None, positions=None):
     engines, options = get_engines_and_options(test_id, engine2, stockfish_options2)
 
     print(f"Running test ({test_id}) with the following configuration:")
@@ -85,15 +85,17 @@ def run_test(test_id, games, st, depth, pgn, epd, log, engine2, stockfish_option
     cmd = [
         python_cmd, "./test/manual_tests/compareEngines.py",
         "-games", str(games),
-        "-st", str(st),
-        "-depth", str(depth),
         "-pgn", pgn,
         "-epd", epd,
         "-log", log,
-        "-engines"
-    ] + engines + [
-        "-options"
-    ] + options_list
+    ]
+
+    if st:
+        cmd += ["-st", str(st)]
+    if depth:
+        cmd += ["-depth", str(depth)]
+
+    cmd += ["-engines"] + engines + ["-options"] + options_list
 
     if book:
             cmd += ["-book", book]
@@ -109,9 +111,9 @@ def run_test(test_id, games, st, depth, pgn, epd, log, engine2, stockfish_option
 def main():
     parser = argparse.ArgumentParser(description="Run specific tests.")
     parser.add_argument("--test-id", type=int, required=True, help="Specify the test ID to run (0-7)")
-    parser.add_argument("--games", type=int, default=10, help="Number of games to play")
-    parser.add_argument("--st", type=int, default=5, help="Search time per move (in seconds)")
-    parser.add_argument("--depth", type=int, default=5, help="Search depth")
+    parser.add_argument("--games", type=int, help="Number of games to play")
+    parser.add_argument("--st", type=int, help="Search time per move (in seconds)")
+    parser.add_argument("--depth", type=int, help="Search depth")
     parser.add_argument("--pgn", type=str, default="results.pgn", help="PGN output filename")
     parser.add_argument("--epd", type=str, default="results.epd", help="EPD output filename")
     parser.add_argument("--log", type=str, default="results.log", help="Log output filename")
