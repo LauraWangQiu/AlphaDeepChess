@@ -179,7 +179,7 @@ We can create a look up table of all the rook and bishop moves for each square o
   \item The final multiplication must produce a unique index for each possible blocker configuration. The way to ensure the uniqueness is by brute force testing.
 \end{itemize}
 
-\noindent As illustrated in~\cref{fig:magics_position}, we aim to compute the legal moves of the white rook in the given position. In practice, the only pieces that truly block the rook's path are those marked with a red circle.
+\noindent As illustrated in~\ref{fig:magics_position}, we aim to compute the legal moves of the white rook in the given position. In practice, the only pieces that truly block the rook's path are those marked with a red circle.
 
 \vspace{1em}
 
@@ -199,7 +199,15 @@ We can create a look up table of all the rook and bishop moves for each square o
     \caption{Initial chess position with white rook and blockers}\label{fig:magics_position}
 \end{figure}
 
-\noindent First, we mask out all pieces outside the rook's attack pattern or on the board borders, as shown in~\cref{fig:magic_preprocessing}.
+\subsection*{Magic number generation}
+
+\noindent
+Magic numbers are generated through a trial and error process. For each square on the board,random numbers are tested until one produces a unique index for every possible blocker configuration~\cite{MagicBitboards}. Over the years, the chess programming community has discovered better magic numbers. In this project, we use magics sourced from the Chess Programming YouTube channel~\cite{MagicsSource}.
+
+
+\subsection*{Index calculation}
+
+\noindent First, we mask out all pieces outside the rook's attack pattern or on the board borders, as shown in~\ref{fig:magic_preprocessing}.
 
 \vspace{1em}
 
@@ -224,7 +232,7 @@ We can create a look up table of all the rook and bishop moves for each square o
     \caption{Pre-processing of the blockers bitboard}\label{fig:magic_preprocessing}
 \end{figure}
 
-\noindent As illustrated in~\cref{fig:magic_multiplication}, the masked blockers bitboard is then multiplied by the magic number. The result retains only the three relevant pawns that obstruct the rook's movement, pushing them toward the most significant bits.
+\noindent As illustrated in~\ref{fig:magic_multiplication}, the masked blockers bitboard is then multiplied by the magic number. The result retains only the three relevant pawns that obstruct the rook's movement, pushing them toward the most significant bits.
 
 \vspace{1em}
 
@@ -251,7 +259,7 @@ We can create a look up table of all the rook and bishop moves for each square o
     \caption{Multiplication by magic number to produce an index}\label{fig:magic_multiplication}
 \end{figure}
 
-\noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square; ~\cref{fig:rook_relevant_squares} shows this for the rook:
+\noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square; ~\ref{fig:rook_relevant_squares} shows this for the rook:
 
 \vspace{1em}
 
@@ -359,7 +367,7 @@ We can create a look up table of all the rook and bishop moves for each square o
     &= \text{\_pext\_u64}(\text{blockers},\,\texttt{attack\_pattern})\,.
 \end{align*}
 
-\subsection{Conditional implementation}
+\subsection*{Conditional implementation}
 
 \noindent To maintain compatibility and performance across different hardware platforms, we provide two implementations for computing the indices:
 
