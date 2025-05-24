@@ -153,17 +153,28 @@ To evaluate the improvement in the new evaluation, we conducted the same 100 gam
 
 \noindent The results are worse, with 15 more losses than the version without this aggresive pruning. This could be because our move ordering is not that strong, and the best move in the position sometimes is in the last positions.
 
+\newpage
+
+\section{Evaluation versus Stockfish}
+
+\begin{center}
+ \ResultBar{15cm}{0.5cm}{0}{0}{100}
+\medskip
+\end{center}
+
+\noindent AlphaDeepChess lost all games against Stockfish. This outcome was expected, as Stockfish has an estimated Elo rating of around 3644~\cite{StockfishElo}, making it orders of magnitude stronger than the best human players. In contrast, as we will show in the next section, AlphaDeepChess plays at a level comparable to a strong human player.
+
 \section{Engine Final Evaluation}
 
-\noindent Figure~\cref{fig:eloDistribution} shows the Elo rating distribution of players on Lichess as of May 2025, where the median rating is approximately 1500.
+\noindent Figure~\cref{fig:eloDistribution} shows the Elo rating distribution of players on Lichess, where the median rating is approximately 1500.
 
 \vspace{1em}
 
-\noindent AlphaDeepChess has achieved a rating of 1900 on Lichess~\cite{AlphaDeepChessElo}, placing it well above the median and within the top percentiles of the player base. For comparison, the highest-rated human player on the platform has a rating of 3003, while the chess engine Stockfish has been benchmarked at approximately 3644 Elo~\cite{StockfishElo}.
+\noindent AlphaDeepChess has achieved a rating of 1900 on Lichess~\cite{AlphaDeepChessElo}, placing it well above the median and within the top percentiles of the player base. For comparison, the highest-rated human player on the platform has reached 3000 Elo in 2025~\cite{LichessBestPlayer}.
 
-\begin{figure}[h]
+\begin{figure}
     \centering
     \includegraphics[width=0.95\linewidth]{Imagenes/eloDistribution.png}
-    \caption{Lichess Elo distribution~\cite{LichessEloDistribution}.}
+    \caption{Lichess Elo distribution as of May 2025~\cite{LichessEloDistribution}.}
     \label{fig:eloDistribution}
 \end{figure}

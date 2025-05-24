@@ -90,12 +90,19 @@ constantes,guionado,Cascaras/bibliografia,config%
     % outer border
     \draw (0,0) rectangle (\TotalWidth,\BarHeight);
     % labels above each segment
-    \node[font=\footnotesize] at (\WinWidth/2,1.4*\BarHeight)
-      {\textbf{#4} wins};
-    \node[font=\footnotesize] at (\WinWidth + \DrawWidth/2,1.4*\BarHeight)
-      {\textbf{#5} draws};
-    \node[font=\footnotesize] at (\WinWidth+\DrawWidth + \LossWidth/2,1.4*\BarHeight)
-      {\textbf{#6} losses};
+    % conditional labels
+    \ifnum#4>0
+      \node[font=\footnotesize] at (\WinWidth/2,1.4*\BarHeight)
+        {\textbf{#4} wins};
+    \fi
+    \ifnum#5>0
+      \node[font=\footnotesize] at (\WinWidth + \DrawWidth/2,1.4*\BarHeight)
+        {\textbf{#5} draws};
+    \fi
+    \ifnum#6>0
+      \node[font=\footnotesize] at (\WinWidth+\DrawWidth + \LossWidth/2,1.4*\BarHeight)
+        {\textbf{#6} losses};
+    \fi
   \end{tikzpicture}%
   \endgroup
 }
