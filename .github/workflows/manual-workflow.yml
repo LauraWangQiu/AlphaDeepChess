@@ -259,20 +259,18 @@ jobs:
     - name: Parse game settings
       id: parse_game_settings
       run: |
-        echo "GAMES=$(echo '${{ github.event.inputs.game_settings }}' | grep -oP '(?<=games=)[^,]*')" >> $GITHUB_ENV
-        echo "ST=$(echo '${{ github.event.inputs.game_settings }}' | grep -oP '(?<=st=)[^,]*')" >> $GITHUB_ENV
-        echo "DEPTH=$(echo '${{ github.event.inputs.game_settings }}' | grep -oP '(?<=depth=)[^,]*')" >> $GITHUB_ENV
+        echo "GAMES=$(echo '${{ github.event.inputs.game_settings }}' | grep -oP '(?<=games=)[^,]*' || echo '')" >> $GITHUB_ENV
+        echo "ST=$(echo '${{ github.event.inputs.game_settings }}' | grep -oP '(?<=st=)[^,]*' || echo '')" >> $GITHUB_ENV
+        echo "DEPTH=$(echo '${{ github.event.inputs.game_settings }}' | grep -oP '(?<=depth=)[^,]*' || echo '')" >> $GITHUB_ENV
 
     - name: Run tests
       run: |
-        python test/manual_tests/tests.py \
-          --test-id $TEST_ID \
-          --games $GAMES \
-          --st $ST \
-          --depth $DEPTH \
-          --engine2 ${{ github.event.inputs.engine2 }} \
-          --stockfish-options2 "${{ github.event.inputs.stockfish_options2 }}" \
-          --positions positions.fen
+        CMD="python test/manual_tests/tests.py --test-id $TEST_ID"
+        if [[ -n "$GAMES" ]]; then CMD="$CMD --games $GAMES"; fi
+        if [[ -n "$ST" ]]; then CMD="$CMD --st $ST"; fi
+        if [[ -n "$DEPTH" ]]; then CMD="$CMD --depth $DEPTH"; fi
+        CMD="$CMD --engine2 ${{ github.event.inputs.engine2 }} --stockfish-options2 '${{ github.event.inputs.stockfish_options2 }}' --positions positions.fen"
+        eval $CMD
         cd ../..
 
     - name: Upload artifacts
