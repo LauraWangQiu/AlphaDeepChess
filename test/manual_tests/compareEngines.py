@@ -67,7 +67,7 @@ def generate_pgn_from_fens(input_file, output_file="positions.pgn"):
 
     print(f"PGN file generated: {output_path}")
 
-def main(pgn_path, edp_path, log_path, build_type, games, tc, st, depth, timemargin, concurrency, engines, options, book, positions):
+def compare(engines, options, games, st, depth, tc, timemargin, concurrency, book, positions, pgn, epd, log, build_type):
     if is_windows:
         cutechess_internal_dir = "cutechess-1.3.1-win64"
         stockfish_internal_dir = "stockfish-windows-x86-64"
@@ -110,16 +110,22 @@ def main(pgn_path, edp_path, log_path, build_type, games, tc, st, depth, timemar
         if engine_options:
             cutechess_cmd.extend(engine_options)
 
+    cutechess_cmd.append("-each")
+    if st:
+        cutechess_cmd.append(f"st={st}")
+    if tc:
+        cutechess_cmd.append(f"tc={tc}")
+    if depth:
+        cutechess_cmd.append(f"depth={depth}")
+    if timemargin:
+        cutechess_cmd.append(f"timemargin={timemargin}")
+    if concurrency:
+        cutechess_cmd.append(f"concurrency={concurrency}")
+
     cutechess_cmd.extend([
-        "-each",
-        f"tc={tc}" if tc else "",
-        f"st={st}" if st else "",
-        f"depth={depth}" if depth else "",
-        f"timemargin={timemargin}" if timemargin else "",
-        f"concurrency={concurrency}" if concurrency else "",
         "-games", str(games),
-        "-pgnout", pgn_path,
-        "-epdout", edp_path,
+        "-pgnout", pgn,
+        "-epdout", epd,
         "-debug"
     ])
     if book:
@@ -129,45 +135,44 @@ def main(pgn_path, edp_path, log_path, build_type, games, tc, st, depth, timemar
         generate_pgn_from_fens(positions, book_file)
         cutechess_cmd.extend(["-openings", f"file={book_file}", "format=pgn", "order=random"])
 
-    with open(log_path, 'w') as log_file:
+    with open(log, 'w') as log_file:
         process = subprocess.Popen(cutechess_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
         for line in process.stdout:
             print(line, end='')
-            if not re.match(r'^\d', line):
-                log_file.write(line)
+            log_file.write(line)
 
         process.wait()
 
-    print(f"PGN saved in {pgn_path}.")
-    print(f"EPD saved in {edp_path}.")
-    print(f"Log saved in {log_path}.")
+    print(f"PGN saved in {pgn}.")
+    print(f"EPD saved in {epd}.")
+    print(f"Log saved in {log}.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compare chess engines.")
-    parser.add_argument("-pgn", type=str, default="results.pgn", help="PGN file path")
-    parser.add_argument("-epd", type=str, default="results.epd", help="EPD file path")
-    parser.add_argument("-log", type=str, default="results.log", help="Log file")
-    parser.add_argument("-buildType", type=str, default="release", help="Build type")
-    parser.add_argument("-games", type=int, default=100, help="Number of games")
-    parser.add_argument("-tc", type=str, help="Time control")
-    parser.add_argument("-st", type=int, help="Search time")
-    parser.add_argument("-timemargin", type=int, help="Time margin")
-    parser.add_argument("-depth", type=int, help="Search depth")
-    parser.add_argument("-concurrency", type=int, help="Concurrency level")
-    parser.add_argument("-book", type=str, help="Path to the opening book file (e.g., 'openings.pgn')")
-    parser.add_argument("-positions", type=str, help="Path to the positions file (e.g., 'positions.fen')")
+    parser.add_argument("--games", type=int, help="Number of games")
+    parser.add_argument("--st", type=int, help="Search time")
+    parser.add_argument("--tc", type=str, help="Time control")
+    parser.add_argument("--depth", type=int, help="Search depth")
+    parser.add_argument("--timemargin", type=int, help="Time margin")
+    parser.add_argument("--concurrency", type=int, help="Concurrency level")
+    parser.add_argument("--book", type=str, help="Path to the opening book file (e.g., 'openings.pgn')")
+    parser.add_argument("--positions", type=str, help="Path to the positions file (e.g., 'positions.fen')")
     parser.add_argument(
-        "-engines",
+        "--engines",
         nargs="+",
         required=True,
         help="List of engine names to test"
     )
     parser.add_argument(
-        "-options",
+        "--options",
         nargs="*",
         help="List of UCI options for engines in the format 'engine_name.option_name=value' (e.g., 'Stockfish.UCI_LimitStrength=true AlphaDeepChess.UCI_Elo=1500')"
     )
+    parser.add_argument("--pgn", type=str, help="PGN file path")
+    parser.add_argument("--epd", type=str, help="EPD file path")
+    parser.add_argument("--log", type=str, help="Log file")
+    parser.add_argument("--buildType", default="release", type=str, help="Build type")
     args = parser.parse_args()
 
-    main(args.pgn, args.epd, args.log, args.buildType, args.games, args.tc, args.st, args.depth, args.timemargin, args.concurrency, args.engines, args.options, args.book, args.positions)
+    compare(games=args.games, engines=args.engines, options=args.options, st=args.st, tc=args.tc, depth=args.depth, timemargin=args.timemargin, concurrency=args.concurrency, book=args.book, positions=args.positions, pgn=args.pgn, epd=args.epd, log=args.log, build_type=args.buildType)

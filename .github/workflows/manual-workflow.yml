@@ -19,9 +19,9 @@ on:
           - "9: Elo Performance Test vs Stockfish (2200 Elo)"
         default: "0: CUSTOM TEST"
       game_settings:
-        description: "Game settings in the format 'games=100,st=5,depth=5'"
+        description: "Game settings in the format 'games=100,st=5 OR tc=40/60 (or inf),depth=5,timemargin=500,concurrency=1'. Use either st (search time per move) or tc (time control), but not both."
         required: false
-        default: "games=100,st=5,depth=5"
+        default: "games=100,st=5"
       engine2:
         description: "Select the engine2 in order to play versus AlphaDeepChess (only for CUSTOM TEST)"
         type: choice
@@ -262,6 +262,9 @@ jobs:
         echo "GAMES=$(echo '${{ github.event.inputs.game_settings }}' | grep -oP '(?<=games=)[^,]*' || echo '')" >> $GITHUB_ENV
         echo "ST=$(echo '${{ github.event.inputs.game_settings }}' | grep -oP '(?<=st=)[^,]*' || echo '')" >> $GITHUB_ENV
         echo "DEPTH=$(echo '${{ github.event.inputs.game_settings }}' | grep -oP '(?<=depth=)[^,]*' || echo '')" >> $GITHUB_ENV
+        echo "TC=$(echo '${{ github.event.inputs.game_settings }}' | grep -oP '(?<=tc=)[^,]*' || echo '')" >> $GITHUB_ENV
+        echo "TIMEMARGIN=$(echo '${{ github.event.inputs.game_settings }}' | grep -oP '(?<=timemargin=)[^,]*' || echo '')" >> $GITHUB_ENV
+        echo "CONCURRENCY=$(echo '${{ github.event.inputs.game_settings }}' | grep -oP '(?<=concurrency=)[^,]*' || echo '')" >> $GITHUB_ENV
 
     - name: Run tests
       run: |
@@ -269,7 +272,14 @@ jobs:
         if [[ -n "$GAMES" ]]; then CMD="$CMD --games $GAMES"; fi
         if [[ -n "$ST" ]]; then CMD="$CMD --st $ST"; fi
         if [[ -n "$DEPTH" ]]; then CMD="$CMD --depth $DEPTH"; fi
-        CMD="$CMD --engine2 ${{ github.event.inputs.engine2 }} --stockfish-options2 '${{ github.event.inputs.stockfish_options2 }}' --positions positions.fen"
+        if [[ -n "$TC" ]]; then CMD="$CMD --tc $TC"; fi
+        if [[ -n "$TIMEMARGIN" ]]; then CMD="$CMD --timemargin $TIMEMARGIN"; fi
+        if [[ -n "$CONCURRENCY" ]]; then CMD="$CMD --concurrency $CONCURRENCY"; fi
+        CMD="$CMD --engine2 ${{ github.event.inputs.engine2 }}"
+        if [[ -n "${{ github.event.inputs.stockfish_options2 }}" ]]; then
+          CMD="$CMD --stockfish-options2 '${{ github.event.inputs.stockfish_options2 }}'"
+        fi
+        CMD="$CMD --positions positions.fen"
         eval $CMD
         cd ../..
 
