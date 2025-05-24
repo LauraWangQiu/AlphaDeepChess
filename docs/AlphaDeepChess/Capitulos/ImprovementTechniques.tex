@@ -376,17 +376,85 @@ Magic numbers are generated through a trial and error process. For each square o
   \item Otherwise, the engine falls back to the magic bitboards approach using multiplication and bit shifts.
 \end{itemize}
 
+\newpage
+
 \section{Evaluation with King Safety and piece mobility}
 
-It is often beneficial to evaluate additional aspects of a position beyond simply counting material. We introduce the following positional evaluation parameters:
+While material count is the fundamental part for evaluating a chess position, human players also consider strategic and positional factors such as pawn structure, piece activity and king safety. We extend the evaluation function by incorporating additional parameters. These enhancements aim to produce a more accurate assessment of the position.
 
-\begin{enumerate}
-    \item \textit{King Shield Bonus}: The king is typically safer when protected by friendly pawns in front of it. We assign a bonus in the evaluation score for each allied pawn positioned directly in front of the king.
+\subsection*{King shield bonus}
 
-    \item \textit{King Safety Penalty}: For each square within a $3 \times 3$ area surrounding the king that is attacked by enemy pieces, we apply a penalty to reflect increased vulnerability.
+The king is typically safer when protected by friendly pawns in front of it. We assign a bonus in the evaluation score for each allied pawn positioned directly in front of the king. In the following image the white side has one pawn in front of the king, adding 100 bonus points, while black has 3 pawns adding 300 bonus shield points.
 
-    \item \textit{Piece Mobility}: Greater piece mobility is generally indicative of a stronger position. Each piece receives a bonus for every available move to a square that is not attacked by enemy pawns.
-\end{enumerate}
+\begin{center}
+    \newchessgame
+    \chessboard[
+        showmover=false,
+        setfen=r1b2rk1/1ppp1ppp/2n5/p1b1p2n/2B1P2q/2NP1N2/PPP2P2/R1BQ1RK1 b - - 7 15,
+        markstyle=border,
+        color=green, markfields={f2},
+        color=blue, markfields={f7,g7,h7}
+    ]
+\end{center}
+
+\subsection*{King Safety Penalty}
+
+To evaluate the safety of the king, we analyze the $3 \times 3$ area surrounding the king, counting how many enemy pieces attack any of those squares. Each type of attacking piece contributes a different \textit{threat weight}:
+
+\begin{itemize}
+    \item Queen: 4 points.
+    \item Rook: 3 points.
+    \item Bishop/Knight: 2 points.
+    \item Pawn: 1 point.
+\end{itemize}
+
+\par We sum these threat values to compute a \textit{total danger score}. This score is then used as an index into the \textit{precomputed safety table}~\cref{tab:safetyTable}, which returns the corresponding penalty to apply to the evaluation score. This method allows us to smoothly scale the penalty based on the level of threat around the king. The maximum penalty applied is 500 points.
+
+\begin{table}
+\centering
+\caption{Sample entries from the king safety penalty table.}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+\textit{Threat Score}     & 0 & 1 & 2 & 3 & 5 & 10 & ... & 20 & ... & 61 \\
+\hline
+\textit{Penalty} & 0 & 0 & 1 & 2 & 5 & 18 & ... & 68 & ... & 500 \\
+\hline
+\end{tabular}
+\label{tab:safetyTable}
+\end{table}
+
+\par In the following image, the black king is under threat from multiple pieces: the queen attacks two squares (8 points), the rook attacks three squares (9 points), a knight attacks one square (2 points), and a pawn attacks one square (1 point). This results in a total threat score of 20, which corresponds to a penalty of 68 points according to the safety table.
+
+
+\begin{center}
+    \newchessgame
+    \chessboard[
+        showmover=false,
+        setfen=7k/5pnp/1p6/p2P4/2Np4/8/8/K1Q4R w - - 0 1,
+        markstyle=border,
+        color=green, markfields={g8,f8,e8,e7,f7,g7,f6,g6,f5},
+        color=red, markfields={h5,h6,h7,e6,e5,g5}
+    ]
+\end{center}
+
+\subsection*{Piece mobility}
+
+Greater piece mobility is generally indicative of a stronger position. Each piece receives a bonus for every available move to a square that is not attacked by enemy pawns. 
+
+\vspace{1em}
+
+To implement this feature, we first compute a bitboard representing all legal moves available to a given piece. We then apply a mask that removes any squares attacked by enemy pawns. The resulting bitboard contains only safe mobility squares. For example in the following image the queen has twelve legal moves to squares not attacked by enemy pawns, and therefore receives a mobility bonus of 12 points. The safe squares are highlighted in green.
+
+\begin{center}
+    \newchessgame
+    \chessboard[
+        showmover=false,
+        setfen=rn2kbnr/pppbpppp/8/3q4/7P/8/PPPP1PP1/RNBQKBNR b KQkq - 0 1,
+        markstyle=border,
+        color=red, markfields={g5,f3,d3,b3},
+        color=green, markfields={d4,d6,e5,f5,h5,c5,b5,a5,c4,e6,c6,e4}
+    ]
+\end{center}
 
 \section{Multithreaded Search}
 
