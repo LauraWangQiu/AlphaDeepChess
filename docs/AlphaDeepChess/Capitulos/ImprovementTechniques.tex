@@ -16,17 +16,14 @@ This chapter documents the implementation of the following techniques used to im
 
 \begin{figure}
     \centering
-    \begin{minipage}{0.6\textwidth}
-        \centering
-        \newchessgame
-        \chessboard[
-            showmover=false,
-            setfen=8/2k5/3p4/p2P1p2/P2P1P2/8/8/2K5 w - - 0 1,
-            pgfstyle=straightmove, color=blue,
-            markmoves={c1-e3,e3-g3,c1-g1,g1-g3},
-            arrow=to
-        ]
-    \end{minipage}
+    \newchessgame
+    \chessboard[
+        showmover=false,
+        setfen=8/2k5/3p4/p2P1p2/P2P1P2/8/8/2K5 w - - 0 1,
+        pgfstyle=straightmove, color=blue,
+        markmoves={c1-e3,e3-g3,c1-g1,g1-g3},
+        arrow=to
+    ]
     \caption{Lasker-Reichhelm Position, transposition example}\label{fig:transposition_example}
 \end{figure}
 
@@ -173,17 +170,14 @@ We can create a look up table of all the rook and bishop moves for each square o
 
 \begin{figure}
     \centering
-    \begin{minipage}{0.6\textwidth}
-        \centering
-        \newchessgame
-        \chessboard[
-            showmover=false,
-            setfen=n1bk3r/3p4/1p1p2p1/8/3R1p2/8/3p4/7n w - - 0 1,
-            markstyle=border,
-            color=red, markfields={d6,f4,d2},
-            color=green, markfields={c4,b4,a4,e4,d5,d3}
-        ]
-    \end{minipage}
+    \newchessgame
+    \chessboard[
+        showmover=false,
+        setfen=n1bk3r/3p4/1p1p2p1/8/3R1p2/8/3p4/7n w - - 0 1,
+        markstyle=border,
+        color=red, markfields={d6,f4,d2},
+        color=green, markfields={c4,b4,a4,e4,d5,d3}
+    ]
     \caption{Chess position with white rook legal moves in green and blockers in red.}\label{fig:magics_position}
 \end{figure}
 
@@ -412,7 +406,6 @@ To evaluate the safety of the king, we analyze the $3 \times 3$ area surrounding
 \end{table}
 
 \par In the following image, the black king is under threat from multiple pieces: the queen attacks two squares (8 points), the rook attacks three squares (9 points), a knight attacks one square (2 points), and a pawn attacks one square (1 point). This results in a total threat score of 20, which corresponds to a penalty of 68 points according to the safety table.
-
 
 \begin{center}
     \newchessgame

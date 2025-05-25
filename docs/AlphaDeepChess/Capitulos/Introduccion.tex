@@ -5,15 +5,15 @@ Chess, one of the oldest strategy games in human history, has long been a domain
 
 \vspace{1em}
 
-\noindent Today, we find ourselves in an era where chess engines have reached unprecedented strength. This has been achieved through a combination of classical techniques like alpha-beta pruning, and modern advancements such as deep learning and neural networks.
+\noindent Today, we find ourselves in an era where chess engines have reached unprecedented strength. This has been achieved through a combination of classical techniques like alpha-beta pruning, and modern advancements such as neural networks.
 
 \vspace{1em}
 
-\noindent In recent years, \textit{Stockfish}, one of the strongest and most widely used open-source chess engines in the world, has incorporated neural network evaluation (NNUE), combining classical search with deep learning techniques. Inspired by \textit{Stockfish}, we started this project: \textit{AlphaDeepChess}, a chess engine based on minimax with alpha-beta pruning that relies solely on classical techniques and human-designed heuristics.
+\noindent In recent years, \textit{Stockfish}, one of the strongest and most widely used open-source chess engines in the world, has incorporated neural network evaluation (NNUE), combining classical search with machine learning techniques. Inspired by \textit{Stockfish}, we started this project: \textit{AlphaDeepChess}, a chess engine based on minimax with alpha-beta pruning that relies solely on classical techniques and human-designed heuristics.
 
 \vspace{1em}
 
-\noindent Beyond its technical contributions, this project also narrates the process of building a chess engine, evaluating each version along the way. This includes profiling and benchmarking different versions, as well as implementing improved heuristics and efficiency enhancements based on current knowledge about chess engines. The project even reaches the point where the engine can be played against on online platforms or observed competing with other live chess engines, making it valuable for any chess enthusiast. Notably, the engine has achieved an ELO rating of 1900 on \textit{Lichess}, demonstrating its competitive strength among online chess engines.
+\noindent Beyond its technical contributions, this project also narrates the process of building a chess engine, evaluating each version along the way. This includes profiling and benchmarking different versions, as well as implementing improved heuristics and efficiency enhancements based on current knowledge about chess engines. The project even reaches the point where the engine can be played against on online platforms or observed competing with other live chess engines, making it valuable for any chess enthusiast. Notably, the engine has achieved an ELO rating of ~1900 on \textit{Lichess}, demonstrating its competitive strength among online chess engines.
 
 \vspace{1em}
 
@@ -65,27 +65,29 @@ The project was divided into several phases, each focusing on a specific aspect 
 
 \subsection*{Chessboard}\label{sec:chessboard}
 
-A chessboard is a game board of 64 squares arranged in 8 rows and 8 columns, as shown in~\cref{fig:chessboard}. To refer to each of the squares we mostly use \textbf{algebraic notation} using the numbers from 1 to 8 and the letters from ``a'' to ``h''. There are also other notations like descriptive notation (now obsolete) or ICCF numeric notation, which solves the problem of chess pieces having different abbreviations depending on the language.
+A chessboard is a game board of 64 squares arranged in 8 rows and 8 columns, as shown in the following figure:
 
 \begin{figure}[H]
     \centering
     \newchessgame
     \chessboard[setpieces={},showmover=false]
-    \caption{Empty chessboard.}\label{fig:chessboard}
+    \caption*{Empty chessboard.}\label{fig:chessboard}
 \end{figure}
 
-\noindent For example, $g5$ refers to the following square:
+\vspace{1em}
+
+\noindent To refer to each of the squares we mostly use \textbf{algebraic notation} using the numbers from 1 to 8 and the letters from ``a'' to ``h''. There are also other notations like descriptive notation (now obsolete) or ICCF numeric notation, which solves the problem of chess pieces having different abbreviations depending on the language. For example, $g5$ refers to the following square:
 
 \begin{center}
-\newchessgame % Crear un nuevo tablero vacío
-\chessboard[
-    setpieces={}, % No piezas en el tablero
-    showmover=false,
-    markstyle=circle, color=red, markfield=g5, % Marcar g5 con un círculo rojo
-    pgfstyle=straightmove, color=blue, % Estilo de flechas rectas y azules
-    markmoves={g1-g5, a5-g5}, % Flechas desde g1 → g5 y a5 → g5
-    arrow=to % Flechas con punta
-]
+    \newchessgame % Crear un nuevo tablero vacío
+    \chessboard[
+        setpieces={}, % No piezas en el tablero
+        showmover=false,
+        markstyle=circle, color=red, markfield=g5, % Marcar g5 con un círculo rojo
+        pgfstyle=straightmove, color=blue, % Estilo de flechas rectas y azules
+        markmoves={g1-g5, a5-g5}, % Flechas desde g1 → g5 y a5 → g5
+        arrow=to % Flechas con punta
+    ]
 \end{center}
 
 \noindent It is important to know that when placing a chessboard in the correct orientation, there should always be a white square in the bottom-right corner or a black square in the bottom-left corner.
@@ -244,7 +246,7 @@ The pawn can move one square forward, but it can only capture pieces one square 
 
 \subsubsection*{Rook}
 
-The rook can move any number of squares horizontally or vertically. It can also capture pieces in the same way, as shown in~\cref{fig:rook-movement}.
+The rook can move any number of squares horizontally or vertically. It can also capture pieces in the same way, as shown in the following figure:
 
 \begin{figure}[H]
     \centering
@@ -256,12 +258,12 @@ The rook can move any number of squares horizontally or vertically. It can also 
         markmoves={d4-a4,d4-h4,d4-d1,d4-d8,g6-h6,g6-g8,g6-c6,g6-g3},
         arrow=to
     ]
-    \caption{Rook's movement.}\label{fig:rook-movement}
+    \caption*{Rook's movement.}\label{fig:rook-movement}
 \end{figure}
 
 \subsubsection*{Knight}
 
-The knight moves in an L-shape: two squares in one direction and then one square perpendicular to that direction. The knight can jump over other pieces, making it a unique piece in terms of movement. It can also capture pieces in the same way.
+The knight moves in an L-shape: two squares in one direction and then one square perpendicular to that direction. The knight can jump over other pieces, making it a unique piece in terms of movement. It can also capture pieces in the same way. This is shown in the following figure:
 
 \begin{figure}[H]
     \centering
@@ -273,12 +275,12 @@ The knight moves in an L-shape: two squares in one direction and then one square
         markmoves={f3-e5,f3-e1,f3-g5,f3-g1,f3-d2,f3-d4,f3-h2,f3-h4,a8-b6,a8-c7},
         arrow=to
     ]
-    \caption{Knight's movement.}\label{fig:knight-movement}
+    \caption*{Knight's movement.}\label{fig:knight-movement}
 \end{figure}
 
 \subsubsection*{Bishop}
 
-The bishop can move any number of squares diagonally, as shown in~\cref{fig:bishop-movement}. It can also capture pieces in the same way. Considering that each side has two bishops, one bishop moves on light squares and the other on dark squares.
+The bishop can move any number of squares diagonally. It can also capture pieces in the same way. Considering that each side has two bishops, one bishop moves on light squares and the other on dark squares. This is shown in the following figure:
 
 \begin{figure}[H]
     \centering
@@ -290,14 +292,16 @@ The bishop can move any number of squares diagonally, as shown in~\cref{fig:bish
         markmoves={c4-a2,c4-g8,c4-f1,c4-a6,f6-h4,f6-h8,f6-b2},
         arrow=to
     ]
-    \caption{Bishop's movement.}\label{fig:bishop-movement}
+    \caption*{Bishop's movement.}\label{fig:bishop-movement}
 \end{figure}
 
 \subsubsection*{King}
 
-The king can move one square in any direction: horizontally, vertically, or diagonally. As shown in~\cref{fig:king-movement}, the king cannot move to a square that is under attack by an opponent's piece. The king can also capture pieces in the same way. The king is a crucial piece in chess, as the game ends when one player checkmates the opponent's king.
+The king is a crucial piece in chess, as the game ends when one player checkmates the opponent's king. The king can move one square in any direction: horizontally, vertically, or diagonally, and can also capture pieces in the same way. 
 
-\begin{figure}[H]
+\vspace{1em}
+
+\begin{figure}
     \centering
     \begin{minipage}[t]{0.45\textwidth}
        \centering
@@ -310,6 +314,7 @@ The king can move one square in any direction: horizontally, vertically, or diag
            arrow=to
        ]
    \end{minipage}
+   \hfill
    \begin{minipage}[t]{0.45\textwidth}
        \centering
        \newchessgame
@@ -324,7 +329,8 @@ The king can move one square in any direction: horizontally, vertically, or diag
    \caption{King's movement.}\label{fig:king-movement}
 \end{figure}
 
-\noindent In~\cref{fig:king-movement}, the white king cannot move to $c3$, $d4$, $e3$ or $e4$ because those squares are being attacked by black pieces:
+
+\noindent As shown in~\cref{fig:king-movement}, the white king cannot move to a square that is under attack by an opponent's piece:
 
 \begin{itemize}[itemsep=1pt]
     \item $c3$ is attacked by the black bishop on $b2$.
@@ -382,7 +388,7 @@ The king can move one square in any direction: horizontally, vertically, or diag
 
 \subsubsection*{Queen}
 
-The queen can move any number of squares in any direction: horizontally, vertically, or diagonally, as shown in~\cref{fig:queen-movement}. It can also capture pieces in the same way.
+The queen can move any number of squares in any direction: horizontally, vertically, or diagonally. It can also capture pieces in the same way. This is shown in the following figure:
 
 \begin{figure}[H]
     \centering
@@ -394,7 +400,7 @@ The queen can move any number of squares in any direction: horizontally, vertica
         markmoves={d4-a4,d4-h4,d4-d1,d4-d8,d4-a1,d4-h1,d4-h8,d4-a8},
         arrow=to
     ]
-    \caption{Queen's movement.}\label{fig:queen-movement}
+    \caption*{Queen's movement.}\label{fig:queen-movement}
 \end{figure}
 
 \subsection*{Rules}\label{sec:rules}
@@ -488,7 +494,7 @@ are written using the piece uppercase letter plus the coordinate of destination.
         markmoves={a7-a6},
         arrow=to
     ]
-    \caption{Pawn goes to a6.}\label{fig:pawn-a6}
+    \caption{Pawn goes to $a6$.}\label{fig:pawn-a6}
 \end{figure}
 
 \paragraph{Captures}
@@ -532,7 +538,7 @@ is written as the pawn's movement to the last row, followed by the piece to whic
             setfen={Q7/2p5/2P3p1/8/6pb/4p1kB/4P1p1/6K1 b - - 0 1}
         ]
     \end{minipage}
-    \caption{Pawn captures rook.}\label{fig:pawn-captures-rook}
+    \caption{Pawn captures rook and promotes to queen.}\label{fig:pawn-captures-rook}
 \end{figure}
 
 \paragraph{Castling}\label{sec:castling}

@@ -3,7 +3,7 @@
 This chapter presents an analysis of the performance of the chess engine through profiling, identifying its most computationally intensive components. We then describe the testing framework used to evaluate the effectiveness of the optimization techniques introduced in~\cref{cap:ImprovementTechniques}. These evaluations are based on 100-game matches between different versions of the engine and a baseline implementation. Finally, we compare the performance of \textit{AlphaDeepChess} against \textit{Stockfish} and examine its position within the Elo rating distribution on \textit{Lichess.org}.
 
 \section{Profiling}
-In order to analyze the performance of our chess engine and identify potential bottlenecks where the code consume the most execution time, we used the \texttt{perf} tool available on Linux systems. \texttt{perf} provides robust profiling capabilities by recording CPU events, sampling function execution, and collecting stack traces ~\cite{PerfLinux}. 
+In order to analyze the performance of our chess engine and identify potential bottlenecks where the code consume the most execution time, we used the \texttt{perf} tool available on Linux systems. \texttt{perf} provides robust profiling capabilities by recording CPU events, sampling function execution, and collecting stack traces~\cite{PerfLinux}. 
 
 \vspace{1em}
 

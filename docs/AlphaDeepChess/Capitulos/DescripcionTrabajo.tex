@@ -34,7 +34,6 @@ This chapter documents the basic architecture of the chess engine.  The project 
 \vspace{1em}
 
 \begin{figure}[H]
-
     \begin{minipage}[c]{0.35\textwidth}
         \newchessgame
         \chessboard[
@@ -140,7 +139,9 @@ What is the optimal depth at which to stop the search? In practice, the most str
 What happens if, upon reaching maximum depth, we evaluate the position in the middle of a piece exchange? For example, the~\cref{fig:horizonEffectExample} illustrates a position where if the search is stopped when the queen captures the pawn, it will seem like we have won a pawn, but on the next move, another pawn captures the queen, and now we lose a queen. This is known as the horizon effect~\cite{HorizonEffect}.
 
 \begin{figure}
-    \begin{minipage}{0.4\textwidth}
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
         \newchessgame
         \chessboard[
             showmover=false,
@@ -151,7 +152,8 @@ What happens if, upon reaching maximum depth, we evaluate the position in the mi
         ]
     \end{minipage}
     \hfill
-    \begin{minipage}{0.4\textwidth}
+    \begin{minipage}{0.45\textwidth}
+        \centering
         \newchessgame
         \chessboard[
             showmover=false,
@@ -430,17 +432,13 @@ and it is also difficult to restrict the moves of pinned pieces~\cite{GenerateLe
 
 \begin{figure}
     \centering
-    \begin{minipage}{0.6\textwidth}
-        \centering
-        \newchessgame
-        \chessboard[
-            showmover=false,
-            setfen=8/8/8/8/3B4/8/8/8 w - - 0 1,
-            markstyle=border,
-            color=blue, markfields={a1,b2,c3,e5,f6,g7,h8,g1,f2,e3,c5,b6,a7}
-        ]
-    \end{minipage}
-
+    \newchessgame
+    \chessboard[
+        showmover=false,
+        setfen=8/8/8/8/3B4/8/8/8 w - - 0 1,
+        markstyle=border,
+        color=blue, markfields={a1,b2,c3,e5,f6,g7,h8,g1,f2,e3,c5,b6,a7}
+    ]
     \caption{Precomputed attack for the bishop on the d4 square.}\label{fig:precomputedAttackBishop}
 \end{figure}
 
@@ -480,18 +478,14 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 
 \begin{figure}
     \centering
-    \begin{minipage}{0.6\textwidth}
-        \centering
-        \newchessgame
-        \chessboard[
-            showmover=true,
-            setfen=8/8/3r2p1/8/3P4/8/8/8 w - - 0 1,
-            markstyle=border,
-            color=blue, markfields={d7,d8,d5,c6,b6,a6,e6,f6},
-            color=red, markfields={d4,g6}
-        ]
-    \end{minipage}
-
+    \newchessgame
+    \chessboard[
+        showmover=true,
+        setfen=8/8/3r2p1/8/3P4/8/8/8 w - - 0 1,
+        markstyle=border,
+        color=blue, markfields={d7,d8,d5,c6,b6,a6,e6,f6},
+        color=red, markfields={d4,g6}
+    ]
     \caption{Example of blocking pieces.}\label{fig:blockerExample}
 
 \end{figure}
@@ -506,15 +500,11 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 
 \begin{figure}
     \centering
-    \begin{minipage}{0.6\textwidth}
-        \centering
-        \newchessgame
-        \chessboard[
-            showmover=true,
-            setfen=3r4/8/8/8/3N4/8/3K4/8 w - - 0 11
-        ]
-    \end{minipage}
-
+    \newchessgame
+    \chessboard[
+        showmover=true,
+        setfen=3r4/8/8/8/3N4/8/3K4/8 w - - 0 11
+    ]
     \caption{Pinned piece.}\label{fig:pinnedPiece}
 \end{figure}
 
@@ -529,7 +519,6 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 \noindent The final bitboards required for handling checks are the \textit{capture mask} and the \textit{push mask}. The capture mask identifies the squares occupied by the checking pieces, while the push mask includes the squares in between the king and the checking piece along the line of attack.
 
 \begin{center}
-\begin{minipage}{0.6\textwidth}
     \centering
     \newchessgame
     \chessboard[
@@ -539,7 +528,6 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
         color=blue, markfields={d5,e5,f5,g5},
         color=red, markfields={h5}
     ]
-\end{minipage}
 \end{center}
 
 \noindent The capture mask is shown in red, and the push mask is shown in blue.
@@ -654,20 +642,16 @@ The main limitation of MVV-LVA is that it only applies to capture moves. In fact
 
 \begin{figure}
     \centering
-    \begin{minipage}{0.6\textwidth}
-        \centering
-        \newchessgame
-        \chessboard[
-            showmover=false,
-            setfen=1r3k2/ppp2ppp/1n1bp3/q2p2N1/3P4/2P1P3/PP3PPP/2BQ2KR w K - 0 3,
-            pgfstyle=straightmove, color=blue,
-            markmoves={d1-h5},
-            arrow=to,
-            markstyle=circle,
-            color=red, markfields={f7}
-        ]
-    \end{minipage}
-
+    \newchessgame
+    \chessboard[
+        showmover=false,
+        setfen=1r3k2/ppp2ppp/1n1bp3/q2p2N1/3P4/2P1P3/PP3PPP/2BQ2KR w K - 0 3,
+        pgfstyle=straightmove, color=blue,
+        markmoves={d1-h5},
+        arrow=to,
+        markstyle=circle,
+        color=red, markfields={f7}
+    ]
     \caption{Killer move example.}\label{fig:killer_move_example}
 \end{figure}
 
