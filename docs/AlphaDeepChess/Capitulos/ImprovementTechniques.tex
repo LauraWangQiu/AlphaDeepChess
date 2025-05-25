@@ -142,7 +142,7 @@ As discussed earlier, index collisions in the transposition table are handled by
 
 \section{Move generator with magic bitboards and pext instructions}
 
-As previously discussed (see ~\cref{sec:moveGenerator}), computing the legal moves for sliding pieces is computationally expensive, as it requires identifying which pieces block their paths within their attack patterns. In this section, we present a technique that enables the precomputation of all possible moves for rooks and bishops, while queen moves can be derived as the union of rook and bishop moves, allowing constant-time O(1) access.
+As previously discussed (see~\cref{sec:moveGenerator}), computing the legal moves for sliding pieces is computationally expensive, as it requires identifying which pieces block their paths within their attack patterns. In this section, we present a technique that enables the precomputation of all possible moves for rooks and bishops, while queen moves can be derived as the union of rook and bishop moves, allowing constant-time O(1) access.
 
 \subsection*{Magic bitboards}
 
@@ -158,13 +158,13 @@ We can create a look up table of all the rook and bishop moves for each square o
 
 \begin{itemize}[itemsep=1pt]
   \item Preserves relevant blocker information: 
-    Only the nearest blockers along a sliding piece's movement direction are important. For example, in ~\cref{fig:magics_position}, the pawn on d6 is a relevant blocker because it directly restricts the rook's movement. In contrast, the pawn on d7 is irrelevant, as it lies beyond the first blocker and does not influence the final set of legal moves.
+    Only the nearest blockers along a sliding piece's movement direction are important. For example, in~\cref{fig:magics_position}, the pawn on d6 is a relevant blocker because it directly restricts the rook's movement. In contrast, the pawn on d7 is irrelevant, as it lies beyond the first blocker and does not influence the final set of legal moves.
 
   \item Compresses the blocker bitboard, pushing the important bits near the most significant bit.
   \item The final multiplication must produce a unique index for each possible blocker configuration. The way to ensure the uniqueness is by brute force testing.
 \end{itemize}
 
-\noindent As illustrated in~\ref{fig:magics_position}, we aim to compute the legal moves of the white rook in the given position. In practice, the only pieces that truly block the rook's path are those marked with a red circle.
+\noindent As illustrated in~\cref{fig:magics_position}, we aim to compute the legal moves of the white rook in the given position. In practice, the only pieces that truly block the rook's path are those marked with a red circle.
 
 \vspace{1em}
 
@@ -189,7 +189,7 @@ Magic numbers are generated through a trial and error process. For each square o
 
 \subsection*{Index calculation}
 
-\noindent First, we mask out all pieces outside the rook's attack pattern or on the board borders, as shown in~\ref{fig:magic_preprocessing}.
+\noindent First, we mask out all pieces outside the rook's attack pattern or on the board borders, as shown in~\cref{fig:magic_preprocessing}.
 
 \vspace{1em}
 
@@ -214,7 +214,7 @@ Magic numbers are generated through a trial and error process. For each square o
     \caption{Pre-processing of the blockers bitboard}\label{fig:magic_preprocessing}
 \end{figure}
 
-\noindent As illustrated in~\ref{fig:magic_multiplication}, the masked blockers bitboard is then multiplied by the magic number. The result retains only the three relevant pawns that obstruct the rook's movement, pushing them toward the most significant bits.
+\noindent As illustrated in~\cref{fig:magic_multiplication}, the masked blockers bitboard is then multiplied by the magic number. The result retains only the three relevant pawns that obstruct the rook's movement, pushing them toward the most significant bits.
 
 \vspace{1em}
 
@@ -241,7 +241,7 @@ Magic numbers are generated through a trial and error process. For each square o
     \caption{Multiplication by magic number to produce an index}\label{fig:magic_multiplication}
 \end{figure}
 
-\noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square; ~\ref{fig:rook_relevant_squares} shows this for the rook:
+\noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square;~\cref{fig:rook_relevant_squares} shows this for the rook:
 
 \vspace{1em}
 
@@ -467,7 +467,7 @@ This version of search follows Young Brothers Wait Concept, which is a parallel 
 \vspace{1em}
 
 \par
-In our implementation, a reduction of one ply is applied to non-capturing moves when the side to move is not in check, the remaining search depth is at least three plies, and the move index is beyond a threshold of the 10th move. The reduction condition is formally defined in Equation~\ref{eq:lmr}:
+In our implementation, a reduction of one ply is applied to non-capturing moves when the side to move is not in check, the remaining search depth is at least three plies, and the move index is beyond a threshold of the 10th move. The reduction condition is formally defined in Equation~\cref{eq:lmr}:
 
 \vspace{1em}
 

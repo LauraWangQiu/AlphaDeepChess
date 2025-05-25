@@ -109,11 +109,11 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
 
 \vspace{1em}
 
-\parbox{\textwidth}{\noindent In this project, since it is public in a GitHub repository, we used GitHub Actions to automate the testing and evaluation of the chess engine with \textit{Stockfish} and \textit{CuteChess}. A workflow was configured (located at \texttt{.github\textbackslash{}workflows\textbackslash{}manual-workflow.yml}) to compile the engine and run automated games using \textit{CuteChess} between different versions of the engine or against \textit{Stockfish}.}
+\parbox{\textwidth}{\noindent In this project, since it is public in a GitHub repository, we used GitHub Actions to automate the testing and evaluation of the chess engine with \textit{Stockfish} and \textit{Cutechess}. A workflow was configured (located at \texttt{.github\textbackslash{}workflows\textbackslash{}manual-workflow.yml}) to compile the engine and run automated games using \textit{Cutechess} between different versions of the engine or against \textit{Stockfish}.}
 
 \section{Evaluation of improvements}
 
-\noindent In this section we provide the results of a 100-game match between improved engine versions and a baseline version. The purpose of these matches is to measure the improvement in playing strength introduced by each new implementation. All matches are conducted using the tournament manager CuteChess with the following configuration:
+\noindent In this section we provide the results of a 100-game match between improved engine versions and a baseline version. The purpose of these matches is to measure the improvement in playing strength introduced by each new implementation. All matches are conducted using the tournament manager \textit{Cutechess} with the following configuration:
 
 \begin{enumerate}
     \item 50 unique random starting positions, each played twice with alternating colors.
@@ -294,20 +294,19 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
 
 \newpage
 
-\section{Engine Elo rating in Lichess}
+\section{Engine elo rating in \textit{Lichess}}
 
 \noindent We deployed the engine on \textit{Lichess}, the platform that allows engines to compete against both human players and other bots (see~\cref{sec:lichess}).
 
 \vspace{1em}
 
-\noindent Figure~\ref{fig:eloDistribution} illustrates the Elo rating distribution of players on Lichess, where the median rating is approximately 1500.
+\noindent~\cref{fig:eloDistribution} illustrates the Elo rating distribution of players on \textit{Lichess}, where the median rating is approximately 1500.
 \vspace{1em}
 
-\noindent After playing more than 500 games, \textit{AlphaDeepChess} achieved an Elo rating of 1900 on Lichess~\cite{AlphaDeepChessElo}. This places the engine significantly above the platform's median and within the top percentiles of the player base. For reference, the highest-rated human player on the platform has reached an Elo of 3000 as of 2025~\cite{LichessBestPlayer}.
+\noindent After playing more than 500 games, \textit{AlphaDeepChess} achieved an Elo rating of 1900 on \textit{Lichess}~\cite{AlphaDeepChessElo}. This places the engine significantly above the platform's median and within the top percentiles of the player base. For reference, the highest-rated human player on the platform has reached an Elo of 3000 as of 2025~\cite{LichessBestPlayer}.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.95\linewidth]{Imagenes/eloDistribution.png}
-    \caption{Lichess Elo distribution as of May 2025~\cite{LichessEloDistribution}.}
-    \label{fig:eloDistribution}
+    \caption{\textit{Lichess} Elo distribution as of May 2025~\cite{LichessEloDistribution}.}\label{fig:eloDistribution}
 \end{figure}
