@@ -1,8 +1,6 @@
 \chapter{Analysis and evaluation}\label{cap:analysis}
 
-This chapter presents an analysis of the performance of the chess engine through profiling, identifying its most computationally intensive components. We then evaluate the effectiveness of the improvement techniques described in ~\cref{cap:ImprovementTechniques}. Finally, we compare the performance of \textit{AlphaDeepChess} against \textit{Stockfish}, and examine its position within the Elo rating distribution on \textit{Lichess.org}.
-
-\newpage
+This chapter presents an analysis of the performance of the chess engine through profiling, identifying its most computationally intensive components. We then describe the testing framework used to evaluate the effectiveness of the optimization techniques introduced in~\cref{cap:ImprovementTechniques}. These evaluations are based on 100-game matches between different versions of the engine and a baseline implementation. Finally, we compare the performance of \textit{AlphaDeepChess} against \textit{Stockfish} and examine its position within the Elo rating distribution on \textit{Lichess.org}.
 
 \section{Profiling}
 In order to analyze the performance of our chess engine and identify potential bottlenecks where the code consume the most execution time, we used the \texttt{perf} tool available on Linux systems. \texttt{perf} provides robust profiling capabilities by recording CPU events, sampling function execution, and collecting stack traces ~\cite{PerfLinux}. 
@@ -73,100 +71,20 @@ sudo perf report -g --no-children
     \label{tab:profilingImprovements}
 \end{table}
 
-\newpage
+\section{Testing framework}
 
-\section{cutechess}
+\noindent In this section, we describe the tools used to test and debug the engine, as well as the methodology for evaluating each of the improvement techniques implemented throughout the development of the chess engine.
 
-\noindent The most common way to measure the strength of a chess engine is by playing games against other engines and analyzing the results. To quantify this strength, the Elo rating system is used. Elo is a statistical rating system originally developed for chess, which assigns a numerical value to each player (or engine) based on their game results against opponents of known strength. When an engine wins games against higher-rated opponents, its Elo increases; if it loses, its Elo decreases. This allows for an objective comparison of playing strength between different engines.
+\subsection*{Graphical user interface}
 
-\vspace{1em}
-
-\noindent But which engine should we use as a reference for comparison? One approach is to consult the Computer Chess Rating Lists, which rank chess engines based on their performance in various tournaments and matches. We have chosen to compare different versions of our engine with \textit{Stockfish}, currently ranked as the number one engine on the list. In addition, we have also competed against other engines online to further evaluate our engine's performance in diverse environments.
+\noindent Although we implemented a \texttt{diagram} command to display the current position in the standard output, making moves and observing evaluations can be a time-consuming process during debugging and testing. To streamline this workflow, we developed a graphical user interface (GUI) using Python. For rapid development and ease of use, we chose \textit{CustomTkinter}, one of the most widely adopted Python UI libraries.
 
 \vspace{1em}
 
-\noindent We created a benchmark to measure the effectiveness of each technique by playing matches with 100 games versus a baseline engine implementation, and we analyze the results of these games at the end of the process to assess the impact of each improvement.
+\parbox{\textwidth}{\noindent The GUI provides a user-friendly interface that communicates with the engine using the UCI protocol under the hood, greatly enhancing the debugging and testing experience. This tool can be used after compiling the engine by running \texttt{AlphaDeepChessGUI.py} with Python.}
 
 
-All of these improvements have been compared with each other using \textit{CuteChess}, and the best version was also evaluated against \textit{Stockfish}. These comparisons were conducted on machines provided by GitHub Actions.
-
-\subsection*{\textit{Cutechess}}
-
-\noindent After considering different options, \textit{Cutechess} proved to be the best fit for our needs.
-
-\vspace{1em}
-
-\noindent \textit{Cutechess}~\cite{CuteChess} is an open-source tool designed to perform automated games between chess engines. It is widely used in the chess programming community to test and compare engines, evaluate their performance, and analyze games.
-
-\vspace{1em}
-
-\noindent It provides both command-line interface (CLI) and a graphic user interface (GUI), with cross-platform compatibility for Windows, macOS, and Linux. For our purposes, we utilized the CLI version to automate the tests with Python scripts and commands, integrating it into a CI/CD workflow.
-
-\vspace{1em}
-
-\noindent Mainly, this tool is responsible for sending commands to both selected engines. For example, when both \textit{Stockfish} and our engine implement UCI, \textit{Cutechess} knows in advance the commands to send, as well as parameters such as the search time and depth for each engine, the number of games to play, the time control, or even specific openings to use. Providing specific openings introduces randomization between games, which is beneficial for later evaluation.
-
-\vspace{1em}
-
-\noindent Then, it checks the active status of each engine and manages the start of the games by setting up the board on both engines with the \texttt{position} command. Afterwards, it sends the \texttt{go} command and stops the search with \texttt{stop} when the search time or depth is reached, extracting the best move provided by the engine whose turn it is. This move is then passed to the other engine, alternating turns so that both engines play against each other automatically.~\cref{lst:cutechess-example} we show a \textit{Cutechess} log file, we directly configured the starting positions from a list of FENs in the \texttt{positions.fen} file:
-
-\begin{lstlisting}[basicstyle=\ttfamily\scriptsize, breaklines=true, frame=single, caption={Example of \textit{Cutechess}}, label={lst:cutechess-example}]
-Running test (8) with the following configuration:
-Games: 1, Search Time: 5, Depth: 5
-PGN File: results.pgn, EPD File: results.epd, Log File: results.log
-Engines: ['AlphaDeepChess', 'Stockfish']
-Options: {'Stockfish': {'UCI_LimitStrength': 'true', 'UCI_Elo': '2000'}}
-Book: 
-Positions: positions.fen
-...
- <Stockfish(1): uciok
- >Stockfish(1): setoption name UCI_Elo value 2000
- >Stockfish(1): setoption name UCI_LimitStrength value true
- >Stockfish(1): isready
- <Stockfish(1): readyok
-Started game 1 of 1 (AlphaDeepChess vs Stockfish)
- >AlphaDeepChess(0): ucinewgame
- >AlphaDeepChess(0): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6
- >Stockfish(1): ucinewgame
- >Stockfish(1): setoption name Ponder value false
- >Stockfish(1): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6
- >AlphaDeepChess(0): isready
- <AlphaDeepChess(0): readyok
- >AlphaDeepChess(0): go movetime 5000 depth 5
- <AlphaDeepChess(0): info depth 1 score cp 130 bestMove c1e3
- <AlphaDeepChess(0): info depth 2 score cp 85 bestMove c1e3
- <AlphaDeepChess(0): info depth 3 score cp 80 bestMove c1e3
- <AlphaDeepChess(0): info depth 4 score cp 62 bestMove c1g5
- <AlphaDeepChess(0): info depth 5 score cp 79 bestMove c1g5
- <AlphaDeepChess(0): bestmove c1g5
- >Stockfish(1): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6 moves c1g5
- >Stockfish(1): isready
- <Stockfish(1): readyok
- >Stockfish(1): go movetime 5000 depth 5
- <Stockfish(1): info depth 1 seldepth 6 multipv 1 score cp -52 ...
- <Stockfish(1): info depth 2 seldepth 3 multipv 1 score cp -45 ...
- <Stockfish(1): info depth 3 seldepth 3 multipv 1 score cp -39 ...
- <Stockfish(1): info depth 4 seldepth 3 multipv 1 score cp -39 ...
- <Stockfish(1): info depth 5 seldepth 3 multipv 1 score cp -27 ...
- <Stockfish(1): bestmove e7e6
- >AlphaDeepChess(0): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6 moves c1g5 e7e6
-\end{lstlisting}
-
-\noindent In~\cref{lst:cutechess-example}, in addition to setting the number of games to $1$, the search time to $5$ seconds, and the search depth to $5$, we provided a list of starting positions, from which one is chosen at random. Each line starting with \texttt{position fen \ldots} establishes the FEN position and continues by adding the moves played.
-
-\vspace{1em}
-
-\noindent Note that both engines stop searching when depth of $5$ is reached and are verified to be ready after \texttt{isready} command.
-
-\vspace{1em}
-
-\noindent Depending on the number of games, search time, and time control, these tournaments between engines can take a long time to process. For this reason, we decided to use GitHub Actions and workflows to separate our development environment from the execution of performance and strength tests. This is explained later in~\cref{cap:analysisOfImprovements}.
-
-\vspace{1em}
-
-\noindent Although UCI implements the \texttt{diagram} command that draws the current position through standard output, making moves and showing the evaluation is somewhat a time-consuming task when debugging and testing while programming. We resorted to using an interface to help us do this job and a really fast solution was to use Python to make a GUI. In this case, one of the most used UI libraries was \textit{CustomTkinter} and it was used to build a friendly interface from scratch for bridging between executable and command sending. This tool can be used after compiling the engine and executing \texttt{AlphaDeepChessGUI.py} with Python.
-
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[width=1.0\textwidth]{Imagenes/gui.png}
     \caption{\textit{AlphaDeepChess}'s GUI}\label{fig:gui}
@@ -174,144 +92,196 @@ Started game 1 of 1 (AlphaDeepChess vs Stockfish)
 
 \noindent In~\cref{fig:gui}, the engine evaluation is enabled and displays the current evaluation value, the best move found, and the calculated search depth. In this way, we also ensure a more user-friendly experience.
 
+
+\subsection*{\textit{Cutechess}}
+
+\noindent To evaluate the different techniques implemented, we also required a tool capable of running automated tournaments between chess engines. For this task, we used \textit{Cutechess}, whose usage is described in detail in~\cref{sec:cutechess}.
+
 \vspace{1em}
 
-\section{Github actions and workflows}
+\noindent Depending on the number of games, search time, and time control, these tournaments between engines can take a long time to process. For this reason, we decided to use GitHub Actions and workflows to separate our development environment from the execution of performance and strength tests.
+
+\vspace{1em}
+
+\subsection*{Github actions and workflows}
 
 GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to automate tasks such as building, testing, and deploying code. Workflows are defined in YAML files and specify the tasks to be executed, the jobs or events that trigger them, and the environment in which they run.
 
 \vspace{1em}
 
-\noindent In this project, since it is public in a GitHub repository, we used GitHub Actions to automate the testing and evaluation of the chess engine with \textit{Stockfish} and \textit{CuteChess}. A workflow was configured (located at \texttt{.github\textbackslash{}workflows\textbackslash{}manual-workflow.yml}) to compile the engine and run automated games using \textit{CuteChess} between different versions of the engine or against \textit{Stockfish}.
+\parbox{\textwidth}{\noindent In this project, since it is public in a GitHub repository, we used GitHub Actions to automate the testing and evaluation of the chess engine with \textit{Stockfish} and \textit{CuteChess}. A workflow was configured (located at \texttt{.github\textbackslash{}workflows\textbackslash{}manual-workflow.yml}) to compile the engine and run automated games using \textit{CuteChess} between different versions of the engine or against \textit{Stockfish}.}
+
+\section{Evaluation of improvements}
+
+\noindent In this section we provide the results of a 100-game match between improved engine versions and a baseline version. The purpose of these matches is to measure the improvement in playing strength introduced by each new implementation. All matches are conducted using the tournament manager CuteChess with the following configuration:
+
+\begin{enumerate}
+    \item 50 unique random starting positions, each played twice with alternating colors.
+    \item 4 seconds of thinking time per move.
+    \item A 150-move limit per game, after which the game is declared a draw.
+\end{enumerate}
 
 \vspace{1em}
 
-\noindent At the end of each section, we provide the results of a 100-game match between the improved engine and a baseline version. The baseline includes only the core techniques discussed in the previous chapter on engine architecture. The purpose of these matches is to measure the improvement in playing strength introduced by each new implementation.
+\parbox{\textwidth}{The matches were executed on virtual machines provided by \textit{GitHub Actions}, using the ubuntu-latest runner. At the time of testing, this environment provided 4 CPUs, 16 GB of RAM, a 14 GB SSD, and a 64-bit architecture.}
 
 \vspace{1em}
 
-\noindent All matches are conducted using the tournament manager \textit{CuteChess}~\cite{CuteChess} with the following configuration:
+\noindent The baseline engine configuration is shown in~\cref{tab:baselineBot}. It includes only the core techniques described in~\cref{cap:descripcionTrabajo}.
 
-\begin{itemize}[itemsep=1pt]
-\item 100 games per match.
-\item 50 unique random starting positions, each played twice with alternating colors.
-\item 4 seconds of thinking time per move.
-\item A 150-move limit per game, after which the game is declared a draw.
-\end{itemize}
-
-\noindent The matches were executed on virtual machines provided by GitHub Actions, using the \texttt{ubuntu-latest} runner. At the time of testing, this environment provided 4 CPUs, 16~GB of RAM, a 14~GB SSD, and a 64-bit architecture.
-
-\section{Transposition table}\label{sec:tt}
-
-\subsection*{Analysis}
-
-\noindent To evaluate the impact of introducing the transposition table, we conducted the 100-game tournament against the baseline version of the engine. The~\cref{tab:tt_vs_basic} details the implementation used for each bot.
-
-\vspace{1em}
-
-\begin{table}
+\begin{table}[H]
     \centering
-    \begin{tabular}{|p{4cm}|p{4cm}|p{4cm}|}
+    \begin{tabular}{|p{4cm}|p{4cm}|}
     \hline
-    \textit{Component}         & \textit{Transposition Table Bot}  & \textit{Basic Bot}     \\ \hline
-    Search                     & Alpha-beta With Transposition Table          & Basic Alpha-beta           \\ \hline
-    Evaluation Function        & Materialistic                      & Materialistic       \\ \hline
-    Move Generator             & Basic implementation              & Basic implementation   \\ \hline
-    Move Ordering              & MVV-LVA                           & MVV-LVA                \\ \hline
+    \textit{Component}         & \textit{Baseline Bot}     \\ \hline
+    Search                     & Basic Alpha-Beta           \\ \hline
+    Evaluation Function        & Materialistic        \\ \hline
+    Move Generator             & Basic implementation   \\ \hline
+    Move Ordering              & MVV-LVA                \\ \hline
     \end{tabular}
-    \caption{Match configuration: Transposition Table Bot vs Basic Bot}\label{tab:tt_vs_basic}
+    \caption{Baseline engine configuration.}
+    \label{tab:baselineBot}
 \end{table}
 
-\noindent As illustrated in following result bar, we see a substantial improvement by adding the transposition table with 46 wins versus 32 losses. The remaining 22 games ended in a draw.
+\subsection*{Transposition table}
+\label{sec:tt}
+
+\noindent This experiment evaluates the impact of integrating a transposition table into the search process. The only modification compared to the baseline engine is in the search component.
+
+\vspace{0.5em}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{4cm}|p{6cm}|}
+    \hline
+    \textit{Component}         & \textit{Engine configuration}            \\ \hline
+    Search                     & With Transposition Table \\ \hline
+    \end{tabular}
+    \caption*{Configuration of Transposition Table Bot.}
+    \label{tab:tt_vs_basic}
+\end{table}
 
 \begin{center}
 \ResultBar{15cm}{0.5cm}{46}{22}{32}
 \medskip
 \end{center}
 
-\section{Move generator with magic bitboards and pext instructions}
+\noindent The match results show a clear improvement: 46 wins, 32 losses, and 22 draws. This confirms that transposition tables reduce redundant evaluations and increase search efficiency.
 
-\subsection*{Analysis}
+\subsection*{Move generator with magic bitboards and pext instruction}
 
-\noindent To evaluate the impact of introducing the move generator accelerated with PEXT instructions, we conducted the 100-game tournament against the baseline version of the engine. The~\cref{tab:pext_vs_basic} details the implementation used for each bot.
+\noindent In addition to the transposition table, we now accelerate the move generation process using \texttt{PEXT}  instructions. We chose not to analyze the magic bitboards technique at this stage, as both approaches provide constant-time (\( O(1) \)) access to legal moves for sliding pieces, and would yield similar performance results.
 
 \vspace{1em}
 
-\begin{table}
+\begin{table}[H]
     \centering
-    \begin{tabular}{|p{4cm}|p{4cm}|p{4cm}|}
+    \begin{tabular}{|p{4cm}|p{6cm}|}
     \hline
-    \textit{Component}         & \textit{PEXT instructions Bot}  & \textit{Basic Bot}     \\ \hline
-    Search                     & Alpha-beta With Transposition Table          & Basic Alpha-beta           \\ \hline
-    Evaluation Function        & Materialistic                      & Materialistic       \\ \hline
-    Move Generator             & PEXT implementation              & Basic implementation   \\ \hline
-    Move Ordering              & MVV-LVA                           & MVV-LVA                \\ \hline
+    \textit{Component}         & \textit{Engine configuration}    \\ \hline
+    Search                     & With Transposition Table                     \\ \hline
+    Move Generator             & PEXT implementation                \\ \hline
     \end{tabular}
-    \caption{Match configuration: PEXT instructions Bot vs Basic Bot}\label{tab:pext_vs_basic}
+    \caption*{Configuration of PEXT instructions Bot}\label{tab:pext_vs_basic}
 \end{table}
-
-\noindent As illustrated in the following result bar, we achieved a significant performance improvement by adding the PEXT instructions with 46 wins versus 22 losses. The remaining 14 games ended in a draw.
 
 \begin{center}
 \ResultBar{15cm}{0.5cm}{64}{14}{22}
 \medskip
 \end{center}
 
-\section{Evaluation with king safety and piece mobility}
+\noindent The results shown a significant performance improvement by adding the PEXT instructions with 46 wins versus 22 losses. The remaining 14 games ended in a draw.
 
-\subsection*{Analysis}
+\subsection*{Evaluation with king safety and piece mobility}
 
-To evaluate the impact of introducing the new parameters in the evaluation, we conducted the 100-game tournament against the baseline version of the engine. The~\cref{tab:safety_mobility_vs_basic} details the implementation used for each bot.
-
+\noindent The next step is the introduction of the new parameters in the evaluation.
 \vspace{1em}
 
-\begin{table}
+\begin{table}[H]
     \centering
-    \begin{tabular}{|p{4cm}|p{4cm}|p{4cm}|}
+    \begin{tabular}{|p{4cm}|p{6cm}|}
     \hline
-    \textit{Component}         & \textit{PEXT instructions Bot}  & \textit{Basic Bot}     \\ \hline
-    Search                     & Alpha-beta With Transposition Table          & Basic Alpha-beta           \\ \hline
-    Evaluation Function        & Safety and Mobility                      & Materialistic      \\ \hline
-    Move Generator             & PEXT implementation              & Basic implementation   \\ \hline
-    Move Ordering              & MVV-LVA                           & MVV-LVA                \\ \hline
+    \textit{Component}         & \textit{Engine configuration}    \\ \hline
+    Search                     & With Transposition Table   \\ \hline
+    Evaluation Function        & King safety and piece mobility     \\ \hline
+    Move Generator             & PEXT implementation                \\ \hline
     \end{tabular}
-    \caption{Match configuration: King Safety and Piece mobility eval Bot vs Basic Bot}\label{tab:safety_mobility_vs_basic}
+    \caption*{Configuration of Bot with advanced evaluation parameters.}\label{tab:advancedEval_vs_basic}
 \end{table}
-
-\noindent As illustrated in the following result bar, the results are slightly worse compared to the match using the material-only evaluation shown in the following result bar, with 62 wins and 30 losses. This decline may be attributed to the additional computational overhead introduced by evaluating the new parameters. Moreover, while concepts such as king safety and piece mobility are intuitively valuable to human players, the engine may struggle to consistently associate them with actual positional strength.
 
 \begin{center}
 \ResultBar{15cm}{0.5cm}{62}{8}{30}
 \medskip
 \end{center}
 
-\section{Multithreaded search}
+\noindent The results are slightly worse compared to the match using the material-only evaluation shown in the following result bar, with 62 wins and 30 losses. This decline may be attributed to the additional computational overhead introduced by evaluating the new parameters. Moreover, while concepts such as king safety and piece mobility are intuitively valuable to human players, the engine may struggle to consistently associate them with actual positional strength.
 
-\subsection*{Analysis}
+\subsection*{Multithreaded search}
 
-To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version. 
+\noindent The next experiment evaluated the impact of parallelizing the search. In this setup, the transposition table was disabled due to its inability to handle concurrent access safely in our implementation.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{4cm}|p{6cm}|}
+    \hline
+    \textit{Component}         & \textit{Engine configuration}         \\ \hline
+    Search                     & YBWC Multithreaded Search  \\ \hline
+    Move Generator             & PEXT Implementation                \\ \hline
+    \end{tabular}
+    \caption*{Configuration of the multithreaded bot.}
+    \label{tab:multithreadedBot}
+\end{table}
 
 \begin{center}
 \ResultBar{15cm}{0.5cm}{32}{5}{63}
 \medskip
 \end{center}
 
-\noindent The results are slightly worse compared to the match using the material-only evaluation, with 8 more losses than before. This may be due to the increased computational cost of evaluating these additional parameters. Furthermore, although these are abstract concepts commonly used by humans to assess positions, the engine may struggle to find a clear correlation between them and actual positional strength.
+\noindent Despite the theoretical advantage of parallel search, the results showed a decline in performance: 32 wins, 63 losses, and 5 draws. This underperformance may be attributed to several disadvantages of the YBWC algorithm in our implementation, including synchronization overhead, thread creation and destruction costs, and lack of shared transposition table access.
 
-\section{Late move reductions}
+\subsection*{Late move reductions}
 
-\subsection*{Analysis}
+\noindent The final technique evaluated is the inclusion of Late Move Reductions (LMR) in the search algorithm. This experiment also includes the transposition table (TT) and the optimized move generator using PEXT instructions.
 
-To evaluate the improvement in the new evaluation, we conducted the same 100 game match vs the basic bot version.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|p{4cm}|p{6cm}|}
+    \hline
+    \textit{Component}         & \textit{Engine configuration}         \\ \hline
+    Search                     & with LMR and TT \\ \hline
+    Move Generator             & PEXT Implementation                \\ \hline
+    \end{tabular}
+    \caption*{Configuration of the late move reductions bot.}
+    \label{tab:reductionsBot}
+\end{table}
 
 \begin{center}
  \ResultBar{15cm}{0.5cm}{48}{15}{37}
 \medskip
 \end{center}
 
-\noindent The results are worse, with 15 more losses than the version without this aggresive pruning. This could be because our move ordering is not that strong, and the best move in the position sometimes is in the last positions.
+\noindent The results show 48 wins, 15 draws, and 37 losses. This outcome is slightly worse than the version without reductions. A likely explanation is that the current move ordering heuristic is not strong enough, leading the search to incorrectly reduce important moves that appear late in the move list. As a result, the potential benefits of LMR are not fully realized and may even degrade search quality in some positions.
 
-\newpage
+\vspace{2em}
+
+\noindent We can confirm that \textit{AlphaDeepChess} achieves its maximum skill level with the following configuration:
+
+\begin{table}
+    \centering
+    \begin{tabular}{|p{4cm}|p{6cm}|}
+    \hline
+    \textit{Component}         & \textit{Best configuration}         \\ \hline
+    Search                     & with Transposition Table    \\ \hline
+    Evaluation Function        & Materialistic                          \\ \hline
+    Move Generator             & PEXT implementation                    \\ \hline
+    Move Ordering              & MVV-LVA                                \\ \hline
+    \end{tabular}
+    \caption{Best engine configuration.}
+    \label{tab:bestEngineConfiguration}
+\end{table}
+
+
+\noindent Now, we compare the skill level of \textit{AlphaDeepChess} with the best configuration against \textit{Stockfish}.
 
 \section{Evaluation versus \textit{Stockfish}}
 
@@ -322,13 +292,18 @@ To evaluate the improvement in the new evaluation, we conducted the same 100 gam
 
 \noindent \textit{AlphaDeepChess} lost all games against \textit{Stockfish}. This outcome was expected, as \textit{Stockfish} has an estimated Elo rating of around 3644~\cite{StockfishElo}, making it orders of magnitude stronger than the best human players. In contrast, as we will show in the next section, \textit{AlphaDeepChess} plays at a level comparable to a strong human player.
 
-\section{Engine final evaluation}
+\newpage
 
-\noindent Figure~\cref{fig:eloDistribution} shows the Elo rating distribution of players on Lichess, where the median rating is approximately 1500.
+\section{Engine Elo rating in Lichess}
+
+\noindent We deployed the engine on \textit{Lichess}, the platform that allows engines to compete against both human players and other bots (see~\cref{sec:lichess}).
 
 \vspace{1em}
 
-\noindent \textit{AlphaDeepChess} has achieved a rating of 1900 on Lichess~\cite{AlphaDeepChessElo}, placing it well above the median and within the top percentiles of the player base. For comparison, the highest-rated human player on the platform has reached 3000 Elo in 2025~\cite{LichessBestPlayer}.
+\noindent Figure~\ref{fig:eloDistribution} illustrates the Elo rating distribution of players on Lichess, where the median rating is approximately 1500.
+\vspace{1em}
+
+\noindent After playing more than 500 games, \textit{AlphaDeepChess} achieved an Elo rating of 1900 on Lichess~\cite{AlphaDeepChessElo}. This places the engine significantly above the platform's median and within the top percentiles of the player base. For reference, the highest-rated human player on the platform has reached an Elo of 3000 as of 2025~\cite{LichessBestPlayer}.
 
 \begin{figure}
     \centering

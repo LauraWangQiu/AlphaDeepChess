@@ -1,6 +1,7 @@
 \chapter{State of the Art}\label{cap:estadoDeLaCuestion}
 
-In this chapter, we present the fundamental concepts on which our chess engine is based, including the minimax search algorithm and alpha-beta pruning. We then explain how chess engines communicate using the Universal Chess Interface (UCI) protocol and discuss how the Elo rating system is used to evaluate the skill of chess players. Finally we provide an overview of the \textit{Stockfish} engine, highlighting its design and the integration of machine learning techniques into its search algorithm.
+In this chapter, we present the fundamental concepts underlying the design of our chess engine, including the minimax search algorithm and alpha-beta pruning. We also explain how chess engines communicate through the Universal Chess Interface (UCI) protocol and discuss the Elo rating system, which is commonly used to evaluate the skill level of chess players. Additionally, we provide an overview of the \textit{Stockfish} engine, highlighting its architecture and the integration of machine learning techniques into its search algorithm. Finally, we describe several tools widely used in the chess programming community for debugging and evaluating engine performance.
+
 
 \section{Game trees}
 
@@ -452,6 +453,8 @@ This system ensures that a player gains more rating points for defeating a highe
 
 \newpage
 
+Now that we have covered the fundamental concepts behind chess engines, in the following section we present the most powerful and widely used chess engine.
+
 \section{\textit{Stockfish}}
 \label{sec:stockfish}
 
@@ -469,7 +472,9 @@ This system ensures that a player gains more rating points for defeating a highe
 
 \par The key component of \textit{Stockfish}'s strength is its use of machine learning algorithms to evaluate chess positions more accurately, in particular, \textit{Stockfish} uses NNUE (Efficiently Updatable Neural Network), a neural network architecture originally developed for shogi engines and later adapted for chess ~\cite{NNUE}. NNUE efficiently evaluates positions by finding and learning complex piece patterns. It is optimized to run quickly even on CPUs and significantly improves move ordering (see Chapter~\ref{cap:moveOrdering}), allowing the engine to explore the most promising lines first and prune large parts of the search tree.
 
-\vspace{1em}
+\vspace{2em}
+
+In the following section, we describe one of the most popular platforms where both humans and chess engines play competitively.
 
 \section{\textit{Lichess}}
 \label{sec:lichess}
@@ -487,3 +492,72 @@ This system ensures that a player gains more rating points for defeating a highe
 \vspace{1em}
 
 \noindent Lichess also supports chess engines and bots through the Lichess Bot API, enabling integration with engines like \textit{Stockfish}. It is often used for engine testing, AI competitions, and research purposes. Many developers and researchers use the Lichess platform as a benchmark or interface for evaluating engine performance.
+
+\vspace{2em}
+
+Finally, the chess community uses specialized tools to evaluate the relative playing strength of chess engines. One of the most widely used tools for this purpose is \textit{Cutechess}.
+
+\section{\textit{Cutechess}}
+\label{sec:cutechess}
+
+\noindent \textit{Cutechess} is an open-source tool widely adopted in the chess programming community. It allows users to run automated matches between engines, compare their performance, and analyze gameplay~\cite{CuteChess}.
+
+\vspace{1em}
+
+\noindent It provides both command-line interface (CLI) and a graphic user interface (GUI), with cross-platform compatibility for Windows, macOS, and Linux. For our purposes, we utilized the CLI version to automate the tests with Python scripts and commands, integrating it into a CI/CD workflow.
+
+\vspace{1em}
+
+\noindent Mainly, this tool is responsible for sending commands to both selected engines via the UCI protocol with parameters such as the search time and depth for each engine, the number of games to play, the time control, or even specific openings to use.
+
+\vspace{1em}
+
+\noindent Then, it checks the active status of each engine and manages the start of the games by setting up the board on both engines with the \texttt{position} command. Afterwards, it sends the \texttt{go} command and stops the search with \texttt{stop} when the search time or depth is reached, extracting the best move provided by the engine whose turn it is. This move is then passed to the other engine, alternating turns so that both engines play against each other automatically.~\cref{lst:cutechess-example} we show a \textit{Cutechess} log file, we directly configured the starting positions from a list of FENs in the \texttt{positions.fen} file:
+
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize, breaklines=true, frame=single, caption={Example of \textit{Cutechess}}, label={lst:cutechess-example}]
+Running test (8) with the following configuration:
+Games: 1, Search Time: 5, Depth: 5
+PGN File: results.pgn, EPD File: results.epd, Log File: results.log
+Engines: ['AlphaDeepChess', 'Stockfish']
+Options: {'Stockfish': {'UCI_LimitStrength': 'true', 'UCI_Elo': '2000'}}
+Book: 
+Positions: positions.fen
+...
+ <Stockfish(1): uciok
+ >Stockfish(1): setoption name UCI_Elo value 2000
+ >Stockfish(1): setoption name UCI_LimitStrength value true
+ >Stockfish(1): isready
+ <Stockfish(1): readyok
+Started game 1 of 1 (AlphaDeepChess vs Stockfish)
+ >AlphaDeepChess(0): ucinewgame
+ >AlphaDeepChess(0): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6
+ >Stockfish(1): ucinewgame
+ >Stockfish(1): setoption name Ponder value false
+ >Stockfish(1): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6
+ >AlphaDeepChess(0): isready
+ <AlphaDeepChess(0): readyok
+ >AlphaDeepChess(0): go movetime 5000 depth 5
+ <AlphaDeepChess(0): info depth 1 score cp 130 bestMove c1e3
+ <AlphaDeepChess(0): info depth 2 score cp 85 bestMove c1e3
+ <AlphaDeepChess(0): info depth 3 score cp 80 bestMove c1e3
+ <AlphaDeepChess(0): info depth 4 score cp 62 bestMove c1g5
+ <AlphaDeepChess(0): info depth 5 score cp 79 bestMove c1g5
+ <AlphaDeepChess(0): bestmove c1g5
+ >Stockfish(1): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6 moves c1g5
+ >Stockfish(1): isready
+ <Stockfish(1): readyok
+ >Stockfish(1): go movetime 5000 depth 5
+ <Stockfish(1): info depth 1 seldepth 6 multipv 1 score cp -52 ...
+ <Stockfish(1): info depth 2 seldepth 3 multipv 1 score cp -45 ...
+ <Stockfish(1): info depth 3 seldepth 3 multipv 1 score cp -39 ...
+ <Stockfish(1): info depth 4 seldepth 3 multipv 1 score cp -39 ...
+ <Stockfish(1): info depth 5 seldepth 3 multipv 1 score cp -27 ...
+ <Stockfish(1): bestmove e7e6
+ >AlphaDeepChess(0): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6 moves c1g5 e7e6
+\end{lstlisting}
+
+\noindent In~\cref{lst:cutechess-example}, in addition to setting the number of games to $1$, the search time to $5$ seconds, and the search depth to $5$, we provided a list of starting positions, from which one is chosen at random. Each line starting with \texttt{position fen \ldots} establishes the FEN position and continues by adding the moves played.
+
+\vspace{1em}
+
+\noindent Note that both engines stop searching when depth of $5$ is reached and are verified to be ready after \texttt{isready} command.
