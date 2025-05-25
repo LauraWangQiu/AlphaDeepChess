@@ -29,6 +29,8 @@ This chapter documents the development process of the chess engine. The project 
 
 \noindent A list of twelve bitboards is used, one for each type of chess piece.~\cref{fig:bitboardPositionExample} illustrates this concept with a chess position example.
 
+\vspace{1em}
+
 \begin{figure}
     \centering
     \newchessgame
@@ -87,7 +89,7 @@ This chapter documents the development process of the chess engine. The project 
 
 \begin{enumerate}
     \item Total number of moves played in the game (bit 0-19). 
-    \item En passant target square (if applicable) (bits 20-26).
+    \item \textit{En passant} target square (if applicable) (bits 20-26).
     \item Black's queenside castling availability (bit 27).
     \item Black's kingside castling availability (bit 28).
     \item White's queenside castling availability (bit 29).
@@ -113,11 +115,11 @@ The search algorithm implemented is an enhanced minimax with alpha-beta pruning 
 \noindent The following events happen at each node of the tree:
 
 \begin{enumerate}
-    \item Terminal node verification: Check for game termination conditions including checkmate, threefold repetition, the fifty-move rule, or reaching maximum search depth.
-    \item Position evaluation: A positive value indicates White's advantage, while a negative value favors Black. We establish 3,200,000 as the mate-in-one threshold value.
-    \item Legal move generation: create a list of every possible legal move in the position.
-    \item Move ordering: Sort moves by estimated quality (best to worst). The sooner we explore the best move, the more branches of the tree will be pruned.
-    \item Move exploration: Iterate through each of the legal moves from the position in order, update the position evaluation, the value of alpha and beta, and performing pruning when possible.
+    \item \textit{Terminal node verification}: Check for game termination conditions including checkmate, threefold repetition, the fifty-move rule, or reaching maximum search depth.
+    \item \text{Position evaluation}: A positive value indicates white's advantage, while a negative value favors black. We establish $3,200,000$ as the mate-in-one threshold value. The value is $3,200,000$ because it is much larger than any possible material or positional evaluation, ensuring that a checkmate is always prioritized over any other advantage.
+    \item \textit{Legal move generation}: create a list of every possible legal move in the position.
+    \item \textit{Move ordering}: Sort moves by estimated quality (best to worst). The sooner we explore the best move, the more branches of the tree will be pruned.
+    \item \textit{Move exploration}: Iterate through each of the legal moves from the position in order, update the position evaluation, the value of alpha and beta, and performing pruning when possible.
 \end{enumerate}
 
 \subsection*{Iterative deepening}\label{sec:iterativeDeepening}
@@ -469,7 +471,7 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 
 \vspace{1em}
 
-\noindent However, sliding pieces as rooks, bishops, and queens require additional handling. Their attacks depend on the presence of blockers in their movement paths.~\cref{fig:blockerExample} shows an example where the attacks of sliding pieces are limited due to blocking pawns.
+\noindent However, sliding pieces as rooks, bishops, and queens require additional handling. Their attacks depend on the presence of blockers in their movement paths.~\cref{fig:blockerExample} shows an example where the attacks of sliding pieces are limited due to blocking pawns. In this case, the rook sliding attack is being blocked by the pawns.
 
 \vspace{1em}
 
@@ -490,10 +492,6 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
     \caption{Example of blocking pieces.}\label{fig:blockerExample}
 
 \end{figure}
-
-\noindent In~\cref{fig:blockerExample}, the rook sliding attack is being blocked by the pawns.
-
-\vspace{1em}
 
 \noindent Currently, calculating legal attacks for sliding pieces involves iterating along orthogonal and diagonal directions until a blocking piece is encountered. This approach is relatively inefficient. In subsequent sections, we present optimization techniques that address this issue.
 
@@ -564,7 +562,7 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 \begin{itemize}[itemsep=1pt]
     \item \textit{Double check}: If there are two or more checkers, the only legal option is to move the king to a square that is not under attack, outside the danger bitboard. No other piece can legally move in this case.
     \item \textit{No check}: In the absence of any checks, we iterate through all the pieces belonging to the side to move and generate their legal moves. If a piece is pinned (inside pinned piece bitboard), its movement is constrained to the direction of the pin.
-    \item \textit{Single check}: If exactly one checker is present, we again iterate over all pieces, but the only moves available are to capture the checker (captures inside the capture mask) or to block the check (moves inside the push mask).
+    \item \textit{Single check}: If exactly one checker is present, we again iterate over all pieces. The moves available are to capture the checker (captures inside the capture mask), to block the check (moves inside the push mask), or to move the king to a legal square.
 \end{itemize}
 
 \noindent Finally, the special moves of castling and \textit{en passant} are handled explicitly by looking for the castling rights and the \textit{en passant} target square in the game state.
@@ -575,11 +573,11 @@ To ensure the correctness of our move generator, we perform what is known as a \
 
 \vspace{1em}
 
-\noindent Perft is a debugging function in which we generate the entire game tree for a specific position up to a given depth and count all the resulting nodes. We can then compare our results with those of other engines, such as Stockfish. Since Stockfish is widely regarded as highly accurate, it serves as a reliable reference for validating move generation.
+\noindent Perft is a debugging function in which we generate the entire game tree for a specific position up to a given depth and count all the resulting nodes. We can then compare our results with those of other engines, such as \textit{Stockfish}. Since \textit{Stockfish} is widely regarded as highly accurate, it serves as a reliable reference for validating move generation.
 
 \vspace{1em}
 
-\noindent In~\cref{tab:perftResults}, we present our Perft results alongside those of Stockfish for seven well-known test positions at depth 6. The identical node counts in all cases confirm the correctness of our move generator.
+\noindent In~\cref{tab:perftResults}, we present our Perft results alongside those of \textit{Stockfish} for seven well-known test positions at depth 6. The identical node counts in all cases confirm the correctness of our move generator.
 
 \begin{table}
     \centering
@@ -596,7 +594,7 @@ To ensure the correctness of our move generator, we perform what is known as a \
     \texttt{FEN START POS}      &  119060324  &  119060324    \\
     \hline
     \end{tabular}
-    \caption{Perft results at depth 6: comparison between Stockfish and AlphaDeepChess~\cite{PerftResults}.}\label{tab:perftResults}
+    \caption{Perft results at depth 6: comparison between \textit{Stockfish} and \textit{AlphaDeepChess}~\cite{PerftResults}.}\label{tab:perftResults}
 \end{table}
 
 \section{Move ordering}
@@ -613,7 +611,7 @@ Once having explained the move generator function, in this chapter we detail the
 
 \subsection*{Most valuable victim - least valuable aggressor}
 
-The heuristic we implemented is the Most Valuable Victim - Least Valuable Aggressor (MVV-LVA). In this approach, a move receives a high score if it captures a valuable piece using a less valuable one. For example, capturing a queen with a pawn is considered a very strong move~\cite{MVVLVA}.
+The heuristic we implemented is the \textit{Most Valuable Victim - Least Valuable Aggressor (MVV-LVA)}. In this approach, a move receives a high score if it captures a valuable piece using a less valuable one. For example, capturing a queen with a pawn is considered a very strong move~\cite{MVVLVA}.
 
 \vspace{1em}
 
@@ -621,18 +619,22 @@ The heuristic we implemented is the Most Valuable Victim - Least Valuable Aggres
 
 \begin{table}
     \centering
-    \begin{tabular}{|c|r|r|r|r|r|r|r|}
-    \hline
-    \textit{Victim $\backslash$ Attacker} & \textit{P} & \textit{N} & \textit{B} & \textit{R} & \textit{Q} & \textit{K} & \textit{EMPTY} \\
-    \hline
-    \textit{P}     & 15 & 14 & 13 & 12 & 11 & 10 & 0 \\
-    \textit{N}     & 25 & 24 & 23 & 22 & 21 & 20 & 0 \\
-    \textit{B}     & 35 & 34 & 33 & 32 & 31 & 30 & 0 \\
-    \textit{R}     & 45 & 44 & 43 & 42 & 41 & 40 & 0 \\
-    \textit{Q}     & 55 & 54 & 53 & 52 & 51 & 50 & 0 \\
-    \textit{K}     &  0 &  0 &  0 &  0 &  0 &  0 & 0 \\
-    \textit{EMPTY} &  0 &  0 &  0 &  0 &  0 &  0 & 0 \\
-    \hline
+    \begin{tabular}{|c|r|r|r|r|r|r|}
+        \hline
+        \textit{Victim $\backslash$ Attacker} & \textit{P} & \textit{N} & \textit{B} & \textit{R} & \textit{Q} & \textit{K} \\
+        \hline
+        \textit{P}     & 15 & 14 & 13 & 12 & 11 & 10 \\
+        \hline
+        \textit{N}     & 25 & 24 & 23 & 22 & 21 & 20 \\
+        \hline
+        \textit{B}     & 35 & 34 & 33 & 32 & 31 & 30 \\
+        \hline
+        \textit{R}     & 45 & 44 & 43 & 42 & 41 & 40 \\
+        \hline
+        \textit{Q}     & 55 & 54 & 53 & 52 & 51 & 50 \\
+        \hline
+        \textit{K}     &  0 &  0 &  0 &  0 &  0 &  0 \\
+        \hline
     \end{tabular}
     \caption{MVV-LVA heuristic table: Rows = Victims, Columns = Attackers.}\label{tab:mvv-lva-table}
 \end{table}
@@ -668,8 +670,10 @@ The main limitation of MVV-LVA is that it only applies to capture moves. In fact
 
 \noindent In~\cref{fig:killer_move_example}, the queen moves to h5, threatening checkmate on f7. This quiet move prunes all other moves that do not respond to the threat.
 
+\vspace{1em}
+
 \noindent These moves are remembered and prioritized during move ordering, as they have proven effective in position at the same depth in the search tree. We implemented a table where we store two moves that causes a cutoff per search depth. There could be more than two killer moves, our replacement policy is to always maintain the older killer move found in one slot, and in the other slot store the least recently found.
 
 \vspace{1em}
 
-\noindent If a quiet move being evaluated matches one of the killer moves stored at the current search depth, we increase its score by 70 points.
+\noindent If a quiet move being evaluated matches one of the killer moves stored at the current search depth, we increase its score by 70 points. The value 70 is chosen empirically to ensure that killer moves are prioritized above most quiet moves, but still allow the most valuable captures (according to the MVV-LVA heuristic) to take precedence when appropriate. This balance helps improve pruning efficiency without overlooking critical tactical opportunities.

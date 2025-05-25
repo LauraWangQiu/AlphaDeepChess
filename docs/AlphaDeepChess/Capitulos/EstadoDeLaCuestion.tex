@@ -1,27 +1,24 @@
 \chapter{State of the Art}\label{cap:estadoDeLaCuestion}
 
-In this chapter, we present the fundamental concepts on which our chess engine is based, including the minimax search algorithm and alpha-beta pruning. We then explain how chess engines communicate using the Universal Chess Interface (UCI) protocol and discuss how the Elo rating system is used to evaluate the skill of chess players. Finally we provide an overview of the Stockfish engine, highlighting its design and the integration of machine learning techniques into its search algorithm.
+In this chapter, we present the fundamental concepts on which our chess engine is based, including the minimax search algorithm and alpha-beta pruning. We then explain how chess engines communicate using the Universal Chess Interface (UCI) protocol and discuss how the Elo rating system is used to evaluate the skill of chess players. Finally we provide an overview of the \textit{Stockfish} engine, highlighting its design and the integration of machine learning techniques into its search algorithm.
 
-\newpage
 \section{Game trees}
 
 \par Two-player turn-based games, such as chess or tic-tac-toe, where players take alternating turns, can be represented using a game tree or graph. In this representation, the root node corresponds to the initial position from which we begin searching for the best move. Each subsequent node represents a possible game state resulting from a legal move, forming a branching, tree-like structure.
 
 \vspace{1em}
 
-\par The depth of the tree refers to the number of turns (or plies) from the root node to a leaf node, alternating between White and Black. Deeper nodes represent positions further into the future of the game. A depth of 1 includes all possible moves for the current player (the side to move), while a depth of 2 includes the opponent's responses to those moves. As the depth increases, the number of nodes grows exponentially, making it computationally expensive to explore every possible state.
+\par The depth of the tree refers to the number of turns (or plies) from the root node to a leaf node, alternating between white and black. A ply refers to a single move made by one player. One ply corresponds to one move by either white or black, while a full turn (both players moving) consists of 2 plies. Deeper nodes represent positions further into the future of the game. A depth of 1 includes all possible moves for the current player (the side to move), while a depth of 2 includes the opponent's responses to those moves. As the depth increases, the process continues to alternate between the two players at each level of the tree. This means that the number of nodes grows exponentially, making it computationally expensive to explore every possible state.
 
 \vspace{1em}
 
 \noindent In~\cref{fig:game-tree}, the shaded cluster of lines on the left represents the part of the game tree corresponding to previous moves leading up to the current position. From there, only a subset of possible continuations is drawn, illustrating the immense complexity of chess. Claude Shannon estimated that the number of possible chess games is around $10^{120}$, a value known as the \textit{Shannon number}~\cite{Shannon1950}. This astronomical figure makes it computationally infeasible to represent or analyze the entire game tree, motivating the use of search algorithms and pruning techniques to explore only the most relevant branches, which are explained in the following section.
 
-\begin{figure}[h]
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.5\textwidth]{Imagenes/chess-game-tree.jpg}
     \caption{Illustration of a game tree for a chess position~\cite{BotvinnikLongRangePlanning}.}\label{fig:game-tree}
 \end{figure}
-
-\newpage
 
 \section{Search algorithms}
 
@@ -29,19 +26,21 @@ There are different approaches to analyze and find the best move from a position
 
 \vspace{1em}
 
-\noindent Note that these search algorithms are the foundation of more advanced and practical algorithms used today. That's why explaining them is essential to understand the underlying principles.
+\noindent Note that these search algorithms are the foundation of more advanced and practical algorithms used today. That is why explaining them is essential for understanding the underlying principles.
 
 \paragraph{Depth-First Search} refers to the process of exploring each branch of a tree or graph to its deepest level before backtracking. Unfortunately, in chess, this cannot be possible as mentioned in the last section. This is because the number of possible moves grows exponentially with the depth of the search tree, leading to the so-called combinatorial explosion. To address this, depth-first search is often combined with techniques like alpha-beta pruning to reduce the number of nodes evaluated, making the search more efficient while still exploring the tree deeply.~\cref{lst:dfs} illustrates the working of the DFS algorithm.
 
 \vspace{1em}
 
-\begin{lstlisting}[caption={Pseudocode of the Depth-First Search algorithm.}, label={lst:dfs}, frame=single, numbers=left, xleftmargin=15pt]
+\begin{lstlisting}[caption={Pseudocode of the Depth-First Search algorithm~\cite{CLRS}.}, label={lst:dfs}, frame=single, numbers=left, xleftmargin=15pt]
 Procedure DFS(Graph G, Node v):
     Mark v as visited
     For each neighbor w of v in G.adjacentEdges(v):
         If w is not visited:
             Recursively call DFS(G, w)
 \end{lstlisting}
+
+\vspace{1em}
 
 \noindent DFS visits nodes by marking them as visited (line 2) and recursively explores all adjacent nodes until no unvisited nodes remain (lines 3 to 5). It has a worst-case performance of $O(|V| + |E|)$ and worst-case space complexity of $O(|V|)$, with $|V| = \text{number of nodes}$ and $|E| = \text{number of edges}$.
 
@@ -53,7 +52,7 @@ Procedure DFS(Graph G, Node v):
 
 \vspace{1em}
 
-\begin{lstlisting}[caption={Pseudocode of the Best-First Search algorithm.}, frame=single, numbers=left, xleftmargin=10pt, breaklines=true]
+\begin{lstlisting}[caption={Pseudocode of the Best-First Search algorithm~\cite{Pearl1984}.}, frame=single, numbers=left, xleftmargin=10pt, breaklines=true]
 Procedure BestFirstSearch(Graph G, Node start, Node goal):
     Create an empty priority queue PQ
     Add start to PQ with priority 0
@@ -71,6 +70,8 @@ Procedure BestFirstSearch(Graph G, Node start, Node goal):
                 Mark w as visited
 \end{lstlisting}
 
+\vspace{1em}
+
 \noindent In this case, the priority queue contains nodes along with their associated priorities, which are determined by a heuristic function. This process is commonly referred to as branch and bound, where the algorithm explores branches of the search tree according to their heuristic value.
 
 \paragraph{Parallel Search} refers to mulithreaded search, a technique used to accelerate search processes by leveraging multiple processors.
@@ -85,7 +86,7 @@ The \textbf{minimax} algorithm is a decision making algorithm that follows Depth
 
 \vspace{1em}
 
-\begin{lstlisting}[caption={Pseudocode of the Minimax algorithm.}, label={lst:minimax}, frame=single, numbers=left, xleftmargin=15pt, breaklines=true]
+\begin{lstlisting}[caption={Pseudocode of the Minimax algorithm~\cite{Russell2021artificial}.}, label={lst:minimax}, frame=single, numbers=left, xleftmargin=15pt, breaklines=true]
 Procedure Minimax(Node position, Integer depth, Boolean maximizingPlayer):
     If depth == 0 or position is a terminal node:
         Return the evaluation of the position
@@ -147,7 +148,9 @@ Procedure Minimax(Node position, Integer depth, Boolean maximizingPlayer):
 
 Minimax has the problem that a lot of the node evaluation is redundant, because we can know beforehand that some branches will not affect the final decision. For that purpose, we can enhance the search with the \textit{alpha-beta pruning} technique. 
 
-Alpha-beta pruning is an optimization of the minimax algorithm that eliminates the need to explore parts of the tree that cannot influence the final decision. It maintains two parameters, \(\alpha\) and \(\beta\), which represent the best already explored option along the path to the root for the maximizer and minimizer, respectively.
+\vspace{1em}
+
+\noindent Alpha-beta pruning is an optimization of the minimax algorithm that eliminates the need to explore parts of the tree that cannot influence the final decision. It maintains two parameters, \(\alpha\) and \(\beta\), which represent the best already explored option along the path to the root for the maximizer and minimizer, respectively.
 
 \begin{itemize}
     \item \(\alpha\): the best value that the maximizer currently can guarantee.
@@ -156,8 +159,8 @@ Alpha-beta pruning is an optimization of the minimax algorithm that eliminates t
 
 During the recursive search:
 \begin{itemize}
-    \item At a \textbf{maximizing} node, we update \(\alpha = \max(\alpha, \text{value})\).
-    \item At a \textbf{minimizing} node, we update \(\beta = \min(\beta, \text{value})\).
+    \item At a maximizing node, we update \(\alpha = \operatorname{max}(\alpha, \text{value})\).
+    \item At a minimizing node, we update \(\beta = \operatorname{min}(\beta, \text{value})\).
 \end{itemize}
 
 If at any point \(\alpha \geq \beta\), we can prune the remaining children of that node, as they will not affect the final decision.
@@ -374,17 +377,19 @@ This technique can drastically reduce the number of nodes evaluated, especially 
 
 \newpage
 
-Having described the main search algorithms, it is important to explain how the skill of chess players both human and computers is measured. We then describe the console communication protocol used by chess engines, and finally, we provide an overview of how Stockfish operates internally.
+\noindent Having described the main search algorithms, it is important to explain how the skill of both human and computer chess players is measured. Next, we describe the console communication protocol used by chess engines, and finally, we provide an overview of how \textit{Stockfish} operates internally.
 
 \section{ELO rating system}
 
-The Elo rating system, developed by Arpad Elo in the 1960s, is a method used to calculate the relative skill levels of players in two-player games such as chess~\cite{Elo}. It was adopted by the FIDE in 1970 as the main rating system for all federated players.
+The Elo rating system, developed by \textit{Arpad Elo} in the 1960s, is a method used to calculate the relative skill levels of players in two-player games such as chess~\cite{Elo}. It was adopted by the FIDE in 1970 as the main rating system for all federated players.
 
 \vspace{1em}
 
-Each player has a numerical rating, which increases or decreases based on the outcome of games against other rated players. The core idea is that the difference in ratings between two players predicts the expected outcome of a match.
+\noindent Each player has a numerical rating, which increases or decreases based on the outcome of games against other rated players. The core idea is that the difference in ratings between two players predicts the expected outcome of a match.
 
-The expected score for player \( A \) against player \( B \) is calculated using the formula:
+\vspace{1em}
+
+\noindent The expected score for player \( A \) against player \( B \) is calculated using the formula:
 
 \[
 E_A = \frac{1}{1 + 10^{(R_B - R_A)/400}}
@@ -397,9 +402,11 @@ where:
   \item \( E_A \) is the expected score for player \( A \) (between 0 and 1).
 \end{itemize}
 
-Similarly, the expected score for player \( B \) is \( E_B = 1 - E_A \).
+\noindent Similarly, the expected score for player \( B \) is \( E_B = 1 - E_A \).
 
-After a game, the players' ratings are updated using the formula:
+\vspace{1em}
+
+\noindent After a game, the players' ratings are updated using the formula:
 
 \[
 R'_A = R_A + K (S_A - E_A)
@@ -445,10 +452,10 @@ This system ensures that a player gains more rating points for defeating a highe
 
 \newpage
 
-\section{Stockfish}
+\section{\textit{Stockfish}}
 \label{sec:stockfish}
 
-\par \textit{Stockfish} is an open-source chess engine that has consistently ranked among the strongest in the world~\cite{Stockfish}. It is written in C++ and released under the GNU General Public License (GPL). Stockfish has been developed and refined by a large community of contributors.
+\par \textit{Stockfish} is an open-source chess engine that has consistently ranked among the strongest in the world~\cite{Stockfish}. It is written in C++ and released under the GNU General Public License (GPL). \textit{Stockfish} has been developed and refined by a large community of contributors.
 
 \vspace{1em}
 
@@ -460,5 +467,5 @@ This system ensures that a player gains more rating points for defeating a highe
 
 \vspace{1em}
 
-\par The key component of Stockfish's strength is its use of machine learning algorithms to evaluate chess positions more accurately, in particular, Stockfish uses NNUE (Efficiently Updatable Neural Network), a neural network architecture originally developed for shogi engines and later adapted for chess ~\cite{NNUE}. NNUE efficiently evaluates positions by finding and learning complex piece patterns. It is optimized to run quickly even on CPUs and significantly improves move ordering (see Chapter~\ref{cap:moveOrdering}), allowing the engine to explore the most promising lines first and prune large parts of the search tree.
+\par The key component of \textit{Stockfish}'s strength is its use of machine learning algorithms to evaluate chess positions more accurately, in particular, \textit{Stockfish} uses NNUE (Efficiently Updatable Neural Network), a neural network architecture originally developed for shogi engines and later adapted for chess ~\cite{NNUE}. NNUE efficiently evaluates positions by finding and learning complex piece patterns. It is optimized to run quickly even on CPUs and significantly improves move ordering (see Chapter~\ref{cap:moveOrdering}), allowing the engine to explore the most promising lines first and prune large parts of the search tree.
 

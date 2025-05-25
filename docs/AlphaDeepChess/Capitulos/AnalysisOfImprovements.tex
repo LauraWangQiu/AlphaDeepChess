@@ -31,7 +31,7 @@ First, in order to analyze the performance of our chess engine and identify pote
 
 \noindent Our profiling goal is to identify which parts of the code consume the most execution time. We run the engine under \texttt{perf} using the following commands:
 
-\begin{lstlisting}[language=bash, caption={Profiling AlphaDeepChess with perf}, frame=single, breaklines=true]
+\begin{lstlisting}[language=bash, caption={Profiling \textit{AlphaDeepChess} with perf}, frame=single, breaklines=true]
 # Record performance data with function stack traces
 sudo perf record -g ./build/release/AlphaDeepChess
 
@@ -54,7 +54,7 @@ sudo perf report -g --no-children
 
 All of these improvements have been compared with each other using \textit{CuteChess}, and the best version was also evaluated against \textit{Stockfish}. These comparisons were conducted on machines provided by GitHub Actions.
 
-\subsection*{Cutechess}
+\subsection*{\textit{Cutechess}}
 
 \noindent After considering different options, \textit{Cutechess} proved to be the best fit for our needs.
 
@@ -68,7 +68,7 @@ All of these improvements have been compared with each other using \textit{CuteC
 
 \vspace{1em}
 
-\noindent Mainly, this tool is responsible for sending commands to both selected engines. For example, when both Stockfish and our engine implement UCI, \textit{Cutechess} knows in advance the commands to send, as well as parameters such as the search time and depth for each engine, the number of games to play, the time control, or even specific openings to use. Providing specific openings introduces randomization between games, which is beneficial for later evaluation.
+\noindent Mainly, this tool is responsible for sending commands to both selected engines. For example, when both \textit{Stockfish} and our engine implement UCI, \textit{Cutechess} knows in advance the commands to send, as well as parameters such as the search time and depth for each engine, the number of games to play, the time control, or even specific openings to use. Providing specific openings introduces randomization between games, which is beneficial for later evaluation.
 
 \vspace{1em}
 
@@ -133,7 +133,7 @@ Started game 1 of 1 (AlphaDeepChess vs Stockfish)
 \begin{figure}
     \centering
     \includegraphics[width=1.0\textwidth]{Imagenes/gui.png}
-    \caption{AlphaDeepChess GUI}\label{fig:gui}
+    \caption{\textit{AlphaDeepChess}'s GUI}\label{fig:gui}
 \end{figure}
 
 \noindent In~\cref{fig:gui}, the engine evaluation is enabled and displays the current evaluation value, the best move found, and the calculated search depth. In this way, we also ensure a more user-friendly experience.
@@ -277,14 +277,14 @@ To evaluate the improvement in the new evaluation, we conducted the same 100 gam
 
 \newpage
 
-\section{Evaluation versus stockfish}
+\section{Evaluation versus \textit{Stockfish}}
 
 \begin{center}
  \ResultBar{15cm}{0.5cm}{0}{0}{100}
 \medskip
 \end{center}
 
-\noindent AlphaDeepChess lost all games against Stockfish. This outcome was expected, as Stockfish has an estimated Elo rating of around 3644~\cite{StockfishElo}, making it orders of magnitude stronger than the best human players. In contrast, as we will show in the next section, AlphaDeepChess plays at a level comparable to a strong human player.
+\noindent \textit{AlphaDeepChess} lost all games against \textit{Stockfish}. This outcome was expected, as \textit{Stockfish} has an estimated Elo rating of around 3644~\cite{StockfishElo}, making it orders of magnitude stronger than the best human players. In contrast, as we will show in the next section, \textit{AlphaDeepChess} plays at a level comparable to a strong human player.
 
 \section{Engine final evaluation}
 
@@ -292,7 +292,7 @@ To evaluate the improvement in the new evaluation, we conducted the same 100 gam
 
 \vspace{1em}
 
-\noindent AlphaDeepChess has achieved a rating of 1900 on Lichess~\cite{AlphaDeepChessElo}, placing it well above the median and within the top percentiles of the player base. For comparison, the highest-rated human player on the platform has reached 3000 Elo in 2025~\cite{LichessBestPlayer}.
+\noindent \textit{AlphaDeepChess} has achieved a rating of 1900 on Lichess~\cite{AlphaDeepChessElo}, placing it well above the median and within the top percentiles of the player base. For comparison, the highest-rated human player on the platform has reached 3000 Elo in 2025~\cite{LichessBestPlayer}.
 
 \begin{figure}
     \centering

@@ -67,9 +67,11 @@ Zobrist Hashing is a technique to transform a board position of arbitrary size i
 \vspace{1em}
 
 \noindent The position shown in~\cref{fig:zobristExamplePosition} illustrates an example of how the Zobrist hash is computed.  
-The hash value is calculated by XORing the random values associated with each element of the position.  
-Since the side to move is White, we do not XOR the value associated with Black to move.  
-The resulting hash is computed as follows:
+The hash value is calculated by XORing the random values associated with each element of the position.
+
+\vspace{1em}
+
+\noindent Since the side to move is white, we do not XOR the value associated with black to move. The resulting hash is computed as follows:
 
 \[
 111 \oplus 69 \oplus 909 \oplus 10 \oplus 67 \oplus 12 \oplus 555 \oplus 3 = 458
@@ -111,7 +113,7 @@ The resulting hash is computed as follows:
             \draw[thick] (0,0) grid (8,8);
         \end{tikzpicture}
         \vspace{1.5em}
-        \caption*{Random values corresponding to each piece and the en passant square. The value for Black to move is 62319.}
+        \caption*{Random values corresponding to each piece and the \textit{en passant} square. The value for black to move is 62319.}
     \end{minipage}
     \caption{Zobrist hash calculation example.}\label{fig:zobristExamplePosition}
 \end{figure}

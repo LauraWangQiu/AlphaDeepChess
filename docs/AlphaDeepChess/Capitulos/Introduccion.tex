@@ -9,7 +9,7 @@ Chess, one of the oldest strategy games in human history, has long been a domain
 
 \vspace{1em}
 
-\noindent In recent years, \textit{Stockfish}, one of the strongest and most widely used open-source chess engines in the world, has incorporated neural network evaluation (NNUE), combining classical search with deep learning techniques. Inspired by \textit{Stockfish}, we started this project: AlphaDeepChess, a chess engine based on minimax with alpha-beta pruning that relies solely on classical techniques and human-designed heuristics.
+\noindent In recent years, \textit{Stockfish}, one of the strongest and most widely used open-source chess engines in the world, has incorporated neural network evaluation (NNUE), combining classical search with deep learning techniques. Inspired by \textit{Stockfish}, we started this project: \textit{AlphaDeepChess}, a chess engine based on minimax with alpha-beta pruning that relies solely on classical techniques and human-designed heuristics.
 
 \vspace{1em}
 
@@ -328,7 +328,7 @@ The king can move one square in any direction: horizontally, vertically, or diag
 
 \begin{itemize}[itemsep=1pt]
     \item $c3$ is attacked by the black bishop on $b2$.
-    \item $d4$ is attacked by the black pawn on $c5$ and black king on $e5$.
+    \item $d4$ is attacked by the black bishop on $b2$, pawn on $c5$ and black king on $e5$.
     \item $e3$ is attacked by the black pawn on $f4$.
     \item $e4$ is attacked by the black king on $e5$.
 \end{itemize}
@@ -410,7 +410,7 @@ The rules of chess follow the official regulations established by FIDE~\cite{Law
     \item Insufficient material: neither player has enough pieces to checkmate. Those cases are king vs king, king and bishop vs king, king and knight vs king, and king and bishop vs king and bishop with the bishops on the same color.
     \item \textit{Threefold repetition}: it occurs when same position happens three times during the game, with the same player to move and the same possible moves (including castling and \textit{en passant}).
     \item \textit{Fifty-move rule}: if 50 consecutive moves are made by both players without a pawn move or a capture, the game can be declared a draw.
-    \item Mutual agreement: both players can agree to a draw at any point during the game.
+    \item \textit{Mutual agreement}: both players can agree to a draw at any point during the game.
     \item \textit{Dead position}: a position in which neither player can achieve checkmate by any series of legal moves, making further progress impossible. This includes the case of insufficient material, where it is not possible to checkmate the opponent regardless of the moves played. In these situations, the game is immediately declared a draw because the main objective to checkmate cannot be accomplished.
 \end{enumerate}
 
@@ -457,7 +457,7 @@ Notation is important in chess to record moves and analyze games.
 
 \subsubsection*{Algebraic notation}
 
-In addition to the algebraic notation of the squares in~\cref{sec:chessboard}, each piece is identified by an uppercase letter, which may vary across different languages, as shown in~\cref{tab:chess-notation}.
+In addition to the algebraic notation of the squares mentioned in the chessboard definition, each piece is identified by an uppercase letter, which may vary across different languages, as shown in~\cref{tab:chess-notation}.
 
 \begin{table}
     \centering
@@ -475,7 +475,7 @@ In addition to the algebraic notation of the squares in~\cref{sec:chessboard}, e
 \end{table}
 
 \paragraph{Normal moves (not captures nor promoting)}
-are written using the piece uppercase letter plus the coordinate of destination. In the case of pawns, it can be written only with the coordinate of destination, as shown in~\cref{fig:pawn-a6}.
+are written using the piece uppercase letter plus the coordinate of destination. In the case of pawns, it can be written only with the coordinate of destination. In~\cref{fig:pawn-a6}, the pawn's movement is written as $Pa6$ or directly as $a6$.
 
 \vspace{1em}
 
@@ -490,8 +490,6 @@ are written using the piece uppercase letter plus the coordinate of destination.
     ]
     \caption{Pawn goes to a6.}\label{fig:pawn-a6}
 \end{figure}
-
-\noindent In~\cref{fig:pawn-a6}, the pawn's movement is written as $Pa6$ or directly as $a6$.
 
 \paragraph{Captures}
 are written with an \texttt{x} between the piece uppercase letter and coordinate of destination or the captured piece coordinate. In the case of pawns, it can be written with the column letter of the pawn that captures the piece. Also, if two pieces of the same type can capture the same piece, the piece's column or row letter is added to indicate which piece is moving.
@@ -516,14 +514,24 @@ are written with an \texttt{x} between the piece uppercase letter and coordinate
 is written as the pawn's movement to the last row, followed by the piece to which it is promoted. In~\cref{fig:pawn-captures-rook}, white pawn capturing and promoting in $a8$ to a queen is written as $bxa8Q$ or $bxa8=Q$.
 
 \begin{figure}
-    \centering
-    \newchessgame
-    \chessboard[
-        setfen={r7/1Pp5/2P3p1/8/6pb/4p1kB/4P1p1/6K1 w - - 0 1},
-        pgfstyle=straightmove, color=blue,
-        markmoves={b7-a8},
-        arrow=to
-    ]
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            setfen={r7/1Pp5/2P3p1/8/6pb/4p1kB/4P1p1/6K1 w - - 0 1},
+            pgfstyle=straightmove, color=blue,
+            markmoves={b7-a8},
+            arrow=to
+        ]
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \newchessgame
+        \chessboard[
+            setfen={Q7/2p5/2P3p1/8/6pb/4p1kB/4P1p1/6K1 b - - 0 1}
+        ]
+    \end{minipage}
     \caption{Pawn captures rook.}\label{fig:pawn-captures-rook}
 \end{figure}
 
@@ -564,15 +572,15 @@ rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 \noindent The fields of the FEN for the starting position are:
 
 \begin{itemize}[itemsep=1pt]
-    \item \texttt{rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR}: Piece placement on the board, from rank 8 to rank 1. Uppercase letters represent White pieces, lowercase letters represent Black pieces. Numbers indicate consecutive empty squares.
-    \item \texttt{w}: Indicates which side is to move (\texttt{w} for White, \texttt{b} for Black).
+    \item \texttt{rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR}: Piece placement on the board, from rank 8 to rank 1. Uppercase letters represent white pieces, lowercase letters represent black pieces. Numbers indicate consecutive empty squares.
+    \item \texttt{w}: Indicates which side is to move (\texttt{w} for white, \texttt{b} for black).
     \item \texttt{KQkq}: Castling availability. \texttt{K} (White kingside), \texttt{Q} (White queenside), \texttt{k} (Black kingside), \texttt{q} (Black queenside). If no castling is available, a hyphen (\texttt{-}) is used.
-    \item \texttt{-}: En passant target square. If there is no en passant possibility, a hyphen is used.
+    \item \texttt{-}: \textit{En passant} target square. If there is no \textit{en passant} possibility, a hyphen is used.
     \item \texttt{0}: Halfmove clock, counting the number of halfmoves since the last pawn move or capture (for the fifty-move rule).
-    \item \texttt{1}: Fullmove number, incremented after each Black move.
+    \item \texttt{1}: Fullmove number, incremented after each black move.
 \end{itemize}
 
-\noindent Keep in mind this notation is very important for chess engines, including AlphaDeepChess, because it provides all the necessary information to reconstruct any chess position, including all the mentioned variables above on the current board without needing to replay all the moves from the beginning of the game. This makes it highly efficient for testing, analysis, and interoperability with other chess software.
+\noindent Keep in mind this notation is very important for chess engines, including \textit{AlphaDeepChess}, because it provides all the necessary information to reconstruct any chess position, including all the mentioned variables above on the current board without needing to replay all the moves from the beginning of the game. This makes it highly efficient for testing, analysis, and interoperability with other chess software.
 
 \subsubsection*{Portable game notation (PGN)}
 
