@@ -469,3 +469,21 @@ This system ensures that a player gains more rating points for defeating a highe
 
 \par The key component of \textit{Stockfish}'s strength is its use of machine learning algorithms to evaluate chess positions more accurately, in particular, \textit{Stockfish} uses NNUE (Efficiently Updatable Neural Network), a neural network architecture originally developed for shogi engines and later adapted for chess ~\cite{NNUE}. NNUE efficiently evaluates positions by finding and learning complex piece patterns. It is optimized to run quickly even on CPUs and significantly improves move ordering (see Chapter~\ref{cap:moveOrdering}), allowing the engine to explore the most promising lines first and prune large parts of the search tree.
 
+\vspace{1em}
+
+\section{\textit{Lichess}}
+\label{sec:lichess}
+
+\textit{Lichess} is a free and open-source online chess platform that offers a wide range of features for both casual and competitive players. It was created by Thibault Duplessis in 2010 and has since grown into one of the most popular chess websites in the world, hosting millions of games each day ~\cite{Lichess}.
+
+\vspace{1em}
+
+\noindent Lichess provides a clean, ad-free user interface. It also features training tools such as puzzles, opening trainers, endgame practice, and access to a large game database.
+
+\vspace{1em}
+
+\noindent One of Lichess's notable features is its use of an Elo based rating system to measure player strength in different game modes. Each player has a separate rating for different time controls and variants.
+
+\vspace{1em}
+
+\noindent Lichess also supports chess engines and bots through the Lichess Bot API, enabling integration with engines like \textit{Stockfish}. It is often used for engine testing, AI competitions, and research purposes. Many developers and researchers use the Lichess platform as a benchmark or interface for evaluating engine performance.
