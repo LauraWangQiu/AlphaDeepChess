@@ -1,35 +1,15 @@
 \chapter{Analysis and evaluation}\label{cap:analysis}
 
-This chapter documents the implementation of the following techniques used to improve the chess engine:
-
-\begin{itemize}[itemsep=1pt]
-    \item Transposition tables with zobrist hashing.
-    \item Move generator with magic bitboards and PEXT instructions.
-    \item Evaluation with king safety and piece mobility parameters.
-    \item Multithread search.
-    \item Search with Late move Reductions.
-\end{itemize}
-
+This chapter presents an analysis of the performance of the chess engine through profiling, identifying its most computationally intensive components. We then evaluate the effectiveness of the improvement techniques described in ~\cref{cap:ImprovementTechniques}. Finally, we compare the performance of \textit{AlphaDeepChess} against \textit{Stockfish}, and examine its position within the Elo rating distribution on \textit{Lichess.org}.
 
 \newpage
 
-\noindent Achieving this level of efficiency and quality requires a well-structured development process. For this reason, we adopted a systematic methodology to guide the implementation and continuous improvement of our engine.
-
-\section{Methodology}
-
-Once the basic foundations are established with an initial version of the essential components or modules (which will be described later), our workflow follows an iterative process: first, we search for existing information on each topic, analyze it, implement a solution, and then profile the implementation to identify bottlenecks. After locating performance issues, we optimize the relevant parts, and finally, compare the new version with the previous one to assess improvements.
+\section{Profiling}
+In order to analyze the performance of our chess engine and identify potential bottlenecks where the code consume the most execution time, we used the \texttt{perf} tool available on Linux systems. \texttt{perf} provides robust profiling capabilities by recording CPU events, sampling function execution, and collecting stack traces ~\cite{PerfLinux}. 
 
 \vspace{1em}
 
-\noindent Then, at a given moment, we can decide to take action and try to determine the strength of the engine with the last functional version.
-
-\subsection*{Profiler}
-
-First, in order to analyze the performance of our chess engine and identify potential bottlenecks, we used the \texttt{perf} tool available on Linux systems. \texttt{perf} provides robust profiling capabilities by recording CPU events, sampling function execution, and collecting stack traces.
-
-\vspace{1em}
-
-\noindent Our profiling goal is to identify which parts of the code consume the most execution time. We run the engine under \texttt{perf} using the following commands:
+\noindent We run the engine under \texttt{perf} using the following commands:
 
 \begin{lstlisting}[language=bash, caption={Profiling \textit{AlphaDeepChess} with perf}, frame=single, breaklines=true]
 # Record performance data with function stack traces
@@ -39,7 +19,63 @@ sudo perf record -g ./build/release/AlphaDeepChess
 sudo perf report -g --no-children
 \end{lstlisting}
 
-\noindent After recording, \texttt{perf report} opens an interactive terminal interface where functions are sorted by CPU overhead. This allows us to prioritize which functions to optimize.
+\noindent After recording, \texttt{perf report} opens an interactive terminal interface where functions are sorted by CPU overhead, allowing us to easily identify performance-critical regions.
+
+\vspace{2em}
+
+\noindent First, we profile the basic architecture of the engine implemented in~\cref{cap:descripcionTrabajo}, and then evaluate it again after applying the optimizations described in~\cref{cap:ImprovementTechniques}.
+
+\subsection*{Profiling of basic engine architecture}
+
+\noindent As shown in~\cref{tab:profilingBasic}, the profiling results indicate that the majority of the total execution time is spent in the legal move generation function. Specifically, the functions \texttt{generate\_legal\_moves}, \texttt{calculate\_moves\_in\_dir}, and \texttt{update\_danger\_in\_dir} together account for over 72\% of the total overhead. Therefore, the optimizations on this component are expected to yield significant performance improvements.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|r|}
+    \hline
+    \textit{Symbol} & \textit{Overhead} \\
+    \hline
+    \texttt{generate\_legal\_moves}       &  36.07\% \\
+    \texttt{calculate\_moves\_in\_dir}    &  19.30\% \\
+    \texttt{evaluate\_position}          &  16.63\% \\
+    \texttt{update\_danger\_in\_dir}      &   16.23\% \\
+    \texttt{calculate\_king\_moves}       &   1.24\% \\
+    \texttt{quiescence\_search}          &   0.96\% \\
+    \texttt{...}                          &   ...     \\
+    \hline
+    \end{tabular}
+    \caption{Profiling results of the basic engine implementation.}
+    \label{tab:profilingBasic}
+\end{table}
+
+\vspace{1em}
+
+\subsection*{Profiling with improvement techniques}
+
+\noindent As shown in~\cref{tab:profilingImprovements}, the updated profiling results demonstrate a successful reduction in the computational cost of move generation. The execution time is now more evenly distributed across various modules, with position evaluation emerging as the new primary performance bottleneck. This shift confirms the effectiveness of the implemented optimization techniques.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|r|}
+    \hline
+    \textit{Symbol} & \textit{Overhead} \\
+    \hline
+    \texttt{evaluate\_position}       &  31.90\% \\
+    \texttt{update\_attacks\_bb}    &  22.62\% \\
+    \texttt{generate\_legal\_moves}          &  22.71\% \\
+    \texttt{order\_moves}      &   3.95\% \\
+    \texttt{make\_move}       &   3.83\% \\
+    \texttt{alpha\_beta\_search}          &   1.66\% \\
+    \texttt{...}                          &   ...     \\
+    \hline
+    \end{tabular}
+    \caption{Profiling results after applying optimization techniques.}
+    \label{tab:profilingImprovements}
+\end{table}
+
+\newpage
+
+\section{cutechess}
 
 \noindent The most common way to measure the strength of a chess engine is by playing games against other engines and analyzing the results. To quantify this strength, the Elo rating system is used. Elo is a statistical rating system originally developed for chess, which assigns a numerical value to each player (or engine) based on their game results against opponents of known strength. When an engine wins games against higher-rated opponents, its Elo increases; if it loses, its Elo decreases. This allows for an objective comparison of playing strength between different engines.
 

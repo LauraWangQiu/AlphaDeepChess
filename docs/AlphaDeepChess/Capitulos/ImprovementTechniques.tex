@@ -145,17 +145,7 @@ As discussed earlier, index collisions in the transposition table are handled by
 
 \section{Move generator with magic bitboards and pext instructions}
 
-To identify potential performance bottlenecks, we performed profiling on the engine, as shown in~\cref{fig:profiling}.
-
-\vspace{1em}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=1.0\textwidth]{Imagenes/basic_move_generator_profiling.png}
-    \caption{Profiling results.}\label{fig:profiling}
-\end{figure}
-
-\noindent The profiling results indicate that the majority of the total execution time is spent in the legal move generation function. Therefore, optimizing this component is expected to yield significant performance improvements.
+As previously discussed (see ~\cref{sec:moveGenerator}), computing the legal moves for sliding pieces is computationally expensive, as it requires identifying which pieces block their paths within their attack patterns. In this section, we present a technique that enables the precomputation of all possible moves for rooks and bishops, while queen moves can be derived as the union of rook and bishop moves, allowing constant-time O(1) access.
 
 \subsection*{Magic bitboards}
 
@@ -171,12 +161,8 @@ We can create a look up table of all the rook and bishop moves for each square o
 
 \begin{itemize}[itemsep=1pt]
   \item Preserves relevant blocker information: 
-  The nearest blockers along a piece's movement direction are preserved. 
-  \textit{Example:} Consider a rook with two pawns in its path:
-  \begin{center}
-    Rook $\rightarrow \rightarrow \rightarrow$ [Pawn1][Pawn2]
-  \end{center}
-  In this case, only `Pawn1` blocks the rook's movement, while `Pawn2` is irrelevant.
+    Only the nearest blockers along a sliding piece's movement direction are important. For example, in ~\cref{fig:magics_position}, the pawn on d6 is a relevant blocker because it directly restricts the rook's movement. In contrast, the pawn on d7 is irrelevant, as it lies beyond the first blocker and does not influence the final set of legal moves.
+
   \item Compresses the blocker bitboard, pushing the important bits near the most significant bit.
   \item The final multiplication must produce a unique index for each possible blocker configuration. The way to ensure the uniqueness is by brute force testing.
 \end{itemize}
@@ -193,12 +179,12 @@ We can create a look up table of all the rook and bishop moves for each square o
         \chessboard[
             showmover=false,
             setfen=n1bk3r/3p4/1p1p2p1/8/3R1p2/8/3p4/7n w - - 0 1,
-            markstyle=circle,
+            markstyle=border,
             color=red, markfields={d6,f4,d2},
             color=green, markfields={c4,b4,a4,e4,d5,d3}
         ]
     \end{minipage}
-    \caption{Initial chess position with white rook and blockers}\label{fig:magics_position}
+    \caption{Chess position with white rook legal moves in green and blockers in red.}\label{fig:magics_position}
 \end{figure}
 
 \subsection*{Magic number generation}

@@ -1,6 +1,6 @@
 \chapter{Basic engine architecture}\label{cap:descripcionTrabajo}
 
-This chapter documents the development process of the chess engine. The project is organized into the following modules:
+This chapter documents the basic architecture of the chess engine.  The project is organized into the following modules:
 
 \begin{itemize}[itemsep=1pt]
     \item \textit{Board}: Data structures to represent the chess board.
@@ -11,11 +11,13 @@ This chapter documents the development process of the chess engine. The project 
     \item \textit{UCI}: Universal Chess Interface implementation.
 \end{itemize}
 
-\noindent First, we describe the implementation of the basic parts of the chess engine, then we introduce and explain in detail the algorithmic techniques developed to improve the engine's performance.
+\noindent First, we describe the implementation of the basic parts of the chess engine, then in the following~\cref{cap:ImprovementTechniques} we introduce and explain in detail the algorithmic techniques developed to improve the engine's performance.
 
 \vspace{1em}
 
 \noindent We begin by examining the fundamental data structure used for chess position representation.
+
+\newpage
 
 \section{Chessboard representation: bitboards}
 
@@ -31,36 +33,39 @@ This chapter documents the development process of the chess engine. The project 
 
 \vspace{1em}
 
-\begin{figure}
-    \centering
-    \newchessgame
-    \chessboard[
-        showmover=false,
-        setfen=7k/8/5p2/2p1p1p1/P2p3p/1P1P1P1P/2P1P1P1/R2K3R w KQ - 0 1
-    ]
+\begin{figure}[H]
 
-    \vspace{1.0em}
+    \begin{minipage}[c]{0.35\textwidth}
+        \newchessgame
+        \chessboard[
+            showmover=false,
+            setfen=7k/8/5p2/2p1p1p1/P2p3p/1P1P1P1P/2P1P1P1/R2K3R w KQ - 0 1
+        ]
+    \end{minipage}
+    \hfill
+    \begin{minipage}[c]{0.36\textwidth}
+        \includegraphics[width=\textwidth]{Imagenes/bitboard_black_pawns.png}
+        \caption*{Bitboard of black pawns.}
+    \end{minipage}
 
-    \begin{minipage}[c]{0.30\textwidth}
+    \vspace{1.1em}
+    \hspace*{0.03\textwidth}
+    \begin{minipage}[c]{0.36\textwidth}
         \includegraphics[width=\textwidth]{Imagenes/bitboard_white_pawns.png}
         \caption*{Bitboard of white pawns.}
     \end{minipage}
     \hfill
-    \begin{minipage}[c]{0.30\textwidth}
-        \includegraphics[width=\textwidth]{Imagenes/bitboard_black_pawns.png}
-        \caption*{Bitboard of black pawns.}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[c]{0.30\textwidth}
+    \begin{minipage}[c]{0.36\textwidth}
         \includegraphics[width=\textwidth]{Imagenes/bitboard_white_rooks.png}
         \caption*{Bitboard of white rooks.}
     \end{minipage}
+
     \caption{List of bitboards data structure example.}\label{fig:bitboardPositionExample}
 \end{figure}
 
 \noindent The main advantages of bitboards is that we can operate on multiple squares simultaneously using bitwise operations. For example, we can determine if there are any black pawns on the fifth rank by performing a bitwise AND operation with the corresponding mask.~\cref{fig:bitboardMaskOperation} illustrates this concept.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{minipage}[c]{0.30\textwidth}
         \centering
@@ -170,14 +175,11 @@ What happens if, upon reaching maximum depth, we evaluate the position in the mi
 
 \vspace{1em}
 
-% TODO: MEJOR EXPLICAD LAS DIFERENCIAS QUE REPETIR EL TEXTO
-\noindent The following events occur in a quiescence node:
+\noindent The same events occur in a quiescence node as in a regular search node, with the following key differences in execution steps:
 
 \begin{enumerate}
-    \item \textit{Terminal node verification}: Check for game termination conditions due to checkmate, threefold repetition, the fifty-move rule or reaching a maximum ply.
     \item \textit{Standing pat evaluation}: Also known as static evaluation, this step assigns a preliminary score to the position. This score can serve as a lower bound and is immediately used to determine whether alpha-beta pruning can be applied.
     \item \textit{Selective legal move generation}: Create a list of every possible legal move excluding moves that are not captures.
-    \item \textit{Move ordering}: Sort capture moves by estimated quality (best to worst).
     \item \textit{Move exploration}: Iterate through each of the capture legal moves from the position in order, update the position evaluation, the value of alpha and beta, and check if we can perform pruning.
 \end{enumerate}
 
@@ -404,6 +406,7 @@ A chess game typically consists of three phases: the opening, where pieces are d
 \end{figure}
 
 \section{Move generator}
+\label{sec:moveGenerator}
 
 Calculating the legal moves in a chess position is a more difficult and tedious task
 than it might seem, mainly due to the unintuitive rules of \textit{en passant} and castling,
