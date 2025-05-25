@@ -1,4 +1,4 @@
-\chapter{Evaluation of playing strenght}\label{cap:analysis}
+\chapter{Analysis and evaluation}\label{cap:analysis}
 
 This chapter documents the implementation of the following techniques used to improve the chess engine:
 
@@ -11,12 +11,134 @@ This chapter documents the implementation of the following techniques used to im
 \end{itemize}
 
 
+\newpage
+
+\noindent Achieving this level of efficiency and quality requires a well-structured development process. For this reason, we adopted a systematic methodology to guide the implementation and continuous improvement of our engine.
+
+\section{Methodology}
+
+Once the basic foundations are established with an initial version of the essential components or modules (which will be described later), our workflow follows an iterative process: first, we search for existing information on each topic, analyze it, implement a solution, and then profile the implementation to identify bottlenecks. After locating performance issues, we optimize the relevant parts, and finally, compare the new version with the previous one to assess improvements.
+
+\vspace{1em}
+
+\noindent Then, at a given moment, we can decide to take action and try to determine the strength of the engine with the last functional version.
+
+\subsection*{Profiler}
+
+First, in order to analyze the performance of our chess engine and identify potential bottlenecks, we used the \texttt{perf} tool available on Linux systems. \texttt{perf} provides robust profiling capabilities by recording CPU events, sampling function execution, and collecting stack traces.
+
+\vspace{1em}
+
+\noindent Our profiling goal is to identify which parts of the code consume the most execution time. We run the engine under \texttt{perf} using the following commands:
+
+\begin{lstlisting}[language=bash, caption={Profiling AlphaDeepChess with perf}, frame=single, breaklines=true]
+# Record performance data with function stack traces
+sudo perf record -g ./build/release/AlphaDeepChess
+
+# Display interactive report
+sudo perf report -g --no-children
+\end{lstlisting}
+
+\noindent After recording, \texttt{perf report} opens an interactive terminal interface where functions are sorted by CPU overhead. This allows us to prioritize which functions to optimize.
+
+\noindent The most common way to measure the strength of a chess engine is by playing games against other engines and analyzing the results. To quantify this strength, the Elo rating system is used. Elo is a statistical rating system originally developed for chess, which assigns a numerical value to each player (or engine) based on their game results against opponents of known strength. When an engine wins games against higher-rated opponents, its Elo increases; if it loses, its Elo decreases. This allows for an objective comparison of playing strength between different engines.
+
+\vspace{1em}
+
+\noindent But which engine should we use as a reference for comparison? One approach is to consult the Computer Chess Rating Lists, which rank chess engines based on their performance in various tournaments and matches. We have chosen to compare different versions of our engine with \textit{Stockfish}, currently ranked as the number one engine on the list. In addition, we have also competed against other engines online to further evaluate our engine's performance in diverse environments.
+
 \vspace{1em}
 
 \noindent We created a benchmark to measure the effectiveness of each technique by playing matches with 100 games versus a baseline engine implementation, and we analyze the results of these games at the end of the process to assess the impact of each improvement.
 
 
 All of these improvements have been compared with each other using \textit{CuteChess}, and the best version was also evaluated against \textit{Stockfish}. These comparisons were conducted on machines provided by GitHub Actions.
+
+\subsection*{Cutechess}
+
+\noindent After considering different options, \textit{Cutechess} proved to be the best fit for our needs.
+
+\vspace{1em}
+
+\noindent \textit{Cutechess}~\cite{CuteChess} is an open-source tool designed to perform automated games between chess engines. It is widely used in the chess programming community to test and compare engines, evaluate their performance, and analyze games.
+
+\vspace{1em}
+
+\noindent It provides both command-line interface (CLI) and a graphic user interface (GUI), with cross-platform compatibility for Windows, macOS, and Linux. For our purposes, we utilized the CLI version to automate the tests with Python scripts and commands, integrating it into a CI/CD workflow.
+
+\vspace{1em}
+
+\noindent Mainly, this tool is responsible for sending commands to both selected engines. For example, when both Stockfish and our engine implement UCI, \textit{Cutechess} knows in advance the commands to send, as well as parameters such as the search time and depth for each engine, the number of games to play, the time control, or even specific openings to use. Providing specific openings introduces randomization between games, which is beneficial for later evaluation.
+
+\vspace{1em}
+
+\noindent Then, it checks the active status of each engine and manages the start of the games by setting up the board on both engines with the \texttt{position} command. Afterwards, it sends the \texttt{go} command and stops the search with \texttt{stop} when the search time or depth is reached, extracting the best move provided by the engine whose turn it is. This move is then passed to the other engine, alternating turns so that both engines play against each other automatically.~\cref{lst:cutechess-example} we show a \textit{Cutechess} log file, we directly configured the starting positions from a list of FENs in the \texttt{positions.fen} file:
+
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize, breaklines=true, frame=single, caption={Example of \textit{Cutechess}}, label={lst:cutechess-example}]
+Running test (8) with the following configuration:
+Games: 1, Search Time: 5, Depth: 5
+PGN File: results.pgn, EPD File: results.epd, Log File: results.log
+Engines: ['AlphaDeepChess', 'Stockfish']
+Options: {'Stockfish': {'UCI_LimitStrength': 'true', 'UCI_Elo': '2000'}}
+Book: 
+Positions: positions.fen
+...
+ <Stockfish(1): uciok
+ >Stockfish(1): setoption name UCI_Elo value 2000
+ >Stockfish(1): setoption name UCI_LimitStrength value true
+ >Stockfish(1): isready
+ <Stockfish(1): readyok
+Started game 1 of 1 (AlphaDeepChess vs Stockfish)
+ >AlphaDeepChess(0): ucinewgame
+ >AlphaDeepChess(0): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6
+ >Stockfish(1): ucinewgame
+ >Stockfish(1): setoption name Ponder value false
+ >Stockfish(1): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6
+ >AlphaDeepChess(0): isready
+ <AlphaDeepChess(0): readyok
+ >AlphaDeepChess(0): go movetime 5000 depth 5
+ <AlphaDeepChess(0): info depth 1 score cp 130 bestMove c1e3
+ <AlphaDeepChess(0): info depth 2 score cp 85 bestMove c1e3
+ <AlphaDeepChess(0): info depth 3 score cp 80 bestMove c1e3
+ <AlphaDeepChess(0): info depth 4 score cp 62 bestMove c1g5
+ <AlphaDeepChess(0): info depth 5 score cp 79 bestMove c1g5
+ <AlphaDeepChess(0): bestmove c1g5
+ >Stockfish(1): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6 moves c1g5
+ >Stockfish(1): isready
+ <Stockfish(1): readyok
+ >Stockfish(1): go movetime 5000 depth 5
+ <Stockfish(1): info depth 1 seldepth 6 multipv 1 score cp -52 ...
+ <Stockfish(1): info depth 2 seldepth 3 multipv 1 score cp -45 ...
+ <Stockfish(1): info depth 3 seldepth 3 multipv 1 score cp -39 ...
+ <Stockfish(1): info depth 4 seldepth 3 multipv 1 score cp -39 ...
+ <Stockfish(1): info depth 5 seldepth 3 multipv 1 score cp -27 ...
+ <Stockfish(1): bestmove e7e6
+ >AlphaDeepChess(0): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6 moves c1g5 e7e6
+\end{lstlisting}
+
+\noindent In~\cref{lst:cutechess-example}, in addition to setting the number of games to $1$, the search time to $5$ seconds, and the search depth to $5$, we provided a list of starting positions, from which one is chosen at random. Each line starting with \texttt{position fen \ldots} establishes the FEN position and continues by adding the moves played.
+
+\vspace{1em}
+
+\noindent Note that both engines stop searching when depth of $5$ is reached and are verified to be ready after \texttt{isready} command.
+
+\vspace{1em}
+
+\noindent Depending on the number of games, search time, and time control, these tournaments between engines can take a long time to process. For this reason, we decided to use GitHub Actions and workflows to separate our development environment from the execution of performance and strength tests. This is explained later in~\cref{cap:analysisOfImprovements}.
+
+\vspace{1em}
+
+\noindent Although UCI implements the \texttt{diagram} command that draws the current position through standard output, making moves and showing the evaluation is somewhat a time-consuming task when debugging and testing while programming. We resorted to using an interface to help us do this job and a really fast solution was to use Python to make a GUI. In this case, one of the most used UI libraries was \textit{CustomTkinter} and it was used to build a friendly interface from scratch for bridging between executable and command sending. This tool can be used after compiling the engine and executing \texttt{AlphaDeepChessGUI.py} with Python.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1.0\textwidth]{Imagenes/gui.png}
+    \caption{AlphaDeepChess GUI}\label{fig:gui}
+\end{figure}
+
+\noindent In~\cref{fig:gui}, the engine evaluation is enabled and displays the current evaluation value, the best move found, and the calculated search depth. In this way, we also ensure a more user-friendly experience.
+
+\vspace{1em}
 
 \section{Github actions and workflows}
 

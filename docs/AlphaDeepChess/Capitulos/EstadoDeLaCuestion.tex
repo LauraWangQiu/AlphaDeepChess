@@ -1,22 +1,27 @@
 \chapter{State of the Art}\label{cap:estadoDeLaCuestion}
 
-In this chapter, we will explore the fundamental concepts and classical techniques on which our chess engine is based. This includes game trees and search algorithms. Each section will provide an overview of the concepts and tools used by our engine, and additionally we will explain the workflow we followed to get better versions of our engine.
+In this chapter, we present the fundamental concepts on which our chess engine is based, including the minimax search algorithm and alpha-beta pruning. We then explain how chess engines communicate using the Universal Chess Interface (UCI) protocol and discuss how the Elo rating system is used to evaluate the skill of chess players. Finally we provide an overview of the Stockfish engine, highlighting its design and the integration of machine learning techniques into its search algorithm.
 
+\newpage
 \section{Game trees}
 
-Sequential games, such as chess or tic-tac-toe, where players take turns alternately, unlike simultaneous games, can be represented in a game tree or graph. In this representation, the root node corresponds to the initial position from which we search for the best move, and each subsequent node represents a possible option or game state, forming a tree-like structure. The tree has a height or depth, which refers to the number of turns alternating between black and white from the root node to the leaf nodes.
+\par Two-player turn-based games, such as chess or tic-tac-toe, where players take alternating turns, can be represented using a game tree or graph. In this representation, the root node corresponds to the initial position from which we begin searching for the best move. Each subsequent node represents a possible game state resulting from a legal move, forming a branching, tree-like structure.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.35\textwidth]{Imagenes/chess-game-tree.jpg}
-    \caption{Illustration of a game tree for a chess position~\cite{BotvinnikLongRangePlanning}.}\label{fig:game-tree}
-\end{figure}
+\vspace{1em}
 
-\noindent The depth of a chess game tree is important because it determines the extent to which it will be analysed and evaluated. A depth of 1 represents all possible moves for the current player or side to move, while a depth of 2 includes the opponent's responses to those moves. As the depth increases, the tree grows exponentially, making it computationally expensive to explore all possible states.
+\par The depth of the tree refers to the number of turns (or plies) from the root node to a leaf node, alternating between White and Black. Deeper nodes represent positions further into the future of the game. A depth of 1 includes all possible moves for the current player (the side to move), while a depth of 2 includes the opponent's responses to those moves. As the depth increases, the number of nodes grows exponentially, making it computationally expensive to explore every possible state.
 
 \vspace{1em}
 
 \noindent In~\cref{fig:game-tree}, the shaded cluster of lines on the left represents the part of the game tree corresponding to previous moves leading up to the current position. From there, only a subset of possible continuations is drawn, illustrating the immense complexity of chess. Claude Shannon estimated that the number of possible chess games is around $10^{120}$, a value known as the \textit{Shannon number}~\cite{Shannon1950}. This astronomical figure makes it computationally infeasible to represent or analyze the entire game tree, motivating the use of search algorithms and pruning techniques to explore only the most relevant branches, which are explained in the following section.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Imagenes/chess-game-tree.jpg}
+    \caption{Illustration of a game tree for a chess position~\cite{BotvinnikLongRangePlanning}.}\label{fig:game-tree}
+\end{figure}
+
+\newpage
 
 \section{Search algorithms}
 
@@ -138,37 +143,238 @@ Procedure Minimax(Node position, Integer depth, Boolean maximizingPlayer):
 
 \vspace{1em}
 
-\noindent The effectiveness of search algorithms such as minimax, and their optimizations (which are carefully explained in~\cref{cap:descripcionTrabajo}), is crucial for the playing strength of a chess engine. The deeper and more efficiently the engine can search the game tree, the better its move selection and overall performance.
+\subsection*{Alpha-beta pruning}\label{sec:alphaBeta}
+
+Minimax has the problem that a lot of the node evaluation is redundant, because we can know beforehand that some branches will not affect the final decision. For that purpose, we can enhance the search with the \textit{alpha-beta pruning} technique. 
+
+Alpha-beta pruning is an optimization of the minimax algorithm that eliminates the need to explore parts of the tree that cannot influence the final decision. It maintains two parameters, \(\alpha\) and \(\beta\), which represent the best already explored option along the path to the root for the maximizer and minimizer, respectively.
+
+\begin{itemize}
+    \item \(\alpha\): the best value that the maximizer currently can guarantee.
+    \item \(\beta\): the best value that the minimizer currently can guarantee.
+\end{itemize}
+
+During the recursive search:
+\begin{itemize}
+    \item At a \textbf{maximizing} node, we update \(\alpha = \max(\alpha, \text{value})\).
+    \item At a \textbf{minimizing} node, we update \(\beta = \min(\beta, \text{value})\).
+\end{itemize}
+
+If at any point \(\alpha \geq \beta\), we can prune the remaining children of that node, as they will not affect the final decision.
 
 \vspace{1em}
 
-\noindent Achieving this level of efficiency and quality requires a well-structured development process. For this reason, we adopted a systematic methodology to guide the implementation and continuous improvement of our engine.
-
-\section{Methodology}
-
-Once the basic foundations are established with an initial version of the essential components or modules (which will be described later), our workflow follows an iterative process: first, we search for existing information on each topic, analyze it, implement a solution, and then profile the implementation to identify bottlenecks. After locating performance issues, we optimize the relevant parts, and finally, compare the new version with the previous one to assess improvements.
+This technique can drastically reduce the number of nodes evaluated, especially if the best moves are searched first. In the best case, alpha-beta pruning reduces the time complexity from \(O(b^d)\) to \(O(b^{d/2})\), where \(b\) is the branching factor and \(d\) the depth of the tree.
 
 \vspace{1em}
 
-\noindent Then, at a given moment, we can decide to take action and try to determine the strength of the engine with the last functional version.
-
-\subsection*{Profiler}
-
-First, in order to analyze the performance of our chess engine and identify potential bottlenecks, we used the \texttt{perf} tool available on Linux systems. \texttt{perf} provides robust profiling capabilities by recording CPU events, sampling function execution, and collecting stack traces.
+\noindent\cref{fig:alphaBetaExample} demonstrates the alpha-beta search process by using $alpha$ ($\alpha$) and $beta$ ($\beta$) values. First, we obtain the leftmost and deepest number, which is $3$, and $\beta$ is set to this number on the node above, representing the current lowest bound. Then, $3$ is compared with the following node on the same depth, $5$, and the MIN node selects the minimum value between $3$ and $5$, which is $3$. Next, this $\beta$ value is passed up to the MAX node above, updating its $\alpha$ value to $3$. This means that the upper bound for that node must be a number less than or equal to $3$. Then, the last calculated $\alpha$ value is passed to the MIN node in the right subtree. To determine its value, we continue down to the next depth, where the first node has a value of $2$. This value updates the $\beta$ value of the MIN node above, with the passed $\alpha$ value. Now, this MIN node can only take a value between $3$ and $2$, meaning the node with a value of $1$ cannot be a solution and is pruned.
 
 \vspace{1em}
 
-\noindent Our profiling goal is to identify which parts of the code consume the most execution time. We run the engine under \texttt{perf} using the following commands:
+\noindent Throughout this process, branches that cannot possibly influence the final decision are pruned, significantly reducing the number of nodes that need to be evaluated. This demonstrates the efficiency of alpha-beta pruning in minimizing the search space while guaranteeing the same result as a full minimax search.
 
-\begin{lstlisting}[language=bash, caption={Profiling AlphaDeepChess with perf}, frame=single, breaklines=true]
-# Record performance data with function stack traces
-sudo perf record -g ./build/release/AlphaDeepChess
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        level 1/.style={sibling distance=4cm},
+        level 2/.style={sibling distance=2cm},
+        circleNode/.style={circle, draw, minimum size=1cm, inner sep=0pt},
+        squareNode/.style={rectangle, draw, minimum size=1cm, inner sep=0pt}
+    ]
+        % Root node
+        \node[squareNode] (root) {}
+            child {node[circleNode] (b) {}
+                child {node[squareNode] (d) {3}}
+                child {node[squareNode] (e) {5}}
+            }
+            child {node[circleNode] (c) {}
+                child {node[squareNode] (f) {2}}
+                child {node[squareNode] (g) {1}}
+            };
 
-# Display interactive report
-sudo perf report -g --no-children
-\end{lstlisting}
+        % Labels for alpha and beta
+        \node[right=0.7cm, align=left] at (root) {$\alpha = -\infty$ \\ $\beta = +\infty$};
+        \node[right=0.7cm, align=left] at (b) {$\alpha = -\infty$ \\ $\beta = +\infty$};
 
-\noindent After recording, \texttt{perf report} opens an interactive terminal interface where functions are sorted by CPU overhead. This allows us to prioritize which functions to optimize.
+        % Node labels
+        \node[left=0.7cm] at (root) {MAX};
+        \node[left=0.7cm] at (b) {MIN};
+        \node[left=0.7cm] at (d) {MAX};
+
+        % Edges
+        \draw[-, draw=red] (root) -- (b);
+        \draw[-] (root) -- (c);
+        \draw[-, draw=red] (b) -- (d);
+        \draw[-] (b) -- (e);
+        \draw[-] (c) -- (f);
+        \draw[-] (c) -- (g);
+    \end{tikzpicture}
+
+    \hspace{3em}
+
+    \centering
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        level 1/.style={sibling distance=4cm},
+        level 2/.style={sibling distance=2cm},
+        circleNode/.style={circle, draw, minimum size=1cm, inner sep=0pt},
+        squareNode/.style={rectangle, draw, minimum size=1cm, inner sep=0pt}
+    ]
+        % Root node
+        \node[squareNode] (root) {}
+            child {node[circleNode] (b) {}
+                child {node[squareNode] (d) {3}}
+                child {node[squareNode] (e) {5}}
+            }
+            child {node[circleNode] (c) {}
+                child {node[squareNode] (f) {2}}
+                child {node[squareNode] (g) {1}}
+            };
+
+        % Labels for alpha and beta
+        \node[right=0.7cm, align=left] at (root) {$\alpha = -\infty$ \\ $\beta = +\infty$};
+        \node[right=0.7cm, align=left] at (b) {$\alpha = -\infty$ \\ $\textcolor{red}{\beta = 3}$};
+
+        % Node labels
+        \node[left=0.7cm] at (root) {MAX};
+        \node[left=0.7cm] at (b) {MIN};
+        \node[left=0.7cm] at (d) {MAX};
+
+        % Edges
+        \draw[-, draw=red] (root) -- (b);
+        \draw[-] (root) -- (c);
+        \draw[-, draw=red] (d) -- (b);
+        \draw[-] (b) -- (e);
+        \draw[-] (c) -- (f);
+        \draw[-] (c) -- (g);
+    \end{tikzpicture}
+
+    \hspace{3em}
+
+    \centering
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        level 1/.style={sibling distance=4cm},
+        level 2/.style={sibling distance=2cm},
+        circleNode/.style={circle, draw, minimum size=1cm, inner sep=0pt},
+        squareNode/.style={rectangle, draw, minimum size=1cm, inner sep=0pt}
+    ]
+        % Root node
+        \node[squareNode] (root) {}
+            child {node[circleNode, draw=red] (b) {\textcolor{red}{3}}
+                child {node[squareNode] (d) {3}}
+                child {node[squareNode] (e) {5}}
+            }
+            child {node[circleNode] (c) {}
+                child {node[squareNode] (f) {2}}
+                child {node[squareNode] (g) {1}}
+            };
+
+        % Labels for alpha and beta
+        \node[right=0.7cm, align=left] at (root) {$\textcolor{red}{\alpha = 3}$ \\ $\beta = +\infty$};
+        \node[right=0.7cm, align=left] at (b) {$\alpha = -\infty$ \\ $\beta = 3$};
+
+        % Node labels
+        \node[left=0.7cm] at (root) {MAX};
+        \node[left=0.7cm] at (b) {MIN};
+        \node[left=0.7cm] at (d) {MAX};
+
+        % Edges
+        \draw[-, draw=red] (root) -- (b);
+        \draw[-] (root) -- (c);
+        \draw[-, draw=red] (d) -- (b);
+        \draw[-, draw=red] (b) -- (e);
+        \draw[-] (c) -- (f);
+        \draw[-] (c) -- (g);
+    \end{tikzpicture}
+
+    \hspace{3em}
+
+    \centering
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        level 1/.style={sibling distance=4cm},
+        level 2/.style={sibling distance=2cm},
+        circleNode/.style={circle, draw, minimum size=1cm, inner sep=0pt},
+        squareNode/.style={rectangle, draw, minimum size=1cm, inner sep=0pt}
+    ]
+        % Root node
+        \node[squareNode] (root) {}
+            child {node[circleNode] (b) {3}
+                child {node[squareNode] (d) {3}}
+                child {node[squareNode] (e) {5}}
+            }
+            child {node[circleNode, draw=red] (c) {\textcolor{red}{2}}
+                child {node[squareNode] (f) {2}}
+                child {node[squareNode, dashed, gray] (g) {1}}
+            };
+
+        % Labels for alpha and beta
+        \node[right=0.7cm, align=left] at (root) {$\alpha = 3$ \\ $\beta = +\infty$};
+        \node[right=0.7cm, align=left] at (b) {$\alpha = -\infty$ \\ $\beta = 3$};
+        \node[right=0.7cm, align=left] at (c) {$\alpha = 3$ \\ $\textcolor{red}{\beta = 2}$};
+
+        % Node labels
+        \node[left=0.7cm] at (root) {MAX};
+        \node[left=0.7cm] at (b) {MIN};
+        \node[left=0.7cm] at (d) {MAX};
+
+        % Edges
+        \draw[-] (b) -- (root);
+        \draw[-, draw=red] (root) -- (c);
+        \draw[-] (d) -- (b);
+        \draw[-] (b) -- (e);
+        \draw[-, draw=red] (c) -- (f);
+        \draw[-, draw=gray, dashed] (c) -- (g);
+    \end{tikzpicture}
+
+    \hspace{3em}
+
+    \centering
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        level 1/.style={sibling distance=4cm},
+        level 2/.style={sibling distance=2cm},
+        circleNode/.style={circle, draw, minimum size=1cm, inner sep=0pt},
+        squareNode/.style={rectangle, draw, minimum size=1cm, inner sep=0pt}
+    ]
+        % Root node
+        \node[squareNode] (root) {3}
+            child {node[circleNode] (b) {3}
+                child {node[squareNode] (d) {3}}
+                child {node[squareNode] (e) {5}}
+            }
+            child {node[circleNode] (c) {2}
+                child {node[squareNode] (f) {2}}
+                child {node[squareNode, dashed, gray] (g) {1}}
+            };
+
+        % Labels for alpha and beta
+        \node[right=0.7cm, align=left] at (root) {$\alpha = 3$ \\ $\beta = +\infty$};
+        \node[right=0.7cm, align=left] at (b) {$\alpha = -\infty$ \\ $\beta = 3$};
+        \node[right=0.7cm, align=left] at (c) {$\alpha = 3$ \\ $\beta = 2$};
+
+        % Node labels
+        \node[left=0.7cm] at (root) {MAX};
+        \node[left=0.7cm] at (b) {MIN};
+        \node[left=0.7cm] at (d) {MAX};
+
+        % Edges
+        \draw[-, draw=red] (b) -- (root);
+        \draw[-] (root) -- (c);
+        \draw[-, draw=red] (d) -- (b);
+        \draw[-] (b) -- (e);
+        \draw[-] (f) -- (c);
+        \draw[-, draw=gray, dashed] (c) -- (g);
+    \end{tikzpicture}
+    \caption{Example of alpha-beta pruning with $\alpha$ and $\beta$ values.}\label{fig:alphaBetaExample}
+\end{figure}
+
+\newpage
+
+Having described the main search algorithms, it is important to explain how the skill of chess players both human and computers is measured. We then describe the console communication protocol used by chess engines, and finally, we provide an overview of how Stockfish operates internally.
 
 \section{ELO rating system}
 
@@ -208,145 +414,51 @@ where:
 
 This system ensures that a player gains more rating points for defeating a higher-rated opponent and loses fewer points when losing to a stronger player.
 
-\section{How can we determine the strength of our engine?}
+\newpage
 
-Once the profiling and optimization steps have been completed with the last decided version, we are ready to try to determine the strength or level of our engine.
+\section{UCI}
+\label{sec:uci}
 
-\vspace{1em}
-
-\noindent The most common way to measure the strength of a chess engine is by playing games against other engines and analyzing the results. To quantify this strength, the Elo rating system is used. Elo is a statistical rating system originally developed for chess, which assigns a numerical value to each player (or engine) based on their game results against opponents of known strength. When an engine wins games against higher-rated opponents, its Elo increases; if it loses, its Elo decreases. This allows for an objective comparison of playing strength between different engines.
-
-\vspace{1em}
-
-\noindent But which engine should we use as a reference for comparison? One approach is to consult the Computer Chess Rating Lists, which rank chess engines based on their performance in various tournaments and matches. We have chosen to compare different versions of our engine with \textit{Stockfish}, currently ranked as the number one engine on the list. In addition, we have also competed against other engines online to further evaluate our engine's performance in diverse environments.
-
-\subsection*{Stockfish}
-
-\textit{Stockfish}~\cite{Stockfish} is an open-source chess engine and command-line program available for multiple platforms, including Windows, macOS, Linux, Android, and iOS. It provides a wide range of versions optimized for different hardware configurations, such as specific CPU instruction sets, to maximize performance. For instance, the AVX2 version is recommended for most users with Intel processors from 2013 onwards or AMD processors from 2015 onwards, as it utilizes advanced vectorization instructions.
+\noindent The chess community has developed an standard console protocol for chess engines to facilitate interoperability between engines and external applications. The \textit{Universal Chess Interface} (UCI)~\cite{UciProtocol} makes it possible to organize games and tournaments between different bots, as well as to integrate engines into graphical user interfaces (GUIs) and other software tools.
 
 \vspace{1em}
 
-\noindent Although it is not strictly mandatory for chess engines to follow a communication standard, adopting one greatly facilitates interoperability and development. In this case, \textit{Stockfish} uses the Universal Chess Interface communication protocol, which we have also implemented in our engine.
-
-\subsection*{UCI}
-
-Universal Chess Interface, also known as UCI, is an open communication protocol whose specifications are independent of the operating system and which enables chess engines to communicate with graphical user interfaces and with each other.
+\textit{AlphaDeepChess} follows the UCI protocol closely.
 
 \vspace{1em}
 
-\noindent The move format is in long algebraic notation which means sending two squares coordinates like \texttt{e2e4} or \texttt{b1c3} independently of the type of piece because the engine must be the one checking that the movement is legal.
-
-\vspace{1em}
-
-\noindent Some of the most important and used commands are the following:
+\noindent Some of the most used commands are the following:
 
 \begin{itemize}[itemsep=1pt]
-    \item \texttt{position [fen <fenstring> | startpos | actualpos] moves <move1> \ldots \\<movei>}: Sets the current position of the board to the FEN string, or applies the list of moves from the starting position or current position.
 
-    \item \texttt{go}: Starts evaluating the current position. Some important subparameters are:
+    \item \texttt{uci}: tell engine to use the uci interface, the engine must identify itself and sent \texttt{uciok} to acknowledge the uci mode.
+    \item \texttt{position [fen <fenstring> | startpos | actualpos] moves <move1> \ldots \\<movei>}: Sets the current position of the board to the FEN string, or applies the list of moves from the starting position or current position. The move format is in long algebraic notation which means sending two squares coordinates like \texttt{e2e4} or \texttt{b1c3}.
+
+    \item \texttt{go}: start calculating on the current position set up with the \texttt{position} command. Some  subparameters are:
     \begin{itemize}[itemsep=1pt]
-        \item \texttt{depth <x>}: Specifies the number of \texttt{x} plies to search.
+        \item \texttt{depth <x>}: Specifies the maximum \texttt{depth} to search.
         \item \texttt{movetime <x>}: Specifies the number of \texttt{x} seconds to search. 
     \end{itemize}
 
-    \item \texttt{stop}: Stops evaluation if it is running.
-    \item \texttt{diagram}: Shows a basic terminal chessboard with the current position.
+    \item \texttt{stop}: stop calculating.
 \end{itemize}
 
-\noindent A ply consists of a single move made by one player in a turn-based game like chess. In chess terminology, one ply refers to one move by either White or Black, not both. Therefore, a full turn (when both White and Black have moved) consists of two plies.
+\newpage
+
+\section{Stockfish}
+\label{sec:stockfish}
+
+\par \textit{Stockfish} is an open-source chess engine that has consistently ranked among the strongest in the world~\cite{Stockfish}. It is written in C++ and released under the GNU General Public License (GPL). Stockfish has been developed and refined by a large community of contributors.
 
 \vspace{1em}
 
-\noindent These commands are considered the most important because they form the core of the interaction between the chess engine and the user interface or testing tools. The \texttt{position} command allows setting up any board state, which is essential for starting games, analyzing specific positions, or resuming play. The \texttt{go} command initiates the engine's search for the best move, with parameters like \texttt{depth} and \texttt{movetime} providing control over the search process. The \texttt{stop} command is necessary to halt the engine's calculation when required, ensuring responsiveness. Finally, the \texttt{diagram} command provides a quick visual representation of the current position, which is especially useful for debugging and analysis. Together, these commands enable flexible, efficient, and interactive communication with the chess engine.
+\par \textit{Stockfish} has an estimated Elo rating of around 3644~\cite{StockfishElo}, placing it far above the best human player, Magnus Carlsen, whose peak Elo rating was 2882 in May 2014~\cite{MagnusCarlsenElo}.
 
 \vspace{1em}
 
-\noindent Then, to conduct fair and automated matches between Stockfish and our engine, it is necessary to use a tool that can arbitrate the games, ensuring consistent conditions and accurate results.
-
-\subsection*{Cutechess}
-
-\noindent After considering different options, \textit{Cutechess} proved to be the best fit for our needs.
+\par It is based on the minimax search algorithm, enhanced with alpha-beta pruning. In addition, it incorporates several of the techniques described in later chapters (see Chapter~\ref{cap:descripcionTrabajo}).
 
 \vspace{1em}
 
-\noindent \textit{Cutechess}~\cite{CuteChess} is an open-source tool designed to perform automated games between chess engines. It is widely used in the chess programming community to test and compare engines, evaluate their performance, and analyze games.
+\par The key component of Stockfish's strength is its use of machine learning algorithms to evaluate chess positions more accurately, in particular, Stockfish uses NNUE (Efficiently Updatable Neural Network), a neural network architecture originally developed for shogi engines and later adapted for chess ~\cite{NNUE}. NNUE efficiently evaluates positions by finding and learning complex piece patterns. It is optimized to run quickly even on CPUs and significantly improves move ordering (see Chapter~\ref{cap:moveOrdering}), allowing the engine to explore the most promising lines first and prune large parts of the search tree.
 
-\vspace{1em}
-
-\noindent It provides both command-line interface (CLI) and a graphic user interface (GUI), with cross-platform compatibility for Windows, macOS, and Linux. For our purposes, we utilized the CLI version to automate the tests with Python scripts and commands, integrating it into a CI/CD workflow.
-
-\vspace{1em}
-
-\noindent Mainly, this tool is responsible for sending commands to both selected engines. For example, when both Stockfish and our engine implement UCI, \textit{Cutechess} knows in advance the commands to send, as well as parameters such as the search time and depth for each engine, the number of games to play, the time control, or even specific openings to use. Providing specific openings introduces randomization between games, which is beneficial for later evaluation.
-
-\vspace{1em}
-
-\noindent Then, it checks the active status of each engine and manages the start of the games by setting up the board on both engines with the \texttt{position} command. Afterwards, it sends the \texttt{go} command and stops the search with \texttt{stop} when the search time or depth is reached, extracting the best move provided by the engine whose turn it is. This move is then passed to the other engine, alternating turns so that both engines play against each other automatically.~\cref{lst:cutechess-example} we show a \textit{Cutechess} log file, we directly configured the starting positions from a list of FENs in the \texttt{positions.fen} file:
-
-\begin{lstlisting}[basicstyle=\ttfamily\scriptsize, breaklines=true, frame=single, caption={Example of \textit{Cutechess}}, label={lst:cutechess-example}]
-Running test (8) with the following configuration:
-Games: 1, Search Time: 5, Depth: 5
-PGN File: results.pgn, EPD File: results.epd, Log File: results.log
-Engines: ['AlphaDeepChess', 'Stockfish']
-Options: {'Stockfish': {'UCI_LimitStrength': 'true', 'UCI_Elo': '2000'}}
-Book: 
-Positions: positions.fen
-...
- <Stockfish(1): uciok
- >Stockfish(1): setoption name UCI_Elo value 2000
- >Stockfish(1): setoption name UCI_LimitStrength value true
- >Stockfish(1): isready
- <Stockfish(1): readyok
-Started game 1 of 1 (AlphaDeepChess vs Stockfish)
- >AlphaDeepChess(0): ucinewgame
- >AlphaDeepChess(0): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6
- >Stockfish(1): ucinewgame
- >Stockfish(1): setoption name Ponder value false
- >Stockfish(1): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6
- >AlphaDeepChess(0): isready
- <AlphaDeepChess(0): readyok
- >AlphaDeepChess(0): go movetime 5000 depth 5
- <AlphaDeepChess(0): info depth 1 score cp 130 bestMove c1e3
- <AlphaDeepChess(0): info depth 2 score cp 85 bestMove c1e3
- <AlphaDeepChess(0): info depth 3 score cp 80 bestMove c1e3
- <AlphaDeepChess(0): info depth 4 score cp 62 bestMove c1g5
- <AlphaDeepChess(0): info depth 5 score cp 79 bestMove c1g5
- <AlphaDeepChess(0): bestmove c1g5
- >Stockfish(1): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6 moves c1g5
- >Stockfish(1): isready
- <Stockfish(1): readyok
- >Stockfish(1): go movetime 5000 depth 5
- <Stockfish(1): info depth 1 seldepth 6 multipv 1 score cp -52 ...
- <Stockfish(1): info depth 2 seldepth 3 multipv 1 score cp -45 ...
- <Stockfish(1): info depth 3 seldepth 3 multipv 1 score cp -39 ...
- <Stockfish(1): info depth 4 seldepth 3 multipv 1 score cp -39 ...
- <Stockfish(1): info depth 5 seldepth 3 multipv 1 score cp -27 ...
- <Stockfish(1): bestmove e7e6
- >AlphaDeepChess(0): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6 moves c1g5 e7e6
-\end{lstlisting}
-
-\noindent In~\cref{lst:cutechess-example}, in addition to setting the number of games to $1$, the search time to $5$ seconds, and the search depth to $5$, we provided a list of starting positions, from which one is chosen at random. Each line starting with \texttt{position fen \ldots} establishes the FEN position and continues by adding the moves played.
-
-\vspace{1em}
-
-\noindent Note that both engines stop searching when depth of $5$ is reached and are verified to be ready after \texttt{isready} command.
-
-\vspace{1em}
-
-\noindent Depending on the number of games, search time, and time control, these tournaments between engines can take a long time to process. For this reason, we decided to use GitHub Actions and workflows to separate our development environment from the execution of performance and strength tests. This is explained later in~\cref{cap:analysisOfImprovements}.
-
-\vspace{1em}
-
-\noindent Although UCI implements the \texttt{diagram} command that draws the current position through standard output, making moves and showing the evaluation is somewhat a time-consuming task when debugging and testing while programming. We resorted to using an interface to help us do this job and a really fast solution was to use Python to make a GUI. In this case, one of the most used UI libraries was \textit{CustomTkinter} and it was used to build a friendly interface from scratch for bridging between executable and command sending. This tool can be used after compiling the engine and executing \texttt{AlphaDeepChessGUI.py} with Python.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=1.0\textwidth]{Imagenes/gui.png}
-    \caption{AlphaDeepChess GUI}\label{fig:gui}
-\end{figure}
-
-\noindent In~\cref{fig:gui}, the engine evaluation is enabled and displays the current evaluation value, the best move found, and the calculated search depth. In this way, we also ensure a more user-friendly experience.
-
-\vspace{1em}
-
-\noindent In the following chapters, we will present more extensive and detailed information on building the engine.
