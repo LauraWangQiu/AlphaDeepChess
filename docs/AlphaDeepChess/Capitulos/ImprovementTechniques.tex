@@ -10,7 +10,7 @@ This chapter documents the implementation of the following techniques used to im
     \item Search with late move reductions.
 \end{itemize}
 
-\section{Transposition table}\label{sec:tt}
+\section{Transposition table}
 
 \noindent As discused in the previous chapter (see~\cref{sec:iterativeDeepening}), the basic implementation of the chess engine generates a large amount of redundant calculations due to the iterative deepening approach and also the concept of transpositions: situations in which the same board position is reached through different sequences of moves in the game tree.
 \noindent~\cref{fig:transposition_example} illustrates a position that can arise through multiple move orders. Where the white king could go to the g3 square from multiple paths.
@@ -461,7 +461,6 @@ This version of search follows Young Brothers Wait Concept, which is a parallel 
    \caption{Principal variation splitting~\cite{PVSplitting}.}\label{fig:pvsplitting}
 \end{figure}
 
-\newpage
 \section{Late move reductions}
 
 \noindent We experiment with the use of late move reductions, a search optimization technique that selectively reduces the search depth for moves that appear late in the move ordering and are therefore considered less promising~\cite{LateMoveReductions}. The technique is based on the assumption that a strong move ordering heuristic will place the best move in the position earlier in the list. As a result, moves evaluated later can be searched at a reduced depth to save computation time.
