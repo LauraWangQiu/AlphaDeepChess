@@ -9,13 +9,13 @@
  * This technique is used to optimize the memory space of the lookup table of rook and bishop moves.
  * 
  * The lookup table is indexed by piece square and the blockers bitboard (pieces that block the path of the piece).
- * We cut off unnecesary information like the board borders and the squares outside its attack pattern.
+ * We cut off unnecessary information like the board borders and the squares outside its attack pattern.
  * Optimally we could use 11 bits for bishop moves (2048 > 1428) and 13 bits for rooks (8196 > 4900).
  * 
  * A magic number is a multiplier to the index with the following property: 
  *      - keeps intact the important info about the blockers (the nearest blockers to the piece are intact).
  *        For example: [Rook] -> -> -> [pawn1][pawn2].
- *        In this case pawn2 is an unnecesary piece inside the blockers bitboard, because the piece that actually
+ *        In this case pawn2 is an unnecessary piece inside the blockers bitboard, because the piece that actually
  *        block the path of the rook is pawn1.
  *      
  *      - Reduces the index number close to the optimal size (ideally to fit inside 11 or 13 bits)
@@ -236,7 +236,7 @@ static inline constexpr uint64_t bishop_magic(Square square)
  */
 inline uint64_t magic_index_rook(uint64_t blockers, Square rook_square, uint64_t rook_attacks)
 {
-    // we cut unnecesary information to optimize memory space: board edges and squares outside the attack mask.
+    // we cut unnecessary information to optimize memory space: board edges and squares outside the attack mask.
     const uint64_t edges = ((ROW_1_MASK | ROW_8_MASK) & ~get_row_mask(rook_square.row())) |
         ((COL_A_MASK | COL_H_MASK) & ~get_col_mask(rook_square.col()));
     blockers &= rook_attacks & ~edges;
@@ -265,7 +265,7 @@ inline uint64_t magic_index_rook(uint64_t blockers, Square rook_square, uint64_t
  */
 inline uint64_t magic_index_bishop(uint64_t blockers, Square bishop_square, uint64_t bishop_attacks)
 {
-    // we cut unnecesary information to optimize memory space: board edges and squares outside the attack mask.
+    // we cut unnecessary information to optimize memory space: board edges and squares outside the attack mask.
     const uint64_t edges = ((ROW_1_MASK | ROW_8_MASK) & ~get_row_mask(bishop_square.row())) |
         ((COL_A_MASK | COL_H_MASK) & ~get_col_mask(bishop_square.col()));
 
