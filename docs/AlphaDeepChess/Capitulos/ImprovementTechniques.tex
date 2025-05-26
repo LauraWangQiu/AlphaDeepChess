@@ -1,18 +1,21 @@
 \chapter{Improvement techniques}\label{cap:ImprovementTechniques}
 
-This chapter documents the implementation of the following techniques used to improve the chess engine:
+This chapter documents the implementation of the following techniques used to improve the playing strenght of the chess engine:
 
-\begin{itemize}[itemsep=1pt]
+\begin{itemize}[itemsep=2pt]
     \item Transposition tables with zobrist hashing.
     \item Move generator with magic bitboards and PEXT instructions.
     \item Evaluation with king safety and piece mobility parameters.
     \item Multithread search.
     \item Search with Late move Reductions.
 \end{itemize}
+
+\newpage
+
 \section{Transposition table}\label{sec:tt}
 
 \noindent As discused in the previous chapter (see~\cref{sec:iterativeDeepening}), the basic implementation of the chess engine generates a large amount of redundant calculations due to the iterative deepening approach and also the concept of transpositions: situations in which the same board position is reached through different sequences of moves in the game tree.
-\noindent~\cref{fig:transposition_example} illustrates a position that can arise through multiple move orders. Where the white king could go to the g3 square from multiple paths.
+\noindent the Following image illustrates a position that can arise through multiple move orders. Where the white king could go to the g3 square from multiple paths.
 
 \begin{figure}[H]
     \centering
@@ -24,7 +27,7 @@ This chapter documents the implementation of the following techniques used to im
         markmoves={c1-e3,e3-g3,c1-g1,g1-g3},
         arrow=to
     ]
-    \caption{Lasker-Reichhelm Position, transposition example}\label{fig:transposition_example}
+    \caption*{Lasker-Reichhelm Position, transposition example}\label{fig:transposition_example}
 \end{figure}
 
 \vspace{1em}
@@ -32,9 +35,11 @@ This chapter documents the implementation of the following techniques used to im
 \noindent Taking advantage of dynamic programming, we create a look-up table of chess positions and its evaluation. So if we encounter the same position again, the evaluation is already precalculated. However, we ask ourselves the following question: how much space does the look-up table take up if there are an astronomical amount of chess positions? What we can do is assign a hash to each position and make the table index the last bits of the hash. The larger the table, the less likely access collisions will be. We also want a hash that is fast to calculate and has collision-reducing properties.
 ~\cite{TranspositionTable}
 
-\vspace{1em}
+\vspace{2em}
 
 \noindent \parbox{\textwidth}{The complete implementation can be found in\\\texttt{include\textbackslash{}utilities\textbackslash{}transposition\_table.hpp}.}
+
+\newpage
 
 \subsection*{Zobrist hashing}
 
@@ -45,9 +50,9 @@ Zobrist Hashing is a technique to transform a board position of arbitrary size i
 \noindent To generate a 64-bit hash for a position, the following steps are followed:
 
 \begin{enumerate}
-  \item Pseudorandom 64-bit numbers are generated for each possible feature of a position:
+  \item Pseudorandom 64-bit numbers are generated for various features of a position:
   \begin{enumerate}
-    \item One number for each piece type on each square — 12 pieces x 64 squares = 768 numbers.
+    \item One number for each piece type on each square (12 pieces x 64 squares).
     \item One number to indicate the side to move is black.
     \item Four numbers to represent castling rights (kingside and queenside for both white and black).
     \item Eight numbers to represent the file of an available \textit{en passant} square.
@@ -164,7 +169,7 @@ We can create a look up table of all the rook and bishop moves for each square o
   \item The final multiplication must produce a unique index for each possible blocker configuration. The way to ensure the uniqueness is by brute force testing.
 \end{itemize}
 
-\noindent As illustrated in~\cref{fig:magics_position}, we aim to compute the legal moves of the white rook in the given position. In practice, the only pieces that truly block the rook's path are those marked with a red circle.
+\noindent We aim to compute the legal moves of the white rook in the given position. In practice, the only pieces that truly block the rook's path are those marked with a red circle.
 
 \vspace{1em}
 
@@ -178,7 +183,7 @@ We can create a look up table of all the rook and bishop moves for each square o
         color=red, markfields={d6,f4,d2},
         color=green, markfields={c4,b4,a4,e4,d5,d3}
     ]
-    \caption{Chess position with white rook legal moves in green and blockers in red.}\label{fig:magics_position}
+    \caption*{Chess position with white rook legal moves in green and blockers in red.}\label{fig:magics_position}
 \end{figure}
 
 \subsection*{Magic number generation}
@@ -189,7 +194,7 @@ Magic numbers are generated through a trial and error process. For each square o
 
 \subsection*{Index calculation}
 
-\noindent First, we mask out all pieces outside the rook's attack pattern or on the board borders, as shown in~\cref{fig:magic_preprocessing}.
+\noindent First, we mask out all pieces outside the rook's attack pattern or on the board borders, as shown i the image below.
 
 \vspace{1em}
 
@@ -211,10 +216,10 @@ Magic numbers are generated through a trial and error process. For each square o
         \includegraphics[width=\textwidth]{Imagenes/magics_processed_blockers.png}
         \caption{Masked blockers bitboard}
     \end{minipage}
-    \caption{Pre-processing of the blockers bitboard}\label{fig:magic_preprocessing}
+    \caption*{Pre-processing of the blockers bitboard}\label{fig:magic_preprocessing}
 \end{figure}
 
-\noindent As illustrated in~\cref{fig:magic_multiplication}, the masked blockers bitboard is then multiplied by the magic number. The result retains only the three relevant pawns that obstruct the rook's movement, pushing them toward the most significant bits.
+\noindent The masked blockers bitboard is then multiplied by the magic number. The result retains only the three relevant pawns that obstruct the rook's movement, pushing them toward the most significant bits.
 
 \vspace{1em}
 
@@ -238,7 +243,7 @@ Magic numbers are generated through a trial and error process. For each square o
         \includegraphics[width=\textwidth]{Imagenes/magics_multiplied_blockers.png}
         \caption{Multiplied blockers bitboard}
     \end{minipage}
-    \caption{Multiplication by magic number to produce an index}\label{fig:magic_multiplication}
+    \caption*{Multiplication by magic number to produce an index}\label{fig:magic_multiplication}
 \end{figure}
 
 \noindent Next, we compress the index toward the least significant bits by shifting right by \(\,64-\)\texttt{relevant\_squares}. The number of relevant squares varies per board square;~\cref{fig:rook_relevant_squares} shows this for the rook:
@@ -298,7 +303,7 @@ Magic numbers are generated through a trial and error process. For each square o
 
 \subsection*{PEXT instruction}
 
-\noindent The \texttt{PEXT} (Parallel Bits Extract) instruction—available on modern x86\_64 CPUs—extracts bits from a source operand according to a mask and packs them into the lower bits of the destination operand~\cite{PextInstruction}. It is ideally suited for computing our table index.
+\noindent The \texttt{PEXT} (Parallel Bits Extract) is an instruction available on modern CPUs. They extracts bits from a source operand according to a mask and packs them into the lower bits of the destination operand~\cite{PextInstruction}. It is ideally suited for computing our table index.
 
 \vspace{1em}
 
@@ -312,7 +317,7 @@ Magic numbers are generated through a trial and error process. For each square o
     \caption{Example of the \texttt{PEXT} instruction.}\label{fig:pext_instruction_example}
 \end{figure}
 
-\noindent For our previous example (see~\cref{fig:magics_position}), we only need the full bitboard of blockers and the rook’s attack pattern (excluding the borders to reduce space), as illustrated in~\cref{fig:pext_bitboards}.
+\noindent For our previous example (see~\cref{fig:magics_position}), we only need the full bitboard of blockers and the rook's attack pattern (excluding the borders to reduce space), as illustrated below.
 
 \vspace{1em}
 
@@ -340,7 +345,7 @@ Magic numbers are generated through a trial and error process. For each square o
         \includegraphics[width=\textwidth]{Imagenes/pext_final_index.png}
         \caption{Final extracted index}
     \end{minipage}
-    \caption{index extraction with Pext example}\label{fig:pext_bitboards}
+    \caption*{index extraction with Pext example}\label{fig:pext_bitboards}
 \end{figure}
 
 \noindent The final index used to access the lookup table is calculated using the \texttt{pext} instruction as follows:
@@ -357,8 +362,6 @@ Magic numbers are generated through a trial and error process. For each square o
   \item If \texttt{PEXT} support is detected at compile time, the engine uses it to compute the index directly.
   \item Otherwise, the engine falls back to the magic bitboards approach using multiplication and bit shifts.
 \end{itemize}
-
-\newpage
 
 \section{Evaluation with king safety and piece mobility}
 
@@ -437,6 +440,7 @@ To implement this feature, we first compute a bitboard representing all legal mo
     ]
 \end{center}
 
+\newpage
 \section{Multithreaded search}
 
 This version of search follows Young Brothers Wait Concept, which is a parallel search algorithm designed to optimize the distribution of work among multiple threads.
@@ -453,9 +457,9 @@ This version of search follows Young Brothers Wait Concept, which is a parallel 
 
 \noindent In~\cref{fig:pvsplitting}, the gray circle and square nodes are considered part of the principal variation, while the remaining white nodes are processed in parallel by multiple threads.
 
-\begin{figure}[H]
+\begin{figure}
    \centering
-   \includegraphics[width=0.8\textwidth]{Imagenes/Bitmap/pvsplitting.png}
+   \includegraphics[width=0.9\textwidth]{Imagenes/Bitmap/pvsplitting.png}
    \caption{Principal variation splitting~\cite{PVSplitting}.}\label{fig:pvsplitting}
 \end{figure}
 
