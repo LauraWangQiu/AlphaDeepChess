@@ -176,7 +176,7 @@ This technique can drastically reduce the number of nodes evaluated, especially 
 
 \noindent Throughout this process, branches that cannot possibly influence the final decision are pruned, significantly reducing the number of nodes that need to be evaluated. This demonstrates the efficiency of alpha-beta pruning in minimizing the search space while guaranteeing the same result as a full minimax search.
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \begin{tikzpicture}[
         level distance=1.5cm,
@@ -213,9 +213,10 @@ This technique can drastically reduce the number of nodes evaluated, especially 
         \draw[-] (c) -- (f);
         \draw[-] (c) -- (g);
     \end{tikzpicture}
+    \caption{Alpha-beta pruning - step 1}\label{fig:alphaBetaExample}
+\end{figure}
 
-    \hspace{3em}
-
+\begin{figure}[htbp]\ContinuedFloat
     \centering
     \begin{tikzpicture}[
         level distance=1.5cm,
@@ -252,9 +253,10 @@ This technique can drastically reduce the number of nodes evaluated, especially 
         \draw[-] (c) -- (f);
         \draw[-] (c) -- (g);
     \end{tikzpicture}
+    \caption{Alpha-beta pruning - step 2}
+\end{figure}
 
-    \hspace{3em}
-
+\begin{figure}[htbp]\ContinuedFloat
     \centering
     \begin{tikzpicture}[
         level distance=1.5cm,
@@ -291,9 +293,10 @@ This technique can drastically reduce the number of nodes evaluated, especially 
         \draw[-] (c) -- (f);
         \draw[-] (c) -- (g);
     \end{tikzpicture}
+    \caption{Alpha-beta pruning - step 3}
+\end{figure}
 
-    \hspace{3em}
-
+\begin{figure}[htbp]\ContinuedFloat
     \centering
     \begin{tikzpicture}[
         level distance=1.5cm,
@@ -331,9 +334,10 @@ This technique can drastically reduce the number of nodes evaluated, especially 
         \draw[-, draw=red] (c) -- (f);
         \draw[-, draw=gray, dashed] (c) -- (g);
     \end{tikzpicture}
+    \caption{Alpha-beta pruning - step 4}
+\end{figure}
 
-    \hspace{3em}
-
+\begin{figure}[htbp]\ContinuedFloat
     \centering
     \begin{tikzpicture}[
         level distance=1.5cm,
@@ -371,7 +375,7 @@ This technique can drastically reduce the number of nodes evaluated, especially 
         \draw[-] (f) -- (c);
         \draw[-, draw=gray, dashed] (c) -- (g);
     \end{tikzpicture}
-    \caption{Example of alpha-beta pruning with $\alpha$ and $\beta$ values.}\label{fig:alphaBetaExample}
+    \caption{Alpha-beta pruning - step 5}
 \end{figure}
 
 \newpage
