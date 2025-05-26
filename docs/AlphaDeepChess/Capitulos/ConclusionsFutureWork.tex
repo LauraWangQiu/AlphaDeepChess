@@ -7,10 +7,15 @@ We have successfully developed a competitive chess engine based on an enhanced m
 \noindent Building on this basic implementation, we have researched and analyzed the following algorithmic techniques to further improve the bot's playing strength:
 
 \begin{itemize}[itemsep=1pt]
+
     \item \textit{Transposition tables with Zobrist hashing}: provided an increase in performance by avoiding redundant position evaluations.
-    \item \textit{Move generator with magic bitboards and PEXT instructions}: substantial improvement in move generation.
-    \item \textit{Evaluation with king safety and piece mobility parameters}: showed no clear improvement, likely due to the added computational cost and the difficulty of correlating these factors directly with positional strength.
+    
+    \item \textit{Move generator with magic bitboards and PEXT instructions}: a lookup table was used to retrieve legal moves for pieces with constant-time access. The table index is computed using the hardware-accelerated PEXT instruction when available; otherwise, the engine falls back to the magic bitboards technique.
+    
+    \item \textit{Evaluation with king safety and piece mobility parameters}: introduced additional parameters to evaluate the position, incorporating king safety and piece mobility. This showed no clear improvement, likely due to the added computational cost and the difficulty of directly correlating these factors with positional strength.
+    
     \item \textit{Multithreaded search}: requires further optimization of data structures and algorithms for concurrent access to yield tangible gains.
+    
     \item \textit{Search with Late Move Reductions}: did not improve performance, as our current move-ordering heuristic is not strong enough to support such aggressive pruning.
 \end{itemize}
 
