@@ -62,7 +62,9 @@ This chapter documents the basic architecture of the chess engine.  The project 
     \caption{List of bitboards data structure example.}\label{fig:bitboardPositionExample}
 \end{figure}
 
-\noindent The main advantages of bitboards is that we can operate on multiple squares simultaneously using bitwise operations. For example, we can determine if there are any black pawns on the fifth rank by performing a bitwise AND operation with the corresponding mask.~\cref{fig:bitboardMaskOperation} illustrates this concept.
+\vspace{2em}
+
+\noindent The main advantages of bitboards is that we can operate on multiple squares simultaneously using bitwise operations. For example, we can determine if there are any black pawns on the fifth rank by performing a bitwise AND operation with the corresponding mask.
 
 \begin{figure}[H]
     \centering
@@ -83,7 +85,7 @@ This chapter documents the basic architecture of the chess engine.  The project 
         \includegraphics[width=\textwidth]{Imagenes/bitboardMaskResult.png}
         \caption*{Pawn's bitboard \& mask}
     \end{minipage}
-    \caption{Bitboard mask operation example.}\label{fig:bitboardMaskOperation}
+    \caption*{Bitboard mask operation example.}\label{fig:bitboardMaskOperation}
     \vspace{-\baselineskip}
 \end{figure}
 
@@ -102,7 +104,7 @@ This chapter documents the basic architecture of the chess engine.  The project 
     \item Fifty-move rule counter (moves since a capture or pawn move) (bits 35-42).
 \end{enumerate}
 
-\vspace{1em}
+\vspace{2em}
 
 \noindent Having described the data structures that represent chess positions, we can now present the engine's core component: the search algorithm.
 
@@ -138,7 +140,7 @@ What is the optimal depth at which to stop the search? In practice, the most str
 
 What happens if, upon reaching maximum depth, we evaluate the position in the middle of a piece exchange? For example, the~\cref{fig:horizonEffectExample} illustrates a position where if the search is stopped when the queen captures the pawn, it will seem like we have won a pawn, but on the next move, another pawn captures the queen, and now we lose a queen. This is known as the horizon effect~\cite{HorizonEffect}.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{minipage}{0.45\textwidth}
         \centering
@@ -199,11 +201,11 @@ In this section we present how our evaluation function works. For each position,
 
 \vspace{1em}
 
-\noindent\cref{tab:values} shows the standard centipawn values assigned to each piece type
+\noindent The following shows the standard centipawn values assigned to each piece type.
 
 \vspace{1em}
 
-\begin{table}
+\begin{table}[H]
     \centering
     \begin{tabular}{|c|c|}
         \hline
@@ -215,7 +217,7 @@ In this section we present how our evaluation function works. For each position,
         Queen & 950 \\ \hline
         King & 500 \\ \hline
     \end{tabular}
-    \caption{Standard values assigned to chess pieces in centipawns.}\label{tab:values}
+    \caption*{Standard values assigned to chess pieces in centipawns.}\label{tab:values}
 \end{table}
 
 \noindent The evaluation of a position can be computed by summing the values of all white pieces on the board and subtracting the values of all black pieces, as shown in the next equation:
@@ -227,11 +229,11 @@ In this section we present how our evaluation function works. For each position,
 
 \subsection*{Piece square tables (PST's)}
 
-\noindent The basic material evaluation described earlier has a significant limitation, it does not consider the fact that a piece could have more power in different squares of the board. For instance, as illustrated in~\cref{fig:knight-movement-corner-and-center}, a knight placed in the center can control up to eight squares, while a knight positioned in the corner can reach only two.
+\noindent The basic material evaluation described earlier has a significant limitation, it does not consider the fact that a piece could have more power in different squares of the board. For instance, as illustrated in the following image, a knight placed in the center can control up to eight squares, while a knight positioned in the corner can reach only two.
 
 \vspace{1em}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \newchessgame
     \chessboard[
@@ -241,18 +243,18 @@ In this section we present how our evaluation function works. For each position,
         markmoves={h8-g6,h8-f7,d4-b5,d4-b3,d4-c2,d4-c6,d4-e6,d4-e2,d4-f5,d4-f3},
         arrow=to
     ]
-    \caption{Knight's movement on corner vs in center.}\label{fig:knight-movement-corner-and-center}
+    \caption*{Knight's movement on corner vs in center.}\label{fig:knight-movement-corner-and-center}
 \end{figure}
 
 \noindent The solution is to add a bonus or a penalization to the piece depending on the square it occupies. This is called a piece square table (PST). For each piece type, a PST assigns a positional bonus based on the square it occupies. These tables are typically implemented as arrays indexed by square and piece type~\cite{PieceSquareTables}.
 
 \vspace{1em}
 
-\noindent An example PST for the bishop is shown in~\cref{fig:piece-square-values-bishop}, where the bishop receives a positional bonus for occupying central squares and a penalty for being placed in the edges of the board.
+\noindent This is an example PST, where the bishop receives a positional bonus for occupying central squares and a penalty for being placed in the edges of the board.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
-    \begin{tikzpicture}[scale=0.6]
+    \begin{tikzpicture}[scale=0.7]
         % Draw the chessboard
         \foreach \x in {0,1,...,7} {
             \foreach \y in {0,1,...,7} {
@@ -290,7 +292,7 @@ In this section we present how our evaluation function works. For each position,
         % Draw the grid
         \draw[thick] (0,0) grid (8,8);
     \end{tikzpicture}
-    \caption{Piece Square Table for the bishop.}\label{fig:piece-square-values-bishop}
+    \caption*{Piece Square Table for the bishop.}\label{fig:piece-square-values-bishop}
 \end{figure}
 
 \subsection*{Tapered evaluation}
@@ -321,7 +323,7 @@ A chess game typically consists of three phases: the opening, where pieces are d
 
 \noindent We now need two PST's for each piece, in the following~\cref{fig:taperedPSTpawns} there is an example of the middlegame bonus and the endgame bonus for the pawn, as we can see, the pawns in the endgame receive a bonus for being near the promotion squares.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{minipage}{0.4\textwidth}
         \centering
@@ -407,6 +409,8 @@ A chess game typically consists of three phases: the opening, where pieces are d
     \caption{Tapered Piece Square Tables for pawn.}\label{fig:taperedPSTpawns}
 \end{figure}
 
+\newpage
+
 \section{Move generator}
 \label{sec:moveGenerator}
 
@@ -428,9 +432,9 @@ and it is also difficult to restrict the moves of pinned pieces~\cite{GenerateLe
 
 \vspace{1em}
 
-\noindent For instance,~\cref{fig:precomputedAttackBishop} illustrates the precomputed attack bitboard for a bishop positioned on the $d4$ square.
+\noindent For instance, the image below illustrates the precomputed attack bitboard for a bishop positioned on the $d4$ square.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \newchessgame
     \chessboard[
@@ -439,14 +443,14 @@ and it is also difficult to restrict the moves of pinned pieces~\cite{GenerateLe
         markstyle=border,
         color=blue, markfields={a1,b2,c3,e5,f6,g7,h8,g1,f2,e3,c5,b6,a7}
     ]
-    \caption{Precomputed attack for the bishop on the d4 square.}\label{fig:precomputedAttackBishop}
+    \caption*{Precomputed attack for the bishop on the d4 square.}\label{fig:precomputedAttackBishop}
 \end{figure}
 
 \subsection*{Bitboard of danger squares}
 
 Using the previously precomputed attack patterns, we generate a bitboard representing all the squares currently attacked by the waiting side (the side not having the move). This bitboard is referred to as the danger bitboard. It includes all squares that are unsafe for the king of the side to move, as moving the king to any of these squares would result in an illegal position.~\cref{fig:BitboardDangers} illustrates an example of this concept.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{minipage}{0.4\textwidth}
         \centering
@@ -458,7 +462,7 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
         \caption*{White is the side to move.}
     \end{minipage}
     \hfill
-    \begin{minipage}{0.4\textwidth}
+    \begin{minipage}{0.35\textwidth}
         \centering
         \includegraphics[width=1.0\textwidth]{Imagenes/bitboardDangers.png}
         \caption*{Danger bitboard for the black (waiting) side.}        
@@ -476,7 +480,7 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 
 \vspace{1em}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \newchessgame
     \chessboard[
@@ -498,17 +502,15 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 
 \vspace{1em}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \newchessgame
     \chessboard[
         showmover=true,
         setfen=3r4/8/8/8/3N4/8/3K4/8 w - - 0 11
     ]
-    \caption{Pinned piece.}\label{fig:pinnedPiece}
+    \caption{The black rook pins the white knight. If the knight moves, the white king could be captured, making the move illegal.}\label{fig:pinnedPiece}
 \end{figure}
-
-\noindent In~\cref{fig:pinnedPiece}, the black rook pins the white knight. If the knight moves, the white king could be captured, making the move illegal.
 
 \vspace{1em}
 
@@ -570,7 +572,7 @@ To ensure the correctness of our move generator, we perform what is known as a \
 
 \noindent In~\cref{tab:perftResults}, we present our Perft results alongside those of \textit{Stockfish} for seven well-known test positions at depth 6. The identical node counts in all cases confirm the correctness of our move generator.
 
-\begin{table}
+\begin{table}[H]
     \centering
     \begin{tabular}{|l|r|l|}
     \hline
@@ -608,7 +610,7 @@ The heuristic we implemented is the \textit{Most Valuable Victim - Least Valuabl
 
 \noindent We implemented this heuristic using a look-up table indexed by the moving piece and the captured piece, as shown in~\cref{tab:mvv-lva-table}. Capturing a queen with a pawn receives a score of 55, while doing the opposite receives 11 points.
 
-\begin{table}
+\begin{table}[H]
     \centering
     \begin{tabular}{|c|r|r|r|r|r|r|}
         \hline
@@ -640,7 +642,7 @@ The main limitation of MVV-LVA is that it only applies to capture moves. In fact
 
 \vspace{1em}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \newchessgame
     \chessboard[

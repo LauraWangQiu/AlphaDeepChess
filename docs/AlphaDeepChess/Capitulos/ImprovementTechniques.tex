@@ -14,7 +14,7 @@ This chapter documents the implementation of the following techniques used to im
 \noindent As discused in the previous chapter (see~\cref{sec:iterativeDeepening}), the basic implementation of the chess engine generates a large amount of redundant calculations due to the iterative deepening approach and also the concept of transpositions: situations in which the same board position is reached through different sequences of moves in the game tree.
 \noindent~\cref{fig:transposition_example} illustrates a position that can arise through multiple move orders. Where the white king could go to the g3 square from multiple paths.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \newchessgame
     \chessboard[
@@ -76,7 +76,7 @@ The hash value is calculated by XORing the random values associated with each el
 
 \noindent Where $\oplus$ denotes $XOR$.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{minipage}[t]{0.4\textwidth}
         \centering
@@ -168,7 +168,7 @@ We can create a look up table of all the rook and bishop moves for each square o
 
 \vspace{1em}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \newchessgame
     \chessboard[
@@ -193,7 +193,7 @@ Magic numbers are generated through a trial and error process. For each square o
 
 \vspace{1em}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{minipage}[c]{0.4\textwidth}
         \centering
@@ -218,7 +218,7 @@ Magic numbers are generated through a trial and error process. For each square o
 
 \vspace{1em}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{minipage}[c]{0.4\textwidth}
         \centering
@@ -245,7 +245,7 @@ Magic numbers are generated through a trial and error process. For each square o
 
 \vspace{1em}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{tikzpicture}[scale=0.8]
         % Draw the chessboard
@@ -306,7 +306,7 @@ Magic numbers are generated through a trial and error process. For each square o
 
 \vspace{1em}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{Imagenes/pext.png}
     \caption{Example of the \texttt{PEXT} instruction.}\label{fig:pext_instruction_example}
@@ -316,7 +316,7 @@ Magic numbers are generated through a trial and error process. For each square o
 
 \vspace{1em}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{minipage}[c]{0.3\textwidth}
         \centering
@@ -392,7 +392,7 @@ To evaluate the safety of the king, we analyze the $3 \times 3$ area surrounding
 
 \par We sum these threat values to compute a \textit{total danger score}. This score is then used as an index into the \textit{precomputed safety table}~\cref{tab:safetyTable}, which returns the corresponding penalty to apply to the evaluation score. This method allows us to smoothly scale the penalty based on the level of threat around the king. The maximum penalty applied is 500 points.
 
-\begin{table}
+\begin{table}[H]
 \centering
 \caption{Sample entries from the king safety penalty table.}
 \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
@@ -453,7 +453,7 @@ This version of search follows Young Brothers Wait Concept, which is a parallel 
 
 \noindent In~\cref{fig:pvsplitting}, the gray circle and square nodes are considered part of the principal variation, while the remaining white nodes are processed in parallel by multiple threads.
 
-\begin{figure}
+\begin{figure}[H]
    \centering
    \includegraphics[width=0.8\textwidth]{Imagenes/Bitmap/pvsplitting.png}
    \caption{Principal variation splitting~\cite{PVSplitting}.}\label{fig:pvsplitting}
