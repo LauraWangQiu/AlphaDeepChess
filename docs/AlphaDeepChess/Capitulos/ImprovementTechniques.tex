@@ -3,11 +3,11 @@
 This chapter documents the implementation of the following techniques used to improve the playing strenght of the chess engine:
 
 \begin{itemize}[itemsep=2pt]
-    \item Transposition tables with zobrist hashing.
+    \item Transposition tables with Zobrist hashing.
     \item Move generator with magic bitboards and PEXT instructions.
     \item Evaluation with king safety and piece mobility parameters.
     \item Multithread search.
-    \item Search with Late move Reductions.
+    \item Search with late move reductions.
 \end{itemize}
 
 \newpage
@@ -27,13 +27,13 @@ This chapter documents the implementation of the following techniques used to im
         markmoves={c1-e3,e3-g3,c1-g1,g1-g3},
         arrow=to
     ]
-    \caption*{Lasker-Reichhelm Position, transposition example}\label{fig:transposition_example}
+    \caption*{Lasker-Reichhelm Position, transposition example.}\label{fig:transposition_example}
 \end{figure}
 
 \vspace{1em}
 
-\noindent Taking advantage of dynamic programming, we create a look-up table of chess positions and its evaluation. So if we encounter the same position again, the evaluation is already precalculated. However, we ask ourselves the following question: how much space does the look-up table take up if there are an astronomical amount of chess positions? What we can do is assign a hash to each position and make the table index the last bits of the hash. The larger the table, the less likely access collisions will be. We also want a hash that is fast to calculate and has collision-reducing properties.
-~\cite{TranspositionTable}
+\noindent Taking advantage of dynamic programming, we create a look-up table of chess positions and its evaluation. So if we encounter the same position again, the evaluation is already precalculated. However, we ask ourselves the following question: how much space does the look-up table take up if there are an astronomical amount of chess positions? What we can do is assign a hash to each position and make the table index the last bits of the hash. The larger the table, the less likely access collisions will be. We also want a hash that is fast to calculate and has collision-reducing properties~\cite{TranspositionTable}.
+
 
 \vspace{1em}
 
@@ -303,18 +303,18 @@ Magic numbers are generated through a trial and error process. For each square o
 
 \subsection*{PEXT instruction}
 
-\noindent The \texttt{PEXT} (Parallel Bits Extract) is an instruction available on modern CPUs. They extracts bits from a source operand according to a mask and packs them into the lower bits of the destination operand~\cite{PextInstruction}. It is ideally suited for computing our table index.
+\noindent The PEXT (Parallel Bits Extract) is an instruction available on modern CPUs. They extracts bits from a source operand according to a mask and packs them into the lower bits of the destination operand~\cite{PextInstruction}. It is ideally suited for computing our table index.
 
 \vspace{1em}
 
-\noindent\cref{fig:pext_instruction_example} illustrates how \texttt{PEXT} works: it selects specific bits from register \texttt{r2}, as specified by the mask in \texttt{r3}, and packs the result into the lower bits of the destination register \texttt{r1}.
+\noindent\cref{fig:pext_instruction_example} illustrates how PEXT works: it selects specific bits from register \texttt{r2}, as specified by the mask in \texttt{r3}, and packs the result into the lower bits of the destination register \texttt{r1}.
 
 \vspace{1em}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{Imagenes/pext.png}
-    \caption{Example of the \texttt{PEXT} instruction.}\label{fig:pext_instruction_example}
+    \caption{Example of the PEXT instruction.}\label{fig:pext_instruction_example}
 \end{figure}
 
 \noindent For our previous example (see~\cref{fig:magics_position}), we only need the full bitboard of blockers and the rook's attack pattern (excluding the borders to reduce space), as illustrated below.
@@ -326,29 +326,29 @@ Magic numbers are generated through a trial and error process. For each square o
     \begin{minipage}[c]{0.3\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/magics_blockers.png}
-        \caption{Blockers bitboard}
+        \caption*{Blockers bitboard}
     \end{minipage}
     \hfill
     \begin{minipage}[c]{0.3\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/magics_rook_attacks.png}
-        \caption{Rook attack mask}
+        \caption*{Rook attack mask}
     \end{minipage}
     \hfill
     \begin{minipage}[c]{0.05\textwidth}
         \centering
-        \Huge\texttt{->}
+        \Huge\texttt{$\rightarrow$}
     \end{minipage}
     \hfill
     \begin{minipage}[c]{0.3\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/pext_final_index.png}
-        \caption{Final extracted index}
+        \caption*{Final extracted index}
     \end{minipage}
-    \caption*{index extraction with Pext example}\label{fig:pext_bitboards}
+    \caption*{Index extraction with PEXT example.}\label{fig:pext_bitboards}
 \end{figure}
 
-\noindent The final index used to access the lookup table is calculated using the \texttt{pext} instruction as follows:
+\noindent The final index used to access the lookup table is calculated using the PEXT instruction as follows:
 \begin{align*}
     \text{index}
     &= \text{\_pext\_u64}(\text{blockers},\,\texttt{attack\_pattern})\,.
@@ -359,7 +359,7 @@ Magic numbers are generated through a trial and error process. For each square o
 \noindent To maintain compatibility and performance across different hardware platforms, we provide two implementations for computing the indices:
 
 \begin{itemize}[itemsep=1pt]
-  \item If \texttt{PEXT} support is detected at compile time, the engine uses it to compute the index directly.
+  \item If PEXT support is detected at compile time, the engine uses it to compute the index directly.
   \item Otherwise, the engine falls back to the magic bitboards approach using multiplication and bit shifts.
 \end{itemize}
 

@@ -190,7 +190,7 @@ In this section we present how our evaluation function works. For each position,
 \vspace{1em}
 
 \noindent The full implementation can be found in \\
-\texttt{src\textbackslash{}evaluation\textbackslash{}evaluation\_dynamic.cpp.}.
+\texttt{src\textbackslash{}evaluation\textbackslash{}evaluation\_dynamic.cpp}.
 
 \vspace{1em}
 
@@ -409,7 +409,7 @@ and it is also difficult to restrict the moves of pinned pieces~\cite{GenerateLe
 
 \vspace{1em}
 
-\noindent \parbox{\textwidth}{The full implementation of the move generator can be found in \texttt{src\textbackslash{}move\_generator\textbackslash{}move\_generator\_basic.cpp}.}
+\noindent The full implementation of the move generator can be found in\\ \texttt{src\textbackslash{}move\_generator\textbackslash{}move\_generator\_basic.cpp}.
 
 \vspace{1em}
 
@@ -643,4 +643,4 @@ The main limitation of MVV-LVA is that it only applies to capture moves. In fact
 
 \vspace{1em}
 
-\noindent If a quiet move being evaluated matches one of the killer moves stored at the current search depth, we increase its score by 70 points. The value 70 is chosen empirically to ensure that killer moves are prioritized above most quiet moves, but still allow the most valuable captures (according to the MVV-LVA heuristic) to take precedence when appropriate. This balance helps improve pruning efficiency without overlooking critical tactical opportunities.
+\noindent If a quiet move being evaluated matches one of the killer moves stored at the current search depth, we increase its score by 70 points. This value is chosen to ensure that killer moves are prioritized above most quiet moves, but still allow the most valuable captures (according to the MVV-LVA heuristic) to take precedence when appropriate. This balance helps improve pruning efficiency without overlooking critical tactical opportunities.
