@@ -1,38 +1,36 @@
-\chapter{Conclusions and future work}
+\chapter{Conclusiones y trabajo futuro}
 
-We have successfully developed a competitive chess engine based on an enhanced minimax search with alpha-beta pruning, a straightforward materialistic evaluation, and a Most Valuable Victim-Least Valuable Aggressor (MVV-LVA) move-ordering heuristic.
+Hemos desarrollado con éxito un motor de ajedrez competitivo basado en una búsqueda minimax mejorada con poda alfa-beta, una evaluación materialista directa y una heurística de ordenación de jugadas MVV-LVA (Most Valuable Victim-Least Valuable Aggressor).
 
 \vspace{1em}
 
-\noindent Building on this basic implementation, we have researched and analyzed the following algorithmic techniques to further improve the bot's playing strength:
+\noindent Partiendo de esta implementación básica, hemos investigado y analizado las siguientes técnicas algorítmicas para mejorar aún más la fuerza de juego del bot:
 
 \begin{itemize}[itemsep=1pt]
-    \item \textit{Transposition tables with Zobrist hashing}: provided an increase in performance by avoiding redundant position evaluations.
-    \item \textit{Move generator with magic bitboards and PEXT instructions}: substantial improvement in move generation.
-    
-    \item \textit{Evaluation with king safety and piece mobility parameters}: showed no clear improvement, likely due to the added computational cost and the difficulty of correlating these factors directly with positional strength.
-    \item \textit{Multithreaded search}: requires further optimization of data structures and algorithms for concurrent access to yield tangible gains.
-    \item \textit{Search with Late Move Reductions}: did not improve performance, as our current move-ordering heuristic is not strong enough to support such aggressive pruning.
+    \item \textit{Tablas de transposición con Zobrist hashing}: proporcionó un aumento en el rendimiento al evitar evaluaciones de posición redundantes.
+    \item \textit{Generador de jugadas con bitboards mágicos e instrucciones PEXT}: mejora sustancial en la generación de jugadas.
+    \item \textit{Evaluación con parámetros de seguridad de rey y movilidad de pieza}: no mostró una mejora clara, probablemente debido al coste computacional añadido y a la dificultad de correlacionar estos factores directamente con la fuerza posicional.
+    \item \textit{Búsqueda multihilo}: requiere una mayor optimización de las estructuras de datos y algoritmos de acceso concurrente para producir ganancias tangibles.
+    \item \textit{Búsqueda con reducciones de movimientos tardíos}: no mejoró el rendimiento, ya que nuestra heurística actual de ordenación de movimientos no es lo suficientemente fuerte como para soportar una poda tan agresiva.
 \end{itemize}
 
-\noindent The engine achieved an ELO rating of 1900 on \textit{Lichess} while running on a Raspberry Pi 5 with a 2GB transposition table, demonstrating its efficiency even on resource-constrained hardware.
+\noindent El motor alcanzó una puntuación ELO de 1900 en \textit{Lichess} mientras se ejecutaba en una Raspberry Pi 5 con una tabla de transposición de 2GB, lo que demuestra su eficiencia incluso en hardware con recursos limitados.
 
 \vspace{1em}
 
-\noindent The engine's \textit{Lichess} profile can be found at:\\
+\noindent El perfil del motor de ajedrez puede encontrarse en: \\
 \url{https://lichess.org/@/AlphaDeepChess}
 
-
 \newpage
-\section{Future work}
+\section{Trabajo futuro}
 
-\noindent Potential avenues for further improvement include:
+\noindent Entre las posibles vías de mejora figuran las siguientes:
 
 \begin{itemize}[itemsep=1pt]
-    \item \textit{Neural-network evaluation and move ordering}:  
-    Application of neural networks for the evaluation function and the move ordering heuristic, following the steps of \textit{Stockfish}, the actual best chess engine. This could unlock more aggressive pruning strategies.
-    \item \textit{Advanced pruning techniques}:  
-    With a stronger evaluation and ordering heuristic, revisit and tune the actual Late Move Reductions, and implement null move pruning technique.
-    \item \textit{Multithreading optimizations}:  
-    Refine concurrent search algorithm and redesign shared data structures like transposition tables to support concurrent access.
+    \item \textit{Evaluación por redes neuronales y ordenación de jugadas}:
+    Aplicación de redes neuronales para la función de evaluación y la heurística de ordenación de jugadas, siguiendo los pasos de \textit{Stockfish}, el mejor motor de ajedrez actual. Esto podría desbloquear estrategias de poda más agresivas.
+    \item \textit{Técnicas avanzadas de poda}:  
+    Con una evaluación más sólida y una heurística de ordenación, revisar y ajustar las reducciones de movimientos tardíos e implementar la técnica de poda de movimientos nulos.
+    \item \textit{Optimizaciones multihilo}:  
+    Perfeccionar el algoritmo de búsqueda concurrente y rediseñar las estructuras de datos compartidos como las tablas de transposición para soportar el acceso concurrente.
 \end{itemize}
