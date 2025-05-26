@@ -266,7 +266,7 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
 
 \noindent We can confirm that \textit{AlphaDeepChess} achieves its maximum skill level with the following configuration:
 
-\begin{table}
+\begin{table}[H]
     \centering
     \begin{tabular}{|p{4cm}|p{6cm}|}
     \hline
@@ -276,7 +276,7 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
     Move Generator             & PEXT implementation                    \\ \hline
     Move Ordering              & MVV-LVA                                \\ \hline
     \end{tabular}
-    \caption{Best engine configuration.}
+    \caption*{Best engine configuration.}
     \label{tab:bestEngineConfiguration}
 \end{table}
 
@@ -300,12 +300,12 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
 
 \vspace{1em}
 
-\noindent~\cref{fig:eloDistribution} illustrates the Elo rating distribution of players on \textit{Lichess}, where the median rating is approximately 1500.
+\noindent The~\cref{fig:eloDistribution} illustrates the Elo rating distribution of players on \textit{Lichess}, where the median rating is approximately 1500.
 \vspace{1em}
 
 \noindent After playing more than 500 games, \textit{AlphaDeepChess} achieved an Elo rating of 1900 on \textit{Lichess}~\cite{AlphaDeepChessElo}. This places the engine significantly above the platform's median and within the top percentiles of the player base. For reference, the highest-rated human player on the platform has reached an Elo of 3000 as of 2025~\cite{LichessBestPlayer}.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.95\linewidth]{Imagenes/eloDistribution.png}
     \caption{\textit{Lichess} Elo distribution as of May 2025~\cite{LichessEloDistribution}.}\label{fig:eloDistribution}
