@@ -31,8 +31,6 @@ This chapter documents the basic architecture of the chess engine.  The project 
 
 \noindent A list of twelve bitboards is used, one for each type of chess piece.~\cref{fig:bitboardPositionExample} illustrates this concept with a chess position example.
 
-\vspace{1em}
-
 \begin{figure}[H]
     \begin{minipage}[c]{0.35\textwidth}
         \newchessgame
@@ -61,8 +59,6 @@ This chapter documents the basic architecture of the chess engine.  The project 
 
     \caption{List of bitboards data structure example.}\label{fig:bitboardPositionExample}
 \end{figure}
-
-\vspace{2em}
 
 \noindent The main advantages of bitboards is that we can operate on multiple squares simultaneously using bitwise operations. For example, we can determine if there are any black pawns on the fifth rank by performing a bitwise AND operation with the corresponding mask.
 
@@ -103,8 +99,6 @@ This chapter documents the basic architecture of the chess engine.  The project 
     \item Current side to move (white or black) (bit 31).
     \item Fifty-move rule counter (moves since a capture or pawn move) (bits 35-42).
 \end{enumerate}
-
-\vspace{2em}
 
 \noindent Having described the data structures that represent chess positions, we can now present the engine's core component: the search algorithm.
 
@@ -169,8 +163,6 @@ What happens if, upon reaching maximum depth, we evaluate the position in the mi
     \caption{Horizon effect position example.}\label{fig:horizonEffectExample}
 \end{figure}
 
-\vspace{1em}
-
 \noindent To avoid this, when we reach the end of the tree at maximum depth, we must extend the search but only considering capture moves until no captures are available. This is known as quiescence search~\cite{QuiescenceSearch}.
 
 \vspace{1em}
@@ -197,13 +189,12 @@ In this section we present how our evaluation function works. For each position,
 
 \vspace{1em}
 
-\noindent \parbox{\textwidth}{The full implementation can be found in \texttt{src\textbackslash{}evaluation\textbackslash{}evaluation\_dynamic.cpp}.}
+\noindent The full implementation can be found in \\
+\texttt{src\textbackslash{}evaluation\textbackslash{}evaluation\_dynamic.cpp.}.
 
 \vspace{1em}
 
 \noindent The following shows the standard centipawn values assigned to each piece type.
-
-\vspace{1em}
 
 \begin{table}[H]
     \centering
@@ -230,8 +221,6 @@ In this section we present how our evaluation function works. For each position,
 \subsection*{Piece square tables (PST's)}
 
 \noindent The basic material evaluation described earlier has a significant limitation, it does not consider the fact that a piece could have more power in different squares of the board. For instance, as illustrated in the following image, a knight placed in the center can control up to eight squares, while a knight positioned in the corner can reach only two.
-
-\vspace{1em}
 
 \begin{figure}[H]
     \centering
@@ -470,15 +459,11 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
     \caption{Example of a danger bitboard squares attacked by the black side.}\label{fig:BitboardDangers}
 \end{figure}
 
-\vspace{1em}
-
 \noindent The danger bitboard is constructed by performing a bitwise OR operation across all legal attacks from the opponent's pieces. For non-sliding pieces such as pawns, knights, and kings, their legal attack bitboards match exactly with their precomputed attack patterns.
 
 \vspace{1em}
 
 \noindent However, sliding pieces as rooks, bishops, and queens require additional handling. Their attacks depend on the presence of blockers in their movement paths.~\cref{fig:blockerExample} shows an example where the attacks of sliding pieces are limited due to blocking pawns. In this case, the rook sliding attack is being blocked by the pawns.
-
-\vspace{1em}
 
 \begin{figure}[H]
     \centering
@@ -500,8 +485,6 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
 
 \noindent The next challenging aspect of legal move generation is handling pinned pieces. A pinned piece cannot move freely, as doing so would expose its king to check, making the move illegal. An example of a pinned piece is shown in~\cref{fig:pinnedPiece}.
 
-\vspace{1em}
-
 \begin{figure}[H]
     \centering
     \newchessgame
@@ -511,8 +494,6 @@ Using the previously precomputed attack patterns, we generate a bitboard represe
     ]
     \caption{The black rook pins the white knight. If the knight moves, the white king could be captured, making the move illegal.}\label{fig:pinnedPiece}
 \end{figure}
-
-\vspace{1em}
 
 \noindent We must compute a bitboard that contains all pinned pieces on the board. This allows us to restrict their movement accordingly during move generation. However, identifying pinned pieces is computationally expensive, as it requires iterating through the attack patterns of sliding pieces and checking for alignment with the king and potential blockers.
 
@@ -590,8 +571,7 @@ To ensure the correctness of our move generator, we perform what is known as a \
     \caption{Perft results at depth 6: comparison between \textit{Stockfish} and \textit{AlphaDeepChess}~\cite{PerftResults}.}\label{tab:perftResults}
 \end{table}
 
-\section{Move ordering}
-\label{cap:moveOrdering}
+\section{Move ordering}\label{cap:moveOrdering}
 Once having explained the move generator function, in this chapter we detail the implementation of the move ordering heuristic.
 
 \vspace{1em}
@@ -639,8 +619,6 @@ The main limitation of MVV-LVA is that it only applies to capture moves. In fact
 \vspace{1em}
 
 \noindent A \textit{killer move} is a quiet, non-capturing move which can cause a cutoff in different branches of the tree at the same depth~\cite{KillerMoves}.
-
-\vspace{1em}
 
 \begin{figure}[H]
     \centering

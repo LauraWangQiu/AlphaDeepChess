@@ -33,7 +33,7 @@ There are different approaches to analyze and find the best move from a position
 
 \vspace{1em}
 
-\begin{lstlisting}[caption={Pseudocode of the Depth-First Search algorithm~\cite{CLRS}.}, label={lst:dfs}, frame=single, numbers=left, xleftmargin=15pt]
+\begin{lstlisting}[caption={Pseudocode of the Depth-First Search algorithm~\cite{CLRS}.}, label={lst:dfs}, frame=single, numbers=left, xleftmargin=15pt, captionpos=b]
 Procedure DFS(Graph G, Node v):
     Mark v as visited
     For each neighbor w of v in G.adjacentEdges(v):
@@ -53,7 +53,7 @@ Procedure DFS(Graph G, Node v):
 
 \vspace{1em}
 
-\begin{lstlisting}[caption={Pseudocode of the Best-First Search algorithm~\cite{Pearl1984}.}, frame=single, numbers=left, xleftmargin=10pt, breaklines=true]
+\begin{lstlisting}[caption={Pseudocode of the Best-First Search algorithm~\cite{Pearl1984}.}, frame=single, numbers=left, xleftmargin=10pt, breaklines=true, captionpos=b]
 Procedure BestFirstSearch(Graph G, Node start, Node goal):
     Create an empty priority queue PQ
     Add start to PQ with priority 0
@@ -87,7 +87,7 @@ The \textbf{minimax} algorithm is a decision making algorithm that follows Depth
 
 \vspace{1em}
 
-\begin{lstlisting}[caption={Pseudocode of the Minimax algorithm~\cite{Russell2021artificial}.}, label={lst:minimax}, frame=single, numbers=left, xleftmargin=15pt, breaklines=true]
+\begin{lstlisting}[caption={Pseudocode of the Minimax algorithm~\cite{Russell2021artificial}.}, label={lst:minimax}, frame=single, numbers=left, xleftmargin=15pt, breaklines=true, captionpos=b]
 Procedure Minimax(Node position, Integer depth, Boolean maximizingPlayer):
     If depth == 0 or position is a terminal node:
         Return the evaluation of the position
@@ -142,8 +142,6 @@ Procedure Minimax(Node position, Integer depth, Boolean maximizingPlayer):
 \end{figure}
 
 \noindent For example, let's say that white always wants the highest value (maximizing the result), while black wants the lowest value (minimizing the result). In~\cref{fig:minimax}, white is represented by square nodes and black by circle nodes. Note that this example is a binary tree, but in a real scenario there would likely be more moves or nodes, because in chess each position usually allows a wide range of legal moves, not just two as in a binary tree. For the leftmost pair of leaf nodes with values of 3 and 5, 3 is chosen because black tries to get the lowest score between them. Then, for the other pair of leaf nodes with values of 2 and 9, 2 is chosen for the same reason. Lastly, at the root node, white selects 3 as the maximum value between 3 and 2.
-
-\vspace{1em}
 
 \subsection*{Alpha-beta pruning}\label{sec:alphaBeta}
 
@@ -380,7 +378,7 @@ This technique can drastically reduce the number of nodes evaluated, especially 
 
 \noindent Having described the main search algorithms, it is important to explain how the skill of both human and computer chess players is measured. Next, we describe the console communication protocol used by chess engines, and finally, we provide an overview of how \textit{Stockfish} operates internally.
 
-\section{ELO rating system}
+\section{Elo rating system}
 
 The Elo rating system, developed by \textit{Arpad Elo} in the 1960s, is a method used to calculate the relative skill levels of players in two-player games such as chess~\cite{Elo}. It was adopted by the FIDE in 1970 as the main rating system for all federated players.
 
@@ -422,10 +420,7 @@ where:
 
 This system ensures that a player gains more rating points for defeating a higher-rated opponent and loses fewer points when losing to a stronger player.
 
-\newpage
-
-\section{UCI}
-\label{sec:uci}
+\section{UCI}\label{sec:uci}
 
 \noindent The chess community has developed an standard console protocol for chess engines to facilitate interoperability between engines and external applications. The \textit{Universal Chess Interface} (UCI)~\cite{UciProtocol} makes it possible to organize games and tournaments between different bots, as well as to integrate engines into graphical user interfaces (GUIs) and other software tools.
 
@@ -451,33 +446,29 @@ This system ensures that a player gains more rating points for defeating a highe
     \item \texttt{stop}: stop calculating.
 \end{itemize}
 
-\newpage
+\noindent Now that we have covered the fundamental concepts behind chess engines, in the following section we present the most powerful and widely used chess engine.
 
-Now that we have covered the fundamental concepts behind chess engines, in the following section we present the most powerful and widely used chess engine.
+\section{\textit{Stockfish}}\label{sec:stockfish}
 
-\section{\textit{Stockfish}}
-\label{sec:stockfish}
-
-\par \textit{Stockfish} is an open-source chess engine that has consistently ranked among the strongest in the world~\cite{Stockfish}. It is written in C++ and released under the GNU General Public License (GPL). \textit{Stockfish} has been developed and refined by a large community of contributors.
+\noindent \textit{Stockfish} is an open-source chess engine that has consistently ranked among the strongest in the world~\cite{Stockfish}. It is written in C++ and released under the GNU General Public License (GPL). \textit{Stockfish} has been developed and refined by a large community of contributors.
 
 \vspace{1em}
 
-\par \textit{Stockfish} has an estimated Elo rating of around 3644~\cite{StockfishElo}, placing it far above the best human player, Magnus Carlsen, whose peak Elo rating was 2882 in May 2014~\cite{MagnusCarlsenElo}.
+\noindent \textit{Stockfish} has an estimated Elo rating of around 3644~\cite{StockfishElo}, placing it far above the best human player, Magnus Carlsen, whose peak Elo rating was 2882 in May 2014~\cite{MagnusCarlsenElo}.
 
 \vspace{1em}
 
-\par It is based on the minimax search algorithm, enhanced with alpha-beta pruning. In addition, it incorporates several of the techniques described in later chapters (see Chapter~\cref{cap:descripcionTrabajo}).
+\noindent It is based on the minimax search algorithm, enhanced with alpha-beta pruning. In addition, it incorporates several of the techniques described in later chapters (see Chapter~\cref{cap:descripcionTrabajo}).
 
 \vspace{1em}
 
 \par The key component of \textit{Stockfish}'s strength is its use of machine learning algorithms to evaluate chess positions more accurately, in particular, \textit{Stockfish} uses NNUE (Efficiently Updatable Neural Network), a neural network architecture originally developed for shogi engines and later adapted for chess~\cite{NNUE}. NNUE efficiently evaluates positions by finding and learning complex piece patterns. It is optimized to run quickly even on CPUs and significantly improves move ordering (see Chapter~\cref{cap:moveOrdering}), allowing the engine to explore the most promising lines first and prune large parts of the search tree.
 
-\vspace{2em}
+\vspace{1em}
 
 In the following section, we describe one of the most popular platforms where both humans and chess engines play competitively.
 
-\section{\textit{Lichess}}
-\label{sec:lichess}
+\section{\textit{Lichess}}\label{sec:lichess}
 
 \textit{Lichess} is a free and open-source online chess platform that offers a wide range of features for both casual and competitive players. It was created by Thibault Duplessis in 2010 and has since grown into one of the most popular chess websites in the world, hosting millions of games each day~\cite{Lichess}.
 
@@ -493,12 +484,11 @@ In the following section, we describe one of the most popular platforms where bo
 
 \noindent \textit{Lichess} also supports chess engines and bots through the \textit{Lichess} Bot API, enabling integration with engines like \textit{Stockfish}. It is often used for engine testing, AI competitions, and research purposes. Many developers and researchers use the \textit{Lichess} platform as a benchmark or interface for evaluating engine performance.
 
-\vspace{2em}
+\vspace{1em}
 
-Finally, the chess community uses specialized tools to evaluate the relative playing strength of chess engines. One of the most widely used tools for this purpose is \textit{Cutechess}.
+\noindent Finally, the chess community uses specialized tools to evaluate the relative playing strength of chess engines. One of the most widely used tools for this purpose is \textit{Cutechess}.
 
-\section{\textit{Cutechess}}
-\label{sec:cutechess}
+\section{\textit{Cutechess}}\label{sec:cutechess}
 
 \noindent \textit{Cutechess} is an open-source tool widely adopted in the chess programming community. It allows users to run automated matches between engines, compare their performance, and analyze gameplay~\cite{CuteChess}.
 
@@ -512,9 +502,9 @@ Finally, the chess community uses specialized tools to evaluate the relative pla
 
 \vspace{1em}
 
-\noindent Then, it checks the active status of each engine and manages the start of the games by setting up the board on both engines with the \texttt{position} command. Afterwards, it sends the \texttt{go} command and stops the search with \texttt{stop} when the search time or depth is reached, extracting the best move provided by the engine whose turn it is. This move is then passed to the other engine, alternating turns so that both engines play against each other automatically.~\cref{lst:cutechess-example} we show a \textit{Cutechess} log file, we directly configured the starting positions from a list of FENs in the \texttt{positions.fen} file:
+\noindent Then, it manages the games by setting up the board with the \texttt{position} command, sending \texttt{go} to start the search, and stopping when the search time or depth is reached. Moves are alternated between engines so they play against each other automatically. In~\cref{lst:cutechess-example}, we show a \textit{Cutechess} log file, where the starting positions are taken directly from a list of FENs in the \texttt{positions.fen} file.
 
-\begin{lstlisting}[basicstyle=\ttfamily\scriptsize, breaklines=true, frame=single, caption={Example of \textit{Cutechess}}, label={lst:cutechess-example}]
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize, breaklines=true, frame=single, captionpos=b, caption={Example of \textit{Cutechess}}, label={lst:cutechess-example}]
 Running test (8) with the following configuration:
 Games: 1, Search Time: 5, Depth: 5
 PGN File: results.pgn, EPD File: results.epd, Log File: results.log
@@ -556,7 +546,7 @@ Started game 1 of 1 (AlphaDeepChess vs Stockfish)
  >AlphaDeepChess(0): position fen rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6 moves c1g5 e7e6
 \end{lstlisting}
 
-\noindent In~\cref{lst:cutechess-example}, in addition to setting the number of games to $1$, the search time to $5$ seconds, and the search depth to $5$, we provided a list of starting positions, from which one is chosen at random. Each line starting with \texttt{position fen \ldots} establishes the FEN position and continues by adding the moves played.
+\noindent In~\cref{lst:cutechess-example}, we set the number of games to $1$, the search time to $5$ seconds, and the search depth to $5$. We also provided a list of starting positions, from which one is chosen at random. Each line starting with \texttt{position fen \ldots} sets the FEN position and adds the moves played.
 
 \vspace{1em}
 

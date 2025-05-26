@@ -5,15 +5,11 @@ Chess, one of the oldest strategy games in human history, has long been a domain
 
 \vspace{1em}
 
-\noindent Today, we find ourselves in an era where chess engines have reached unprecedented strength. This has been achieved through a combination of classical techniques like alpha-beta pruning, and modern advancements such as neural networks.
+\noindent Today, we find ourselves in an era where chess engines have reached unprecedented strength. \textit{Stockfish}, the strongest chess engine in the world, continues to rely on an improved minimax algorithm with alpha-beta pruning, additionally incorporating machine learning techniques. Inspired by it, we started this project: \textit{AlphaDeepChess}.
 
 \vspace{1em}
 
-\noindent In recent years, \textit{Stockfish}, one of the strongest and most widely used open-source chess engines in the world, has incorporated neural network evaluation (NNUE), combining classical search with machine learning techniques. Inspired by \textit{Stockfish}, we started this project: \textit{AlphaDeepChess}, a chess engine based on minimax with alpha-beta pruning that relies solely on classical techniques and human-designed heuristics.
-
-\vspace{1em}
-
-\noindent Beyond its technical contributions, this project also narrates the process of building a chess engine, evaluating each version along the way. This includes profiling and benchmarking different versions, as well as implementing improved heuristics and efficiency enhancements based on current knowledge about chess engines. The project even reaches the point where the engine can be played against on online platforms or observed competing with other live chess engines, making it valuable for any chess enthusiast. Notably, the engine has achieved an ELO rating of ~1900 on \textit{Lichess}, demonstrating its competitive strength among online chess engines.
+\noindent We present \textit{AlphaDeepChess}, a chess engine based on minimax with alpha-beta pruning that relies solely on classical algorithms and implements optimization techniques based on current knowledge about chess engines. Notably, the engine has achieved an ELO rating of around 1900 on \textit{Lichess}, demonstrating its competitive strength among online chess engines.
 
 \vspace{1em}
 
@@ -38,7 +34,7 @@ Chess, one of the oldest strategy games in human history, has long been a domain
 The project was divided into several phases, each focusing on a specific aspect of the engine's development. The timeline for each phase is as follows:
 
 \begin{enumerate}
-    \item Research phase and basic implementation: understand the fundamentals of minimax with alpha-beta pruning and position evaluation. Familiarize with the UCI (Universal Chess Interface) and implement the move generator with its specific exceptions and rules.
+    \item \textit{Research phase and basic implementation}: understand the fundamentals of minimax with alpha-beta pruning and position evaluation. Familiarize with the UCI (Universal Chess Interface) and implement the move generator with its specific exceptions and rules.
     \item \textit{Optimization}: implement quiescence search and iterative deepening to improve pruning effectiveness.
     \item \textit{Optimization}: improve search efficiency using transposition tables and Zobrist hashing.
     \item \textit{Optimization}: implement multithreading to enable parallel search.
@@ -46,8 +42,6 @@ The project was divided into several phases, each focusing on a specific aspect 
     \item \textit{Benchmarking}: use \textit{Stockfish} to compare efficiency generating tournaments between chess engines and estimate the performance of the engine. Also, compare different versions of the engine to evaluate the impact of optimizations.
     \item Analyze the results and write the final report.
 \end{enumerate}
-
-\vspace{1em}
 
 \noindent In the following~\cref{sec:basicConcepts}, we will explain about the basic concepts of chess, but if you already have the knowledge we recommend you to advance directly to the next~\cref{cap:estadoDeLaCuestion}.
 
@@ -91,8 +85,6 @@ A chessboard is a game board of 64 squares arranged in 8 rows and 8 columns, as 
 \end{center}
 
 \noindent It is important to know that when placing a chessboard in the correct orientation, there should always be a white square in the bottom-right corner or a black square in the bottom-left corner.
-
-\newpage
 
 \subsection*{Chess pieces}
 
@@ -144,20 +136,21 @@ There are 6 types of chess pieces: king, queen, rook, bishop, knight, and pawn, 
 
 \noindent The smaller white square next to the board indicates which side is to move in the current position. If the square is white, it means it is white's turn to move; if the square is black, it means it is black's turn to move. Notice that the queen and king are placed in the center columns. The queen is placed on a square of its color, while the king is placed on the remaining central column. The rest of the pieces are positioned symmetrically, as shown in~\cref{fig:start-pos}. This means that the chessboard is divided into two sides relative to the positions of the king and queen at the start of the game. Red is queen's side and blue is king's side.
 
-\subsection*{Movement of the pieces}\label{sec:movement-pieces}
+\subsection*{Movement of the pieces}
 
 In the following sections, we describe the movement rules for each type of piece, including their unique abilities and special moves. These are fundamental to understand playing and analyzing the game.
 
 \subsubsection*{Pawn}
 
-The pawn can move one square forward, but it can only capture pieces one square diagonally, as shown in the top right chessboard in~\cref{fig:pawn}. On its first move, the pawn has the option to move two squares forward. If a pawn reaches the last row of the opponent's side, it promotes to any other piece (except for a king). Promotion is a term to indicate the mandatory replacement of a pawn with another piece, usually providing a significant advantage to the player who promotes. This is also illustrated in the two lower boards of~\cref{fig:pawn}.
+The pawn can move one square forward, but it can only capture pieces one square diagonally, as shown in the top right chessboard in the figure below. On its first move, the pawn has the option to move two squares forward. If a pawn reaches the last row of the opponent's side, it promotes to any other piece (except for a king). Promotion is a term to indicate the mandatory replacement of a pawn with another piece, usually providing a significant advantage to the player who promotes. This is also illustrated in the two lower boards of the figure below.
 
-\vspace{1em}
+\newpage
 
-\begin{figure}
+\begin{figure}[H]
     \centering
-    \begin{minipage}{0.45\textwidth}
+    \begin{minipage}{0.22\textwidth}
         \centering
+        \setchessboard{boardfontsize=12pt,labelfontsize=8pt}
         \newchessgame
         \chessboard[
             setpieces={Pe2, Pc4, pc5, Pg3, pf6},
@@ -167,8 +160,10 @@ The pawn can move one square forward, but it can only capture pieces one square 
             arrow=to
         ]
     \end{minipage}
-    \begin{minipage}{0.45\textwidth}
+    \hspace{0.04\textwidth}
+    \begin{minipage}{0.22\textwidth}
         \centering
+        \setchessboard{boardfontsize=12pt,labelfontsize=8pt}
         \newchessgame
         \chessboard[
            setpieces={Pe2, Pc4, pc5, Pg3, pf6},
@@ -178,8 +173,10 @@ The pawn can move one square forward, but it can only capture pieces one square 
            arrow=to
        ]
     \end{minipage}
-    \begin{minipage}{0.45\textwidth}
+    \\[1em]
+    \begin{minipage}{0.22\textwidth}
         \centering
+        \setchessboard{boardfontsize=12pt,labelfontsize=8pt}
         \newchessgame
         \chessboard[
             setpieces={Pe7},
@@ -189,22 +186,22 @@ The pawn can move one square forward, but it can only capture pieces one square 
             arrow=to
         ]
     \end{minipage}
-    \begin{minipage}{0.45\textwidth}
+    \hspace{0.04\textwidth}
+    \begin{minipage}{0.22\textwidth}
         \centering
+        \setchessboard{boardfontsize=12pt,labelfontsize=8pt}
         \newchessgame
         \chessboard[
             setpieces={Qe8},
             showmover=false
         ]
     \end{minipage}
-    \caption{Pawn's movement, attack, and promotion.}\label{fig:pawn}
+    \caption*{Pawn's movement, attack, and promotion.}
 \end{figure}
 
-\noindent There is a specific capture movement which is \textit{en passant}. This move allows a pawn that has moved two squares forward from its starting position to be captured by an opponent's pawn as if it had only moved one square, as shown in~\cref{fig:en-passant}. The capturing pawn must be on an adjacent file and can only capture the \textit{en passant} pawn immediately after it moves.
+\noindent There is a specific capture movement which is \textit{en passant}. This move allows a pawn that has moved two squares forward from its starting position to be captured by an opponent's pawn as if it had only moved one square, as shown in the figure below. The capturing pawn must be on an adjacent file and can only capture the \textit{en passant} pawn immediately after it moves.
 
-\vspace{1em}
-
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{minipage}{0.3\textwidth}
         \centering
@@ -241,7 +238,7 @@ The pawn can move one square forward, but it can only capture pieces one square 
             showmover=false
         ]
     \end{minipage}
-    \caption{\textit{En passant}.}\label{fig:en-passant}
+    \caption*{\textit{En passant}.}
 \end{figure}
 
 \subsubsection*{Rook}
@@ -258,7 +255,7 @@ The rook can move any number of squares horizontally or vertically. It can also 
         markmoves={d4-a4,d4-h4,d4-d1,d4-d8,g6-h6,g6-g8,g6-c6,g6-g3},
         arrow=to
     ]
-    \caption*{Rook's movement.}\label{fig:rook-movement}
+    \caption*{Rook's movement.}
 \end{figure}
 
 \subsubsection*{Knight}
@@ -275,7 +272,7 @@ The knight moves in an L-shape: two squares in one direction and then one square
         markmoves={f3-e5,f3-e1,f3-g5,f3-g1,f3-d2,f3-d4,f3-h2,f3-h4,a8-b6,a8-c7},
         arrow=to
     ]
-    \caption*{Knight's movement.}\label{fig:knight-movement}
+    \caption*{Knight's movement.}
 \end{figure}
 
 \subsubsection*{Bishop}
@@ -292,16 +289,14 @@ The bishop can move any number of squares diagonally. It can also capture pieces
         markmoves={c4-a2,c4-g8,c4-f1,c4-a6,f6-h4,f6-h8,f6-b2},
         arrow=to
     ]
-    \caption*{Bishop's movement.}\label{fig:bishop-movement}
+    \caption*{Bishop's movement.}
 \end{figure}
 
 \subsubsection*{King}
 
 The king is a crucial piece in chess, as the game ends when one player checkmates the opponent's king. The king can move one square in any direction: horizontally, vertically, or diagonally, and can also capture pieces in the same way. 
 
-\vspace{1em}
-
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{minipage}[t]{0.45\textwidth}
        \centering
@@ -314,7 +309,7 @@ The king is a crucial piece in chess, as the game ends when one player checkmate
            arrow=to
        ]
    \end{minipage}
-   \hfill
+   \hspace{0.1em}
    \begin{minipage}[t]{0.45\textwidth}
        \centering
        \newchessgame
@@ -326,11 +321,11 @@ The king is a crucial piece in chess, as the game ends when one player checkmate
            arrow=to
        ]
    \end{minipage}
-   \caption{King's movement.}\label{fig:king-movement}
+   \caption*{King's movement.}
 \end{figure}
 
 
-\noindent As shown in~\cref{fig:king-movement}, the white king cannot move to a square that is under attack by an opponent's piece:
+\noindent As shown in the figure above, the white king cannot move to a square that is under attack by an opponent's piece:
 
 \begin{itemize}[itemsep=1pt]
     \item $c3$ is attacked by the black bishop on $b2$.
@@ -361,7 +356,7 @@ The king is a crucial piece in chess, as the game ends when one player checkmate
             arrow=to
         ]
     \end{minipage}
-    \hfill
+    \hspace{0.1em}
     \begin{minipage}{0.3\textwidth}
         \centering
         \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
@@ -371,7 +366,7 @@ The king is a crucial piece in chess, as the game ends when one player checkmate
             showmover=false
         ]
     \end{minipage}
-    \hfill
+    \hspace{0.1em}
     \begin{minipage}{0.3\textwidth}
         \centering
         \setchessboard{boardfontsize=15pt,labelfontsize=10pt}
@@ -381,10 +376,12 @@ The king is a crucial piece in chess, as the game ends when one player checkmate
             showmover=false
         ]
     \end{minipage}
-    \caption{Castling situation.}\label{fig:castling-situation}
+    \caption*{Castling situation.}
 \end{figure}
 
-\noindent In~\cref{fig:castling-situation}, the white king can castle on either the king's side (short castling) or the queen's side (long castling) as long as the rooks have not been moved from their starting position, but the black king cannot castle because there is a bishop on $f8$ interfering with the movement and the rook on the queen's side has been moved to $b8$.
+\noindent In the figure above, the white king can castle on either the king's side (short castling) or the queen's side (long castling) as long as the rooks have not been moved from their starting position, but the black king cannot castle because there is a bishop on $f8$ interfering with the movement and the rook on the queen's side has been moved to $b8$.
+
+\newpage
 
 \subsubsection*{Queen}
 
@@ -420,7 +417,7 @@ The rules of chess follow the official regulations established by FIDE~\cite{Law
     \item \textit{Dead position}: a position in which neither player can achieve checkmate by any series of legal moves, making further progress impossible. This includes the case of insufficient material, where it is not possible to checkmate the opponent regardless of the moves played. In these situations, the game is immediately declared a draw because the main objective to checkmate cannot be accomplished.
 \end{enumerate}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{minipage}[t]{0.3\textwidth}
         \centering
@@ -452,7 +449,7 @@ The rules of chess follow the official regulations established by FIDE~\cite{Law
             setfen={8/2b1k3/7p/p1p1p1pP/PpP1P1P1/1P1BK3/8/8 w - - 0 1}
         ]
    \end{minipage}
-   \caption{Stalemate, insufficient material, and dead position.}\label{fig:stalemate-insufficient-material-dead-position}
+   \caption*{Stalemate, insufficient material, and dead position.}\label{fig:stalemate-insufficient-material-dead-position}
 \end{figure}
 
 \noindent Players can also resign at any time, conceding victory to the opponent. Also, if a player runs out of time in a timed game, they lose unless the opponent does not have enough material to checkmate, in which case the game is drawn.
@@ -463,9 +460,9 @@ Notation is important in chess to record moves and analyze games.
 
 \subsubsection*{Algebraic notation}
 
-In addition to the algebraic notation of the squares mentioned in the chessboard definition, each piece is identified by an uppercase letter, which may vary across different languages, as shown in~\cref{tab:chess-notation}.
+In addition to the algebraic notation of the squares mentioned in the chessboard definition, each piece is identified by an uppercase letter, which may vary across different languages, as shown in the following table:
 
-\begin{table}
+\begin{table}[H]
     \centering
     \begin{tabular}{|c|c|c|}
         \hline
@@ -477,7 +474,7 @@ In addition to the algebraic notation of the squares mentioned in the chessboard
         Queen          & \textit{Q}               & \textit{D} (dama)         \\ \hline
         King           & \textit{K}               & \textit{R} (rey)          \\ \hline
     \end{tabular}
-    \caption{Chess piece notation in English and Spanish.}\label{tab:chess-notation}
+    \caption*{Chess piece notation in English and Spanish.}
 \end{table}
 
 \paragraph{Normal moves (not captures nor promoting)}
@@ -530,7 +527,7 @@ is written as the pawn's movement to the last row, followed by the piece to whic
             arrow=to
         ]
     \end{minipage}
-    \hfill
+    \hspace{0.1em}
     \begin{minipage}{0.45\textwidth}
         \centering
         \newchessgame

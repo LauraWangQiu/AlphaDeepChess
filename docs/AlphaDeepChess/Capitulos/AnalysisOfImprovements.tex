@@ -9,7 +9,7 @@ In order to analyze the performance of our chess engine and identify potential b
 
 \noindent We run the engine under \texttt{perf} using the following commands:
 
-\begin{lstlisting}[language=bash, caption={Profiling \textit{AlphaDeepChess} with perf}, frame=single, breaklines=true]
+\begin{lstlisting}[language=bash, caption={Profiling \textit{AlphaDeepChess} with perf}, frame=single, breaklines=true, captionpos=b]
 # Record performance data with function stack traces
 sudo perf record -g ./build/release/AlphaDeepChess
 
@@ -19,7 +19,7 @@ sudo perf report -g --no-children
 
 \noindent After recording, \texttt{perf report} opens an interactive terminal interface where functions are sorted by CPU overhead, allowing us to easily identify performance-critical regions.
 
-\vspace{2em}
+\vspace{1em}
 
 \noindent First, we profile the basic architecture of the engine implemented in~\cref{cap:descripcionTrabajo}, and then evaluate it again after applying the optimizations described in~\cref{cap:ImprovementTechniques}.
 
@@ -262,7 +262,7 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
 
 \noindent The results show 48 wins, 15 draws, and 37 losses. This outcome is slightly worse than the version without reductions. A likely explanation is that the current move ordering heuristic is not strong enough, leading the search to incorrectly reduce important moves that appear late in the move list. As a result, the potential benefits of LMR are not fully realized and may even degrade search quality in some positions.
 
-\vspace{2em}
+\vspace{1em}
 
 \noindent We can confirm that \textit{AlphaDeepChess} achieves its maximum skill level with the following configuration:
 
