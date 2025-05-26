@@ -10,14 +10,12 @@ This chapter documents the implementation of the following techniques used to im
     \item Search with late move reductions.
 \end{itemize}
 
-\newpage
-
 \section{Transposition table}\label{sec:tt}
 
 \noindent As discused in the previous chapter (see~\cref{sec:iterativeDeepening}), the basic implementation of the chess engine generates a large amount of redundant calculations due to the iterative deepening approach and also the concept of transpositions: situations in which the same board position is reached through different sequences of moves in the game tree.
-\noindent the Following image illustrates a position that can arise through multiple move orders. Where the white king could go to the g3 square from multiple paths.
+\noindent~\cref{fig:transposition_example} illustrates a position that can arise through multiple move orders. Where the white king could go to the g3 square from multiple paths.
 
-\begin{figure}[H]
+\begin{figure}
     \centering
     \newchessgame
     \chessboard[
@@ -27,7 +25,7 @@ This chapter documents the implementation of the following techniques used to im
         markmoves={c1-e3,e3-g3,c1-g1,g1-g3},
         arrow=to
     ]
-    \caption*{Lasker-Reichhelm Position, transposition example.}\label{fig:transposition_example}
+    \caption{Lasker-Reichhelm Position, transposition example.}\label{fig:transposition_example}
 \end{figure}
 
 \vspace{1em}
@@ -183,7 +181,7 @@ We can create a look up table of all the rook and bishop moves for each square o
         color=red, markfields={d6,f4,d2},
         color=green, markfields={c4,b4,a4,e4,d5,d3}
     ]
-    \caption*{Chess position with white rook legal moves in green and blockers in red.}\label{fig:magics_position}
+    \caption{Chess position with white rook legal moves in green and blockers in red.}\label{fig:magics_position}
 \end{figure}
 
 \subsection*{Magic number generation}
@@ -471,18 +469,15 @@ This version of search follows Young Brothers Wait Concept, which is a parallel 
 \vspace{1em}
 
 \par
-In our implementation, a reduction of one ply is applied to non-capturing moves when the side to move is not in check, the remaining search depth is at least three plies, and the move index is beyond a threshold of the 10th move. The reduction condition is formally defined in Equation~\cref{eq:lmr}:
+In our implementation, a reduction of one ply is applied to non-capturing moves when the side to move is not in check, the remaining search depth is at least three plies, and the move index is beyond a threshold of the 10th move. The reduction condition is formally defined in the following equation:
 
-\vspace{1em}
-
-\begin{equation}
+\begin{equation*}
 \text{reduction} = 
 \begin{cases}
 1, & \text{if } \text{isNotCheck} \wedge \text{depth} \geq 3 \wedge moveIndex \geq 10 \\
 0, & \text{otherwise}
 \end{cases}
-\label{eq:lmr}
-\end{equation}
+\end{equation*}
 
 \vspace{1em}
 

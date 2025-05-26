@@ -17,21 +17,15 @@ This chapter documents the basic architecture of the chess engine.  The project 
 
 \noindent We begin by examining the fundamental data structure used for chess position representation.
 
-\newpage
-
 \section{Chessboard representation: bitboards}
 
 \noindent The chessboard is represented using a list of \textit{bitboards}. A bitboard is a 64-bit variable in which each bit corresponds to a square on the board. A bit is set to \texttt{1} if a piece occupies the corresponding square and \texttt{0} otherwise. The least significant bit (LSB) represents the \texttt{a1} square, while the most significant bit (MSB) corresponds to \texttt{h8}~\cite{Bitboards}.
- 
-\vspace{1em}
-
-\noindent \parbox{\textwidth}{The complete implementation can be found in the \texttt{Board} class file in \texttt{include\textbackslash{}board\textbackslash{}board.hpp} and \texttt{src\textbackslash{}board\textbackslash{}board.cpp}.}
 
 \vspace{1em}
 
-\noindent A list of twelve bitboards is used, one for each type of chess piece.~\cref{fig:bitboardPositionExample} illustrates this concept with a chess position example.
+\noindent A list of twelve bitboards is used, one for each type of chess piece.~\cref{fig:bitboardPositionExample} illustrates this concept with a chess position example. The main advantages of bitboards is that we can operate on multiple squares simultaneously using bitwise operations (see~\cref{fig:bitboardMaskOperation}). For example, we can determine if there are any black pawns on the fifth rank by performing a bitwise AND operation with the corresponding mask.
 
-\begin{figure}[H]
+\begin{figure}[t]
     \begin{minipage}[c]{0.35\textwidth}
         \newchessgame
         \chessboard[
@@ -60,30 +54,30 @@ This chapter documents the basic architecture of the chess engine.  The project 
     \caption{List of bitboards data structure example.}\label{fig:bitboardPositionExample}
 \end{figure}
 
-\noindent The main advantages of bitboards is that we can operate on multiple squares simultaneously using bitwise operations. For example, we can determine if there are any black pawns on the fifth rank by performing a bitwise AND operation with the corresponding mask.
-
 \begin{figure}[H]
     \centering
-    \begin{minipage}[c]{0.30\textwidth}
+    \begin{minipage}[c]{0.3\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/bitboard_black_pawns.png}
         \caption*{Bitboard of black pawns}
     \end{minipage}
     \hfill
-    \begin{minipage}[c]{0.30\textwidth}
+    \begin{minipage}[c]{0.3\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/fifth_rank_mask.png}
         \caption*{Fifth rank mask}
     \end{minipage}
     \hfill
-    \begin{minipage}[c]{0.30\textwidth}
+    \begin{minipage}[c]{0.3\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/bitboardMaskResult.png}
         \caption*{Pawn's bitboard \& mask}
     \end{minipage}
-    \caption*{Bitboard mask operation example.}\label{fig:bitboardMaskOperation}
+    \caption{Bitboard mask operation example.}\label{fig:bitboardMaskOperation}
     \vspace{-\baselineskip}
 \end{figure}
+
+\newpage
 
 \subsection*{Game state}
 

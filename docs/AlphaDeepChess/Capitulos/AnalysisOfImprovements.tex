@@ -84,7 +84,7 @@ sudo perf report -g --no-children
 \parbox{\textwidth}{\noindent The GUI provides a user-friendly interface that communicates with the engine using the UCI protocol under the hood, greatly enhancing the debugging and testing experience. This tool can be used after compiling the engine by running \texttt{AlphaDeepChessGUI.py} with Python.}
 
 
-\begin{figure}[H]
+\begin{figure}
     \centering
     \includegraphics[width=1.0\textwidth]{Imagenes/gui.png}
     \caption{\textit{AlphaDeepChess}'s GUI}\label{fig:gui}
@@ -280,8 +280,11 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
     \label{tab:bestEngineConfiguration}
 \end{table}
 
+\vspace{3em}
 
-\noindent Now, we compare the skill level of \textit{AlphaDeepChess} with the best configuration against \textit{Stockfish}.
+\noindent  We now compare the skill level of \textit{AlphaDeepChess} with the best configuration against \textit{Stockfish}.
+
+\vspace{2em}
 
 \section{Evaluation versus \textit{Stockfish}}
 
@@ -290,7 +293,7 @@ GitHub Actions is a CI/CD tool integrated into GitHub that allows developers to 
 \medskip
 \end{center}
 
-\noindent \textit{AlphaDeepChess} lost all games against \textit{Stockfish}. This outcome was expected, as \textit{Stockfish} has an estimated Elo rating of around 3644~\cite{StockfishElo}, making it orders of magnitude stronger than the best human players. In contrast, as we will show in the next section, \textit{AlphaDeepChess} plays at a level comparable to a strong human player.
+\noindent \textit{AlphaDeepChess} was defeated in all games against \textit{Stockfish}. This result is not surprising, given that \textit{Stockfish} has an estimated Elo rating of approximately 3644~\cite{StockfishElo}, placing it far beyond even the strongest human players. In contrast, as we will demonstrate in the following section, \textit{AlphaDeepChess} performs at a level comparable to a strong player.
 
 \newpage
 
